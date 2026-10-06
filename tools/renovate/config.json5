@@ -4,7 +4,11 @@
   timezone: "America/New_York",
   dependencyDashboard: true,
   rebaseWhen: "behind-base-branch",
-  enabledManagers: ["custom.regex"],
+  // 5-day supply-chain cooldown, matching bunfig.toml minimumReleaseAge; strict
+  // holds a PR until a version clears the window.
+  minimumReleaseAge: "5 days",
+  internalChecksFilter: "strict",
+  enabledManagers: ["custom.regex", "bun", "npm"],
   customManagers: [
     {
       customType: "regex",
@@ -19,6 +23,12 @@
     },
   ],
   packageRules: [
+    {
+      // Mirrors bunfig.toml minimumReleaseAgeExcludes so Renovate and bun install agree;
+      // config.test.ts keeps the two lists equal.
+      matchPackageNames: ["@types/bun", "bun-types"],
+      minimumReleaseAge: null,
+    },
     {
       matchManagers: ["custom.regex"],
       matchDepNames: ["cachix/devenv-nixpkgs"],

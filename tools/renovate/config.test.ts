@@ -32,12 +32,26 @@ describe("Renovate policy", () => {
     ]);
   });
 
-  test("daily schedule uses the configured timezone and only the nixpkgs manager", async () => {
+  test("daily schedule uses the configured timezone, nixpkgs and bun/npm managers, and a 5-day cooldown", async () => {
     const config = await readJson5(configPath);
     expect(config.extends).toContain("schedule:daily");
     expect(config.extends).not.toContain("helpers:pinGitHubActionDigests");
     expect(config.timezone).toBe("America/New_York");
-    expect(config.enabledManagers).toEqual(["custom.regex"]);
+    expect(config.enabledManagers).toEqual(["custom.regex", "bun", "npm"]);
+    expect(config.minimumReleaseAge).toBe("5 days");
+    expect(config.internalChecksFilter).toBe("strict");
+  });
+
+  test("the cooldown exemptions match bunfig minimumReleaseAgeExcludes", async () => {
+    const config = await readJson5(configPath);
+    const bunfig: unknown = Bun.TOML.parse(await readFile(join(root, "bunfig.toml"), "utf8"));
+    const install = asRecord(asRecord(bunfig, "bunfig.toml").install, "bunfig install");
+    const rules = config.packageRules;
+    expect(Array.isArray(rules)).toBe(true);
+    const exempt = rules.map((entry) => asRecord(entry, "package rule")).filter((entry) =>
+      entry.minimumReleaseAge === null && Array.isArray(entry.matchPackageNames)
+    );
+    expect(exempt.flatMap((entry) => entry.matchPackageNames)).toEqual(install.minimumReleaseAgeExcludes);
   });
 
   test("the nixpkgs lock manager has a same-branch relock with no cooldown", async () => {
