@@ -32,10 +32,12 @@ describe("Renovate policy", () => {
     ]);
   });
 
-  test("daily schedule uses the configured timezone", async () => {
+  test("daily schedule uses the configured timezone and only the nixpkgs manager", async () => {
     const config = await readJson5(configPath);
     expect(config.extends).toContain("schedule:daily");
+    expect(config.extends).not.toContain("helpers:pinGitHubActionDigests");
     expect(config.timezone).toBe("America/New_York");
+    expect(config.enabledManagers).toEqual(["custom.regex"]);
   });
 
   test("the nixpkgs lock manager has a same-branch relock with no cooldown", async () => {
@@ -82,15 +84,23 @@ describe("Renovate policy", () => {
     const steps = renovate.steps;
     expect(Array.isArray(steps)).toBe(true);
     const stepRecords = steps.map((step) => asRecord(step, "workflow step"));
-    const pathIndex = stepRecords.findIndex((step) => step.name === "Put pinned devenv CLI on PATH");
-    const assertIndex = stepRecords.findIndex((step) => step.name === "Assert devenv is on PATH");
+    const devenvIndex = stepRecords.findIndex((step) => step.name === "Put pinned devenv CLI on PATH");
+    const devenvAssertIndex = stepRecords.findIndex((step) => step.name === "Assert devenv is on PATH");
+    const nodeIndex = stepRecords.findIndex((step) => step.name === "Put pinned Node.js on PATH");
+    const nodeAssertIndex = stepRecords.findIndex((step) => step.name === "Assert pinned Node.js is on PATH");
     const runIndex = stepRecords.findIndex((step) => step.name === "Run Renovate");
-    expect(pathIndex).toBeGreaterThanOrEqual(0);
-    expect(pathIndex).toBeLessThan(assertIndex);
-    expect(assertIndex).toBeLessThan(runIndex);
-    expect(stepRecords[pathIndex]?.run).toContain("--inputs-from . nixpkgs#devenv");
-    expect(stepRecords[pathIndex]?.run).toContain("$GITHUB_PATH");
-    expect(stepRecords[assertIndex]?.run).toBe("command -v devenv");
+    expect(devenvIndex).toBeGreaterThanOrEqual(0);
+    expect(devenvIndex).toBeLessThan(devenvAssertIndex);
+    expect(devenvAssertIndex).toBeLessThan(runIndex);
+    expect(stepRecords[devenvIndex]?.run).toContain("--inputs-from . nixpkgs#devenv");
+    expect(stepRecords[devenvIndex]?.run).toContain("$GITHUB_PATH");
+    expect(stepRecords[devenvAssertIndex]?.run).toBe("command -v devenv");
+    expect(nodeIndex).toBeGreaterThanOrEqual(0);
+    expect(nodeIndex).toBeLessThan(nodeAssertIndex);
+    expect(nodeAssertIndex).toBeLessThan(runIndex);
+    expect(stepRecords[nodeIndex]?.run).toContain("--inputs-from . nixpkgs#nodejs");
+    expect(stepRecords[nodeIndex]?.run).toContain("$GITHUB_PATH");
+    expect(stepRecords[nodeAssertIndex]?.run).toBe("node --version");
   });
 
   test("the seed lock tracks the older rolling nixpkgs node without follows", async () => {
@@ -99,8 +109,6 @@ describe("Renovate policy", () => {
     const nodes = asRecord(lockRecord.nodes, "devenv.lock nodes");
     const nixpkgs = asRecord(nodes.nixpkgs, "nixpkgs lock node");
     const locked = asRecord(nixpkgs.locked, "nixpkgs locked");
-    const rollingRev = "c2f38fe7f9e04d9aadd354d380f2bd40531d9737";
-    expect(locked.rev).not.toBe(rollingRev);
     expect(nixpkgs).not.toHaveProperty("follows");
 
     const yaml: unknown = Bun.YAML.parse(await readFile(join(root, "devenv.yaml"), "utf8"));

@@ -23,11 +23,16 @@ jobs:
 
       - name: Build exported tools and policy
         run: |
-          mapfile -t outputs < <(nix build --no-link --print-out-paths .#rumdl .#biome .#rumdl-base-config)
-          for output in "${outputs[@]}"; do
-            echo "$output/bin" >> "$GITHUB_PATH"
-          done
-          echo "RUMDL_BASE_CONFIG=${outputs[2]}/rumdl/base.toml" >> "$GITHUB_ENV"
+          rumdl="$(nix build --no-link --print-out-paths .#rumdl)"
+          biome="$(nix build --no-link --print-out-paths .#biome)"
+          base_config="$(nix build --no-link --print-out-paths .#rumdl-base-config)"
+          echo "$rumdl/bin" >> "$GITHUB_PATH"
+          echo "$biome/bin" >> "$GITHUB_PATH"
+          echo "RUMDL_BASE_CONFIG=$base_config/rumdl/base.toml" >> "$GITHUB_ENV"
+          echo "RUMDL_BIN=$rumdl/bin/rumdl" >> "$GITHUB_ENV"
+
+      - name: Check exported devenv module
+        run: nix build --no-link .#checks.x86_64-linux.devenv-module
 
       - name: Test toolchain and policy contracts
         run: bun test

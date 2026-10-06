@@ -4,7 +4,7 @@ Shared public tooling for RigelBuild repositories. Meissa pins the toolchain and
 
 ## Exports
 
-The flake exports `packages.<system>.rumdl`, `packages.<system>.biome`, and `packages.<system>.rumdl-base-config`. The last package contains `rumdl/base.toml`. It also exports `devenvModules.default`, which adds rumdl, Biome, Bun, Node.js, and moon to PATH and sets `RUMDL_BASE_CONFIG` to that store file.
+The flake exports `packages.<system>.rumdl`, `packages.<system>.biome`, and `packages.<system>.rumdl-base-config`. The last package contains `rumdl/base.toml`. It also exports `devenvModules.default`, which adds only rumdl and Biome to PATH and sets `RUMDL_BASE_CONFIG` to that store file.
 
 Import the module in a consumer's `devenv.nix`:
 
@@ -29,7 +29,7 @@ Consumer `.rumdl.toml` files inherit the shared rules and can add local exclusio
 extends = "$RUMDL_BASE_CONFIG"
 ```
 
-The policy is the shared `[MD0nn]` rule set in Compass's [`.rumdl.toml`](https://github.com/RigelBuild/compass/blob/main/.rumdl.toml). Bun, Node.js, and moon in the module come from the same nixpkgs pin as the exported tools.
+The policy is the shared `[MD0nn]` rule set in Compass's [`.rumdl.toml`](https://github.com/RigelBuild/compass/blob/main/.rumdl.toml). Meissa's own development shell also provides Bun, Node.js, and moon from its pinned nixpkgs.
 
 ## Local development
 

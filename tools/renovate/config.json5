@@ -1,10 +1,10 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: ["config:recommended", "schedule:daily", "helpers:pinGitHubActionDigests"],
+  extends: ["config:recommended", "schedule:daily"],
   timezone: "America/New_York",
   dependencyDashboard: true,
   rebaseWhen: "behind-base-branch",
-  enabledManagers: ["github-actions", "custom.regex"],
+  enabledManagers: ["custom.regex"],
   customManagers: [
     {
       customType: "regex",

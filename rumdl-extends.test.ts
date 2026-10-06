@@ -4,13 +4,17 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const directories: string[] = [];
-const baseConfig = process.env.RUMDL_BASE_CONFIG ?? join(import.meta.dir, "rumdl/base.toml");
-const rumdl = Bun.which("rumdl");
+const baseConfig = process.env.RUMDL_BASE_CONFIG;
+const rumdl = process.env.RUMDL_BIN;
+const pathRumdl = Bun.which("rumdl");
 
-async function checkWithConfig(config: string): Promise<number> {
-  if (!baseConfig) throw new Error("RUMDL_BASE_CONFIG is not set");
-  if (!rumdl) throw new Error("rumdl is not on PATH");
+if (!baseConfig) throw new Error("RUMDL_BASE_CONFIG is not set");
+if (!rumdl) throw new Error("RUMDL_BIN is not set");
+if (pathRumdl !== rumdl) {
+  throw new Error(`PATH rumdl (${pathRumdl ?? "not found"}) does not match RUMDL_BIN`);
+}
 
+async function checkWithConfig(config: string): Promise<{ status: number; output: string }> {
   const directory = await mkdtemp(join(tmpdir(), "meissa-rumdl-extends-"));
   directories.push(directory);
   const configPath = join(directory, ".rumdl.toml");
@@ -19,7 +23,7 @@ async function checkWithConfig(config: string): Promise<number> {
   const paragraph = "A paragraph whose length exceeds the default maximum line width without violating other default rules. ".repeat(2).trimEnd();
   await writeFile(markdownPath, `${paragraph}\n`);
 
-  return Bun.spawnSync(
+  const result = Bun.spawnSync(
     [rumdl, "check", "--no-cache", "--config", configPath, markdownPath],
     {
       cwd: directory,
@@ -27,7 +31,11 @@ async function checkWithConfig(config: string): Promise<number> {
       stdout: "pipe",
       stderr: "pipe",
     },
-  ).exitCode ?? 1;
+  );
+  return {
+    status: result.exitCode ?? 1,
+    output: `${result.stdout.toString()}${result.stderr.toString()}`,
+  };
 }
 
 afterEach(async () => {
@@ -35,13 +43,14 @@ afterEach(async () => {
 });
 
 describe("shared rumdl policy inheritance", () => {
-  test("extends passes a heading-less file under the shared line-length rule", async () => {
-    const status = await checkWithConfig('extends = "$RUMDL_BASE_CONFIG"\n\n[MD041]\nenabled = false\n');
-    expect(status).toBe(0);
+  test("extends inherits disabled MD013 for a long heading-less paragraph", async () => {
+    const result = await checkWithConfig('extends = "$RUMDL_BASE_CONFIG"\n\n[MD041]\nenabled = false\n');
+    expect(result.status).toBe(0);
   });
 
-  test("the same heading-less control without extends fails the default line-length rule", async () => {
-    const status = await checkWithConfig("[MD041]\nenabled = false\n");
-    expect(status).toBe(1);
+  test("the heading-less control without extends reports MD013", async () => {
+    const result = await checkWithConfig("[MD041]\nenabled = false\n");
+    expect(result.status).toBe(1);
+    expect(result.output).toContain("MD013");
   });
 });

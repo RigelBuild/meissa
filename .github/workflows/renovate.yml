@@ -41,6 +41,12 @@ jobs:
       - name: Assert devenv is on PATH
         run: command -v devenv
 
+      - name: Put pinned Node.js on PATH
+        run: echo "$(nix build --no-link --print-out-paths --inputs-from . nixpkgs#nodejs)/bin" >> "$GITHUB_PATH"
+
+      - name: Assert pinned Node.js is on PATH
+        run: node --version
+
       - name: Run Renovate
         env:
           RENOVATE_CONFIG_FILE: tools/renovate/bot-config.json5
