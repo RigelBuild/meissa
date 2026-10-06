@@ -1,0 +1,21 @@
+# Shared rules keep markdown behavior aligned across consuming repositories.
+[MD013]
+enabled = false
+
+[MD046]
+style = "fenced"
+
+[MD032]
+enabled = false
+
+[MD076]
+enabled = false
+
+[MD077]
+enabled = false
+
+[MD075]
+enabled = false
+
+[MD049]
+enabled = false

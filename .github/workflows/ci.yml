@@ -1,0 +1,36 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - uses: oven-sh/setup-bun@3d267786b128fe76c2f16a390aa2448b815359f3 # v2.1.2
+
+      - name: Build exported tools and policy
+        run: |
+          mapfile -t outputs < <(nix build --no-link --print-out-paths .#rumdl .#biome .#rumdl-base-config)
+          for output in "${outputs[@]}"; do
+            echo "$output/bin" >> "$GITHUB_PATH"
+          done
+          echo "RUMDL_BASE_CONFIG=${outputs[2]}/rumdl/base.toml" >> "$GITHUB_ENV"
+
+      - name: Test toolchain and policy contracts
+        run: bun test
+
+      - name: Check markdown with shared policy
+        run: rumdl check .
