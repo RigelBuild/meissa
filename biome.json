@@ -1,0 +1,23 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.5.9/schema.json",
+	"root": true,
+	"vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+	"files": {
+		"includes": [
+			"**",
+			"!rumdl-extends.test.ts",
+			"!tools/renovate/config.test.ts"
+		]
+	},
+	"formatter": { "indentStyle": "tab" },
+	"linter": {
+		"enabled": true,
+		"rules": { "preset": "recommended" }
+	},
+	"overrides": [
+		{
+			"includes": ["packages/**"],
+			"linter": { "rules": { "suspicious": { "noConsole": "off" } } }
+		}
+	]
+}

@@ -1,0 +1,37 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "@rigelbuild/meissa",
+      "devDependencies": {
+        "@types/bun": "1.4.0",
+        "typescript": "6.0.3",
+      },
+    },
+    "packages/ref-gate": {
+      "name": "@rigelbuild/ref-gate",
+      "version": "0.0.0",
+      "bin": {
+        "ref-gate": "./index.ts",
+      },
+      "devDependencies": {
+        "@types/bun": "1.4.0",
+        "typescript": "6.0.3",
+      },
+    },
+  },
+  "packages": {
+    "@rigelbuild/ref-gate": ["@rigelbuild/ref-gate@workspace:packages/ref-gate"],
+
+    "@types/bun": ["@types/bun@1.4.0", "", { "dependencies": { "bun-types": "1.4.0" } }, "sha512-K+lZULY23vRgK/CfTjFIV+tyifaNdSMlPh9j+6mQ/cLfpOznLyAuzgV/JQysyECpkBQLVMSyvjlr2fBUSA9wFQ=="],
+
+    "@types/node": ["@types/node@26.6.3", "", { "dependencies": { "undici-types": "~8.9.0" } }, "sha512-dsqMQQoeTLqu9wynDD00q573mNzso3IdQOAfHRJqLCcmCFPoGo9A1bDpUcv/9tnKpErQWv9uKeGfl37EIS02Yg=="],
+
+    "bun-types": ["bun-types@1.4.0", "", { "dependencies": { "@types/node": "*" } }, "sha512-iIKw23BspnQQYd3prITOBxeUsxBHnwzX6YJfGMuNOZzeNcMmVqzIIVGRm1l69ogaPQmb4wB6BN8mA5bE9YuC5Q=="],
+
+    "typescript": ["typescript@6.0.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw=="],
+
+    "undici-types": ["undici-types@8.9.0", "", {}, "sha512-KTDyRTYX8sWmKXAikPHHSyc63CRPETMctyjKFupcC6OBLXT3xsN0e9aF7m+mIXutFWpUXuedtowG7iLOzp0kQg=="],
+  }
+}

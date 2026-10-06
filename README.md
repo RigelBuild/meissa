@@ -31,6 +31,16 @@ extends = "$RUMDL_BASE_CONFIG"
 
 The policy is the shared `[MD0nn]` rule set in Compass's [`.rumdl.toml`](https://github.com/RigelBuild/compass/blob/main/.rumdl.toml). Meissa's own development shell also provides Bun, Node.js, and moon from its pinned nixpkgs.
 
+## Packages
+
+Packages under `packages/` are published to npm as `@rigelbuild/<tool>` and versioned independently.
+
+Meissa is public: never name or cite a private repository. `ref-gate` enforces this with `ref-gate.config.json`.
+
+## Releases
+
+Release Please opens one release pull request covering every changed package. When it merges, the release workflow publishes each released package to npm with provenance through trusted publishing. A new package needs one manual first publish before its trusted publisher can be attached.
+
 ## Local development
 
-Run `direnv allow .` once, then `direnv exec . rumdl check .` or `direnv exec . bun test`. The CI workflow builds the flake exports, runs `rumdl check .`, and checks inheritance with the exported binary.
+Run `direnv allow .` once, then `direnv exec . rumdl check .` or `direnv exec . bun test`. CI runs `nix flake check` and `moon run :ci` (lint, markdown, the ref-gate self-check, and every package's typecheck and tests).

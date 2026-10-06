@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/workspace.json
+
+projects:
+  globs:
+    - 'packages/*/moon.yml'
+  sources:
+    root: '.'
+
+vcs:
+  client: 'git'
+  provider: 'github'
+  defaultBranch: 'main'
