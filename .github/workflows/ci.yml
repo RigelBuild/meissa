@@ -45,5 +45,6 @@ jobs:
       - name: Check the flake
         run: nix flake check
 
+      # --force skips the affected-file diff: a shallow checkout has no base ref to diff against.
       - name: Run workspace CI
-        run: moon run :ci
+        run: moon run :ci --force
