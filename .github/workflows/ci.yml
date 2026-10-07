@@ -5,21 +5,27 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
+      # Full history: moon diffs against main for affected files, which a shallow clone lacks.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
 
       - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
-
-      - uses: oven-sh/setup-bun@3d267786b128fe76c2f16a390aa2448b815359f3 # v2.1.2
 
       - name: Build exported tools and policy
         run: |
@@ -31,11 +37,16 @@ jobs:
           echo "RUMDL_BASE_CONFIG=$base_config/rumdl/base.toml" >> "$GITHUB_ENV"
           echo "RUMDL_BIN=$rumdl/bin/rumdl" >> "$GITHUB_ENV"
 
-      - name: Check exported devenv module
-        run: nix build --no-link .#checks.x86_64-linux.devenv-module
+      # The dev shell's runtimes, from the same nixpkgs pin, so CI and local runs agree.
+      - name: Put Bun, Node.js, and moon on PATH
+        run: |
+          mapfile -t outputs < <(nix build --no-link --print-out-paths --inputs-from . nixpkgs#bun nixpkgs#nodejs nixpkgs#moon)
+          for output in "${outputs[@]}"; do
+            echo "$output/bin" >> "$GITHUB_PATH"
+          done
 
-      - name: Test toolchain and policy contracts
-        run: bun test
+      - name: Check the flake
+        run: nix flake check
 
-      - name: Check markdown with shared policy
-        run: rumdl check .
+      - name: Run workspace CI
+        run: moon run :ci --force

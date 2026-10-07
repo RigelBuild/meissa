@@ -1,0 +1,78 @@
+name: release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+# Serial runs: two release-please runs racing would fight over the release PR and tags.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release-pr:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: main
+    permissions: {}
+    outputs:
+      releases_created: ${{ steps.release.outputs.releases_created }}
+      paths_released: ${{ steps.release.outputs.paths_released }}
+    steps:
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: app-token
+        with:
+          client-id: ${{ vars.RELEASE_PLEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_PLEASE_APP_PRIVATE_KEY }}
+
+      - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
+        id: release
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          target-branch: main
+
+  publish:
+    if: github.ref == 'refs/heads/main' && needs.release-pr.outputs.releases_created == 'true'
+    needs: release-pr
+    runs-on: ubuntu-latest
+    environment: main
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      PATHS_RELEASED: ${{ needs.release-pr.outputs.paths_released }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Put Bun and Node.js on PATH
+        run: |
+          mapfile -t outputs < <(nix build --no-link --print-out-paths --inputs-from . nixpkgs#bun nixpkgs#nodejs)
+          for output in "${outputs[@]}"; do
+            echo "$output/bin" >> "$GITHUB_PATH"
+          done
+
+      - name: Install workspace dependencies
+        run: bun install --frozen-lockfile
+
+      # npm trusted publishing (OIDC) needs npm >= 11.5.1; the pinned Node 24 ships 11.x.
+      # Each package is published once by hand first, then gets its trusted publisher.
+      - name: Publish released packages
+        run: |
+          # A malformed or empty list must fail, not publish nothing and pass.
+          paths_text="$(jq -er 'if type == "array" and length > 0 and all(type == "string") then .[] else error("bad paths_released") end' <<< "$PATHS_RELEASED")"
+          mapfile -t paths <<< "$paths_text"
+          for path in "${paths[@]}"; do
+            (cd "$GITHUB_WORKSPACE/$path" && npm publish --provenance --access public)
+          done
