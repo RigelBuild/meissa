@@ -1,0 +1,54 @@
+name: renovate
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: renovate
+  cancel-in-progress: false
+
+jobs:
+  renovate:
+    name: run
+    runs-on: ubuntu-latest
+    environment: main
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - uses: oven-sh/setup-bun@3d267786b128fe76c2f16a390aa2448b815359f3 # v2.1.2
+
+      - name: Mint Renovate App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.RENOVATE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RENOVATE_APP_PRIVATE_KEY }}
+
+      - name: Put pinned devenv CLI on PATH
+        run: echo "$(nix build --no-link --print-out-paths --inputs-from . nixpkgs#devenv)/bin" >> "$GITHUB_PATH"
+
+      - name: Assert devenv is on PATH
+        run: command -v devenv
+
+      - name: Put pinned Node.js on PATH
+        run: echo "$(nix build --no-link --print-out-paths --inputs-from . nixpkgs#nodejs)/bin" >> "$GITHUB_PATH"
+
+      - name: Assert pinned Node.js is on PATH
+        run: node --version
+
+      - name: Run Renovate
+        env:
+          RENOVATE_CONFIG_FILE: tools/renovate/bot-config.json5
+          RENOVATE_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: bunx renovate@44.46.2

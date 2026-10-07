@@ -1,0 +1,41 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - uses: oven-sh/setup-bun@3d267786b128fe76c2f16a390aa2448b815359f3 # v2.1.2
+
+      - name: Build exported tools and policy
+        run: |
+          rumdl="$(nix build --no-link --print-out-paths .#rumdl)"
+          biome="$(nix build --no-link --print-out-paths .#biome)"
+          base_config="$(nix build --no-link --print-out-paths .#rumdl-base-config)"
+          echo "$rumdl/bin" >> "$GITHUB_PATH"
+          echo "$biome/bin" >> "$GITHUB_PATH"
+          echo "RUMDL_BASE_CONFIG=$base_config/rumdl/base.toml" >> "$GITHUB_ENV"
+          echo "RUMDL_BIN=$rumdl/bin/rumdl" >> "$GITHUB_ENV"
+
+      - name: Check exported devenv module
+        run: nix build --no-link .#checks.x86_64-linux.devenv-module
+
+      - name: Test toolchain and policy contracts
+        run: bun test
+
+      - name: Check markdown with shared policy
+        run: rumdl check .

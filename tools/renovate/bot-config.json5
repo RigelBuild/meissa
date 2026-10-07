@@ -1,0 +1,12 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-global-schema.json",
+  configFileNames: ["tools/renovate/config.json5"],
+  platform: "github",
+  repositories: ["RigelBuild/meissa"],
+  onboarding: false,
+  requireConfig: "required",
+  allowedCommands: [
+    "^devenv update nixpkgs$",
+    "^nix flake update nixpkgs$",
+  ],
+}

@@ -1,0 +1,35 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["config:recommended", "schedule:daily"],
+  timezone: "America/New_York",
+  dependencyDashboard: true,
+  rebaseWhen: "behind-base-branch",
+  enabledManagers: ["custom.regex"],
+  customManagers: [
+    {
+      customType: "regex",
+      managerFilePatterns: ["/^devenv\\.lock$/"],
+      matchStrings: [
+        "\"repo\": \"devenv-nixpkgs\",\\s*\"rev\": \"(?<currentDigest>[a-f0-9]{40})\"",
+      ],
+      depNameTemplate: "cachix/devenv-nixpkgs",
+      packageNameTemplate: "https://github.com/cachix/devenv-nixpkgs",
+      currentValueTemplate: "rolling",
+      datasourceTemplate: "git-refs",
+    },
+  ],
+  packageRules: [
+    {
+      matchManagers: ["custom.regex"],
+      matchDepNames: ["cachix/devenv-nixpkgs"],
+      groupName: "devenv nixpkgs",
+      schedule: ["before 4am"],
+      minimumReleaseAge: null,
+      postUpgradeTasks: {
+        commands: ["devenv update nixpkgs", "nix flake update nixpkgs"],
+        fileFilters: ["devenv.lock", "flake.lock"],
+        executionMode: "branch",
+      },
+    },
+  ],
+}
