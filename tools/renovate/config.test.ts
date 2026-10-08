@@ -32,11 +32,12 @@ describe("Renovate policy", () => {
     ]);
   });
 
-  test("daily schedule uses the configured timezone, nixpkgs and bun/npm managers, and a 5-day cooldown", async () => {
+  test("the workflow cron alone sets the cadence; nixpkgs and bun/npm managers have a 5-day cooldown", async () => {
     const config = await readJson5(configPath);
-    expect(config.extends).toContain("schedule:daily");
+    // A Renovate schedule window misses runs once GitHub starts the cron hours late.
+    expect(config.extends).not.toContain("schedule:daily");
+    expect(config.schedule).toBeUndefined();
     expect(config.extends).not.toContain("helpers:pinGitHubActionDigests");
-    expect(config.timezone).toBe("America/New_York");
     expect(config.enabledManagers).toEqual(["custom.regex", "bun", "npm"]);
     expect(config.minimumReleaseAge).toBe("5 days");
     expect(config.internalChecksFilter).toBe("strict");
@@ -72,7 +73,7 @@ describe("Renovate policy", () => {
     const rule = rules.map((entry) => asRecord(entry, "package rule")).find((entry) =>
       Array.isArray(entry.matchDepNames) && entry.matchDepNames.includes("cachix/devenv-nixpkgs")
     );
-    expect(rule?.schedule).toEqual(["before 4am"]);
+    expect(rule?.schedule).toBeUndefined();
     expect(rule?.minimumReleaseAge).toBeNull();
     expect(asRecord(rule?.postUpgradeTasks, "postUpgradeTasks")).toMatchObject({
       commands: ["devenv update nixpkgs", "nix flake update nixpkgs"],

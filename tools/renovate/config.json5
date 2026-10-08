@@ -1,7 +1,8 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: ["config:recommended", "schedule:daily"],
-  timezone: "America/New_York",
+  // No Renovate schedule: the workflow's daily cron is the cadence, so a late
+  // GitHub cron start still opens PRs.
+  extends: ["config:recommended"],
   dependencyDashboard: true,
   rebaseWhen: "behind-base-branch",
   // 5-day supply-chain cooldown, matching bunfig.toml minimumReleaseAge; strict
@@ -33,7 +34,6 @@
       matchManagers: ["custom.regex"],
       matchDepNames: ["cachix/devenv-nixpkgs"],
       groupName: "devenv nixpkgs",
-      schedule: ["before 4am"],
       minimumReleaseAge: null,
       postUpgradeTasks: {
         commands: ["devenv update nixpkgs", "nix flake update nixpkgs"],
