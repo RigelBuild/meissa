@@ -35,8 +35,12 @@ describe("Renovate policy", () => {
   test("the workflow cron alone sets the cadence; nixpkgs and bun/npm managers have a 5-day cooldown", async () => {
     const config = await readJson5(configPath);
     // A Renovate schedule window misses runs once GitHub starts the cron hours late.
-    expect(config.extends).not.toContain("schedule:daily");
+    expect(Array.isArray(config.extends)).toBe(true);
+    expect(config.extends.filter((preset: unknown) => String(preset).startsWith("schedule:"))).toEqual([]);
     expect(config.schedule).toBeUndefined();
+    expect(config.lockFileMaintenance).toBeUndefined();
+    expect(Array.isArray(config.packageRules)).toBe(true);
+    expect(config.packageRules.filter((entry: unknown) => "schedule" in asRecord(entry, "package rule"))).toEqual([]);
     expect(config.extends).not.toContain("helpers:pinGitHubActionDigests");
     expect(config.enabledManagers).toEqual(["custom.regex", "bun", "npm"]);
     expect(config.minimumReleaseAge).toBe("5 days");
