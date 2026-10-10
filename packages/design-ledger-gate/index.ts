@@ -240,7 +240,7 @@ export type StatusValue =
 
 const LEDGER_IMPACT_RE = /^\s*>?\s*ledger-impact:\s*(\S.*)$/im;
 const STATUS_RE =
-	/^\s*>?\s*(?:\*\*)?status(?:\*\*)?\s*:\s*(?:\*\*)?(superseded by (\S+)|historical)(?:\*\*)?(?:[\s.,;:()—-].*)?$/i;
+	/^\s*>?\s*(?:\*\*)?status(?:\*\*)?\s*:(?:\*\*)?\s*(?:\*\*)?(superseded by (\S+)|historical)(?:\*\*)?(?:[\s.,;:()—-].*)?$/i;
 const ROW_SUPERSEDED_RE =
 	/^Superseded by (DL-(?:\d{3}|[1-9]\d{3,})) \(.+, \d{4}-\d{2}-\d{2}\)$/;
 
@@ -364,18 +364,10 @@ export function parseRecordHeader(path: string, text: string): RecordHeader {
 }
 
 export function recordContentFromText(text: string): RecordContent {
-	const headings: string[] = [];
-	let inFence = false;
-	for (const line of text.split("\n")) {
-		if (/^\s*(```|~~~)/.test(line)) {
-			inFence = !inFence;
-			continue;
-		}
-		if (inFence) continue;
-		const heading = /^#{1,6}\s+(.*)$/.exec(line);
-		if (heading !== null) headings.push(slugify(heading[1] ?? ""));
-	}
-	return { headings, sizeBytes: Buffer.byteLength(text, "utf8") };
+	return {
+		headings: [...headingSlugs(text)],
+		sizeBytes: Buffer.byteLength(text, "utf8"),
+	};
 }
 
 export function evaluate(
@@ -413,7 +405,12 @@ export function evaluate(
 	for (const row of rows) {
 		const first = byId.get(row.id);
 		if (first === undefined) byId.set(row.id, row);
-		else v(row.path, KEY_LINE.id, "duplicate decision ID");
+		else
+			v(
+				row.path,
+				KEY_LINE.id,
+				`${row.id}: duplicate decision id (also defined in ${first.path})`,
+			);
 	}
 	for (const row of rows) {
 		const decisionParts = row.path
@@ -432,14 +429,14 @@ export function evaluate(
 			v(
 				row.path,
 				KEY_LINE.record,
-				`decision area must match its Record path (${row.recordPath})`,
+				`${row.id}: decision area must match its Record path (${row.recordPath})`,
 			);
 		const target = readRecord(row.recordPath);
 		if (target === null)
 			v(
 				row.path,
 				KEY_LINE.record,
-				`Record link path does not resolve: ${row.recordRaw}`,
+				`${row.id}: Record link path does not resolve: ${row.recordRaw}`,
 			);
 		else if (
 			row.recordAnchor !== null &&
@@ -448,24 +445,24 @@ export function evaluate(
 			v(
 				row.path,
 				KEY_LINE.record,
-				`Record link #anchor not found in ${row.recordRaw.split("#")[0]}: #${row.recordAnchor}`,
+				`${row.id}: Record link #anchor not found in ${row.recordRaw.split("#")[0]}: #${row.recordAnchor}`,
 			);
 		else if (row.recordAnchor === null && target.sizeBytes > LARGE_RECORD_BYTES)
 			v(
 				row.path,
 				KEY_LINE.record,
-				"Record link into a large record must carry a #anchor",
+				`${row.id}: Record link into a large record must carry a #anchor: ${row.recordRaw}`,
 			);
 		const supersession = ROW_SUPERSEDED_RE.exec(row.status);
 		if (supersession !== null) {
 			const targetId = supersession[1] ?? "";
 			if (targetId === row.id)
-				v(row.path, KEY_LINE.status, "decision supersedes itself");
+				v(row.path, KEY_LINE.status, `${row.id}: superseded by itself`);
 			else if (!byId.has(targetId))
 				v(
 					row.path,
 					KEY_LINE.status,
-					"Superseded target is not a decision file",
+					`${row.id}: Superseded by ${targetId}, which is not a decision file`,
 				);
 		}
 	}
@@ -486,7 +483,11 @@ export function evaluate(
 				if (cycle.length > 1 && !cyclesReported.has(key)) {
 					cyclesReported.add(key);
 					const anchor = cycle.reduce((a, b) => (b.id < a.id ? b : a));
-					v(anchor.path, KEY_LINE.status, "supersession cycle detected");
+					v(
+						anchor.path,
+						KEY_LINE.status,
+						`supersession cycle: ${cycle.map((row) => row.id).join(" → ")} → ${node.id}`,
+					);
 				}
 				break;
 			}

@@ -318,7 +318,7 @@ describe("decision parsing and invariants", () => {
 		expect(got).toContainEqual({
 			file: `${DECISION_DIR}/server/DL-001.md`,
 			line: KEY_LINE.id,
-			message: "duplicate decision ID",
+			message: `DL-001: duplicate decision id (also defined in ${DECISION_DIR}/ui/DL-001.md)`,
 		});
 	});
 
@@ -341,7 +341,7 @@ describe("decision parsing and invariants", () => {
 			file: `${DECISION_DIR}/ui/DL-001.md`,
 			line: KEY_LINE.status,
 			message: expect.stringContaining(
-				"Superseded target is not a decision file",
+				"DL-001: Superseded by DL-999, which is not a decision file",
 			),
 		});
 		const self = evaluateCorpus(
@@ -351,7 +351,7 @@ describe("decision parsing and invariants", () => {
 			}),
 		);
 		expect(self).toHaveLength(1);
-		expect(self[0]?.message).toContain("decision supersedes itself");
+		expect(self[0]?.message).toContain("superseded by itself");
 	});
 
 	test("reports cycles once at their stable lowest-id decision locus", () => {
@@ -391,7 +391,9 @@ describe("decision parsing and invariants", () => {
 			item.message.includes("supersession cycle"),
 		);
 		expect(loop).toHaveLength(1);
-		expect(loop[0]?.message).toBe("supersession cycle detected");
+		expect(loop[0]?.message).toBe(
+			"supersession cycle: DL-003 → DL-004 → DL-003",
+		);
 		const independent = evaluateCorpus(
 			corpus(
 				{ id: "DL-001", status: "Superseded by DL-002 (Matt, 2026-07-22)" },
@@ -418,7 +420,7 @@ describe("decision parsing and invariants", () => {
 			}),
 		);
 		expect(self).toHaveLength(1);
-		expect(self[0]?.message).toContain("decision supersedes itself");
+		expect(self[0]?.message).toContain("superseded by itself");
 		expect(
 			self.some((item) => item.message.includes("supersession cycle")),
 		).toBe(false);
@@ -527,6 +529,23 @@ describe("decision parsing and invariants", () => {
 });
 
 describe("record Status headers", () => {
+	test("bold key with the colon inside the bold parses", () => {
+		expect(parseStatusValue("**Status:** Historical")).toEqual({
+			kind: "Historical",
+		});
+		expect(parseStatusValue("> **Status:** Superseded by ../x.md")).toEqual({
+			kind: "Superseded",
+			path: "../x.md",
+		});
+	});
+
+	test("duplicate headings resolve the same suffixed anchor in both checks", () => {
+		expect(recordContentFromText("## X\n\n## X\n").headings).toEqual([
+			"x",
+			"x-1",
+		]);
+	});
+
 	test("rejects prohibited Status and restricts Historical only when configured", () => {
 		expect(
 			evaluateCorpus(corpus(), [
