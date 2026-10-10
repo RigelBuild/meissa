@@ -1,6 +1,6 @@
 {
 	"name": "@rigelbuild/design-ledger-gate",
-	"version": "0.0.0",
+	"version": "1.0.0",
 	"type": "module",
 	"license": "MIT OR Apache-2.0",
 	"repository": {
