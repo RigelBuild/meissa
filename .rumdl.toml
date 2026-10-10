@@ -1,1 +1,6 @@
 extends = "$RUMDL_BASE_CONFIG"
+
+# release-please regenerates each package CHANGELOG.md, overwriting any hand-fix.
+# Its template emits double blank lines (MD012) and copies commit subjects verbatim (MD050).
+[per-file-ignores]
+"packages/*/CHANGELOG.md" = ["MD012", "MD050"]
