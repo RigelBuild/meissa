@@ -59,6 +59,18 @@ describe("Renovate policy", () => {
     expect(exempt.flatMap((entry) => entry.matchPackageNames)).toEqual(install.minimumReleaseAgeExcludes);
   });
 
+  test("typescript stays on 6.x until 7.1 ships its API", async () => {
+    const config = await readJson5(configPath);
+    const rules = config.packageRules;
+    expect(Array.isArray(rules)).toBe(true);
+    const cap = rules.map((entry) => asRecord(entry, "package rule")).find((entry) =>
+      Array.isArray(entry.matchPackageNames) && entry.matchPackageNames.includes("typescript")
+    );
+    const range = String(cap?.allowedVersions);
+    expect(Bun.semver.satisfies("6.9.9", range)).toBe(true);
+    expect(Bun.semver.satisfies("7.0.2", range)).toBe(false);
+  });
+
   test("the nixpkgs lock manager has a same-branch relock with no cooldown", async () => {
     const config = await readJson5(configPath);
     const managers = config.customManagers;

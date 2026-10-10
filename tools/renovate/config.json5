@@ -31,6 +31,13 @@
       minimumReleaseAge: null,
     },
     {
+      // TypeScript 7.0 ships without the programmatic API (it lands in 7.1), so
+      // tools that import `typescript` break. Remove this cap once 7.1 ships.
+      matchManagers: ["bun", "npm"],
+      matchPackageNames: ["typescript"],
+      allowedVersions: "<7",
+    },
+    {
       matchManagers: ["custom.regex"],
       matchDepNames: ["cachix/devenv-nixpkgs"],
       groupName: "devenv nixpkgs",
