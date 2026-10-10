@@ -252,7 +252,9 @@ export async function claim(
 		});
 	} catch (error) {
 		const name = error instanceof Error ? error.name : "UnknownError";
-		throw new Error(`request to ${baseUrl(config)}/claim failed (${name})`);
+		throw new Error(
+			`request to ${baseUrl(config)}/claim failed (${name}).${maybeMinted(config)}`,
+		);
 	}
 	if (!response.ok)
 		throw formatServiceError(
@@ -345,8 +347,8 @@ export async function runOnce(
 		log(formatClaimed(ids));
 		return 0;
 	} catch (error) {
-		const name = error instanceof Error ? error.name : "UnknownError";
-		err(`dl-claim: request to ${baseUrl(config)}/claim failed (${name})`);
+		// claim builds every message it throws; none carries the token.
+		err(`dl-claim: ${error instanceof Error ? error.message : String(error)}`);
 		return 1;
 	}
 }

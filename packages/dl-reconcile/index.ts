@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 import { readFile } from "node:fs/promises";
 import { basename, resolve } from "node:path";
 import type { LedgerConfig } from "@rigelbuild/design-ledger-gate";

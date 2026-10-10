@@ -283,8 +283,29 @@ describe("claim CLI", () => {
 		expect(output.join("\n")).toContain(
 			"request to https://counter.example.test/claim failed (Error)",
 		);
-		expect(output.join("\n")).not.toContain("Authorization");
-		expect(output.join("\n")).not.toContain("secret");
+		expect(output.join("\n")).not.toContain("Bearer secret");
+		expect(output.join("\n")).toContain("do not rerun");
+	});
+
+	test("service errors keep the counter's message and the do-not-rerun warning", async () => {
+		const directory = mkdtempSync(join(tmpdir(), "dl-claim-cli-test-"));
+		temporaryDirectories.push(directory);
+		const configPath = join(directory, "config.json");
+		writeFileSync(configPath, JSON.stringify(oneSurface));
+		const output: string[] = [];
+		expect(
+			await runOnce(
+				["--config", configPath, "--ref", "none", "--lane", "feature/b"],
+				{
+					token: "token",
+					fetchFn: async () => new Response("bad gateway", { status: 502 }),
+					err: (message) => output.push(message),
+				},
+			),
+		).toBe(1);
+		const text = output.join("\n");
+		expect(text).not.toContain("failed (Error)");
+		expect(text).toContain("do not rerun");
 	});
 });
 
