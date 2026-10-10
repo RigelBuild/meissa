@@ -59,6 +59,17 @@
         "typescript": "6.0.3",
       },
     },
+    "packages/renovate-preflight": {
+      "name": "@rigelbuild/renovate-preflight",
+      "version": "0.0.0",
+      "bin": {
+        "renovate-preflight": "./index.ts",
+      },
+      "devDependencies": {
+        "@types/bun": "1.4.0",
+        "typescript": "6.0.3",
+      },
+    },
   },
   "packages": {
     "@rigelbuild/design-ledger-gate": ["@rigelbuild/design-ledger-gate@workspace:packages/design-ledger-gate"],
@@ -68,6 +79,8 @@
     "@rigelbuild/dl-reconcile": ["@rigelbuild/dl-reconcile@workspace:packages/dl-reconcile"],
 
     "@rigelbuild/ref-gate": ["@rigelbuild/ref-gate@workspace:packages/ref-gate"],
+
+    "@rigelbuild/renovate-preflight": ["@rigelbuild/renovate-preflight@workspace:packages/renovate-preflight"],
 
     "@types/bun": ["@types/bun@1.4.0", "", { "dependencies": { "bun-types": "1.4.0" } }, "sha512-K+lZULY23vRgK/CfTjFIV+tyifaNdSMlPh9j+6mQ/cLfpOznLyAuzgV/JQysyECpkBQLVMSyvjlr2fBUSA9wFQ=="],
 
