@@ -20,6 +20,34 @@
         "typescript": "6.0.3",
       },
     },
+    "packages/dl-claim": {
+      "name": "@rigelbuild/dl-claim",
+      "version": "0.0.0",
+      "bin": {
+        "dl-claim": "./index.ts",
+      },
+      "dependencies": {
+        "@rigelbuild/design-ledger-gate": "0.0.0",
+      },
+      "devDependencies": {
+        "@types/bun": "1.4.0",
+        "typescript": "6.0.3",
+      },
+    },
+    "packages/dl-reconcile": {
+      "name": "@rigelbuild/dl-reconcile",
+      "version": "0.0.0",
+      "bin": {
+        "dl-reconcile": "./index.ts",
+      },
+      "dependencies": {
+        "@rigelbuild/design-ledger-gate": "0.0.0",
+      },
+      "devDependencies": {
+        "@types/bun": "1.4.0",
+        "typescript": "6.0.3",
+      },
+    },
     "packages/ref-gate": {
       "name": "@rigelbuild/ref-gate",
       "version": "0.0.0",
@@ -34,6 +62,10 @@
   },
   "packages": {
     "@rigelbuild/design-ledger-gate": ["@rigelbuild/design-ledger-gate@workspace:packages/design-ledger-gate"],
+
+    "@rigelbuild/dl-claim": ["@rigelbuild/dl-claim@workspace:packages/dl-claim"],
+
+    "@rigelbuild/dl-reconcile": ["@rigelbuild/dl-reconcile@workspace:packages/dl-reconcile"],
 
     "@rigelbuild/ref-gate": ["@rigelbuild/ref-gate@workspace:packages/ref-gate"],
 

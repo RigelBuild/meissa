@@ -1,30 +1,31 @@
 {
-	"name": "@rigelbuild/design-ledger-gate",
+	"name": "@rigelbuild/dl-claim",
 	"version": "0.0.0",
 	"type": "module",
 	"license": "MIT OR Apache-2.0",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/RigelBuild/meissa.git",
-		"directory": "packages/design-ledger-gate"
+		"directory": "packages/dl-claim"
 	},
 	"bin": {
-		"design-ledger-gate": "./index.ts"
+		"dl-claim": "./index.ts"
 	},
 	"exports": {
-		".": "./index.ts",
-		"./decision-files.ts": "./decision-files.ts"
+		".": "./index.ts"
 	},
 	"files": [
 		"package.json",
 		"index.ts",
-		"decision-files.ts",
 		"README.md",
 		"LICENSE-MIT",
 		"LICENSE-APACHE"
 	],
 	"publishConfig": {
 		"access": "public"
+	},
+	"dependencies": {
+		"@rigelbuild/design-ledger-gate": "0.0.0"
 	},
 	"devDependencies": {
 		"@types/bun": "1.4.0",

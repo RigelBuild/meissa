@@ -1,4 +1,6 @@
 {
 	"packages/ref-gate": "0.0.0",
-	"packages/design-ledger-gate": "0.0.0"
+	"packages/design-ledger-gate": "0.0.0",
+	"packages/dl-claim": "0.0.0",
+	"packages/dl-reconcile": "0.0.0"
 }

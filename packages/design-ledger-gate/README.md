@@ -13,7 +13,8 @@ Pass a JSON file with these fields:
   "governedRoots": ["ui", "server"],
   "historicalChain": [],
   "exemptBranchPrefixes": ["renovate/", "trunk-merge/"],
-  "citationAmbiguousPaths": [],
+  "surfaces": ["alpha"],
+  "citationAmbiguousPaths": ["shared/README.md"],
   "legs": {
     "citations": false,
     "errata": false,
@@ -29,6 +30,7 @@ Pass a JSON file with these fields:
 ```
 
 `surfaceDepth` 0 stores records under `designsRoot/<area>/` and decisions under `designsRoot/decisions/<area>/`. It requires `governedRoots`. At depth 1, each discovered surface stores decisions under `designsRoot/<surface>/decisions/<area>/` and records elsewhere beneath that surface; a decision may cite a record on another surface. `governedRoots` is only valid at depth 0. `historicalChain`, `exemptBranchPrefixes`, `citationAmbiguousPaths`, `legs`, and `remediationDoc` are optional. `citationAmbiguousPaths` defaults to an empty list and names repository-root paths that also exist in sibling repositories. When a citation needs a root-relative retry for one of those paths, the gate refuses it and counts it as repo-ambiguous. When `historicalChain` is absent, any record may be Historical. When present, only listed paths may be Historical; an empty list allows none. `recordStatusScope` is `all` (default) or `changed`. The latter checks no records without PR context and reports `record Status skipped (no PR context)`. All extra legs default to `false`.
+`surfaces` optionally lists the counter surfaces this repository may claim. At depth 0 it must contain exactly one directory name; at depth 1 the gate reports discovered surfaces that are not listed. Use this list when the repository claims decision IDs from the counter.
 Record `Status:` headers are case-insensitive. The key may be bold, and spaces may appear before its colon. `Historical` and `Superseded by <path>` values may be bold. A supersession value may include a free-text reason after the path.
 
 When `errata` is enabled, an `## Errata` section must be the final H2. Each entry starts with `### E<n> — YYYY-MM-DD (<who>)`, with IDs in order from E1. The first quoted text after each entry heading must appear verbatim above the section. The first header-zone `Errata: E1, E2` marker must list the same IDs in order. The marker and section require each other.
