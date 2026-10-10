@@ -28,7 +28,7 @@
 		"@rigelbuild/design-ledger-gate": "0.0.0"
 	},
 	"devDependencies": {
-		"@types/bun": "1.4.0",
+		"@types/bun": "1.4.2",
 		"typescript": "6.0.3"
 	}
 }
