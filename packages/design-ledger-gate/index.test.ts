@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
+import { spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -141,11 +142,8 @@ test.each([
 		"Status: Superseded by foo.md for wave runtime, pane placement…",
 		{ kind: "Superseded", path: "foo.md" },
 	],
-	[
-		"bold key and value with trailing period",
-		"**STATUS:** **Superseded by foo.md.**",
-		{ kind: "Superseded", path: "foo.md" },
-	],
+	["bold key", "**Status**: Historical", { kind: "Historical" }],
+	["spaced colon", "Status : Historical", { kind: "Historical" }],
 ] as const)("parseStatusValue accepts %s", (_label, line, result) => {
 	expect(parseStatusValue(line)).toEqual(result);
 });
@@ -153,6 +151,15 @@ test.each([
 test.each(["Status: Draft", "Status: Active", "**Status: Active**"])(
 	"parseStatusValue rejects %s",
 	(line) => expect(parseStatusValue(line)).toBeNull(),
+);
+
+test.each(["**Status**: Draft", "Status : Draft"])(
+	"parseRecordHeader exposes prohibited values in %s",
+	(line) => {
+		const parsed = parseRecordHeader("record.md", `# Title\n\n${line}\n`);
+		expect(parsed.statusLine).toBe(line);
+		expect(parseStatusValue(parsed.statusLine ?? "")).toBeNull();
+	},
 );
 
 test("record-relative supersession resolves nested and cross-bucket paths only", () => {
@@ -209,7 +216,6 @@ describe("parseRecordHeader", () => {
 		).toBe(line);
 	});
 });
-
 describe("design path discovery", () => {
 	test("classifies decision files, the readme, legacy files, and misplaced files", () => {
 		expect(classifyDesignPath(`${DECISION_DIR}/README.md`, CONFIG)).toBe(
@@ -312,7 +318,7 @@ describe("decision parsing and invariants", () => {
 		expect(got).toContainEqual({
 			file: `${DECISION_DIR}/server/DL-001.md`,
 			line: KEY_LINE.id,
-			message: expect.stringContaining("duplicate decision id"),
+			message: "duplicate decision ID",
 		});
 	});
 
@@ -334,7 +340,9 @@ describe("decision parsing and invariants", () => {
 		expect(missing).toContainEqual({
 			file: `${DECISION_DIR}/ui/DL-001.md`,
 			line: KEY_LINE.status,
-			message: expect.stringContaining("not a decision file"),
+			message: expect.stringContaining(
+				"Superseded target is not a decision file",
+			),
 		});
 		const self = evaluateCorpus(
 			corpus({
@@ -343,7 +351,7 @@ describe("decision parsing and invariants", () => {
 			}),
 		);
 		expect(self).toHaveLength(1);
-		expect(self[0]?.message).toContain("superseded by itself");
+		expect(self[0]?.message).toContain("decision supersedes itself");
 	});
 
 	test("reports cycles once at their stable lowest-id decision locus", () => {
@@ -383,9 +391,7 @@ describe("decision parsing and invariants", () => {
 			item.message.includes("supersession cycle"),
 		);
 		expect(loop).toHaveLength(1);
-		expect(loop[0]?.message).toContain("DL-003");
-		expect(loop[0]?.message).toContain("DL-004");
-		expect(loop[0]?.message).not.toContain("DL-001");
+		expect(loop[0]?.message).toBe("supersession cycle detected");
 		const independent = evaluateCorpus(
 			corpus(
 				{ id: "DL-001", status: "Superseded by DL-002 (Matt, 2026-07-22)" },
@@ -412,7 +418,7 @@ describe("decision parsing and invariants", () => {
 			}),
 		);
 		expect(self).toHaveLength(1);
-		expect(self[0]?.message).toContain("superseded by itself");
+		expect(self[0]?.message).toContain("decision supersedes itself");
 		expect(
 			self.some((item) => item.message.includes("supersession cycle")),
 		).toBe(false);
@@ -543,19 +549,27 @@ describe("record Status headers", () => {
 		).toBe(true);
 	});
 
-	test("recordStatusScope changed checks only PR-changed records", () => {
+	test("recordStatusScope changed checks PR-changed records only", () => {
 		const draft = record(undefined, "# Title\n\nStatus: Draft\n");
 		const scoped = { ...CONFIG, recordStatusScope: "changed" as const };
-		const flagged = (files: string[]) =>
-			evaluateCorpus(
-				corpus(),
-				[draft],
-				{ files, body: null, headBranch: "feature" },
-				smallRecord,
-				scoped,
-			).some((item) => item.message.includes("malformed or prohibited"));
-		expect(flagged([])).toBe(false);
-		expect(flagged([draft.path])).toBe(true);
+		const flagged = (changed: Changed) =>
+			evaluateCorpus(corpus(), [draft], changed, smallRecord, scoped).some(
+				(item) => item.message.includes("malformed or prohibited"),
+			);
+		expect(flagged(noChange)).toBe(false);
+		expect(
+			flagged({ files: [draft.path], body: "", headBranch: "feature" }),
+		).toBe(true);
+	});
+	test("Status key spacing forms remain prohibited", () => {
+		for (const header of ["**Status**: Draft", "Status : Draft"]) {
+			const parsed = record(undefined, `# Title\n\n${header}\n`);
+			expect(
+				evaluateCorpus(corpus(), [parsed]).some((item) =>
+					item.message.includes("malformed or prohibited"),
+				),
+			).toBe(true);
+		}
 	});
 
 	test("checks record-level Superseded pointer and decision status agreement", () => {
@@ -749,7 +763,9 @@ describe("runOnce", () => {
 			readText: async (_root, path) => files.get(path) ?? null,
 			listDesignFiles: options.list ?? (async () => paths),
 			readRecord: () => smallRecord(),
+			readMergeBaseDecisionPaths: async () => [],
 			readBaseDecisionPaths: async () => [],
+			baseRef: "main",
 			changed: options.changed ?? noChange,
 			log: (message) => out.push(message),
 			err: (message) => errs.push(message),
@@ -770,6 +786,18 @@ describe("runOnce", () => {
 		expect(out).toEqual([
 			"design-ledger-gate: OK — 1 decision file(s), 1 record(s) status-checked; PR checks skipped (no PR context); citation checks off.",
 		]);
+	});
+
+	test("changed Status scope skips records without PR context", async () => {
+		const { deps, out } = fixture({
+			files: new Map([
+				[decisionPath, decisionText()],
+				[recordPath, "# Record\n\nStatus: Draft\n"],
+			]),
+		});
+		const config = { ...CONFIG, recordStatusScope: "changed" as const };
+		expect(await runOnce(deps, config)).toBe(0);
+		expect(out[0]).toContain("record Status skipped (no PR context)");
 	});
 
 	test("rejects a reintroduced DECISIONS.md", async () => {
@@ -933,6 +961,52 @@ describe("prContextFrom", () => {
 			}),
 		).toEqual({ kind: "pr", repo: "ExampleOrg/docs", prNumber: "1315" });
 	});
+	test("Woodpecker pull requests carry changed files, body, and branch", () => {
+		expect(
+			prContextFrom({
+				CI_PIPELINE_EVENT: "pull_request",
+				CI_PIPELINE_FILES: '["docs/designs/ui/record.md"]',
+				CI_COMMIT_PULL_REQUEST_BODY: "Issue details",
+				CI_COMMIT_SOURCE_BRANCH: "feature/design",
+			}),
+		).toEqual({
+			kind: "woodpecker",
+			changed: {
+				files: ["docs/designs/ui/record.md"],
+				body: "Issue details",
+				headBranch: "feature/design",
+			},
+		});
+	});
+
+	test("non-PR Woodpecker events skip pull-request checks", () => {
+		expect(
+			prContextFrom({
+				CI_PIPELINE_EVENT: "push",
+				CI_PIPELINE_FILES: '["docs/designs/ui/record.md"]',
+			}),
+		).toEqual({ kind: "skip" });
+	});
+});
+
+describe("CLI arguments", () => {
+	const entry = new URL("./index.ts", import.meta.url).pathname;
+
+	test("--help prints usage and exits successfully", () => {
+		const result = spawnSync("bun", [entry, "--help"], { encoding: "utf8" });
+		expect(result.status).toBe(0);
+		expect(result.stdout).toContain(
+			"Usage: design-ledger-gate --config <path>",
+		);
+	});
+
+	test("missing arguments print usage and exit with code 2", () => {
+		const result = spawnSync("bun", [entry], { encoding: "utf8" });
+		expect(result.status).toBe(2);
+		expect(result.stderr).toContain(
+			"Usage: design-ledger-gate --config <path>",
+		);
+	});
 });
 
 function validConfig(): LedgerConfig {
@@ -949,6 +1023,7 @@ function ledgerFixture(options: {
 	files: ReadonlyMap<string, string>;
 	changed?: Changed;
 	basePaths?: readonly string[];
+	mergeBasePaths?: readonly string[];
 }) {
 	const config = options.config ?? validConfig();
 	const errors: string[] = [];
@@ -962,7 +1037,9 @@ function ledgerFixture(options: {
 			const text = options.files.get(path);
 			return text === undefined ? null : recordContentFromText(text);
 		},
+		readMergeBaseDecisionPaths: async () => options.mergeBasePaths ?? [],
 		readBaseDecisionPaths: async () => options.basePaths ?? [],
+		baseRef: "main",
 		changed: options.changed ?? noChange,
 		log: (message) => logs.push(message),
 		err: (message) => errors.push(message),
@@ -1021,6 +1098,24 @@ describe("loadLedgerConfig", () => {
 				designsRoot: "docs/designs",
 				surfaceDepth: 1,
 				recordStatusScope: "some",
+				counter: { url: "x", partition: "p" },
+			},
+		],
+		[
+			"empty governed roots",
+			{
+				designsRoot: "docs/designs",
+				surfaceDepth: 0,
+				governedRoots: [],
+				counter: { url: "x", partition: "p" },
+			},
+		],
+		[
+			"empty exempt prefix",
+			{
+				designsRoot: "docs/designs",
+				surfaceDepth: 1,
+				exemptBranchPrefixes: [""],
 				counter: { url: "x", partition: "p" },
 			},
 		],
@@ -1258,6 +1353,25 @@ describe("optional validation legs", () => {
 		expect(await runOnce(unclosed.deps, unclosed.config)).toBe(1);
 		expect(unclosed.errors.join("\n")).toContain("unclosed Markdown fence");
 	});
+	test("enabled prose legs report one unclosed fence per file", async () => {
+		const decisionPath = "docs/designs/decisions/ui/DL-001.md";
+		const recordPath = "docs/designs/ui/record/design.md";
+		const files = new Map([
+			[decisionPath, decisionAt(decisionPath, "../../ui/record/design.md")],
+			[recordPath, "# Record\n````md\nunfinished `../source.md:99`\n"],
+		]);
+		const result = ledgerFixture({
+			config: {
+				...validConfig(),
+				legs: { citations: true, recordLinks: true, errata: true },
+			},
+			files,
+		});
+		expect(await runOnce(result.deps, result.config)).toBe(1);
+		expect(
+			result.errors.filter((line) => line.includes("unclosed Markdown fence")),
+		).toHaveLength(1);
+	});
 
 	test("recordLinks reject dead anchors and accept heading slugs outside fences", async () => {
 		const decisionPath = "docs/designs/decisions/ui/DL-001.md";
@@ -1288,6 +1402,20 @@ describe("optional validation legs", () => {
 		const files = new Map([
 			[decisionPath, decisionAt(decisionPath, "../../ui/record/design.md")],
 			[recordPath, "# Record\n[link](../../../../../outside.md#anchor)\n"],
+		]);
+		const result = ledgerFixture({
+			config: { ...validConfig(), legs: { recordLinks: true } },
+			files,
+		});
+		expect(await runOnce(result.deps, result.config)).toBe(1);
+		expect(result.errors.join("\n")).toContain("escapes the repository");
+	});
+	test("recordLinks reject paths escaping without an anchor", async () => {
+		const decisionPath = "docs/designs/decisions/ui/DL-001.md";
+		const recordPath = "docs/designs/ui/record/design.md";
+		const files = new Map([
+			[decisionPath, decisionAt(decisionPath, "../../ui/record/design.md")],
+			[recordPath, "# Record\n[link](../../../../../outside.md)\n"],
 		]);
 		const result = ledgerFixture({
 			config: { ...validConfig(), legs: { recordLinks: true } },
@@ -1399,8 +1527,73 @@ describe("optional validation legs", () => {
 			"malformed errata entry heading",
 		);
 	});
+	test.each([
+		[
+			"missing Errata marker",
+			[
+				"# Decision",
+				'Prior wording includes "old text".',
+				"## Errata",
+				"### E1 — 2026-01-02 (Reviewer)",
+				'Correction of "old text".',
+			],
+			"Errata section requires an Errata marker line",
+		],
+		[
+			"marker without section",
+			["# Decision", "Errata: E1", 'Prior wording includes "old text".'],
+			"Errata marker requires an Errata section",
+		],
+		[
+			"missing numbered entry",
+			[
+				"# Decision",
+				"Errata: E2",
+				'Prior wording includes "old text".',
+				"## Errata",
+				"### E2 — 2026-01-02 (Reviewer)",
+				'Correction of "old text".',
+			],
+			"errata IDs must be numbered E1..En in order",
+		],
+		[
+			"entry without quote",
+			[
+				"# Decision",
+				"Errata: E1",
+				'Prior wording includes "old text".',
+				"## Errata",
+				"### E1 — 2026-01-02 (Reviewer)",
+				"Correction without a quote.",
+			],
+			"errata entry requires a quoted wrong text",
+		],
+	])(
+		"reports the expected errata diagnostic for %s",
+		async (_name, lines, message) => {
+			const decisionPath = "docs/designs/decisions/ui/DL-001.md";
+			const recordPath = "docs/designs/ui/record/design.md";
+			const files = new Map([
+				[
+					decisionPath,
+					decisionAt(
+						decisionPath,
+						"../../ui/record/design.md",
+						lines.join("\n"),
+					),
+				],
+				[recordPath, "# Record\n"],
+			]);
+			const result = ledgerFixture({
+				config: { ...validConfig(), legs: { errata: true } },
+				files,
+			});
+			expect(await runOnce(result.deps, result.config)).toBe(1);
+			expect(result.errors.join("\n")).toContain(message);
+		},
+	);
 
-	test("mainIds reject duplicate base ids and allow unused ids below the base maximum", async () => {
+	test("mainIds compare merge-base additions against base-tip IDs", async () => {
 		const decisionPath = "docs/designs/decisions/ui/DL-001.md";
 		const recordPath = "docs/designs/ui/record/design.md";
 		const files = new Map([
@@ -1412,24 +1605,70 @@ describe("optional validation legs", () => {
 			body: "",
 			headBranch: "feature/test",
 		};
-		const bad = ledgerFixture({
+		const duplicate = ledgerFixture({
 			config: { ...validConfig(), legs: { mainIds: true } },
 			files,
 			changed,
+			mergeBasePaths: [],
 			basePaths: ["docs/designs/decisions/server/DL-001.md"],
 		});
-		expect(await runOnce(bad.deps, bad.config)).toBe(1);
-		expect(bad.errors.join("\n")).toContain(
+		expect(await runOnce(duplicate.deps, duplicate.config)).toBe(1);
+		expect(duplicate.errors.join("\n")).toContain(
 			"already exists on base branch tip",
 		);
-		const good = ledgerFixture({
+		const oldId = ledgerFixture({
 			config: { ...validConfig(), legs: { mainIds: true } },
 			files,
 			changed,
+			mergeBasePaths: ["docs/designs/decisions/server/DL-001.md"],
+			basePaths: ["docs/designs/decisions/server/DL-001.md"],
+		});
+		expect(await runOnce(oldId.deps, oldId.config)).toBe(0);
+		const unusedId = ledgerFixture({
+			config: { ...validConfig(), legs: { mainIds: true } },
+			files,
+			changed,
+			mergeBasePaths: [],
 			basePaths: ["docs/designs/decisions/server/DL-500.md"],
 		});
-		expect(await runOnce(good.deps, good.config)).toBe(0);
+		expect(await runOnce(unusedId.deps, unusedId.config)).toBe(0);
 	});
+	test.each(["merge-base", "base-tip"])(
+		"mainIds fail closed when %s listing fails",
+		async (failedListing) => {
+			const decisionPath = "docs/designs/decisions/ui/DL-001.md";
+			const recordPath = "docs/designs/ui/record/design.md";
+			const files = new Map([
+				[decisionPath, decisionAt(decisionPath, "../../ui/record/design.md")],
+				[recordPath, "# Record\n"],
+			]);
+			const fixture = ledgerFixture({
+				config: { ...validConfig(), legs: { mainIds: true } },
+				files,
+				changed: {
+					files: [decisionPath],
+					body: "",
+					headBranch: "feature/test",
+				},
+			});
+			const brokenDeps = {
+				...fixture.deps,
+				readMergeBaseDecisionPaths: async () => {
+					if (failedListing === "merge-base")
+						throw new Error("merge-base failed");
+					return [];
+				},
+				readBaseDecisionPaths: async () => {
+					if (failedListing === "base-tip") throw new Error("base-tip failed");
+					return [];
+				},
+			};
+			expect(await runOnce(brokenDeps, fixture.config)).toBe(2);
+			expect(fixture.errors.join("\n")).toContain(
+				"cannot read base decision listing",
+			);
+		},
+	);
 
 	test("all extra legs stay off by default", async () => {
 		const decisionPath = "docs/designs/decisions/ui/DL-001.md";
@@ -1437,10 +1676,35 @@ describe("optional validation legs", () => {
 		const sourcePath = "docs/designs/ui/source.md";
 		const files = new Map([
 			[decisionPath, decisionAt(decisionPath, "../../ui/record/design.md")],
-			[recordPath, "# Record\n../source.md:99\n[link](../source.md#missing)\n"],
+			[
+				recordPath,
+				"# Record\n`../source.md:99`\n[link](../source.md#missing)\n## Errata\n### E1 malformed\n",
+			],
 			[sourcePath, "# Source\n"],
 		]);
-		const result = ledgerFixture({ files });
+		const result = ledgerFixture({
+			files,
+			changed: { files: [decisionPath], body: "", headBranch: "feature/test" },
+			mergeBasePaths: [],
+			basePaths: ["docs/designs/decisions/server/DL-001.md"],
+		});
 		expect(await runOnce(result.deps, result.config)).toBe(0);
+		const failures = await Promise.all(
+			[
+				{ citations: true },
+				{ errata: true },
+				{ recordLinks: true },
+				{ mainIds: true },
+			].map((leg) => {
+				const enabled = ledgerFixture({
+					files,
+					changed: result.deps.changed,
+					mergeBasePaths: [],
+					basePaths: ["docs/designs/decisions/server/DL-001.md"],
+				});
+				return runOnce(enabled.deps, { ...enabled.config, legs: leg });
+			}),
+		);
+		expect(failures).toEqual([1, 1, 1, 1]);
 	});
 });

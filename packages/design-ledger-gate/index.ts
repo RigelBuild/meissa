@@ -8,7 +8,7 @@ export interface LedgerConfig {
 	readonly designsRoot: string;
 	readonly surfaceDepth: 0 | 1;
 	readonly governedRoots?: readonly string[];
-	/** Absent permits any record; present restricts Historical to these paths. */
+	/** Absent permits any record to be Historical; present restricts it to listed paths. */
 	readonly historicalChain?: readonly string[];
 	readonly exemptBranchPrefixes?: readonly string[];
 	/** "changed" checks record `Status:` lines only in PR-changed files; default "all". */
@@ -22,6 +22,15 @@ export interface LedgerConfig {
 	};
 	readonly counter: { readonly url: string; readonly partition: string };
 	readonly remediationDoc?: string;
+}
+function isRepoRelativePath(value: string): boolean {
+	return (
+		value !== "" &&
+		!pathPosix.isAbsolute(value) &&
+		!/^[A-Za-z]:[\\/]/.test(value) &&
+		!value.includes("\\") &&
+		!value.includes("..")
+	);
 }
 
 function asRecord(value: unknown, label: string): Record<string, unknown> {
@@ -83,13 +92,24 @@ export function loadLedgerConfig(path: string): LedgerConfig {
 		],
 		"config",
 	);
-	if (typeof raw.designsRoot !== "string" || raw.designsRoot === "")
-		throw new Error("designsRoot must be a non-empty string");
+	if (
+		typeof raw.designsRoot !== "string" ||
+		!isRepoRelativePath(raw.designsRoot)
+	)
+		throw new Error(
+			"designsRoot must be a non-empty repository-relative path without ..",
+		);
 	if (raw.surfaceDepth !== 0 && raw.surfaceDepth !== 1)
 		throw new Error("surfaceDepth must be 0 or 1");
 	let governedRoots: string[] | undefined;
 	if (raw.governedRoots !== undefined)
 		governedRoots = readStringArray(raw.governedRoots, "governedRoots");
+	if (governedRoots?.length === 0)
+		throw new Error("governedRoots must not be empty");
+	if (governedRoots?.some((root) => !isRepoRelativePath(root)) === true)
+		throw new Error(
+			"governedRoots entries must be repository-relative paths without ..",
+		);
 	if (raw.surfaceDepth === 0 && governedRoots === undefined)
 		throw new Error("governedRoots is required when surfaceDepth is 0");
 	if (raw.surfaceDepth === 1 && governedRoots !== undefined)
@@ -103,6 +123,8 @@ export function loadLedgerConfig(path: string): LedgerConfig {
 			raw.exemptBranchPrefixes,
 			"exemptBranchPrefixes",
 		);
+	if (exemptBranchPrefixes?.some((prefix) => prefix === "") === true)
+		throw new Error("exemptBranchPrefixes entries must not be empty");
 	const citationAmbiguousPaths =
 		raw.citationAmbiguousPaths === undefined
 			? []
@@ -218,7 +240,7 @@ export type StatusValue =
 
 const LEDGER_IMPACT_RE = /^\s*>?\s*ledger-impact:\s*(\S.*)$/im;
 const STATUS_RE =
-	/^\s*>?\s*(?:\*\*)?status:(?:\*\*)?\s*(?:\*\*)?(superseded by (\S+)|historical)(?:\*\*)?(?:[\s.,;:()—-].*)?$/i;
+	/^\s*>?\s*(?:\*\*)?status(?:\*\*)?\s*:\s*(?:\*\*)?(superseded by (\S+)|historical)(?:\*\*)?(?:[\s.,;:()—-].*)?$/i;
 const ROW_SUPERSEDED_RE =
 	/^Superseded by (DL-(?:\d{3}|[1-9]\d{3,})) \(.+, \d{4}-\d{2}-\d{2}\)$/;
 
@@ -269,7 +291,7 @@ export function slugify(heading: string): string {
 	return heading
 		.trim()
 		.toLowerCase()
-		.replace(/[^\w\s-]/gu, "")
+		.replace(/[^\p{L}\p{N}\s_-]/gu, "")
 		.replace(/\s/g, "-");
 }
 
@@ -323,34 +345,22 @@ export function conflictMarkerViolations(
 }
 
 export function parseRecordHeader(path: string, text: string): RecordHeader {
-	const lines = text.split("\n");
-	let h1 = -1;
-	let inFence = false;
-	for (let index = 0; index < lines.length; index++) {
-		const line = lines[index] ?? "";
-		if (/^\s*(```|~~~)/.test(line)) {
-			inFence = !inFence;
-			continue;
-		}
-		if (!inFence && /^#\s/.test(line)) {
-			h1 = index;
-			break;
-		}
-	}
-	if (h1 === -1) return { path, statusLine: null, line: 1 };
-	inFence = false;
-	for (let index = h1 + 1; index < lines.length; index++) {
-		const raw = lines[index] ?? "";
-		if (/^\s*(```|~~~)/.test(raw)) {
-			inFence = !inFence;
-			continue;
-		}
-		if (inFence) continue;
-		if (/^##\s/.test(raw)) break;
-		if (/^\s*(?:>\s*)*(?:\*\*)?Status:/i.test(raw))
-			return { path, statusLine: raw.trimEnd(), line: index + 1 };
-	}
-	return { path, statusLine: null, line: h1 + 2 };
+	const scan = markdownLinesOutsideFences(text);
+	const h1 = scan.lines.find(({ text: line }) => /^#\s/.test(line));
+	if (h1 === undefined) return { path, statusLine: null, line: 1 };
+	const nextH2 =
+		scan.lines.find(
+			({ line, text: source }) => line > h1.line && /^##\s/.test(source),
+		)?.line ?? Number.POSITIVE_INFINITY;
+	const status = scan.lines.find(
+		({ line, text: source }) =>
+			line > h1.line &&
+			line < nextH2 &&
+			/^\s*(?:>\s*)*(?:\*\*)?status(?:\*\*)?\s*:/i.test(source),
+	);
+	return status === undefined
+		? { path, statusLine: null, line: h1.line + 1 }
+		: { path, statusLine: status.text.trimEnd(), line: status.line };
 }
 
 export function recordContentFromText(text: string): RecordContent {
@@ -403,12 +413,7 @@ export function evaluate(
 	for (const row of rows) {
 		const first = byId.get(row.id);
 		if (first === undefined) byId.set(row.id, row);
-		else
-			v(
-				row.path,
-				KEY_LINE.id,
-				`${row.id}: duplicate decision id (also defined in ${first.path})`,
-			);
+		else v(row.path, KEY_LINE.id, "duplicate decision ID");
 	}
 	for (const row of rows) {
 		const decisionParts = row.path
@@ -427,14 +432,14 @@ export function evaluate(
 			v(
 				row.path,
 				KEY_LINE.record,
-				`${row.id}: decision area must match its Record path (${row.recordPath})`,
+				`decision area must match its Record path (${row.recordPath})`,
 			);
 		const target = readRecord(row.recordPath);
 		if (target === null)
 			v(
 				row.path,
 				KEY_LINE.record,
-				`${row.id}: Record link path does not resolve: ${row.recordRaw}`,
+				`Record link path does not resolve: ${row.recordRaw}`,
 			);
 		else if (
 			row.recordAnchor !== null &&
@@ -443,24 +448,24 @@ export function evaluate(
 			v(
 				row.path,
 				KEY_LINE.record,
-				`${row.id}: Record link #anchor not found in ${row.recordRaw.split("#")[0]}: #${row.recordAnchor}`,
+				`Record link #anchor not found in ${row.recordRaw.split("#")[0]}: #${row.recordAnchor}`,
 			);
 		else if (row.recordAnchor === null && target.sizeBytes > LARGE_RECORD_BYTES)
 			v(
 				row.path,
 				KEY_LINE.record,
-				`${row.id}: Record link into a large record must carry a #anchor: ${row.recordRaw}`,
+				"Record link into a large record must carry a #anchor",
 			);
 		const supersession = ROW_SUPERSEDED_RE.exec(row.status);
 		if (supersession !== null) {
 			const targetId = supersession[1] ?? "";
 			if (targetId === row.id)
-				v(row.path, KEY_LINE.status, `${row.id}: superseded by itself`);
+				v(row.path, KEY_LINE.status, "decision supersedes itself");
 			else if (!byId.has(targetId))
 				v(
 					row.path,
 					KEY_LINE.status,
-					`${row.id}: Superseded by ${targetId}, which is not a decision file`,
+					"Superseded target is not a decision file",
 				);
 		}
 	}
@@ -481,11 +486,7 @@ export function evaluate(
 				if (cycle.length > 1 && !cyclesReported.has(key)) {
 					cyclesReported.add(key);
 					const anchor = cycle.reduce((a, b) => (b.id < a.id ? b : a));
-					v(
-						anchor.path,
-						KEY_LINE.status,
-						`supersession cycle: ${cycle.map((row) => row.id).join(" → ")} → ${node.id}`,
-					);
+					v(anchor.path, KEY_LINE.status, "supersession cycle detected");
 				}
 				break;
 			}
@@ -549,6 +550,8 @@ export function evaluate(
 	const changedFiles = new Set(changed.files);
 	for (const record of records) {
 		if (record.statusLine === null) continue;
+		if (config.recordStatusScope === "changed" && changed.body === null)
+			continue;
 		if (
 			config.recordStatusScope === "changed" &&
 			!changedFiles.has(record.path)
@@ -617,10 +620,15 @@ export interface Deps {
 		designsRoot: string,
 	) => Promise<string[]>;
 	readonly readRecord: (root: string, path: string) => RecordContent | null;
+	readonly readMergeBaseDecisionPaths: (
+		root: string,
+		baseRef: string,
+	) => Promise<readonly string[]>;
 	readonly readBaseDecisionPaths: (
 		root: string,
 		baseRef: string,
 	) => Promise<readonly string[]>;
+	readonly baseRef: string;
 	readonly changed: Changed;
 	readonly log: (message: string) => void;
 	readonly err: (message: string) => void;
@@ -675,11 +683,28 @@ function markdownLinesOutsideFences(text: string): MarkdownScan {
 	return { lines: visible, openFenceLine: fence?.line ?? null };
 }
 
+function reportUnclosedFence(
+	file: string,
+	text: string,
+	violations: Violation[],
+): void {
+	const openFenceLine = markdownLinesOutsideFences(text).openFenceLine;
+	if (openFenceLine !== null)
+		violations.push({
+			file,
+			line: openFenceLine,
+			message: "unclosed Markdown fence",
+		});
+}
 function headingSlugs(text: string): Set<string> {
 	const slugs = new Set<string>();
 	for (const { text: line } of markdownLinesOutsideFences(text).lines) {
 		const heading = /^#{1,6}\s+(.+?)\s*#*\s*$/.exec(line);
-		if (heading?.[1] !== undefined) slugs.add(slugify(heading[1]));
+		if (heading?.[1] === undefined) continue;
+		const base = slugify(heading[1]);
+		let slug = base;
+		for (let suffix = 1; slugs.has(slug); suffix++) slug = `${base}-${suffix}`;
+		slugs.add(slug);
 	}
 	return slugs;
 }
@@ -824,7 +849,9 @@ export async function runOnce(
 		readText,
 		listDesignFiles,
 		readRecord,
+		readMergeBaseDecisionPaths,
 		readBaseDecisionPaths,
+		baseRef,
 		changed,
 		log,
 		err,
@@ -882,6 +909,12 @@ export async function runOnce(
 			config,
 		),
 	);
+	const filesWithUnclosedFence = new Set<string>();
+	const reportUnclosedFenceOnce = (file: string, text: string) => {
+		if (filesWithUnclosedFence.has(file)) return;
+		filesWithUnclosedFence.add(file);
+		reportUnclosedFence(file, text, violations);
+	};
 	let citationsSeen = 0;
 	let citationsChecked = 0;
 	let citationsUnresolvable = 0;
@@ -954,12 +987,7 @@ export async function runOnce(
 					}
 				}
 			}
-			if (scan.openFenceLine !== null)
-				violations.push({
-					file,
-					line: scan.openFenceLine,
-					message: "unclosed Markdown fence",
-				});
+			reportUnclosedFenceOnce(file, text);
 		}
 	if (config.legs?.recordLinks)
 		for (const file of paths.filter(
@@ -968,13 +996,15 @@ export async function runOnce(
 		)) {
 			const text = contents.get(file) ?? (await readText(root, file));
 			if (text === null) continue;
-			const links = /\]\(([^)#]+\.md)#([^)]*)\)/g;
-			for (const { line, text: source } of markdownLinesOutsideFences(text)
-				.lines)
-				for (const match of source.matchAll(links)) {
-					const targetPath = match[1];
-					const anchor = match[2];
-					if (targetPath === undefined || anchor === undefined) continue;
+			const scan = markdownLinesOutsideFences(text);
+			for (const { line, text: source } of scan.lines)
+				for (const match of source.matchAll(/\]\(([^)]+)\)/g)) {
+					const href = match[1];
+					if (href === undefined) continue;
+					const hash = href.indexOf("#");
+					const targetPath = hash === -1 ? href : href.slice(0, hash);
+					const anchor = hash === -1 ? null : href.slice(hash + 1);
+					if (targetPath === "" || pathPosix.isAbsolute(targetPath)) continue;
 					const relativeTarget = pathPosix.normalize(
 						pathPosix.join(pathPosix.dirname(file), targetPath),
 					);
@@ -982,10 +1012,11 @@ export async function runOnce(
 						violations.push({
 							file,
 							line,
-							message: `relative Markdown link escapes the repository (DL-221): ${targetPath}`,
+							message: `relative Markdown link escapes the repository: ${targetPath}`,
 						});
 						continue;
 					}
+					if (!targetPath.endsWith(".md") || anchor === null) continue;
 					const target = await readText(root, relativeTarget);
 					if (target !== null && !headingSlugs(target).has(anchor))
 						violations.push({
@@ -994,6 +1025,7 @@ export async function runOnce(
 							message: `record link anchor not found: ${targetPath}#${anchor}`,
 						});
 				}
+			reportUnclosedFenceOnce(file, text);
 		}
 	if (config.legs?.errata)
 		for (const file of paths.filter(
@@ -1001,27 +1033,38 @@ export async function runOnce(
 				path.startsWith(`${config.designsRoot}/`) && path.endsWith(".md"),
 		)) {
 			const text = contents.get(file) ?? (await readText(root, file));
-			if (text !== null) violations.push(...validateErrata(file, text));
+			if (text === null) continue;
+			violations.push(...validateErrata(file, text));
+			reportUnclosedFenceOnce(file, text);
 		}
-	if (config.legs?.mainIds && changed.files.length > 0) {
+	if (
+		config.legs?.mainIds &&
+		changed.body !== null &&
+		changed.files.length > 0
+	) {
 		try {
-			const basePaths = await readBaseDecisionPaths(
-				root,
-				process.env.BASE_REF ?? "main",
+			const [mergeBasePaths, basePaths] = await Promise.all([
+				readMergeBaseDecisionPaths(root, baseRef),
+				readBaseDecisionPaths(root, baseRef),
+			]);
+			const mergeBaseIds = new Set(
+				mergeBasePaths.map((path) =>
+					pathPosix.basename(path).replace(/\.md$/, ""),
+				),
 			);
-			const baseIds = new Set(
+			const baseTipIds = new Set(
 				basePaths.map((path) => pathPosix.basename(path).replace(/\.md$/, "")),
 			);
-			for (const row of corpus.rows.filter(
-				(decision) =>
-					changed.files.includes(decision.path) &&
-					!basePaths.includes(decision.path),
-			))
-				if (baseIds.has(row.id))
+			for (const row of corpus.rows)
+				if (
+					changed.files.includes(row.path) &&
+					!mergeBaseIds.has(row.id) &&
+					baseTipIds.has(row.id)
+				)
 					violations.push({
 						file: row.path,
 						line: KEY_LINE.id,
-						message: `${row.id} already exists on base branch tip`,
+						message: "decision ID already exists on base branch tip",
 					});
 		} catch (error) {
 			err(
@@ -1038,8 +1081,12 @@ export async function runOnce(
 		const citations = config.legs?.citations
 			? `${citationsChecked}/${citationsSeen} citation(s) (${citationsUnresolvable} unresolvable, ${citationsRepoAmbiguous} repo-ambiguous)`
 			: "citation checks off";
+		const recordStatus =
+			config.recordStatusScope === "changed" && changed.body === null
+				? "record Status skipped (no PR context)"
+				: `${records.length} record(s) status-checked`;
 		log(
-			`design-ledger-gate: OK — ${corpus.rows.length} decision file(s), ${records.length} record(s) status-checked; ${pr}; ${citations}.`,
+			`design-ledger-gate: OK — ${corpus.rows.length} decision file(s), ${recordStatus}; ${pr}; ${citations}.`,
 		);
 		return 0;
 	}
@@ -1055,21 +1102,31 @@ export async function runOnce(
 
 export type PrContext =
 	| { kind: "pr"; repo: string; prNumber: string }
+	| { kind: "woodpecker"; changed: Changed }
 	| { kind: "skip" }
 	| { kind: "error"; message: string };
+
 export function prContextFrom(
 	env: Readonly<Record<string, string | undefined>>,
 ): PrContext {
+	if (env.CI_PIPELINE_EVENT === "pull_request") {
+		const files = parseWoodpeckerFiles(env.CI_PIPELINE_FILES);
+		if (files === null)
+			return { kind: "error", message: "the PR checks need valid PR context" };
+		return {
+			kind: "woodpecker",
+			changed: {
+				files,
+				body: env.CI_COMMIT_PULL_REQUEST_BODY ?? "",
+				headBranch: env.CI_COMMIT_SOURCE_BRANCH ?? "",
+			},
+		};
+	}
 	const repo = env.REPO ?? "";
 	const prNumber = env.PR_NUMBER ?? "";
 	if (repo !== "" && /^[1-9][0-9]*$/.test(prNumber))
 		return { kind: "pr", repo, prNumber };
-	if (
-		env.GITHUB_EVENT_NAME === "pull_request" ||
-		(env.CI_PIPELINE_EVENT === "pull_request" &&
-			env.CI_PIPELINE_FILES === undefined) ||
-		prNumber !== ""
-	)
+	if (env.GITHUB_EVENT_NAME === "pull_request" || prNumber !== "")
 		return { kind: "error", message: "the PR checks need valid PR context" };
 	return { kind: "skip" };
 }
@@ -1109,6 +1166,23 @@ function configArgument(args: readonly string[]): string | undefined {
 	return args.length === 2 && args[0] === "--config" ? args[1] : undefined;
 }
 
+function readDecisionPaths(
+	workspaceRoot: string,
+	revision: string,
+	config: LedgerConfig,
+): string[] {
+	const result = Bun.spawnSync({
+		cmd: ["git", "-C", workspaceRoot, "ls-tree", "-r", "--name-only", revision],
+		stdout: "pipe",
+		stderr: "pipe",
+	});
+	if (result.exitCode !== 0)
+		throw new Error(new TextDecoder().decode(result.stderr).trim());
+	return new TextDecoder()
+		.decode(result.stdout)
+		.split("\n")
+		.filter((file) => classifyDesignPath(file, config) === "decision");
+}
 async function main(args: readonly string[]): Promise<number> {
 	const configPath = configArgument(args);
 	if (configPath === "help") {
@@ -1123,19 +1197,9 @@ async function main(args: readonly string[]): Promise<number> {
 		const config = loadLedgerConfig(configPath);
 		const root = scanRoot();
 		let changed: Changed = { files: [], body: null, headBranch: "" };
-		const woodpeckerFiles =
-			process.env.CI_PIPELINE_EVENT === "pull_request"
-				? parseWoodpeckerFiles(process.env.CI_PIPELINE_FILES)
-				: null;
 		const context = prContextFrom(process.env);
-		if (context.kind === "error" && woodpeckerFiles === null)
-			throw new Error(context.message);
-		if (woodpeckerFiles !== null)
-			changed = {
-				files: woodpeckerFiles,
-				body: process.env.CI_COMMIT_PULL_REQUEST_BODY ?? "",
-				headBranch: process.env.CI_COMMIT_SOURCE_BRANCH ?? "",
-			};
+		if (context.kind === "error") throw new Error(context.message);
+		if (context.kind === "woodpecker") changed = context.changed;
 		else if (context.kind === "pr") {
 			const view =
 				await $`timeout 30 gh pr view ${context.prNumber} --repo ${context.repo} --json headRefName,body`.json();
@@ -1173,15 +1237,15 @@ async function main(args: readonly string[]): Promise<number> {
 						return null;
 					}
 				},
-				readBaseDecisionPaths: async (workspaceRoot, baseRef) => {
+				baseRef: process.env.BASE_REF ?? "main",
+				readMergeBaseDecisionPaths: async (workspaceRoot, baseRef) => {
 					const result = Bun.spawnSync({
 						cmd: [
 							"git",
 							"-C",
 							workspaceRoot,
-							"ls-tree",
-							"-r",
-							"--name-only",
+							"merge-base",
+							"HEAD",
 							`origin/${baseRef}`,
 						],
 						stdout: "pipe",
@@ -1189,11 +1253,11 @@ async function main(args: readonly string[]): Promise<number> {
 					});
 					if (result.exitCode !== 0)
 						throw new Error(new TextDecoder().decode(result.stderr).trim());
-					return new TextDecoder()
-						.decode(result.stdout)
-						.split("\n")
-						.filter((file) => classifyDesignPath(file, config) === "decision");
+					const mergeBase = new TextDecoder().decode(result.stdout).trim();
+					return readDecisionPaths(workspaceRoot, mergeBase, config);
 				},
+				readBaseDecisionPaths: async (workspaceRoot, baseRef) =>
+					readDecisionPaths(workspaceRoot, `origin/${baseRef}`, config),
 				changed,
 				log: (message) => console.log(message),
 				err: (message) => console.error(message),
