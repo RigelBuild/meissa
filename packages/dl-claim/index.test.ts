@@ -4,11 +4,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { LedgerConfig } from "@rigelbuild/design-ledger-gate";
 import {
+	readDlClaimToken,
+	validateDlClaimToken,
+} from "@rigelbuild/design-ledger-gate";
+import {
 	buildClaimBody,
 	claim,
 	formatClaimed,
 	parseArgs,
-	readDlClaimToken,
 	runOnce,
 } from "./index.ts";
 
@@ -65,6 +68,11 @@ describe("claim arguments and request", () => {
 				severalSurfaces,
 			),
 		).toMatchObject({ surface: "beta" });
+	});
+	test("requires an explicit surface when building a multi-surface body", () => {
+		expect(() => buildClaimBody(severalSurfaces, claimArgs)).toThrow(
+			"valid surface from config.surfaces",
+		);
 	});
 
 	test("validates refs, lane, counts, and unknown flags", () => {
@@ -254,6 +262,30 @@ describe("claim CLI", () => {
 		expect(result).toBe(0);
 		expect(output).toEqual(["DL-377 (claimed 2026-09-29)"]);
 	});
+	test("request rejection prints endpoint and error name only", async () => {
+		const directory = mkdtempSync(join(tmpdir(), "dl-claim-cli-test-"));
+		temporaryDirectories.push(directory);
+		const configPath = join(directory, "config.json");
+		writeFileSync(configPath, JSON.stringify(oneSurface));
+		const output: string[] = [];
+		expect(
+			await runOnce(
+				["--config", configPath, "--ref", "none", "--lane", "feature/b"],
+				{
+					token: "token",
+					fetchFn: async () => {
+						throw new Error("Authorization: Bearer secret");
+					},
+					err: (message) => output.push(message),
+				},
+			),
+		).toBe(1);
+		expect(output.join("\n")).toContain(
+			"request to https://counter.example.test/claim failed (Error)",
+		);
+		expect(output.join("\n")).not.toContain("Authorization");
+		expect(output.join("\n")).not.toContain("secret");
+	});
 });
 
 test("formats claimed IDs", () => {
@@ -273,7 +305,27 @@ test("uses a non-empty token file before the environment value", async () => {
 			DL_CLAIM_TOKEN_FILE: path,
 		}),
 	).toBe("file-token");
+	const fallbackPath = join(directory, "empty-token");
+	writeFileSync(fallbackPath, " \n\t ");
 	expect(
-		await readDlClaimToken({ DL_CLAIM_TOKEN: "env", DL_CLAIM_TOKEN_FILE: "" }),
-	).toBe("env");
+		await readDlClaimToken({
+			DL_CLAIM_TOKEN: "env-token",
+			DL_CLAIM_TOKEN_FILE: fallbackPath,
+		}),
+	).toBe("env-token");
+	expect(() => validateDlClaimToken("bad\ntoken")).toThrow("printable ASCII");
+});
+
+test("rejects a token containing an interior newline without logging it", async () => {
+	const directory = mkdtempSync(join(tmpdir(), "dl-claim-cli-test-"));
+	temporaryDirectories.push(directory);
+	const configPath = join(directory, "config.json");
+	writeFileSync(configPath, JSON.stringify(oneSurface));
+	const output: string[] = [];
+	const result = await runOnce(
+		["--config", configPath, "--ref", "none", "--lane", "feature/b"],
+		{ token: "safe\nsecret", err: (message) => output.push(message) },
+	);
+	expect(result).toBe(2);
+	expect(output.join("\n")).not.toContain("safe\nsecret");
 });

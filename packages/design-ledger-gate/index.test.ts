@@ -38,7 +38,7 @@ const CONFIG: LedgerConfig = {
 		"infra",
 		"observability",
 		"repo",
-		"platform",
+		"gamma",
 	],
 	counter: { url: "https://example.invalid/counter", partition: "test" },
 };
@@ -265,7 +265,7 @@ describe("touchesRecord", () => {
 		["docs/designs/ui/example/design.md", true],
 		["docs/designs/ui/example/other.md", true],
 		["docs/designs/infra/runtime/sample/microvm-v3.md", true],
-		["docs/designs/platform/x/design.md", true],
+		["docs/designs/gamma/x/design.md", true],
 		["docs/designs/CONTRIBUTING.md", false],
 		["docs/designs/nope/example.md", false],
 		["docs/designs/ui/subgroup/flat.md", true],
@@ -682,10 +682,10 @@ describe("touch coupling", () => {
 		).toBe(true);
 	});
 
-	test("a nested supporting record or a platform record also couples", () => {
+	test("a nested supporting record or a gamma record also couples", () => {
 		for (const file of [
 			"docs/designs/infra/runtime/sample/microvm-v3.md",
-			"docs/designs/platform/x/design.md",
+			"docs/designs/gamma/x/design.md",
 		]) {
 			const missing = evaluateCorpus(corpus(), [], {
 				files: [file],
@@ -1143,7 +1143,7 @@ describe("loadLedgerConfig", () => {
 			{
 				designsRoot: "docs/designs",
 				surfaceDepth: 1,
-				surfaces: "agents",
+				surfaces: 42,
 				counter: { url: "x", partition: "p" },
 			},
 		],
@@ -1162,7 +1162,7 @@ describe("loadLedgerConfig", () => {
 				designsRoot: "docs/designs",
 				surfaceDepth: 0,
 				governedRoots: ["ui"],
-				surfaces: ["agents", "product"],
+				surfaces: ["alpha", "beta"],
 				counter: { url: "x", partition: "p" },
 			},
 		],
@@ -1171,7 +1171,7 @@ describe("loadLedgerConfig", () => {
 			{
 				designsRoot: "docs/designs",
 				surfaceDepth: 1,
-				surfaces: ["agents", "agents"],
+				surfaces: ["alpha", "alpha"],
 				counter: { url: "x", partition: "p" },
 			},
 		],
@@ -1180,7 +1180,7 @@ describe("loadLedgerConfig", () => {
 			{
 				designsRoot: "docs/designs",
 				surfaceDepth: 1,
-				surfaces: ["../agents"],
+				surfaces: ["../alpha"],
 				counter: { url: "x", partition: "p" },
 			},
 		],
@@ -1245,10 +1245,22 @@ describe("loadLedgerConfig", () => {
 			"normalized repository-relative paths",
 		);
 	});
-	test("accepts surfaces for both configured layouts", () => {
-		const path = join(temporaryDirectory(), "config.json");
+	test("accepts surfaces for depth zero and depth one layouts", () => {
+		const depthZeroPath = join(temporaryDirectory(), "depth-zero.json");
 		writeFileSync(
-			path,
+			depthZeroPath,
+			JSON.stringify({
+				designsRoot: "docs/designs",
+				surfaceDepth: 0,
+				governedRoots: ["ui"],
+				surfaces: ["alpha"],
+				counter: { url: "x", partition: "p" },
+			}),
+		);
+		expect(loadLedgerConfig(depthZeroPath).surfaces).toEqual(["alpha"]);
+		const depthOnePath = join(temporaryDirectory(), "depth-one.json");
+		writeFileSync(
+			depthOnePath,
 			JSON.stringify({
 				designsRoot: "docs/designs",
 				surfaceDepth: 1,
@@ -1256,7 +1268,7 @@ describe("loadLedgerConfig", () => {
 				counter: { url: "x", partition: "p" },
 			}),
 		);
-		expect(loadLedgerConfig(path).surfaces).toEqual(["alpha", "beta"]);
+		expect(loadLedgerConfig(depthOnePath).surfaces).toEqual(["alpha", "beta"]);
 	});
 	test("reports discovered depth-one surfaces outside the counter allowlist", async () => {
 		const path = "docs/designs/gamma/record.md";

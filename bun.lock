@@ -27,7 +27,7 @@
         "dl-claim": "./index.ts",
       },
       "dependencies": {
-        "@rigelbuild/design-ledger-gate": "workspace:*",
+        "@rigelbuild/design-ledger-gate": "0.0.0",
       },
       "devDependencies": {
         "@types/bun": "1.4.0",
@@ -41,7 +41,7 @@
         "dl-reconcile": "./index.ts",
       },
       "dependencies": {
-        "@rigelbuild/design-ledger-gate": "workspace:*",
+        "@rigelbuild/design-ledger-gate": "0.0.0",
       },
       "devDependencies": {
         "@types/bun": "1.4.0",

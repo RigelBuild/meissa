@@ -3,6 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import type { LedgerConfig } from "@rigelbuild/design-ledger-gate";
+import { readDlClaimToken } from "@rigelbuild/design-ledger-gate";
 import {
 	assertReconcilableLedgers,
 	formatReconcileOutput,
@@ -164,8 +165,12 @@ describe("reconcile service", () => {
 
 	test("rejects blank credentials and invalid service responses", async () => {
 		let called = false;
+		const body = {
+			repo: "public-docs",
+			landed: [{ id: "DL-001", surface: "alpha", ref: "none" }],
+		};
 		await expect(
-			reconcile({ repo: "public-docs", landed: [] }, depthZero, " ", {
+			reconcile(body, depthZero, " ", {
 				fetchFn: async () => {
 					called = true;
 					return response();
@@ -174,10 +179,49 @@ describe("reconcile service", () => {
 		).rejects.toThrow("DL_CLAIM_TOKEN is required");
 		expect(called).toBe(false);
 		await expect(
-			reconcile({ repo: "public-docs", landed: [] }, depthZero, "token", {
+			reconcile(body, depthZero, "token", {
 				fetchFn: async () => Response.json({ updated: 1 }),
 			}),
 		).rejects.toThrow("invalid reconciliation response");
+	});
+	test("rejects non-ok service responses with their HTTP status", async () => {
+		await expect(
+			reconcile(
+				{
+					repo: "public-docs",
+					landed: [{ id: "DL-001", surface: "alpha", ref: "none" }],
+				},
+				depthZero,
+				"token",
+				{ fetchFn: async () => new Response("failure", { status: 503 }) },
+			),
+		).rejects.toThrow("HTTP 503");
+	});
+
+	test("rejects an empty landed frontier before contacting the counter", async () => {
+		let called = false;
+		await expect(
+			reconcile({ repo: "public-docs", landed: [] }, depthZero, "token", {
+				fetchFn: async () => {
+					called = true;
+					return response();
+				},
+			}),
+		).rejects.toThrow("empty landed frontier");
+		expect(called).toBe(false);
+	});
+
+	test("shares the gate token reader and prefers non-empty file content", async () => {
+		const directory = mkdtempSync(join(tmpdir(), "dl-reconcile-token-test-"));
+		temporaryDirectories.push(directory);
+		const tokenPath = join(directory, "token");
+		writeFileSync(tokenPath, " \n ");
+		expect(
+			await readDlClaimToken({
+				DL_CLAIM_TOKEN: "env-token",
+				DL_CLAIM_TOKEN_FILE: tokenPath,
+			}),
+		).toBe("env-token");
 	});
 	describe("reconcile CLI", () => {
 		test("check mode performs no request and reports discovered count", async () => {
@@ -228,6 +272,75 @@ describe("reconcile service", () => {
 				expect(errors).toHaveLength(1);
 			}
 		});
+		test("refuses a misplaced decision-tree file before posting", async () => {
+			const fixture = fixtureRoot(
+				depthZero,
+				new Map([
+					[
+						"docs/designs/decisions/ui/archive/DL-009.md",
+						decisionFile("DL-009"),
+					],
+				]),
+			);
+			let posted = false;
+			const errors: string[] = [];
+			expect(
+				await runOnce(["--config", fixture.configPath], {
+					root: fixture.root,
+					token: "token",
+					fetchFn: async () => {
+						posted = true;
+						return response();
+					},
+					err: (message) => errors.push(message),
+				}),
+			).toBe(2);
+			expect(posted).toBe(false);
+			expect(errors.join("\n")).toContain("misplaced decision path");
+		});
+
+		test("returns one when the counter rejects the request", async () => {
+			const fixture = fixtureRoot(
+				depthZero,
+				new Map([
+					["docs/designs/decisions/ui/DL-001.md", decisionFile("DL-001")],
+				]),
+			);
+			const errors: string[] = [];
+			expect(
+				await runOnce(["--config", fixture.configPath], {
+					root: fixture.root,
+					token: "token",
+					fetchFn: async () => new Response("rejected", { status: 503 }),
+					err: (message) => errors.push(message),
+				}),
+			).toBe(1);
+			expect(errors.join("\n")).toContain("HTTP 503");
+		});
+
+		test("stale claims leave the default exit status successful", async () => {
+			const path = "docs/designs/decisions/ui/DL-001.md";
+			const fixture = fixtureRoot(
+				depthZero,
+				new Map([[path, decisionFile("DL-001")]]),
+			);
+			expect(
+				await runOnce(["--config", fixture.configPath], {
+					root: fixture.root,
+					token: "token",
+					fetchFn: async () =>
+						response([
+							{
+								id: "DL-007",
+								surface: "alpha",
+								ref: "none",
+								lane: "branch",
+								date: "2026-09-01",
+							},
+						]),
+				}),
+			).toBe(0);
+		});
 
 		test("stale-exit returns one when stale claims remain", async () => {
 			const path = "docs/designs/decisions/ui/DL-001.md";
@@ -256,5 +369,22 @@ describe("reconcile service", () => {
 			expect(logs[0]).toContain("updated: 1  inserted: 2");
 			expect(logs[0]).toContain("DL-007 alpha branch none 2026-09-01");
 		});
+	});
+	test("rejects an interior-newline token without logging its value", async () => {
+		const fixture = fixtureRoot(
+			depthZero,
+			new Map([
+				["docs/designs/decisions/ui/DL-001.md", decisionFile("DL-001")],
+			]),
+		);
+		const output: string[] = [];
+		expect(
+			await runOnce(["--config", fixture.configPath], {
+				root: fixture.root,
+				token: "safe\nsecret",
+				err: (message) => output.push(message),
+			}),
+		).toBe(2);
+		expect(output.join("\n")).not.toContain("safe\nsecret");
 	});
 });

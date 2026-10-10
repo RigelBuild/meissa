@@ -1,7 +1,10 @@
 #!/usr/bin/env bun
-import { readFile } from "node:fs/promises";
 import type { LedgerConfig } from "@rigelbuild/design-ledger-gate";
-import { loadLedgerConfig } from "@rigelbuild/design-ledger-gate";
+import {
+	loadLedgerConfig,
+	readDlClaimToken,
+	validateDlClaimToken,
+} from "@rigelbuild/design-ledger-gate";
 
 export interface ClaimArgs {
 	ref: string;
@@ -230,8 +233,7 @@ export async function claim(
 	config: LedgerConfig,
 	deps: ClaimDeps = {},
 ): Promise<ClaimedId[]> {
-	const trimmedToken = token.trim();
-	if (trimmedToken.length === 0) throw new Error("DL_CLAIM_TOKEN is required");
+	const trimmedToken = validateDlClaimToken(token);
 	const timeoutMs =
 		deps.timeoutMs !== undefined && deps.timeoutMs > 0
 			? deps.timeoutMs
@@ -249,8 +251,8 @@ export async function claim(
 			signal: (deps.timeoutSignal ?? AbortSignal.timeout)(timeoutMs),
 		});
 	} catch (error) {
-		const reason = error instanceof Error ? error.message : String(error);
-		throw new Error(`claim request failed: ${reason}.${maybeMinted(config)}`);
+		const name = error instanceof Error ? error.name : "UnknownError";
+		throw new Error(`request to ${baseUrl(config)}/claim failed (${name})`);
 	}
 	if (!response.ok)
 		throw formatServiceError(
@@ -259,28 +261,6 @@ export async function claim(
 			await readServiceError(response),
 		);
 	return readClaimedIds(response, body.count, config);
-}
-
-async function readCredentialFile(
-	path: string | undefined,
-): Promise<string | undefined> {
-	if (!path?.trim()) return undefined;
-	try {
-		const value = (await readFile(path, "utf8")).trim();
-		return value.length > 0 ? value : undefined;
-	} catch {
-		return undefined;
-	}
-}
-
-export async function readDlClaimToken(
-	env: Readonly<Record<string, string | undefined>> = process.env,
-): Promise<string> {
-	return (
-		(await readCredentialFile(env.DL_CLAIM_TOKEN_FILE)) ??
-		env.DL_CLAIM_TOKEN ??
-		""
-	);
 }
 
 function extractConfigPath(argv: readonly string[]): {
@@ -349,9 +329,13 @@ export async function runOnce(
 		err(`dl-claim: ${error instanceof Error ? error.message : String(error)}`);
 		return 2;
 	}
-	const token = deps.token ?? (await readDlClaimToken());
-	if (token.trim().length === 0) {
-		err("dl-claim: DL_CLAIM_TOKEN is required");
+	let token: string;
+	try {
+		token = validateDlClaimToken(deps.token ?? (await readDlClaimToken()));
+	} catch (error) {
+		err(
+			`dl-claim: ${error instanceof Error ? error.message : "invalid token"}`,
+		);
 		return 2;
 	}
 	try {
@@ -361,9 +345,8 @@ export async function runOnce(
 		log(formatClaimed(ids));
 		return 0;
 	} catch (error) {
-		err(
-			`dl-claim failed: ${error instanceof Error ? error.message : String(error)}`,
-		);
+		const name = error instanceof Error ? error.name : "UnknownError";
+		err(`dl-claim: request to ${baseUrl(config)}/claim failed (${name})`);
 		return 1;
 	}
 }

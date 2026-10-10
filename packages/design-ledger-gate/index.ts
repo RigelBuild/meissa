@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 import { existsSync, readFileSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { posix as pathPosix, resolve } from "node:path";
 import { $ } from "bun";
 import { type DecisionRow, parseDecisionFile } from "./decision-files.ts";
@@ -220,6 +221,31 @@ export function loadLedgerConfig(path: string): LedgerConfig {
 			? { remediationDoc: raw.remediationDoc }
 			: {}),
 	};
+}
+
+export async function readDlClaimToken(
+	env: Readonly<Record<string, string | undefined>> = process.env,
+): Promise<string> {
+	const path = env.DL_CLAIM_TOKEN_FILE;
+	if (path?.trim()) {
+		try {
+			const fileToken = (await readFile(path, "utf8")).trim();
+			if (fileToken.length > 0) return fileToken;
+		} catch {
+			// Fall back to the environment token when the file is unavailable.
+		}
+	}
+	return env.DL_CLAIM_TOKEN ?? "";
+}
+
+export function validateDlClaimToken(token: string): string {
+	const trimmedToken = token.trim();
+	if (trimmedToken.length === 0) throw new Error("DL_CLAIM_TOKEN is required");
+	if (!/^[\x21-\x7e]+$/.test(trimmedToken))
+		throw new Error(
+			"DL_CLAIM_TOKEN must contain printable ASCII characters without whitespace",
+		);
+	return trimmedToken;
 }
 
 export const LARGE_RECORD_BYTES = 50 * 1024;

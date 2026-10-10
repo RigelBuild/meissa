@@ -14,6 +14,7 @@ Pass a JSON file with these fields:
   "historicalChain": [],
   "exemptBranchPrefixes": ["renovate/", "trunk-merge/"],
   "surfaces": ["alpha"],
+  "citationAmbiguousPaths": ["shared/README.md"],
   "legs": {
     "citations": false,
     "errata": false,

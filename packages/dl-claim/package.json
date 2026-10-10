@@ -11,6 +11,9 @@
 	"bin": {
 		"dl-claim": "./index.ts"
 	},
+	"exports": {
+		".": "./index.ts"
+	},
 	"files": [
 		"package.json",
 		"index.ts",

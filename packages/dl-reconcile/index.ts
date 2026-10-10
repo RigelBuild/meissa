@@ -1,10 +1,11 @@
-#!/usr/bin/env bun
 import { readFile } from "node:fs/promises";
 import { basename, resolve } from "node:path";
 import type { LedgerConfig } from "@rigelbuild/design-ledger-gate";
 import {
 	classifyDesignPath,
 	loadLedgerConfig,
+	readDlClaimToken,
+	validateDlClaimToken,
 } from "@rigelbuild/design-ledger-gate";
 import { parseDecisionFile } from "@rigelbuild/design-ledger-gate/decision-files.ts";
 
@@ -110,22 +111,29 @@ export async function reconcile(
 	token: string,
 	deps: ReconcileDeps = {},
 ): Promise<ReconcileResponse> {
-	const trimmedToken = token.trim();
-	if (trimmedToken.length === 0) throw new Error("DL_CLAIM_TOKEN is required");
+	const trimmedToken = validateDlClaimToken(token);
+	if (body.landed.length === 0)
+		throw new Error("refusing to reconcile an empty landed frontier");
 	const timeoutMs =
 		deps.timeoutMs !== undefined && deps.timeoutMs > 0
 			? deps.timeoutMs
 			: 30_000;
-	const response = await (deps.fetchFn ?? fetch)(endpoint(config), {
-		method: "POST",
-		redirect: "error",
-		headers: {
-			Authorization: `Bearer ${trimmedToken}`,
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify(body),
-		signal: (deps.timeoutSignal ?? AbortSignal.timeout)(timeoutMs),
-	});
+	let response: Response;
+	try {
+		response = await (deps.fetchFn ?? fetch)(endpoint(config), {
+			method: "POST",
+			redirect: "error",
+			headers: {
+				Authorization: `Bearer ${trimmedToken}`,
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(body),
+			signal: (deps.timeoutSignal ?? AbortSignal.timeout)(timeoutMs),
+		});
+	} catch (error) {
+		const name = error instanceof Error ? error.name : "UnknownError";
+		throw new Error(`request to ${endpoint(config)} failed (${name})`);
+	}
 	if (!response.ok)
 		throw new Error(`reconciliation failed with HTTP ${response.status}`);
 	const payload: unknown = await response.json();
@@ -193,20 +201,6 @@ export function formatReconcileOutput(response: ReconcileResponse): string {
 	return lines.join("\n");
 }
 
-export async function readDlClaimToken(
-	env: Readonly<Record<string, string | undefined>> = process.env,
-): Promise<string> {
-	const path = env.DL_CLAIM_TOKEN_FILE;
-	if (path?.trim()) {
-		try {
-			const value = (await readFile(path, "utf8")).trim();
-			if (value.length > 0) return value;
-		} catch {
-			// Fall back to the environment token when no usable file value exists.
-		}
-	}
-	return env.DL_CLAIM_TOKEN ?? "";
-}
 interface CliOptions {
 	configPath: string;
 	check: boolean;
@@ -274,7 +268,10 @@ async function discoverDecisionFiles(
 	const glob = new Bun.Glob(`${config.designsRoot}/**`);
 	for await (const path of glob.scan({ cwd: root, onlyFiles: true })) {
 		const normalizedPath = path.replaceAll("\\", "/");
-		if (classifyDesignPath(normalizedPath, config) !== "decision") continue;
+		const kind = classifyDesignPath(normalizedPath, config);
+		if (kind === "misplaced")
+			throw new Error(`misplaced decision path ${normalizedPath}`);
+		if (kind !== "decision") continue;
 		files.set(
 			normalizedPath,
 			await readFile(resolve(root, normalizedPath), "utf8"),
@@ -324,9 +321,15 @@ export async function runOnce(
 		);
 		return 0;
 	}
-	const token = deps.token ?? (await readDlClaimToken());
-	if (token.trim().length === 0) {
-		err("dl-reconcile: DL_CLAIM_TOKEN is required");
+	let token: string;
+	try {
+		token = validateDlClaimToken(deps.token ?? (await readDlClaimToken()));
+	} catch (error) {
+		const message =
+			error instanceof Error && error.message === "DL_CLAIM_TOKEN is required"
+				? error.message
+				: "DL_CLAIM_TOKEN must contain printable ASCII characters without whitespace";
+		err(`dl-reconcile: ${message}`);
 		return 2;
 	}
 	try {
@@ -336,9 +339,15 @@ export async function runOnce(
 		log(formatReconcileOutput(response));
 		return options.staleExit && response.stale.length > 0 ? 1 : 0;
 	} catch (error) {
-		err(
-			`dl-reconcile failed: ${error instanceof Error ? error.message : String(error)}`,
-		);
+		if (
+			error instanceof Error &&
+			error.message.startsWith("reconciliation failed with HTTP ")
+		) {
+			err(`dl-reconcile: ${error.message}`);
+		} else {
+			const name = error instanceof Error ? error.name : "UnknownError";
+			err(`dl-reconcile: request to ${endpoint(config)} failed (${name})`);
+		}
 		return 1;
 	}
 }
