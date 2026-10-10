@@ -1,30 +1,28 @@
 {
-	"name": "@rigelbuild/design-ledger-gate",
+	"name": "@rigelbuild/dl-reconcile",
 	"version": "0.0.0",
 	"type": "module",
 	"license": "MIT OR Apache-2.0",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/RigelBuild/meissa.git",
-		"directory": "packages/design-ledger-gate"
+		"directory": "packages/dl-reconcile"
 	},
 	"bin": {
-		"design-ledger-gate": "./index.ts"
-	},
-	"exports": {
-		".": "./index.ts",
-		"./decision-files.ts": "./decision-files.ts"
+		"dl-reconcile": "./index.ts"
 	},
 	"files": [
 		"package.json",
 		"index.ts",
-		"decision-files.ts",
 		"README.md",
 		"LICENSE-MIT",
 		"LICENSE-APACHE"
 	],
 	"publishConfig": {
 		"access": "public"
+	},
+	"dependencies": {
+		"@rigelbuild/design-ledger-gate": "0.0.0"
 	},
 	"devDependencies": {
 		"@types/bun": "1.4.0",

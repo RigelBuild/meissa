@@ -1138,6 +1138,52 @@ describe("loadLedgerConfig", () => {
 				counter: { url: "x", partition: "p" },
 			},
 		],
+		[
+			"non-array surfaces",
+			{
+				designsRoot: "docs/designs",
+				surfaceDepth: 1,
+				surfaces: "agents",
+				counter: { url: "x", partition: "p" },
+			},
+		],
+		[
+			"empty surfaces",
+			{
+				designsRoot: "docs/designs",
+				surfaceDepth: 1,
+				surfaces: [],
+				counter: { url: "x", partition: "p" },
+			},
+		],
+		[
+			"multiple depth-zero surfaces",
+			{
+				designsRoot: "docs/designs",
+				surfaceDepth: 0,
+				governedRoots: ["ui"],
+				surfaces: ["agents", "product"],
+				counter: { url: "x", partition: "p" },
+			},
+		],
+		[
+			"duplicate surfaces",
+			{
+				designsRoot: "docs/designs",
+				surfaceDepth: 1,
+				surfaces: ["agents", "agents"],
+				counter: { url: "x", partition: "p" },
+			},
+		],
+		[
+			"surface path",
+			{
+				designsRoot: "docs/designs",
+				surfaceDepth: 1,
+				surfaces: ["../agents"],
+				counter: { url: "x", partition: "p" },
+			},
+		],
 	])("rejects %s", (_label, value) => {
 		const path = join(temporaryDirectory(), "config.json");
 		writeFileSync(path, JSON.stringify(value));
@@ -1197,6 +1243,35 @@ describe("loadLedgerConfig", () => {
 		);
 		expect(() => loadLedgerConfig(path)).toThrow(
 			"normalized repository-relative paths",
+		);
+	});
+	test("accepts surfaces for both configured layouts", () => {
+		const path = join(temporaryDirectory(), "config.json");
+		writeFileSync(
+			path,
+			JSON.stringify({
+				designsRoot: "docs/designs",
+				surfaceDepth: 1,
+				surfaces: ["alpha", "beta"],
+				counter: { url: "x", partition: "p" },
+			}),
+		);
+		expect(loadLedgerConfig(path).surfaces).toEqual(["alpha", "beta"]);
+	});
+	test("reports discovered depth-one surfaces outside the counter allowlist", async () => {
+		const path = "docs/designs/gamma/record.md";
+		const fixture = ledgerFixture({
+			config: {
+				designsRoot: "docs/designs",
+				surfaceDepth: 1,
+				surfaces: ["alpha"],
+				counter: { url: "https://example.invalid", partition: "test" },
+			},
+			files: new Map([[path, "# Unknown surface\n"]]),
+		});
+		expect(await runOnce(fixture.deps, fixture.config)).toBe(1);
+		expect(fixture.errors.join("\n")).toContain(
+			"unknown design surface: gamma",
 		);
 	});
 });

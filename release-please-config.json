@@ -13,6 +13,15 @@
 		"packages/design-ledger-gate": {
 			"component": "design-ledger-gate",
 			"package-name": "@rigelbuild/design-ledger-gate"
+		},
+		"packages/dl-claim": {
+			"component": "dl-claim",
+			"package-name": "@rigelbuild/dl-claim"
+		},
+		"packages/dl-reconcile": {
+			"component": "dl-reconcile",
+			"package-name": "@rigelbuild/dl-reconcile"
 		}
-	}
+	},
+	"plugins": ["node-workspace"]
 }

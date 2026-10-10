@@ -8,6 +8,7 @@ export interface LedgerConfig {
 	readonly designsRoot: string;
 	readonly surfaceDepth: 0 | 1;
 	readonly governedRoots?: readonly string[];
+	readonly surfaces?: readonly string[];
 	/** Absent permits any record to be Historical; present restricts it to listed paths. */
 	readonly historicalChain?: readonly string[];
 	readonly exemptBranchPrefixes?: readonly string[];
@@ -82,6 +83,7 @@ export function loadLedgerConfig(path: string): LedgerConfig {
 			"designsRoot",
 			"surfaceDepth",
 			"governedRoots",
+			"surfaces",
 			"historicalChain",
 			"exemptBranchPrefixes",
 			"citationAmbiguousPaths",
@@ -114,6 +116,27 @@ export function loadLedgerConfig(path: string): LedgerConfig {
 		throw new Error("governedRoots is required when surfaceDepth is 0");
 	if (raw.surfaceDepth === 1 && governedRoots !== undefined)
 		throw new Error("governedRoots is only valid when surfaceDepth is 0");
+	let surfaces: string[] | undefined;
+	if (raw.surfaces !== undefined) {
+		surfaces = readStringArray(raw.surfaces, "surfaces");
+		if (surfaces.length === 0) throw new Error("surfaces must not be empty");
+		if (
+			surfaces.some(
+				(surface) =>
+					surface.trim() === "" ||
+					surface === "." ||
+					surface === ".." ||
+					surface.includes("/") ||
+					surface.includes("\\"),
+			) ||
+			new Set(surfaces).size !== surfaces.length
+		)
+			throw new Error("surfaces entries must be unique directory names");
+		if (raw.surfaceDepth === 0 && surfaces.length !== 1)
+			throw new Error(
+				"surfaces must have exactly one entry when surfaceDepth is 0",
+			);
+	}
 	let historicalChain: string[] | undefined;
 	if (raw.historicalChain !== undefined)
 		historicalChain = readStringArray(raw.historicalChain, "historicalChain");
@@ -186,6 +209,7 @@ export function loadLedgerConfig(path: string): LedgerConfig {
 		designsRoot: raw.designsRoot,
 		surfaceDepth: raw.surfaceDepth,
 		...(governedRoots === undefined ? {} : { governedRoots }),
+		...(surfaces === undefined ? {} : { surfaces }),
 		...(historicalChain === undefined ? {} : { historicalChain }),
 		...(exemptBranchPrefixes === undefined ? {} : { exemptBranchPrefixes }),
 		citationAmbiguousPaths,
@@ -901,6 +925,28 @@ export async function runOnce(
 		return 2;
 	}
 	const corpus = buildDecisionCorpus(decisionFiles, strays);
+	if (config.surfaceDepth === 1 && config.surfaces !== undefined) {
+		const knownSurfaces = new Set(config.surfaces);
+		const discoveredSurfaces = new Set(
+			paths.flatMap((file) => {
+				const prefix = `${config.designsRoot}/`;
+				if (!file.startsWith(prefix)) return [];
+				const relative = file.slice(prefix.length).split("/");
+				return relative.length >= 2 &&
+					relative[0] !== undefined &&
+					relative[0] !== ""
+					? [relative[0]]
+					: [];
+			}),
+		);
+		for (const surface of discoveredSurfaces)
+			if (!knownSurfaces.has(surface))
+				violations.push({
+					file: `${config.designsRoot}/${surface}`,
+					line: 0,
+					message: `unknown design surface: ${surface}`,
+				});
+	}
 	violations.push(
 		...evaluate(
 			corpus,
