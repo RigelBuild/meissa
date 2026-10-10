@@ -24,7 +24,7 @@ Set these before running:
 | --- | --- |
 | 0 | The token authenticates and can see the repository. |
 | 1 | Preflight failed: no token, bad credentials, no access, rate-limited, or an unknown error. |
-| 2 | Could not evaluate: `REPO` is missing or not `owner/name`, or the probe threw. |
+| 2 | Could not evaluate: `REPO` is missing or has no `owner/name` split, or the probe threw. |
 
 ## Library
 

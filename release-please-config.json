@@ -27,7 +27,5 @@
 			"package-name": "@rigelbuild/renovate-preflight"
 		}
 	},
-	"plugins": [
-		"node-workspace"
-	]
+	"plugins": ["node-workspace"]
 }
