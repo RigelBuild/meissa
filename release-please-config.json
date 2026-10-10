@@ -21,6 +21,10 @@
 		"packages/dl-reconcile": {
 			"component": "dl-reconcile",
 			"package-name": "@rigelbuild/dl-reconcile"
+		},
+		"packages/renovate-preflight": {
+			"component": "renovate-preflight",
+			"package-name": "@rigelbuild/renovate-preflight"
 		}
 	},
 	"plugins": ["node-workspace"]
