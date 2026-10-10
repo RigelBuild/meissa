@@ -9,6 +9,17 @@
         "typescript": "6.0.3",
       },
     },
+    "packages/design-ledger-gate": {
+      "name": "@rigelbuild/design-ledger-gate",
+      "version": "0.0.0",
+      "bin": {
+        "design-ledger-gate": "./index.ts",
+      },
+      "devDependencies": {
+        "@types/bun": "1.4.0",
+        "typescript": "6.0.3",
+      },
+    },
     "packages/ref-gate": {
       "name": "@rigelbuild/ref-gate",
       "version": "0.0.0",
@@ -22,6 +33,8 @@
     },
   },
   "packages": {
+    "@rigelbuild/design-ledger-gate": ["@rigelbuild/design-ledger-gate@workspace:packages/design-ledger-gate"],
+
     "@rigelbuild/ref-gate": ["@rigelbuild/ref-gate@workspace:packages/ref-gate"],
 
     "@types/bun": ["@types/bun@1.4.0", "", { "dependencies": { "bun-types": "1.4.0" } }, "sha512-K+lZULY23vRgK/CfTjFIV+tyifaNdSMlPh9j+6mQ/cLfpOznLyAuzgV/JQysyECpkBQLVMSyvjlr2fBUSA9wFQ=="],

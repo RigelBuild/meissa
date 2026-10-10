@@ -1,3 +1,4 @@
 {
-	"packages/ref-gate": "0.0.0"
+	"packages/ref-gate": "0.0.0",
+	"packages/design-ledger-gate": "0.0.0"
 }

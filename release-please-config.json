@@ -9,6 +9,10 @@
 		"packages/ref-gate": {
 			"component": "ref-gate",
 			"package-name": "@rigelbuild/ref-gate"
+		},
+		"packages/design-ledger-gate": {
+			"component": "design-ledger-gate",
+			"package-name": "@rigelbuild/design-ledger-gate"
 		}
 	}
 }
