@@ -363,7 +363,12 @@ export function touchesRecord(file: string, config: LedgerConfig): boolean {
 	if (relative[0] === "decisions") return false;
 	if (config.surfaceDepth === 0)
 		return (config.governedRoots ?? []).some((area) => relative[0] === area);
-	return relative.length >= 2 && relative[1] !== "decisions";
+	// A surface's own README introduces the surface; it is not a design record.
+	return (
+		relative.length >= 2 &&
+		relative[1] !== "decisions" &&
+		!(relative.length === 2 && relative[1] === "README.md")
+	);
 }
 
 export function resolveRecordRelative(
@@ -445,7 +450,10 @@ export function evaluate(
 			malformed.line,
 			`malformed decision file: ${malformed.reason}`,
 		);
-	if (rows.length === 0)
+	if (
+		rows.length === 0 &&
+		records.some((record) => touchesRecord(record.path, config))
+	)
 		v(
 			`${config.designsRoot}/decisions`,
 			0,

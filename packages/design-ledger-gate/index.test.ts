@@ -278,6 +278,33 @@ describe("touchesRecord", () => {
 	});
 });
 
+describe("touchesRecord at depth one", () => {
+	const depthOne: LedgerConfig = {
+		designsRoot: "docs/designs",
+		surfaceDepth: 1,
+		counter: { url: "https://example.invalid/counter", partition: "test" },
+	};
+	test.each([
+		["docs/designs/alpha/README.md", false],
+		["docs/designs/alpha/record.md", true],
+		["docs/designs/alpha/record/README.md", true],
+		["docs/designs/alpha/decisions/ui/DL-001.md", false],
+	])("%s -> %s", (path, expected) => {
+		expect(touchesRecord(path, depthOne)).toBe(expected);
+	});
+
+	test("a README-only surface needs no decision file", () => {
+		const violations = evaluateCorpus(
+			buildDecisionCorpus([]),
+			[{ path: "docs/designs/alpha/README.md", statusLine: null, line: 0 }],
+			noChange,
+			smallRecord,
+			depthOne,
+		);
+		expect(violations).toEqual([]);
+	});
+});
+
 describe("decision parsing and invariants", () => {
 	test("Retired decisions pass and never require a successor", () => {
 		expect(
