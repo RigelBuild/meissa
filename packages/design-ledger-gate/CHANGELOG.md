@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/RigelBuild/meissa/compare/design-ledger-gate@v1.0.0...design-ledger-gate@v1.0.1) (2026-10-11)
+
+
+### Bug Fixes
+
+* **design-ledger-gate:** a README-only surface needs no decision file (RIG-4528) ([#15](https://github.com/RigelBuild/meissa/issues/15)) ([3d13515](https://github.com/RigelBuild/meissa/commit/3d13515504d1c58d50a314d4cf2d5ed58a2a3570))
+
 ## 1.0.0 (2026-10-10)
 
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.1](https://github.com/RigelBuild/meissa/compare/dl-claim@v1.0.0...dl-claim@v1.0.1) (2026-10-11)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @rigelbuild/design-ledger-gate bumped from 1.0.0 to 1.0.1
+
 ## 1.0.0 (2026-10-10)
 
 
