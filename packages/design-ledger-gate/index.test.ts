@@ -278,6 +278,37 @@ describe("touchesRecord", () => {
 	});
 });
 
+describe("touchesRecord at depth one", () => {
+	const depthOne: LedgerConfig = {
+		designsRoot: "docs/designs",
+		surfaceDepth: 1,
+		counter: { url: "https://example.invalid/counter", partition: "test" },
+	};
+	test.each([
+		["docs/designs/alpha/README.md", false],
+		["docs/designs/alpha/record.md", true],
+		["docs/designs/alpha/record/README.md", true],
+		["docs/designs/alpha/decisions/ui/DL-001.md", false],
+	])("%s -> %s", (path, expected) => {
+		expect(touchesRecord(path, depthOne)).toBe(expected);
+	});
+
+	test("depth zero still counts a governed area README as a record", () => {
+		expect(touchesRecord("docs/designs/ui/README.md", CONFIG)).toBe(true);
+	});
+
+	test("a README-only surface needs no decision file", () => {
+		const violations = evaluateCorpus(
+			buildDecisionCorpus([]),
+			[{ path: "docs/designs/alpha/README.md", statusLine: null, line: 0 }],
+			noChange,
+			smallRecord,
+			depthOne,
+		);
+		expect(violations).toEqual([]);
+	});
+});
+
 describe("decision parsing and invariants", () => {
 	test("Retired decisions pass and never require a successor", () => {
 		expect(
@@ -842,6 +873,27 @@ describe("runOnce", () => {
 		expect(
 			errs.filter((line) => line.includes("misplaced design file")),
 		).toHaveLength(2);
+	});
+
+	test("an empty designs tree fails closed", async () => {
+		const { deps, errs } = fixture({ paths: [], files: new Map() });
+		expect(await runOnce(deps, CONFIG)).toBe(2);
+		expect(errs.join("\n")).toContain("no files under docs/designs");
+	});
+
+	test("a README-only surface passes at depth one", async () => {
+		const readme = "docs/designs/alpha/README.md";
+		const { deps } = fixture({
+			paths: [readme],
+			files: new Map([[readme, "# Alpha\n"]]),
+		});
+		expect(
+			await runOnce(deps, {
+				designsRoot: "docs/designs",
+				surfaceDepth: 1,
+				counter: { url: "https://example.invalid/counter", partition: "test" },
+			}),
+		).toBe(0);
 	});
 
 	test("zero valid decision files is a violation", async () => {
