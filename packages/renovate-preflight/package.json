@@ -1,6 +1,6 @@
 {
 	"name": "@rigelbuild/renovate-preflight",
-	"version": "0.0.0",
+	"version": "1.0.0",
 	"type": "module",
 	"description": "Probes GitHub with RENOVATE_TOKEN before Renovate starts and fails fast with an actionable diagnosis.",
 	"license": "MIT OR Apache-2.0",

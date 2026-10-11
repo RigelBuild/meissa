@@ -1,7 +1,7 @@
 {
-	"packages/ref-gate": "0.0.0",
-	"packages/design-ledger-gate": "0.0.0",
-	"packages/dl-claim": "0.0.0",
-	"packages/dl-reconcile": "0.0.0",
-	"packages/renovate-preflight": "0.0.0"
+	"packages/ref-gate": "1.0.0",
+	"packages/design-ledger-gate": "1.0.0",
+	"packages/dl-claim": "1.0.0",
+	"packages/dl-reconcile": "1.0.0",
+	"packages/renovate-preflight": "1.0.0"
 }
