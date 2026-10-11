@@ -923,6 +923,11 @@ export async function runOnce(
 		err(errorMessage(error));
 		return 2;
 	}
+	// A wrong root or designsRoot lists nothing; never pass a gate that saw no files.
+	if (paths.length === 0) {
+		err(`design-ledger-gate: no files under ${config.designsRoot}`);
+		return 2;
+	}
 	const decisions: string[] = [];
 	const recordsPaths: string[] = [];
 	const strays: StrayPath[] = [];

@@ -49,4 +49,4 @@ design-ledger-gate --config ./design-ledger-gate.json
 
 - `0`: no violations.
 - `1`: one or more violations.
-- `2`: usage, configuration, or read error.
+- `2`: usage, configuration, or read error, including an empty `designsRoot` tree.

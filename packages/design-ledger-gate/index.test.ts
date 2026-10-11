@@ -293,6 +293,10 @@ describe("touchesRecord at depth one", () => {
 		expect(touchesRecord(path, depthOne)).toBe(expected);
 	});
 
+	test("depth zero still counts a governed area README as a record", () => {
+		expect(touchesRecord("docs/designs/ui/README.md", CONFIG)).toBe(true);
+	});
+
 	test("a README-only surface needs no decision file", () => {
 		const violations = evaluateCorpus(
 			buildDecisionCorpus([]),
@@ -869,6 +873,27 @@ describe("runOnce", () => {
 		expect(
 			errs.filter((line) => line.includes("misplaced design file")),
 		).toHaveLength(2);
+	});
+
+	test("an empty designs tree fails closed", async () => {
+		const { deps, errs } = fixture({ paths: [], files: new Map() });
+		expect(await runOnce(deps, CONFIG)).toBe(2);
+		expect(errs.join("\n")).toContain("no files under docs/designs");
+	});
+
+	test("a README-only surface passes at depth one", async () => {
+		const readme = "docs/designs/alpha/README.md";
+		const { deps } = fixture({
+			paths: [readme],
+			files: new Map([[readme, "# Alpha\n"]]),
+		});
+		expect(
+			await runOnce(deps, {
+				designsRoot: "docs/designs",
+				surfaceDepth: 1,
+				counter: { url: "https://example.invalid/counter", partition: "test" },
+			}),
+		).toBe(0);
 	});
 
 	test("zero valid decision files is a violation", async () => {
