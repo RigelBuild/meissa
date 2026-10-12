@@ -14,7 +14,9 @@
 	"files": [
 		"package.json",
 		"README.md",
-		"biome.json"
+		"biome.json",
+		"LICENSE-MIT",
+		"LICENSE-APACHE"
 	],
 	"publishConfig": {
 		"access": "public"
