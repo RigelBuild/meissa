@@ -15,10 +15,10 @@ const bins = readdirSync(PACKAGES, { withFileTypes: true })
 	.filter((entry) => entry.isDirectory())
 	.flatMap((entry) =>
 		declaredBins(
-			JSON.parse(readFileSync(join(PACKAGES, entry.name, "package.json"), "utf8")),
-		).map((bin) =>
-			join(PACKAGES, entry.name, bin),
-		),
+			JSON.parse(
+				readFileSync(join(PACKAGES, entry.name, "package.json"), "utf8"),
+			),
+		).map((bin) => join(PACKAGES, entry.name, bin)),
 	);
 
 // A bin without a shebang fails with ENOEXEC when run from node_modules/.bin.
