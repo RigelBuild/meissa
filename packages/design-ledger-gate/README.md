@@ -12,7 +12,10 @@ Pass a JSON file with these fields:
   "surfaceDepth": 0,
   "governedRoots": ["ui", "server"],
   "historicalChain": [],
-  "exemptBranchPrefixes": ["renovate/", "trunk-merge/"],
+  "exemptBranches": [
+    { "prefix": "renovate/", "author": "rigelbuild-renovate[bot]" },
+    { "prefix": "trunk-merge/", "author": "app/trunk-io" }
+  ],
   "surfaces": ["alpha"],
   "citationAmbiguousPaths": ["shared/README.md"],
 	"legs": {
@@ -30,7 +33,7 @@ Pass a JSON file with these fields:
 }
 ```
 
-`surfaceDepth` 0 stores records under `designsRoot/<area>/` and decisions under `designsRoot/decisions/<area>/`. It requires `governedRoots`. At depth 1, each discovered surface stores decisions under `designsRoot/<surface>/decisions/<area>/` and records elsewhere beneath that surface; a decision may cite a record on another surface. A surface-level `README.md` is not a record. The gate requires decision files only once records exist. `governedRoots` is only valid at depth 0. `historicalChain`, `exemptBranchPrefixes`, `citationAmbiguousPaths`, `legs`, and `remediationDoc` are optional. `citationAmbiguousPaths` defaults to an empty list and names repository-root paths that also exist in sibling repositories. When a citation needs a root-relative retry for one of those paths, the gate refuses it and counts it as repo-ambiguous. When `historicalChain` is absent, any record may be Historical. When present, only listed paths may be Historical; an empty list allows none. `recordStatusScope` is `all` (default) or `changed`. The latter checks no records without PR context and reports `record Status skipped (no PR context)`. All extra legs default to `false`.
+`surfaceDepth` 0 stores records under `designsRoot/<area>/` and decisions under `designsRoot/decisions/<area>/`. It requires `governedRoots`. At depth 1, each discovered surface stores decisions under `designsRoot/<surface>/decisions/<area>/` and records elsewhere beneath that surface; a decision may cite a record on another surface. A surface-level `README.md` is not a record. The gate requires decision files only once records exist. `governedRoots` is only valid at depth 0. `historicalChain`, `exemptBranches`, `citationAmbiguousPaths`, `legs`, and `remediationDoc` are optional. Each `exemptBranches` entry binds a branch prefix to an author. Omitting the key applies two entries, `renovate/` for `rigelbuild-renovate[bot]` and `trunk-merge/` for `trunk-io[bot]`; `[]` disables exemptions. An exemption applies only to a same-repository PR whose author matches the entry; missing author or repository metadata does not exempt the branch. Author names in `app/<slug>` and `<slug>[bot]` form are equivalent. `citationAmbiguousPaths` defaults to an empty list and names repository-root paths that also exist in sibling repositories. When a citation needs a root-relative retry for one...
 `surfaces` optionally lists the counter surfaces this repository may claim. At depth 0 it must contain exactly one directory name; at depth 1 the gate reports discovered surfaces that are not listed. Use this list when the repository claims decision IDs from the counter.
 Record `Status:` headers are case-insensitive. The key may be bold, and spaces may appear before its colon. `Historical` and `Superseded by <path>` values may be bold. A supersession value may include a free-text reason after the path.
 
@@ -38,7 +41,7 @@ When `errata` is enabled, an `## Errata` section must be the final H2. Each entr
 
 Citation references use backtick-wrapped `path.md:N` or `path.md:N-M` on a Markdown line. Paths resolve relative to the citing file first. Only directory-qualified targets retry from the repository root; a bare filename never falls back to the root. Missing targets are counted as unresolvable, and configured root targets are counted as repo-ambiguous. The success summary reports checked and seen citations and both counts. Record links must use a live heading anchor when the target exists. The `mainIds` check reads the fetched base ref tree and rejects new decision IDs that already occur on that base tip.
 
-The optional `legs.claimCheck` checks new decision IDs on PRs against the counter. It is off by default. The check uses `counter.url` and `counter.partition`. It requires each new ID to be claimed for the PR head branch; cross-repository heads use `<owner>:<branch>`. A configured exemption requires a matching PR author. Use `dl-claim --rebind` to move a claim from another lane.
+The optional `legs.claimCheck` checks new decision IDs on PRs against the counter. It is off by default. The check uses `counter.url` and `counter.partition`. It requires each new ID to be claimed for the PR head branch; cross-repository heads use `<owner>:<branch>`. The same `exemptBranches` rules apply: branch prefix and author must match, and only same-repository PRs are exempt. Missing author or repository metadata never skips the check. Use `dl-claim --rebind` to move a claim from another lane.
 
 ## CLI
 
