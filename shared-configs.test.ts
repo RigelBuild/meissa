@@ -1,9 +1,47 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+	mkdirSync,
+	mkdtempSync,
+	readFileSync,
+	rmSync,
+	writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const temporaryDirectories: string[] = [];
+
+function consumerFixture(prefix: string) {
+	const directory = mkdtempSync(join(tmpdir(), prefix));
+	temporaryDirectories.push(directory);
+	const packageDirectory = join(
+		directory,
+		"node_modules",
+		"@rigelbuild",
+		"biome-config",
+	);
+	mkdirSync(packageDirectory, { recursive: true });
+	const sourceDirectory = join(import.meta.dir, "packages", "biome-config");
+	for (const filename of ["package.json", "biome.json"]) {
+		writeFileSync(
+			join(packageDirectory, filename),
+			readFileSync(join(sourceDirectory, filename)),
+		);
+	}
+	const configPath = join(directory, "biome.json");
+	const spaceConfigPath = join(directory, "space.json");
+	const fixturePath = join(directory, "fixture.ts");
+	writeFileSync(
+		configPath,
+		'{\n\t"root": true,\n\t"extends": ["./space.json", "@rigelbuild/biome-config/biome"]\n}\n',
+	);
+	writeFileSync(
+		spaceConfigPath,
+		'{\n\t"root": false,\n\t"formatter": { "indentStyle": "space" }\n}\n',
+	);
+	return { directory, packageDirectory, configPath, fixturePath };
+}
 
 afterAll(() => {
 	for (const directory of temporaryDirectories) {
@@ -37,49 +75,124 @@ describe("shared configuration packages", () => {
 	});
 
 	test("Node rejects the Biome subpath when its export key is removed", () => {
-		const packageDirectory = join(
-			import.meta.dir,
-			"node_modules",
-			"@rigelbuild",
-			"biome-config",
+		const { directory, packageDirectory } = consumerFixture(
+			"meissa-biome-export-",
 		);
-		const packageJson = join(packageDirectory, "package.json");
-		const originalManifest = readFileSync(packageJson, "utf8");
+		const manifestPath = join(packageDirectory, "package.json");
+		const originalManifest = readFileSync(manifestPath, "utf8");
 		const manifestWithoutBiomeExport = originalManifest.replace(
 			'"./biome": "./biome.json"',
 			'"./other": "./biome.json"',
 		);
 		expect(manifestWithoutBiomeExport).not.toBe(originalManifest);
-		try {
-			writeFileSync(packageJson, manifestWithoutBiomeExport);
-			const result = Bun.spawnSync({
-				cmd: [
-					"node",
-					"--input-type=module",
-					"-e",
-					'import.meta.resolve("@rigelbuild/biome-config/biome")',
-				],
-				cwd: import.meta.dir,
-				stdout: "pipe",
-				stderr: "pipe",
-			});
-			expect(result.exitCode).not.toBe(0);
-			expect(new TextDecoder().decode(result.stderr)).toContain(
-				"ERR_PACKAGE_PATH_NOT_EXPORTED",
-			);
-		} finally {
-			writeFileSync(packageJson, originalManifest);
-		}
+		writeFileSync(manifestPath, manifestWithoutBiomeExport);
+		const resolverPath = join(directory, "resolve.mjs");
+		writeFileSync(
+			resolverPath,
+			'import.meta.resolve("@rigelbuild/biome-config/biome");\n',
+		);
+
+		const result = Bun.spawnSync({
+			cmd: ["node", resolverPath],
+			cwd: directory,
+			stdout: "pipe",
+			stderr: "pipe",
+		});
+		expect(result.exitCode).not.toBe(0);
+		expect(new TextDecoder().decode(result.stderr)).toContain(
+			"ERR_PACKAGE_PATH_NOT_EXPORTED",
+		);
+	});
+
+	test("shared preset preserves tabs and converts spaces to tabs", () => {
+		const { directory, configPath, fixturePath } = consumerFixture(
+			"meissa-biome-format-",
+		);
+		const tabInput = "export const preset = {\n\tshared: true,\n};\n";
+		writeFileSync(fixturePath, tabInput);
+
+		const tabResult = Bun.spawnSync({
+			cmd: [
+				"biome",
+				"format",
+				"--write",
+				"--config-path",
+				configPath,
+				fixturePath,
+			],
+			cwd: directory,
+			stdout: "pipe",
+			stderr: "pipe",
+		});
+		expect(tabResult.exitCode).toBe(0);
+		expect(readFileSync(fixturePath, "utf8")).toBe(tabInput);
+
+		writeFileSync(
+			fixturePath,
+			"export const preset = {\n  shared: true,\n};\n",
+		);
+		const spaceResult = Bun.spawnSync({
+			cmd: [
+				"biome",
+				"format",
+				"--write",
+				"--config-path",
+				configPath,
+				fixturePath,
+			],
+			cwd: directory,
+			stdout: "pipe",
+			stderr: "pipe",
+		});
+		expect(spaceResult.exitCode).toBe(0);
+		expect(readFileSync(fixturePath, "utf8")).toBe(tabInput);
+	});
+
+	test("removing preset indentStyle restores the earlier space setting", () => {
+		const { directory, packageDirectory, configPath, fixturePath } =
+			consumerFixture("meissa-biome-format-mutation-");
+		const presetPath = join(packageDirectory, "biome.json");
+		const originalPreset = readFileSync(presetPath, "utf8");
+		const presetWithoutIndentStyle = originalPreset.replace(
+			'\t"formatter": { "indentStyle": "tab" },\n',
+			"",
+		);
+		expect(presetWithoutIndentStyle).not.toBe(originalPreset);
+		const tabInput = "export const preset = {\n\tshared: true,\n};\n";
+		writeFileSync(fixturePath, tabInput);
+		writeFileSync(presetPath, presetWithoutIndentStyle);
+		const formatterSettings = Bun.spawnSync({
+			cmd: ["biome", "rage", "--formatter"],
+			cwd: directory,
+			stdout: "pipe",
+			stderr: "pipe",
+		});
+		expect(new TextDecoder().decode(formatterSettings.stdout)).toContain(
+			"Indent style:                 Space",
+		);
+		const formatResult = Bun.spawnSync({
+			cmd: [
+				"biome",
+				"format",
+				"--write",
+				"--config-path",
+				configPath,
+				fixturePath,
+			],
+			cwd: directory,
+			stdout: "pipe",
+			stderr: "pipe",
+		});
+		expect(formatResult.exitCode).toBe(0);
+		const formatted = readFileSync(fixturePath, "utf8");
+		expect(formatted).not.toBe(tabInput);
+		expect(formatted).toContain("  shared: true");
 	});
 
 	test("Biome CI accepts a consumer fixture extending the shared preset", () => {
-		const directory = mkdtempSync(join(import.meta.dir, ".biome-preset-"));
-		temporaryDirectories.push(directory);
-		const configPath = join(directory, "biome.json");
-		const fixturePath = join(directory, "fixture.ts");
-		const config =
-			'{\n\t"root": false,\n\t"extends": ["@rigelbuild/biome-config/biome"]\n}\n';
-		writeFileSync(configPath, config);
+		const { directory, configPath, fixturePath } = consumerFixture(
+			"meissa-biome-preset-",
+		);
 		writeFileSync(
 			fixturePath,
 			"export const preset = {\n\tshared: true,\n};\n",
