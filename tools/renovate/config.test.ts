@@ -60,6 +60,7 @@ describe("Renovate policy", () => {
     expect(bot.allowedCommands).toEqual([
       "^devenv update nixpkgs$",
       "^nix flake update nixpkgs$",
+      "^bun tools/renovate/refresh-go-analysis-hashes\\.ts$",
     ]);
   });
 
@@ -143,6 +144,33 @@ describe("Renovate policy", () => {
     expect(asRecord(rule?.postUpgradeTasks, "postUpgradeTasks")).toMatchObject({
       commands: ["devenv update nixpkgs", "nix flake update nixpkgs"],
       fileFilters: ["devenv.lock", "flake.lock"],
+      executionMode: "branch",
+    });
+  });
+
+  test("Go analyzer pins have Renovate managers and refresh their derived hashes", async () => {
+    const config = await readJson5(configPath);
+    const managers = config.customManagers;
+    const pins = await readFile(join(root, "tools/toolchain/go-analysis-pins.nix"), "utf8");
+    const analysis = managers.map((entry) => asRecord(entry, "manager")).filter((entry) =>
+      entry.depTypeTemplate === "go-analysis"
+    );
+    expect(analysis.map((entry) => entry.depNameTemplate)).toEqual([
+      "golangci/golangci-lint",
+      "uber-go/nilaway",
+    ]);
+    expect(analysis.every((entry) =>
+      entry.managerFilePatterns?.includes("/^tools/toolchain/go-analysis-pins\\.nix$/")
+    )).toBe(true);
+    expect([...pins.matchAll(/golangci-lint = \{\s*version = "([^"]+)"/g)].map((match) => match[1])).toEqual(["2.14.0"]);
+    expect([...pins.matchAll(/rev = "([a-f0-9]{40})"/g)].map((match) => match[1])).toEqual([
+      "acb8859b9031bb9496be97e027df5573f9fb5340",
+    ]);
+
+    const refresh = asRecord(config.postUpgradeTasks, "postUpgradeTasks");
+    expect(refresh).toMatchObject({
+      commands: ["bun tools/renovate/refresh-go-analysis-hashes.ts"],
+      fileFilters: ["tools/toolchain/go-analysis-pins.nix"],
       executionMode: "branch",
     });
   });

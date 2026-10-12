@@ -41,14 +41,42 @@
             test -f "${module.env.RUMDL_BASE_CONFIG}"
             touch "$out"
           '';
+      goAnalysisCheck = system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+          goAnalysis = self.lib.goAnalysis { inherit pkgs; goToolchain = pkgs.go; };
+          module = import ./devenv-module-go.nix {
+            config.meissa.go.toolchain = pkgs.go;
+            inherit pkgs;
+            lib = pkgs.lib;
+          };
+          moduleOptions = module.options.meissa.go.toolchain;
+          hasRequiredOption = moduleOptions.type.name == "package" && !(moduleOptions ? default);
+          hasAllPackages = builtins.length (builtins.attrValues goAnalysis) == 4
+            && builtins.length module.packages == 4
+            && builtins.all (package: builtins.elem package module.packages) (builtins.attrValues goAnalysis);
+        in
+        if !hasRequiredOption || !hasAllPackages then
+          throw "Go analysis module must expose four tools and require meissa.go.toolchain"
+        else
+          pkgs.runCommand "meissa-go-analysis-check" {
+            nativeBuildInputs = builtins.attrValues goAnalysis;
+          } ''
+            command -v golangci-lint govulncheck go-licenses nilaway
+            touch "$out"
+          '';
     in
     {
       packages = forAllSystems packagesFor;
       devenvModules.default = import ./devenv-module.nix {
         toolchain = self.packages;
       };
+      devenvModules.go = import ./devenv-module-go.nix;
+      lib.goAnalysis = { pkgs, goToolchain }: import ./tools/toolchain/go-analysis.nix { inherit pkgs goToolchain; };
       checks = forAllSystems (system: {
         devenv-module = moduleCheck system;
-      });
+      } // (if system == "x86_64-linux" then {
+        go-analysis = goAnalysisCheck system;
+      } else { }));
     };
 }

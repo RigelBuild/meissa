@@ -8,5 +8,6 @@
   allowedCommands: [
     "^devenv update nixpkgs$",
     "^nix flake update nixpkgs$",
+    "^bun tools/renovate/refresh-go-analysis-hashes\\.ts$",
   ],
 }
