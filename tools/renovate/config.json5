@@ -2,13 +2,7 @@
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
   // No Renovate schedule: the workflow's daily cron is the cadence, so a late
   // GitHub cron start still opens PRs.
-  extends: ["config:recommended"],
-  dependencyDashboard: true,
-  rebaseWhen: "behind-base-branch",
-  // 5-day supply-chain cooldown, matching bunfig.toml minimumReleaseAge; strict
-  // holds a PR until a version clears the window.
-  minimumReleaseAge: "5 days",
-  internalChecksFilter: "strict",
+  extends: ["github>RigelBuild/meissa//tools/renovate/preset.json5"],
   enabledManagers: ["custom.regex", "bun", "npm"],
   customManagers: [
     {
