@@ -2,12 +2,14 @@
 { pkgs, goToolchain }:
 let
   pins = import ./go-analysis-pins.nix;
+  # buildGoModule reads Go from its own scope; a package-level `go` override is ignored.
   buildGoModule' = pkgs.buildGoModule.override { go = goToolchain; };
 
   rebuild =
     { pkg, builderArg, pin ? null, passGo ? false }:
     assert pin == null || (pin ? hash && (pin ? tag || pin ? rev));
     let
+      # Pins replace source/version-dependent attrs; passGo also fixes wrapped GOROOT.
       base = pkg.override (
         { ${builderArg} = buildGoModule'; }
         // pkgs.lib.optionalAttrs passGo { go = goToolchain; }
@@ -49,6 +51,7 @@ in
     builderArg = "buildGoModule";
     passGo = true;
   };
+  # Upstream's test suite OOMs CI and tests nilaway itself, not this package.
   nilaway = (rebuild {
     pkg = pkgs.nilaway;
     builderArg = "buildGoModule";

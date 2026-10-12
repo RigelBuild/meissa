@@ -16,6 +16,8 @@ The opt-in `devenvModules.go` module adds golangci-lint, govulncheck, go-license
 }
 ```
 
+Consumers must use a Go toolchain that produces matching vendor output for the pinned Go analysis tools.
+
 Import the module in a consumer's `devenv.nix`:
 
 ```nix

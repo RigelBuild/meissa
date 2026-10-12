@@ -162,12 +162,32 @@ describe("Renovate policy", () => {
     expect(analysis.every((entry) =>
       entry.managerFilePatterns?.includes("/^tools/toolchain/go-analysis-pins\\.nix$/")
     )).toBe(true);
-    expect([...pins.matchAll(/golangci-lint = \{\s*version = "([^"]+)"/g)].map((match) => match[1])).toEqual(["2.14.0"]);
-    expect([...pins.matchAll(/rev = "([a-f0-9]{40})"/g)].map((match) => match[1])).toEqual([
-      "acb8859b9031bb9496be97e027df5573f9fb5340",
-    ]);
+    const golangciManager = analysis.find((entry) => entry.depNameTemplate === "golangci/golangci-lint");
+    const nilawayManager = analysis.find((entry) => entry.depNameTemplate === "uber-go/nilaway");
+    expect(golangciManager).toBeDefined();
+    expect(nilawayManager).toBeDefined();
+    const pinMatches = (manager: Json5Record) => {
+      const pattern = String(manager.matchStrings?.[0]);
+      return [...pins.matchAll(new RegExp(pattern, "g"))];
+    };
+    const golangciMatches = pinMatches(golangciManager ?? {});
+    const nilawayMatches = pinMatches(nilawayManager ?? {});
+    expect(golangciMatches).toHaveLength(1);
+    expect(nilawayMatches).toHaveLength(1);
+    const golangci = pins.match(/^\s*golangci-lint = \{[\s\S]*?^\s*\};/m)?.[0];
+    const nilaway = pins.match(/^\s*nilaway = \{[\s\S]*?^\s*\};/m)?.[0];
+    expect(golangci).toBeDefined();
+    expect(nilaway).toBeDefined();
+    const tag = golangci?.match(/^\s*tag = "([^"]+)"/m)?.[1];
+    const rev = nilaway?.match(/^\s*rev = "([a-f0-9]{40})"/m)?.[1];
+    expect(golangciMatches[0]?.[1]).toBe(tag?.replace(/^v/, ""));
+    expect(nilawayMatches[0]?.[1]).toBe(rev);
 
     const refresh = asRecord(config.postUpgradeTasks, "postUpgradeTasks");
+    const nilawayRule = config.packageRules.map((entry) => asRecord(entry, "package rule")).find((entry) =>
+      Array.isArray(entry.matchDepNames) && entry.matchDepNames.includes("uber-go/nilaway")
+    );
+    expect(nilawayRule?.dependencyDashboardApproval).toBe(true);
     expect(refresh).toMatchObject({
       commands: ["bun tools/renovate/refresh-go-analysis-hashes.ts"],
       fileFilters: ["tools/toolchain/go-analysis-pins.nix"],

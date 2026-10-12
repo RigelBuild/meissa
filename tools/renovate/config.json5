@@ -65,6 +65,7 @@
       matchManagers: ["custom.regex"],
       matchDepNames: ["uber-go/nilaway"],
       minimumReleaseAge: null,
+      dependencyDashboardApproval: true,
     },
   ],
   postUpgradeTasks: {

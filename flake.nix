@@ -45,24 +45,32 @@
         let
           pkgs = nixpkgs.legacyPackages.${system};
           goAnalysis = self.lib.goAnalysis { inherit pkgs; goToolchain = pkgs.go; };
-          module = import ./devenv-module-go.nix {
-            config.meissa.go.toolchain = pkgs.go;
-            inherit pkgs;
-            lib = pkgs.lib;
+          evaluated = pkgs.lib.evalModules {
+            modules = [
+              ({ lib, ... }: {
+                options.packages = lib.mkOption {
+                  type = lib.types.listOf lib.types.package;
+                  default = [ ];
+                };
+              })
+              ({ ... }: { _module.args.pkgs = pkgs; })
+              self.devenvModules.go
+              ({ ... }: { meissa.go.toolchain = pkgs.go; packages = [ pkgs.hello ]; })
+            ];
           };
-          moduleOptions = module.options.meissa.go.toolchain;
-          hasRequiredOption = moduleOptions.type.name == "package" && !(moduleOptions ? default);
-          hasAllPackages = builtins.length (builtins.attrValues goAnalysis) == 4
-            && builtins.length module.packages == 4
-            && builtins.all (package: builtins.elem package module.packages) (builtins.attrValues goAnalysis);
+          packages = evaluated.config.packages;
+          expectedPackages = [ pkgs.hello ] ++ builtins.attrValues goAnalysis;
+          hasExpectedPackages = builtins.length packages == 5
+            && builtins.all (package: builtins.elem package packages) expectedPackages
+            && builtins.all (tool: builtins.elem tool packages) (builtins.attrValues goAnalysis);
         in
-        if !hasRequiredOption || !hasAllPackages then
-          throw "Go analysis module must expose four tools and require meissa.go.toolchain"
+        if !hasExpectedPackages then
+          throw "devenvModules.go must add four analysis tools to configured packages"
         else
           pkgs.runCommand "meissa-go-analysis-check" {
-            nativeBuildInputs = builtins.attrValues goAnalysis;
+            nativeBuildInputs = packages;
           } ''
-            command -v golangci-lint govulncheck go-licenses nilaway
+            command -v hello golangci-lint govulncheck go-licenses nilaway
             touch "$out"
           '';
     in

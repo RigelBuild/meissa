@@ -120,14 +120,15 @@ function parseGot(output: string, drvFragment: string): string {
 
 async function nilawayVersionDate(rev: string): Promise<string> {
 	if (!/^[a-f0-9]{40}$/.test(rev)) fail(`invalid nilaway revision ${rev}`);
+	const fetchUrl =
+		process.env.NILAWAY_FETCH_URL || "https://github.com/uber-go/nilaway";
 	const directory = await mkdtemp(join(tmpdir(), "renovate-go-analysis-"));
 	try {
 		await $`git init -q`.cwd(directory).quiet();
-		const fetched =
-			await $`git fetch --depth=1 https://github.com/uber-go/nilaway ${rev}`
-				.cwd(directory)
-				.nothrow()
-				.quiet();
+		const fetched = await $`git fetch --depth=1 ${fetchUrl} ${rev}`
+			.cwd(directory)
+			.nothrow()
+			.quiet();
 		if (fetched.exitCode !== 0)
 			fail(`nilaway revision fetch failed: ${fetched.stderr.toString()}`);
 		const logged =
@@ -182,13 +183,19 @@ async function recomputeHash(
 	return parseGot(output, drvFragment.replace(/\.drv$/, ""));
 }
 
+export function golangciLintTag(version: string): string {
+	if (!/^\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?$/.test(version)) {
+		fail(`invalid golangci-lint version '${version}'`);
+	}
+	return `v${version}`;
+}
 async function refreshTool(entry: ToolEntry, text: string): Promise<string> {
 	let block = toolBlock(text, entry);
 	if (entry.derived === "tag-from-version") {
 		block = rewriteField(
 			block,
 			"tag",
-			`v${fieldValue(block, "version", entry)}`,
+			golangciLintTag(fieldValue(block, "version", entry)),
 			entry,
 		);
 	} else {
@@ -277,7 +284,12 @@ if (import.meta.main) {
 	try {
 		await main();
 	} catch (error) {
-		console.error(error instanceof Error ? error.message : String(error));
+		console.error(
+			error instanceof Error &&
+				error.message.startsWith("renovate-go-analysis:")
+				? error.message
+				: `renovate-go-analysis: ${error instanceof Error ? error.message : String(error)}`,
+		);
 		process.exitCode = 1;
 	}
 }

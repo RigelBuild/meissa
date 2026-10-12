@@ -11,5 +11,5 @@ in
     description = "Go toolchain used to build the Go analysis tools.";
   };
 
-  packages = builtins.attrValues goAnalysis;
+  config.packages = builtins.attrValues goAnalysis;
 }
