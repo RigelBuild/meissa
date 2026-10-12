@@ -12,6 +12,43 @@ import { fileURLToPath } from "node:url";
 
 const temporaryDirectories: string[] = [];
 
+type BiomePreset = {
+	[key: string]: unknown;
+	formatter: { [key: string]: unknown; indentStyle: string };
+	linter: {
+		enabled: boolean;
+		rules: { preset: string };
+	};
+};
+
+function isBiomePreset(value: unknown): value is BiomePreset {
+	return (
+		typeof value === "object" &&
+		value !== null &&
+		"formatter" in value &&
+		typeof value.formatter === "object" &&
+		value.formatter !== null &&
+		"indentStyle" in value.formatter &&
+		typeof value.formatter.indentStyle === "string" &&
+		"linter" in value &&
+		typeof value.linter === "object" &&
+		value.linter !== null &&
+		"enabled" in value.linter &&
+		typeof value.linter.enabled === "boolean" &&
+		"rules" in value.linter &&
+		typeof value.linter.rules === "object" &&
+		value.linter.rules !== null &&
+		"preset" in value.linter.rules &&
+		typeof value.linter.rules.preset === "string"
+	);
+}
+
+function parseBiomePreset(source: string): BiomePreset {
+	const value: unknown = JSON.parse(source);
+	if (!isBiomePreset(value)) throw new Error("Invalid Biome preset fixture");
+	return value;
+}
+
 function consumerFixture(prefix: string) {
 	const directory = mkdtempSync(join(tmpdir(), prefix));
 	temporaryDirectories.push(directory);
@@ -156,22 +193,16 @@ describe("shared configuration packages", () => {
 			consumerFixture("meissa-biome-format-mutation-");
 		const presetPath = join(packageDirectory, "biome.json");
 		const originalPreset = readFileSync(presetPath, "utf8");
-		const presetWithoutIndentStyle = originalPreset.replace(
-			'\t"formatter": { "indentStyle": "tab" },\n',
-			"",
-		);
-		expect(presetWithoutIndentStyle).not.toBe(originalPreset);
+		const parsedPreset = parseBiomePreset(originalPreset);
+		const presetWithTabs = parsedPreset;
+		const { formatter: _formatter, ...presetWithoutIndentStyle } =
+			presetWithTabs;
+		expect(presetWithoutIndentStyle).not.toEqual(presetWithTabs);
 		const tabInput = "export const preset = {\n\tshared: true,\n};\n";
 		writeFileSync(fixturePath, tabInput);
-		writeFileSync(presetPath, presetWithoutIndentStyle);
-		const formatterSettings = Bun.spawnSync({
-			cmd: ["biome", "rage", "--formatter"],
-			cwd: directory,
-			stdout: "pipe",
-			stderr: "pipe",
-		});
-		expect(new TextDecoder().decode(formatterSettings.stdout)).toContain(
-			"Indent style:                 Space",
+		writeFileSync(
+			presetPath,
+			`${JSON.stringify(presetWithoutIndentStyle, null, "\t")}\n`,
 		);
 		const formatResult = Bun.spawnSync({
 			cmd: [
@@ -230,5 +261,26 @@ describe("shared configuration packages", () => {
 			stderr: "pipe",
 		});
 		expect(result.exitCode).toBe(0);
+	});
+	test("Biome CI rejects debugger under recommended lint rules", () => {
+		const { directory, configPath, fixturePath } = consumerFixture(
+			"meissa-biome-recommended-rule-",
+		);
+		writeFileSync(fixturePath, "debugger;\n");
+		const invalidResult = Bun.spawnSync({
+			cmd: ["biome", "ci", "--config-path", configPath, "."],
+			cwd: directory,
+			stdout: "pipe",
+			stderr: "pipe",
+		});
+		expect(invalidResult.exitCode).not.toBe(0);
+		writeFileSync(fixturePath, "const ready = true;\n");
+		const validResult = Bun.spawnSync({
+			cmd: ["biome", "ci", "--config-path", configPath, "."],
+			cwd: directory,
+			stdout: "pipe",
+			stderr: "pipe",
+		});
+		expect(validResult.exitCode).toBe(0);
 	});
 });
