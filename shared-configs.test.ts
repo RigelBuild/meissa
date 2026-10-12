@@ -15,6 +15,9 @@ const temporaryDirectories: string[] = [];
 function consumerFixture(prefix: string) {
 	const directory = mkdtempSync(join(tmpdir(), prefix));
 	temporaryDirectories.push(directory);
+	// The preset enables VCS ignore files, so a consumer fixture must be a git repo.
+	Bun.spawnSync({ cmd: ["git", "init", "-q", directory] });
+	writeFileSync(join(directory, ".gitignore"), "node_modules/\ngenerated/\n");
 	const packageDirectory = join(
 		directory,
 		"node_modules",
@@ -198,6 +201,28 @@ describe("shared configuration packages", () => {
 			"export const preset = {\n\tshared: true,\n};\n",
 		);
 
+		const result = Bun.spawnSync({
+			cmd: ["biome", "ci", "--config-path", configPath, "."],
+			cwd: directory,
+			stdout: "pipe",
+			stderr: "pipe",
+		});
+		expect(result.exitCode).toBe(0);
+	});
+
+	test("a consumer extending the preset skips gitignored files", () => {
+		const { directory, configPath, fixturePath } =
+			consumerFixture("meissa-biome-vcs-");
+		writeFileSync(
+			configPath,
+			'{\n\t"root": true,\n\t"extends": ["@rigelbuild/biome-config/biome"]\n}\n',
+		);
+		writeFileSync(fixturePath, "export const ok = true;\n");
+		mkdirSync(join(directory, "generated"));
+		writeFileSync(
+			join(directory, "generated", "bad.ts"),
+			"export   const bad   =  1\n",
+		);
 		const result = Bun.spawnSync({
 			cmd: ["biome", "ci", "--config-path", configPath, "."],
 			cwd: directory,
