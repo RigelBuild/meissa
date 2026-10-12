@@ -211,8 +211,8 @@ describe("run", () => {
 		return { code, out, err };
 	};
 
-	test("uses config-driven roots for orion-docs and compass-docs layouts", async () => {
-		const orionDocs = tree(corpus, {
+	test("uses config-driven roots for surface-depth 1 and depth 0 layouts", async () => {
+		const depthOneDocs = tree(corpus, {
 			designsRoot: "docs/designs",
 			surfaceDepth: 1,
 		});
@@ -220,9 +220,9 @@ describe("run", () => {
 			designsRoot: "docs/designs",
 			surfaceDepth: 0,
 		});
-		const orion = await call([], orionDocs);
+		const depthOne = await call([], depthOneDocs);
 		const compass = await call([], compassDocs);
-		expect([orion.code, ids(orion.out), orion.err]).toEqual([
+		expect([depthOne.code, ids(depthOne.out), depthOne.err]).toEqual([
 			0,
 			["DL-002", "DL-003", "DL-099", "DL-500"],
 			[],
