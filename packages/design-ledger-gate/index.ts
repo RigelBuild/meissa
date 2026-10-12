@@ -11,11 +11,13 @@ export interface LedgerConfig {
 	readonly surfaces?: readonly string[];
 	/** Absent permits any record to be Historical; present restricts it to listed paths. */
 	readonly historicalChain?: readonly string[];
-	readonly exemptBranchPrefixes?: readonly string[];
+	readonly exemptBranches?: readonly {
+		readonly prefix: string;
+		readonly author: string;
+	}[];
 	/** "changed" checks record `Status:` lines only in PR-changed files; default "all". */
 	readonly recordStatusScope?: "all" | "changed";
 	readonly citationAmbiguousPaths?: readonly string[];
-	readonly exemptAuthors?: Readonly<Record<string, string>>;
 	readonly legs?: {
 		readonly citations?: boolean;
 		readonly errata?: boolean;
@@ -54,7 +56,7 @@ export class ClaimServiceError extends Error {
 }
 
 export interface PullRequestDetails {
-	readonly isCrossRepository: boolean;
+	readonly isCrossRepository: boolean | undefined;
 	readonly headRepositoryOwner: string | null;
 	readonly author: string | null;
 }
@@ -69,7 +71,8 @@ export function parsePrMetadata(value: unknown): PrMetadata {
 	if (
 		typeof view.headRefName !== "string" ||
 		typeof view.body !== "string" ||
-		typeof view.isCrossRepository !== "boolean"
+		(view.isCrossRepository !== undefined &&
+			typeof view.isCrossRepository !== "boolean")
 	)
 		throw new Error("Pull request metadata is malformed");
 	const owner = view.headRepositoryOwner;
@@ -100,16 +103,30 @@ export function parsePrMetadata(value: unknown): PrMetadata {
 
 export type GhRun = (args: readonly string[]) => Promise<string>;
 
-export function botExempt(
-	headBranch: string,
-	author: string | undefined,
-	exemptAuthors: Readonly<Record<string, string>>,
-): boolean {
-	return Object.entries(exemptAuthors).some(
-		([prefix, bot]) => headBranch.startsWith(prefix) && author === bot,
-	);
+const DEFAULT_EXEMPT_BRANCHES = [
+	{ prefix: "renovate/", author: "rigelbuild-renovate[bot]" },
+	{ prefix: "trunk-merge/", author: "trunk-io[bot]" },
+] as const satisfies readonly { prefix: string; author: string }[];
+
+function normalizeAuthor(author: string): string {
+	return author.startsWith("app/") ? `${author.slice(4)}[bot]` : author;
 }
 
+export function exemptBranch(
+	headBranch: string,
+	author: string | null | undefined,
+	crossRepository: boolean | undefined,
+	entries: readonly { readonly prefix: string; readonly author: string }[],
+): boolean {
+	if (author === null || author === undefined || crossRepository !== false)
+		return false;
+	const normalizedAuthor = normalizeAuthor(author);
+	return entries.some(
+		(entry) =>
+			headBranch.startsWith(entry.prefix) &&
+			normalizeAuthor(entry.author) === normalizedAuthor,
+	);
+}
 function isRepoRelativePath(value: string): boolean {
 	return (
 		value !== "" &&
@@ -163,6 +180,13 @@ export function loadLedgerConfig(path: string): LedgerConfig {
 		});
 	}
 	const raw = asRecord(parsed, "Config");
+	const legacyExemptionKey = ["exemptBranchPrefixes", "exemptAuthors"].find(
+		(key) => Object.hasOwn(raw, key),
+	);
+	if (legacyExemptionKey !== undefined)
+		throw new Error(
+			`Config key "${legacyExemptionKey}" is no longer supported; use exemptBranches`,
+		);
 	rejectUnknownKeys(
 		raw,
 		[
@@ -171,8 +195,7 @@ export function loadLedgerConfig(path: string): LedgerConfig {
 			"governedRoots",
 			"surfaces",
 			"historicalChain",
-			"exemptBranchPrefixes",
-			"exemptAuthors",
+			"exemptBranches",
 			"citationAmbiguousPaths",
 			"recordStatusScope",
 			"legs",
@@ -227,25 +250,27 @@ export function loadLedgerConfig(path: string): LedgerConfig {
 	let historicalChain: string[] | undefined;
 	if (raw.historicalChain !== undefined)
 		historicalChain = readStringArray(raw.historicalChain, "historicalChain");
-	let exemptBranchPrefixes: string[] | undefined;
-	if (raw.exemptBranchPrefixes !== undefined)
-		exemptBranchPrefixes = readStringArray(
-			raw.exemptBranchPrefixes,
-			"exemptBranchPrefixes",
-		);
-	if (exemptBranchPrefixes?.some((prefix) => prefix === "") === true)
-		throw new Error("exemptBranchPrefixes entries must not be empty");
-	let exemptAuthors: Record<string, string> | undefined;
-	if (raw.exemptAuthors !== undefined) {
-		const authors = asRecord(raw.exemptAuthors, "exemptAuthors");
-		const entries = Object.entries(authors).map(([prefix, author]) => {
-			if (prefix.trim() === "")
-				throw new Error("exemptAuthors prefixes must not be empty");
-			if (typeof author !== "string" || author.trim() === "")
-				throw new Error(`exemptAuthors.${prefix} must be a non-empty string`);
-			return [prefix, author] as const;
+	let exemptBranches: LedgerConfig["exemptBranches"];
+	if (raw.exemptBranches !== undefined) {
+		if (!Array.isArray(raw.exemptBranches))
+			throw new Error("exemptBranches must be an array of objects");
+		exemptBranches = raw.exemptBranches.map((value, index) => {
+			const entry = asRecord(value, `exemptBranches[${index}]`);
+			rejectUnknownKeys(
+				entry,
+				["prefix", "author"],
+				`exemptBranches[${index}]`,
+			);
+			if (typeof entry.prefix !== "string" || entry.prefix.trim() === "")
+				throw new Error(
+					`exemptBranches[${index}].prefix must be a non-empty string`,
+				);
+			if (typeof entry.author !== "string" || entry.author.trim() === "")
+				throw new Error(
+					`exemptBranches[${index}].author must be a non-empty string`,
+				);
+			return { prefix: entry.prefix, author: entry.author };
 		});
-		exemptAuthors = Object.fromEntries(entries);
 	}
 	const citationAmbiguousPaths =
 		raw.citationAmbiguousPaths === undefined
@@ -314,8 +339,7 @@ export function loadLedgerConfig(path: string): LedgerConfig {
 		...(governedRoots === undefined ? {} : { governedRoots }),
 		...(surfaces === undefined ? {} : { surfaces }),
 		...(historicalChain === undefined ? {} : { historicalChain }),
-		...(exemptBranchPrefixes === undefined ? {} : { exemptBranchPrefixes }),
-		...(exemptAuthors === undefined ? {} : { exemptAuthors }),
+		...(exemptBranches === undefined ? {} : { exemptBranches }),
 		citationAmbiguousPaths,
 		...(scope === undefined ? {} : { recordStatusScope: scope }),
 		...(legs === undefined ? {} : { legs }),
@@ -534,6 +558,7 @@ export function evaluate(
 	changed: Changed,
 	readRecord: (path: string) => RecordContent | null,
 	config: LedgerConfig,
+	pullRequestDetails?: PullRequestDetails,
 ): Violation[] {
 	const violations: Violation[] = [];
 	const v = (file: string, line: number, message: string) =>
@@ -710,13 +735,21 @@ export function evaluate(
 	for (const row of rows)
 		if (row.recordAnchor === null) rowByRecord.set(row.recordPath, row);
 	const changedFiles = new Set(changed.files);
+	const exempt = exemptBranch(
+		changed.headBranch,
+		pullRequestDetails?.author,
+		pullRequestDetails?.isCrossRepository,
+		config.exemptBranches ?? DEFAULT_EXEMPT_BRANCHES,
+	);
 	for (const record of records) {
-		if (record.statusLine === null) continue;
-		if (config.recordStatusScope === "changed" && changed.body === null)
+		if (
+			record.statusLine === null ||
+			(exempt && config.recordStatusScope === "changed")
+		)
 			continue;
 		if (
 			config.recordStatusScope === "changed" &&
-			!changedFiles.has(record.path)
+			(changed.body === null || !changedFiles.has(record.path))
 		)
 			continue;
 		const value = parseStatusValue(record.statusLine);
@@ -756,9 +789,6 @@ export function evaluate(
 				);
 		}
 	}
-	const exempt = (
-		config.exemptBranchPrefixes ?? ["renovate/", "trunk-merge/"]
-	).some((prefix) => changed.headBranch.startsWith(prefix));
 	const declared = LEDGER_IMPACT_RE.test(changed.body ?? "");
 	const touchedRecord =
 		!exempt && changed.files.some((file) => touchesRecord(file, config));
@@ -794,6 +824,7 @@ export interface Deps {
 	readonly changed: Changed;
 	readonly fetchClaims: ClaimFetch;
 	readonly readPullRequestDetails?: () => Promise<PullRequestDetails>;
+	readonly pullRequestDetails?: PullRequestDetails;
 	readonly log: (message: string) => void;
 	readonly err: (message: string) => void;
 }
@@ -1269,6 +1300,23 @@ export async function runOnce(
 					message: `unknown design surface: ${surface}`,
 				});
 	}
+	let pullRequestDetails = deps.pullRequestDetails;
+	if (
+		pullRequestDetails === undefined &&
+		(config.legs?.mainIds ||
+			config.legs?.claimCheck ||
+			changed.body !== null) &&
+		readPullRequestDetails
+	) {
+		try {
+			pullRequestDetails = await readPullRequestDetails();
+		} catch (error) {
+			err(
+				`design-ledger-gate: cannot read pull request details: ${errorMessage(error)}`,
+			);
+			return 2;
+		}
+	}
 	violations.push(
 		...evaluate(
 			corpus,
@@ -1276,6 +1324,7 @@ export async function runOnce(
 			changed,
 			(path) => readRecord(root, path),
 			config,
+			pullRequestDetails,
 		),
 	);
 	const filesWithUnclosedFence = new Set<string>();
@@ -1444,43 +1493,32 @@ export async function runOnce(
 	}
 	let claimChecked = 0;
 	let lane = changed.headBranch;
-	let author = process.env.CI_COMMIT_AUTHOR;
-	let crossRepository: boolean | undefined;
-	let headRepositoryOwner: string | null = null;
+	const author = pullRequestDetails?.author ?? undefined;
+	const crossRepository = pullRequestDetails?.isCrossRepository;
+	const headRepositoryOwner = pullRequestDetails?.headRepositoryOwner ?? null;
 	if (
-		(config.legs?.mainIds || config.legs?.claimCheck) &&
-		readPullRequestDetails
-	) {
-		try {
-			const details = await readPullRequestDetails();
-			author ??= details.author ?? undefined;
-			crossRepository = details.isCrossRepository;
-			headRepositoryOwner = details.headRepositoryOwner;
-		} catch (error) {
-			err(
-				`design-ledger-gate: cannot read pull request details: ${errorMessage(error)}`,
-			);
-			return 2;
-		}
-	}
-	const networkExempt =
 		config.legs?.claimCheck === true &&
-		changed.body !== null &&
-		botExempt(changed.headBranch, author, config.exemptAuthors ?? {});
-	if (
-		crossRepository === true &&
-		headRepositoryOwner !== null &&
-		headRepositoryOwner.length > 0
-	)
-		lane = `${headRepositoryOwner}:${changed.headBranch}`;
-	if (
-		config.legs?.claimCheck &&
 		changed.body !== null &&
 		changed.headBranch.length === 0
 	) {
 		err("design-ledger-gate: the claim check needs the PR head branch");
 		return 2;
 	}
+	const networkExempt =
+		config.legs?.claimCheck === true &&
+		changed.body !== null &&
+		exemptBranch(
+			changed.headBranch,
+			author,
+			crossRepository,
+			config.exemptBranches ?? DEFAULT_EXEMPT_BRANCHES,
+		);
+	if (
+		crossRepository === true &&
+		headRepositoryOwner !== null &&
+		headRepositoryOwner.length > 0
+	)
+		lane = `${headRepositoryOwner}:${changed.headBranch}`;
 	if (config.legs?.claimCheck && changed.body !== null && !networkExempt) {
 		try {
 			const [mergeBasePaths, basePaths] = await Promise.all([
@@ -1753,6 +1791,7 @@ async function main(args: readonly string[]): Promise<number> {
 				readBaseDecisionPaths: async (workspaceRoot, baseRef) =>
 					readDecisionPaths(workspaceRoot, `origin/${baseRef}`, config),
 				changed,
+				pullRequestDetails,
 				fetchClaims: claimClient(config),
 				readPullRequestDetails:
 					pullRequestDetails === undefined

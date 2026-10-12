@@ -120,8 +120,25 @@ function evaluateCorpus(
 	changed: Changed = noChange,
 	read: (path: string) => RecordContent | null = smallRecord,
 	config: LedgerConfig = CONFIG,
+	pullRequestDetails?: {
+		readonly isCrossRepository: boolean | undefined;
+		readonly headRepositoryOwner?: string | null;
+		readonly author: string | null;
+	},
 ): Violation[] {
-	return evaluate(decisions, records, changed, read, config);
+	return evaluate(
+		decisions,
+		records,
+		changed,
+		read,
+		config,
+		pullRequestDetails === undefined
+			? undefined
+			: {
+					...pullRequestDetails,
+					headRepositoryOwner: pullRequestDetails.headRepositoryOwner ?? null,
+				},
+	);
 }
 
 test("slugify matches GitHub punctuation and whitespace rules", () => {
@@ -780,17 +797,112 @@ describe("touch coupling", () => {
 		expect(evaluateCorpus(corpus(), [], noChange)).toEqual([]);
 	});
 	test.each(["renovate/update", "trunk-merge/pr-1/test"])(
-		"branch exemption %s still skips coupling",
+		"branch %s without PR metadata does not skip coupling",
 		(headBranch) => {
+			const violations = evaluateCorpus(corpus(), [], {
+				files: [changedRecord],
+				body: "",
+				headBranch,
+			});
 			expect(
-				evaluateCorpus(corpus(), [], {
-					files: [changedRecord],
-					body: null,
-					headBranch,
-				}),
+				violations.some((item) =>
+					item.message.includes("changed decision file"),
+				),
+			).toBe(true);
+		},
+	);
+	test.each([
+		["renovate/update", "rigelbuild-renovate[bot]"],
+		["trunk-merge/pr-1/test", "trunk-io[bot]"],
+	] as const)(
+		"same-repo author-bound exemption passes for %s",
+		(headBranch, author) => {
+			expect(
+				evaluateCorpus(
+					corpus(),
+					[],
+					{ files: [changedRecord], body: "", headBranch },
+					smallRecord,
+					CONFIG,
+					{ isCrossRepository: false, author },
+				),
 			).toEqual([]);
 		},
 	);
+	test.each([
+		["wrong author", { isCrossRepository: false, author: "person" }],
+		[
+			"cross-repository PR",
+			{ isCrossRepository: true, author: "rigelbuild-renovate[bot]" },
+		],
+		[
+			"unknown repository status",
+			{ isCrossRepository: undefined, author: "rigelbuild-renovate[bot]" },
+		],
+	] as const)(
+		"renovate branch with %s still enforces coupling",
+		(_label, details) => {
+			const violations = evaluateCorpus(
+				corpus(),
+				[],
+				{ files: [changedRecord], body: "", headBranch: "renovate/x" },
+				smallRecord,
+				CONFIG,
+				details,
+			);
+			expect(
+				violations.some((item) =>
+					item.message.includes("changed decision file"),
+				),
+			).toBe(true);
+		},
+	);
+	test("unknown cross-repository status does not exempt touch coupling", () => {
+		const violations = evaluateCorpus(corpus(), [], {
+			files: [changedRecord],
+			body: "",
+			headBranch: "renovate/x",
+		});
+		expect(
+			violations.some((item) => item.message.includes("changed decision file")),
+		).toBe(true);
+	});
+	test.each([
+		["app/rigelbuild-renovate", "rigelbuild-renovate[bot]"],
+		["rigelbuild-renovate[bot]", "app/rigelbuild-renovate"],
+	] as const)(
+		"matches bot author forms %s and %s",
+		(author, configuredAuthor) => {
+			const config = {
+				...CONFIG,
+				exemptBranches: [{ prefix: "renovate/", author: configuredAuthor }],
+			};
+			expect(
+				evaluateCorpus(
+					corpus(),
+					[],
+					{ files: [changedRecord], body: "", headBranch: "renovate/x" },
+					smallRecord,
+					config,
+					{ isCrossRepository: false, author },
+				),
+			).toEqual([]);
+		},
+	);
+	test("same-repo bot exemption skips changed-scope Status validation", () => {
+		const draft = record(undefined, "# Title\n\nStatus: Draft\n");
+		const scoped = { ...CONFIG, recordStatusScope: "changed" as const };
+		expect(
+			evaluateCorpus(
+				corpus(),
+				[draft],
+				{ files: [draft.path], body: "", headBranch: "renovate/x" },
+				smallRecord,
+				scoped,
+				{ isCrossRepository: false, author: "rigelbuild-renovate[bot]" },
+			),
+		).toEqual([]);
+	});
 });
 
 describe("runOnce", () => {
@@ -802,6 +914,7 @@ describe("runOnce", () => {
 			paths?: string[];
 			files?: Map<string, string>;
 			changed?: Changed;
+			pullRequestDetails?: Deps["pullRequestDetails"];
 			list?: Deps["listDesignFiles"];
 		} = {},
 	) {
@@ -823,12 +936,40 @@ describe("runOnce", () => {
 			readBaseDecisionPaths: async () => [],
 			baseRef: "main",
 			changed: options.changed ?? noChange,
+			pullRequestDetails: options.pullRequestDetails,
 			log: (message) => out.push(message),
 			fetchClaims: async () => new Map(),
 			err: (message) => errs.push(message),
 		};
 		return { deps, out, errs };
 	}
+
+	test("runOnce applies matching same-repo bot metadata to declaration legs", async () => {
+		const status = fixture({
+			files: new Map([
+				[decisionPath, decisionText()],
+				[recordPath, "# Record\n\nStatus: Draft\n"],
+			]),
+			changed: {
+				files: [recordPath],
+				body: "",
+				headBranch: "renovate/update",
+			},
+			pullRequestDetails: {
+				isCrossRepository: false,
+				headRepositoryOwner: null,
+				author: "rigelbuild-renovate[bot]",
+			},
+		});
+		const config = {
+			...CONFIG,
+			recordStatusScope: "changed" as const,
+			exemptBranches: [
+				{ prefix: "renovate/", author: "rigelbuild-renovate[bot]" },
+			],
+		};
+		expect(await runOnce(status.deps, config)).toBe(0);
+	});
 
 	test("valid fixture lists once and logs decision and record counts", async () => {
 		let listingCalls = 0;
@@ -1190,11 +1331,11 @@ describe("loadLedgerConfig", () => {
 			},
 		],
 		[
-			"empty exempt prefix",
+			"empty exempt branch prefix",
 			{
 				designsRoot: "docs/designs",
 				surfaceDepth: 1,
-				exemptBranchPrefixes: [""],
+				exemptBranches: [{ prefix: "", author: "bot[bot]" }],
 				counter: { url: "x", partition: "p" },
 			},
 		],
@@ -1247,6 +1388,39 @@ describe("loadLedgerConfig", () => {
 	])("rejects %s", (_label, value) => {
 		const path = join(temporaryDirectory(), "config.json");
 		writeFileSync(path, JSON.stringify(value));
+		expect(() => loadLedgerConfig(path)).toThrow();
+	});
+	test.each(["exemptBranchPrefixes", "exemptAuthors"])(
+		"rejects legacy %s config with migration guidance",
+		(key) => {
+			const path = join(temporaryDirectory(), "config.json");
+			writeFileSync(
+				path,
+				JSON.stringify({
+					designsRoot: "docs/designs",
+					surfaceDepth: 1,
+					counter: { url: "x", partition: "p" },
+					[key]: [],
+				}),
+			);
+			expect(() => loadLedgerConfig(path)).toThrow("use exemptBranches");
+		},
+	);
+	test.each([
+		[{ prefix: "renovate/" }],
+		[{ prefix: "renovate/", author: "" }],
+		[{ prefix: "renovate/", author: "bot[bot]", extra: true }],
+	])("rejects malformed exemptBranches entries", (entry) => {
+		const path = join(temporaryDirectory(), "config.json");
+		writeFileSync(
+			path,
+			JSON.stringify({
+				designsRoot: "docs/designs",
+				surfaceDepth: 1,
+				counter: { url: "x", partition: "p" },
+				exemptBranches: [entry],
+			}),
+		);
 		expect(() => loadLedgerConfig(path)).toThrow();
 	});
 	test("defaults citationAmbiguousPaths to an empty list", () => {
@@ -2224,7 +2398,7 @@ describe("claim check", () => {
 		const config: LedgerConfig = {
 			...validConfig(),
 			legs: { claimCheck: true },
-			exemptAuthors: { "automation/": "trusted[bot]" },
+			exemptBranches: [{ prefix: "automation/", author: "trusted[bot]" }],
 		};
 		const fixture = ledgerFixture({
 			config,
@@ -2256,6 +2430,26 @@ describe("claim check", () => {
 		};
 		expect(await runOnce(exemptDeps, config)).toBe(0);
 		expect(calls).toBe(1);
+		const crossRepositoryDeps: Deps = {
+			...exemptDeps,
+			readPullRequestDetails: async () => ({
+				isCrossRepository: true,
+				headRepositoryOwner: "contributor",
+				author: "trusted[bot]",
+			}),
+		};
+		expect(await runOnce(crossRepositoryDeps, config)).toBe(0);
+		expect(calls).toBe(2);
+		const unknownRepositoryDeps: Deps = {
+			...exemptDeps,
+			readPullRequestDetails: async () => ({
+				isCrossRepository: undefined,
+				headRepositoryOwner: null,
+				author: "trusted[bot]",
+			}),
+		};
+		expect(await runOnce(unknownRepositoryDeps, config)).toBe(0);
+		expect(calls).toBe(3);
 		const failedDeps: Deps = {
 			...fixture.deps,
 			fetchClaims: async () => {
@@ -2294,10 +2488,13 @@ describe("claim check", () => {
 		);
 		writeFileSync(
 			path,
-			JSON.stringify({ ...base, exemptAuthors: { "bot/": 2 } }),
+			JSON.stringify({
+				...base,
+				exemptBranches: [{ prefix: "automation/", author: "trusted[bot]" }],
+			}),
 		);
-		expect(() => loadLedgerConfig(path)).toThrow(
-			"exemptAuthors.bot/ must be a non-empty string",
-		);
+		expect(loadLedgerConfig(path).exemptBranches).toEqual([
+			{ prefix: "automation/", author: "trusted[bot]" },
+		]);
 	});
 });
