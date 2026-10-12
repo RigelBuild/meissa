@@ -72,10 +72,15 @@ function matches(
 	row: DecisionRow,
 	line: string,
 	filters: Filters,
-	surfaceDepth: LedgerConfig["surfaceDepth"],
+	layout: Pick<LedgerConfig, "surfaceDepth" | "surfaces">,
 ): boolean {
-	const where = location(row.path, surfaceDepth);
-	const surface = where.includes("/") ? where.split("/")[0] : undefined;
+	const where = location(row.path, layout.surfaceDepth);
+	const surface =
+		layout.surfaceDepth === 0
+			? layout.surfaces?.length === 1
+				? layout.surfaces[0]
+				: undefined
+			: where.split("/")[0];
 	if (filters.surface !== undefined && surface !== filters.surface)
 		return false;
 	if (filters.area !== undefined && where.split("/").at(-1) !== filters.area)
@@ -97,7 +102,7 @@ function matches(
 export function listDecisions(
 	files: readonly DecisionFile[],
 	filters: Filters,
-	layout: Pick<LedgerConfig, "surfaceDepth"> = { surfaceDepth: 1 },
+	layout: Pick<LedgerConfig, "surfaceDepth" | "surfaces"> = { surfaceDepth: 1 },
 ): { lines: string[]; errors: string[] } {
 	const rows: DecisionRow[] = [];
 	const errors: string[] = [];
@@ -112,7 +117,7 @@ export function listDecisions(
 	const lines = rows
 		.sort((left, right) => Number(left.id.slice(3)) - Number(right.id.slice(3)))
 		.map((row) => ({ row, line: format(row, layout.surfaceDepth) }))
-		.filter(({ row, line }) => matches(row, line, filters, layout.surfaceDepth))
+		.filter(({ row, line }) => matches(row, line, filters, layout))
 		.map(({ line }) => line);
 	return { lines, errors };
 }
@@ -179,11 +184,13 @@ function decisionGlob(config: LedgerConfig): string {
 		: `${config.designsRoot}/decisions/*/DL-*.md`;
 }
 
-/** Exit 0 on success, 1 on a malformed file or an empty glob, 2 on a usage/config error. */
+/** Exit 0 on success, 1 on a malformed file or an empty glob, 2 on a usage/config/read error. */
 export async function run(
 	argv: readonly string[],
 	root: string,
 	io: Output,
+	readDecisionFile: (path: string) => Promise<string> = (path) =>
+		readFile(path, "utf8"),
 ): Promise<number> {
 	let args: ParsedArgs;
 	try {
@@ -207,14 +214,31 @@ export async function run(
 		);
 		return 2;
 	}
+	if (
+		config.surfaceDepth === 0 &&
+		args.filters.surface !== undefined &&
+		config.surfaces?.length !== 1
+	) {
+		io.err(
+			"dl-list: --surface requires exactly one configured surface when surfaceDepth is 0",
+		);
+		return 2;
+	}
 	const glob = args.glob ?? decisionGlob(config);
 	const files: DecisionFile[] = [];
-	for await (const path of new Bun.Glob(glob).scan({ cwd: root })) {
-		const normalized = path.split(pathPosix.sep).join("/");
-		files.push({
-			path: normalized,
-			text: await readFile(resolve(root, normalized), "utf8"),
-		});
+	try {
+		for await (const path of new Bun.Glob(glob).scan({ cwd: root })) {
+			const normalized = path.split(pathPosix.sep).join("/");
+			files.push({
+				path: normalized,
+				text: await readDecisionFile(resolve(root, normalized)),
+			});
+		}
+	} catch (error) {
+		io.err(
+			`dl-list: cannot scan or read decision files matching ${glob}: ${error instanceof Error ? error.message : String(error)}`,
+		);
+		return 2;
 	}
 	if (files.length === 0) {
 		io.err(`no decision files match ${glob} under ${root}`);

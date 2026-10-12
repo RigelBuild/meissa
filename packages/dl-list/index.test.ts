@@ -101,9 +101,6 @@ describe("listDecisions", () => {
 			{ surfaceDepth: 0 },
 		);
 		expect(lines[0]).toContain("  ci  ");
-		expect(
-			listDecisions([flat], { surface: "tools" }, { surfaceDepth: 0 }).lines,
-		).toEqual([]);
 	});
 
 	test("a malformed file is reported, not dropped silently", () => {
@@ -172,7 +169,11 @@ describe("run", () => {
 	});
 	const tree = (
 		files: readonly DecisionFile[],
-		config: { designsRoot: string; surfaceDepth: 0 | 1 },
+		config: {
+			designsRoot: string;
+			surfaceDepth: 0 | 1;
+			surfaces?: readonly string[];
+		},
 	): string => {
 		const root = mkdtempSync(join(tmpdir(), "dl-list-"));
 		roots.push(root);
@@ -191,13 +192,22 @@ describe("run", () => {
 		}
 		return root;
 	};
-	const call = async (argv: string[], root: string) => {
+	const call = async (
+		argv: string[],
+		root: string,
+		readDecisionFile?: (path: string) => Promise<string>,
+	) => {
 		const out: string[] = [];
 		const err: string[] = [];
-		const code = await run(argv, root, {
-			out: (line) => out.push(line),
-			err: (line) => err.push(line),
-		});
+		const code = await run(
+			argv,
+			root,
+			{
+				out: (line) => out.push(line),
+				err: (line) => err.push(line),
+			},
+			readDecisionFile,
+		);
 		return { code, out, err };
 	};
 
@@ -223,6 +233,53 @@ describe("run", () => {
 			[],
 		]);
 	});
+	test("a non-default designsRoot drives the default glob", async () => {
+		const root = tree(
+			[file("DL-011", { area: "ci", root: "ledger-tree", layout: "flat" })],
+			{ designsRoot: "ledger-tree", surfaceDepth: 0 },
+		);
+		const result = await call([], root);
+		expect([result.code, ids(result.out), result.err]).toEqual([
+			0,
+			["DL-011"],
+			[],
+		]);
+	});
+
+	test("depth-zero surface filtering requires one configured surface", async () => {
+		const root = tree([file("DL-012", { area: "ci", layout: "flat" })], {
+			designsRoot: "docs/designs",
+			surfaceDepth: 0,
+		});
+		const result = await call(["--surface", "compass"], root);
+		expect(result.code).toBe(2);
+		expect(result.err[0]).toContain("requires exactly one configured surface");
+	});
+	test("a decision file read error is reported with exit 2", async () => {
+		const root = tree([file("DL-013", { area: "ci", layout: "flat" })], {
+			designsRoot: "docs/designs",
+			surfaceDepth: 0,
+		});
+		const result = await call([], root, async () => {
+			throw new Error("EACCES");
+		});
+		expect(result.code).toBe(2);
+		expect(result.err[0]).toContain("EACCES");
+	});
+
+	test("depth-zero surface filtering selects the configured surface", async () => {
+		const root = tree([file("DL-014", { area: "ci", layout: "flat" })], {
+			designsRoot: "docs/designs",
+			surfaceDepth: 0,
+			surfaces: ["compass"],
+		});
+		const result = await call(["--surface", "compass"], root);
+		expect([result.code, ids(result.out), result.err]).toEqual([
+			0,
+			["DL-014"],
+			[],
+		]);
+	});
 
 	test("an explicit glob overrides the layout-derived pattern", async () => {
 		const root = tree(
@@ -230,6 +287,7 @@ describe("run", () => {
 			{ designsRoot: "docs/designs", surfaceDepth: 0 },
 		);
 		const result = await call(["--glob", "ledger/decisions/*/DL-*.md"], root);
+
 		expect([result.code, ids(result.out), result.err]).toEqual([
 			0,
 			["DL-010"],
