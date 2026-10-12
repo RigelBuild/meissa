@@ -8,6 +8,7 @@ import {
 
 export interface ClaimArgs {
 	ref: string;
+	/** The branch name used for the claims. Name it before claiming. */
 	lane: string;
 	count: number;
 	surface?: string;
@@ -26,8 +27,12 @@ export interface ClaimedId {
 	date: string;
 }
 
-const USAGE =
-	"Usage: dl-claim --config <path> --ref <RIG-n|none> --lane <branch> [--count 1..10] [--surface <s>]";
+export type MaintenanceArgs =
+	| { mode: "rebind"; from: string; lane: string; ids: readonly string[] }
+	| { mode: "release"; lane: string; ids: readonly string[] };
+export type DlClaimArgs = ({ mode: "claim" } & ClaimArgs) | MaintenanceArgs;
+
+const USAGE = `Usage: dl-claim --config <path> --ref <RIG-n|none> --lane <branch> [--count 1..10] [--surface <s>]\n       dl-claim --config <path> --rebind --from <lane> --lane <lane> --ids DL-a,DL-b\n       dl-claim --config <path> --release --lane <lane> --ids DL-a,DL-b`;
 const ACCEPTED_FLAGS = ["--ref", "--lane", "--count", "--surface"];
 
 function parseFlag(arg: string): { flag: string; value: string | undefined } {
@@ -50,10 +55,66 @@ function readFlagValue(
 	return { value, nextIndex: inlineValue === undefined ? index + 1 : index };
 }
 
+function parseMaintenanceArgs(
+	argv: readonly string[],
+): MaintenanceArgs | undefined {
+	const rebind = argv.includes("--rebind");
+	const release = argv.includes("--release");
+	if (!rebind && !release) return undefined;
+	if (rebind && release)
+		throw new Error(`${USAGE}\nChoose one maintenance mode`);
+	const mode: "rebind" | "release" = rebind ? "rebind" : "release";
+	const allowed = rebind
+		? ["--rebind", "--from", "--lane", "--ids"]
+		: ["--release", "--lane", "--ids"];
+	const values: Record<string, string> = {};
+	for (let index = 0; index < argv.length; index += 1) {
+		const arg = argv[index] ?? "";
+		const { flag, value: inlineValue } = parseFlag(arg);
+		if (!allowed.includes(flag))
+			throw new Error(`${USAGE}\nUnknown or mixed flag: ${arg}`);
+		if (flag === "--rebind" || flag === "--release") {
+			if (inlineValue !== undefined || flag !== `--${mode}`)
+				throw new Error(`${USAGE}\nInvalid maintenance mode`);
+			continue;
+		}
+		if (values[flag] !== undefined)
+			throw new Error(`${USAGE}\nDuplicate flag: ${flag}`);
+		const parsed = readFlagValue(argv, index, flag, inlineValue);
+		values[flag] = parsed.value;
+		index = parsed.nextIndex;
+	}
+	const lane = values["--lane"];
+	const rawIds = values["--ids"];
+	if (lane === undefined || lane.trim().length === 0 || rawIds === undefined)
+		throw new Error(`${USAGE}\nMaintenance mode requires --lane and --ids`);
+	const ids: string[] = [];
+	const seen: Record<string, true> = {};
+	for (const rawId of rawIds.split(",")) {
+		const match = /^DL-(\d+)$/.exec(rawId);
+		const number = match?.[1] === undefined ? Number.NaN : Number(match[1]);
+		if (!Number.isSafeInteger(number) || number < 0)
+			throw new Error(`${USAGE}\nInvalid DL id: ${rawId}`);
+		const id = `DL-${String(number).padStart(3, "0")}`;
+		if (seen[id] === true) throw new Error(`${USAGE}\nDuplicate DL id: ${id}`);
+		seen[id] = true;
+		ids.push(id);
+	}
+	if (rebind) {
+		const from = values["--from"];
+		if (from === undefined || from.trim().length === 0)
+			throw new Error(`${USAGE}\n--from must be non-empty`);
+		return { mode: "rebind", from, lane, ids };
+	}
+	return { mode: "release", lane, ids };
+}
+
 export function parseArgs(
 	argv: readonly string[],
 	config: LedgerConfig,
-): ClaimArgs {
+): DlClaimArgs {
+	const maintenance = parseMaintenanceArgs(argv);
+	if (maintenance !== undefined) return maintenance;
 	const state: {
 		ref: string | undefined;
 		lane: string | undefined;
@@ -104,7 +165,7 @@ export function parseArgs(
 	}
 	if (!surfaces.includes(surface))
 		throw new Error(`${USAGE}\nUnknown surface: ${surface}`);
-	return { ref, lane, count: state.count, surface };
+	return { mode: "claim", ref, lane, count: state.count, surface };
 }
 
 export function buildClaimBody(
@@ -265,6 +326,95 @@ export async function claim(
 	return readClaimedIds(response, body.count, config);
 }
 
+async function readMaintenanceIds(response: Response): Promise<string[]> {
+	let payload: unknown;
+	try {
+		payload = await response.json();
+	} catch {
+		throw new Error("claim maintenance response is not valid JSON");
+	}
+	if (
+		!isRecord(payload) ||
+		!Array.isArray(payload.ids) ||
+		!payload.ids.every((id: unknown) => typeof id === "string")
+	)
+		throw new Error("claim maintenance response is malformed");
+	return payload.ids;
+}
+
+export async function maintain(
+	args: MaintenanceArgs,
+	token: string,
+	config: LedgerConfig,
+	deps: ClaimDeps = {},
+): Promise<string[]> {
+	const trimmedToken = validateDlClaimToken(token);
+	const mode = args.mode;
+	const body =
+		mode === "rebind"
+			? {
+					repo: config.counter.partition,
+					ids: args.ids,
+					from: args.from,
+					to: args.lane,
+				}
+			: { repo: config.counter.partition, ids: args.ids, lane: args.lane };
+	const path = mode === "rebind" ? "/claims/rebind" : "/claims/release";
+	const timeoutMs =
+		deps.timeoutMs !== undefined && deps.timeoutMs > 0
+			? deps.timeoutMs
+			: 30_000;
+	const endpoint = `${baseUrl(config)}${path}`;
+	let response: Response;
+	try {
+		response = await (deps.fetchFn ?? fetch)(endpoint, {
+			method: "POST",
+			redirect: "error",
+			headers: {
+				Authorization: `Bearer ${trimmedToken}`,
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(body),
+			signal: (deps.timeoutSignal ?? AbortSignal.timeout)(timeoutMs),
+		});
+	} catch (error) {
+		const name = error instanceof Error ? error.name : "UnknownError";
+		throw new Error(`request to ${endpoint} failed (${name})`);
+	}
+	if (response.status === 409) {
+		let payload: unknown;
+		try {
+			payload = await response.json();
+		} catch {
+			payload = undefined;
+		}
+		const ids =
+			isRecord(payload) && Array.isArray(payload.ids)
+				? payload.ids.filter(
+						(id: unknown): id is string => typeof id === "string",
+					)
+				: [];
+		throw new Error(
+			`${mode} refused, nothing changed: ${ids.join(", ") || "some ids"} not claimed for lane ${mode === "rebind" ? args.from : args.lane}.`,
+		);
+	}
+	if (!response.ok)
+		throw formatServiceError(
+			config,
+			response.status,
+			await readServiceError(response),
+		);
+	const ids = await readMaintenanceIds(response);
+	const returned = new Set(ids);
+	if (
+		ids.length !== args.ids.length ||
+		returned.size !== ids.length ||
+		args.ids.some((id) => !returned.has(id))
+	)
+		throw new Error("claim maintenance response has the wrong ids");
+	return ids;
+}
+
 function extractConfigPath(argv: readonly string[]): {
 	configPath: string;
 	claimArgs: string[];
@@ -324,9 +474,12 @@ export async function runOnce(
 		err(`dl-claim: ${error instanceof Error ? error.message : String(error)}`);
 		return 2;
 	}
-	let body: ClaimRequest;
+	let body: ClaimRequest | undefined;
+	let maintenance: MaintenanceArgs | undefined;
 	try {
-		body = buildClaimBody(config, parseArgs(claimArgs, config));
+		const parsed = parseArgs(claimArgs, config);
+		if (parsed.mode === "claim") body = buildClaimBody(config, parsed);
+		else maintenance = parsed;
 	} catch (error) {
 		err(`dl-claim: ${error instanceof Error ? error.message : String(error)}`);
 		return 2;
@@ -341,13 +494,20 @@ export async function runOnce(
 		return 2;
 	}
 	try {
+		if (maintenance !== undefined) {
+			const ids = await maintain(maintenance, token, config, {
+				...(deps.fetchFn === undefined ? {} : { fetchFn: deps.fetchFn }),
+			});
+			log(ids.join("\n"));
+			return 0;
+		}
+		if (body === undefined) throw new Error("claim arguments were not parsed");
 		const ids = await claim(body, token, config, {
 			...(deps.fetchFn === undefined ? {} : { fetchFn: deps.fetchFn }),
 		});
 		log(formatClaimed(ids));
 		return 0;
 	} catch (error) {
-		// claim builds every message it throws; none carries the token.
 		err(`dl-claim: ${error instanceof Error ? error.message : String(error)}`);
 		return 1;
 	}

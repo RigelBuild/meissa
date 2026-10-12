@@ -16,15 +16,60 @@ export interface LedgerConfig {
 	/** "changed" checks record `Status:` lines only in PR-changed files; default "all". */
 	readonly recordStatusScope?: "all" | "changed";
 	readonly citationAmbiguousPaths?: readonly string[];
+	readonly exemptAuthors?: Readonly<Record<string, string>>;
 	readonly legs?: {
 		readonly citations?: boolean;
 		readonly errata?: boolean;
 		readonly recordLinks?: boolean;
 		readonly mainIds?: boolean;
+		readonly claimCheck?: boolean;
 	};
 	readonly counter: { readonly url: string; readonly partition: string };
 	readonly remediationDoc?: string;
 }
+
+export type ClaimVerdict = "lane" | "not-lane";
+export const CLAIM_CHECK_TIMEOUT_MS = 10_000;
+export const CLAIM_CHECK_ATTEMPTS = 3;
+export const CLAIM_CHECK_BACKOFF_MS = [1_000, 3_000] as const;
+export const CLAIM_CHECK_RATE_WAIT_MAX_MS = 65_000;
+
+export type ClaimFetch = (
+	lane: string,
+	ids: readonly string[],
+) => Promise<ReadonlyMap<string, ClaimVerdict>>;
+
+export type ClaimFetchFn = (
+	input: string | URL | Request,
+	init?: RequestInit,
+) => Promise<Response>;
+
+export class ClaimServiceError extends Error {
+	readonly kind: "unreachable" | "rate_limited";
+
+	constructor(kind: "unreachable" | "rate_limited", message: string) {
+		super(message);
+		this.name = "ClaimServiceError";
+		this.kind = kind;
+	}
+}
+
+export interface PullRequestDetails {
+	readonly isCrossRepository: boolean;
+	readonly headRepositoryOwner: string | null;
+	readonly author: string | null;
+}
+
+export function botExempt(
+	headBranch: string,
+	author: string | undefined,
+	exemptAuthors: Readonly<Record<string, string>>,
+): boolean {
+	return Object.entries(exemptAuthors).some(
+		([prefix, bot]) => headBranch.startsWith(prefix) && author === bot,
+	);
+}
+
 function isRepoRelativePath(value: string): boolean {
 	return (
 		value !== "" &&
@@ -87,6 +132,7 @@ export function loadLedgerConfig(path: string): LedgerConfig {
 			"surfaces",
 			"historicalChain",
 			"exemptBranchPrefixes",
+			"exemptAuthors",
 			"citationAmbiguousPaths",
 			"recordStatusScope",
 			"legs",
@@ -149,6 +195,18 @@ export function loadLedgerConfig(path: string): LedgerConfig {
 		);
 	if (exemptBranchPrefixes?.some((prefix) => prefix === "") === true)
 		throw new Error("exemptBranchPrefixes entries must not be empty");
+	let exemptAuthors: Record<string, string> | undefined;
+	if (raw.exemptAuthors !== undefined) {
+		const authors = asRecord(raw.exemptAuthors, "exemptAuthors");
+		const entries = Object.entries(authors).map(([prefix, author]) => {
+			if (prefix.trim() === "")
+				throw new Error("exemptAuthors prefixes must not be empty");
+			if (typeof author !== "string" || author.trim() === "")
+				throw new Error(`exemptAuthors.${prefix} must be a non-empty string`);
+			return [prefix, author] as const;
+		});
+		exemptAuthors = Object.fromEntries(entries);
+	}
 	const citationAmbiguousPaths =
 		raw.citationAmbiguousPaths === undefined
 			? []
@@ -176,7 +234,7 @@ export function loadLedgerConfig(path: string): LedgerConfig {
 		const legConfig = asRecord(raw.legs, "legs");
 		rejectUnknownKeys(
 			legConfig,
-			["citations", "errata", "recordLinks", "mainIds"],
+			["citations", "errata", "recordLinks", "mainIds", "claimCheck"],
 			"legs",
 		);
 		for (const [key, value] of Object.entries(legConfig))
@@ -195,6 +253,10 @@ export function loadLedgerConfig(path: string): LedgerConfig {
 					: undefined,
 			mainIds:
 				typeof legConfig.mainIds === "boolean" ? legConfig.mainIds : undefined,
+			claimCheck:
+				typeof legConfig.claimCheck === "boolean"
+					? legConfig.claimCheck
+					: undefined,
 		};
 	}
 	const counter = asRecord(raw.counter, "counter");
@@ -213,6 +275,7 @@ export function loadLedgerConfig(path: string): LedgerConfig {
 		...(surfaces === undefined ? {} : { surfaces }),
 		...(historicalChain === undefined ? {} : { historicalChain }),
 		...(exemptBranchPrefixes === undefined ? {} : { exemptBranchPrefixes }),
+		...(exemptAuthors === undefined ? {} : { exemptAuthors }),
 		citationAmbiguousPaths,
 		...(scope === undefined ? {} : { recordStatusScope: scope }),
 		...(legs === undefined ? {} : { legs }),
@@ -689,8 +752,186 @@ export interface Deps {
 	) => Promise<readonly string[]>;
 	readonly baseRef: string;
 	readonly changed: Changed;
+	readonly fetchClaims: ClaimFetch;
+	readonly readPullRequestDetails?: () => Promise<PullRequestDetails>;
 	readonly log: (message: string) => void;
 	readonly err: (message: string) => void;
+}
+export function claimCheckIds(
+	rows: readonly DecisionRow[],
+	changedFiles: readonly string[],
+	mergeBaseIds: ReadonlySet<string>,
+	baseTipIds: ReadonlySet<string>,
+): DecisionRow[] {
+	const changed = new Set(changedFiles);
+	const seen = new Set<string>();
+	const selected: DecisionRow[] = [];
+	for (const row of rows) {
+		if (
+			!changed.has(row.path) ||
+			mergeBaseIds.has(row.id) ||
+			baseTipIds.has(row.id) ||
+			seen.has(row.id)
+		)
+			continue;
+		seen.add(row.id);
+		selected.push(row);
+	}
+	return selected.sort((left, right) => left.id.localeCompare(right.id));
+}
+
+export function checkClaims(
+	rows: readonly DecisionRow[],
+	lane: string,
+	verdicts: ReadonlyMap<string, ClaimVerdict>,
+): Violation[] {
+	return rows.flatMap((row) =>
+		verdicts.get(row.id) === "lane"
+			? []
+			: [
+					{
+						file: row.path,
+						line: row.line,
+						message: `${row.id}: not claimed for lane ${lane}. If you claimed it under another lane, run\n\`dl-claim --rebind --from <old-lane> --lane ${lane} --ids ${row.id}\`. Otherwise run \`dl-claim --lane ${lane}\`.`,
+					},
+				],
+	);
+}
+
+function isClaimVerdict(value: unknown): value is ClaimVerdict {
+	return value === "lane" || value === "not-lane";
+}
+
+function unreachableClaimError(url: string, reason: string): ClaimServiceError {
+	return new ClaimServiceError(
+		"unreachable",
+		`design-ledger-gate: cannot reach the DL claim service at ${url} (${reason}).\nRe-run the pipeline when it answers. Do not hand-mint: an unclaimed id fails.`,
+	);
+}
+
+function parseClaimResponse(
+	value: unknown,
+	ids: readonly string[],
+): ReadonlyMap<string, ClaimVerdict> {
+	if (typeof value !== "object" || value === null || !("claims" in value))
+		throw new Error("response must contain claims");
+	const claims = value.claims;
+	if (!Array.isArray(claims)) throw new Error("claims must be an array");
+	const requested = new Set(ids);
+	const verdicts = new Map<string, ClaimVerdict>();
+	for (const claim of claims) {
+		if (typeof claim !== "object" || claim === null || Array.isArray(claim))
+			throw new Error("claim entry must be an object");
+		if (!("id" in claim) || !("state" in claim))
+			throw new Error("claim entry must contain id and state");
+		if (
+			typeof claim.id !== "string" ||
+			!requested.has(claim.id) ||
+			!isClaimVerdict(claim.state)
+		)
+			throw new Error("claim entry has an unknown id or state");
+		if (verdicts.has(claim.id))
+			throw new Error(`duplicate claim verdict for ${claim.id}`);
+		verdicts.set(claim.id, claim.state);
+	}
+	for (const id of ids)
+		if (!verdicts.has(id)) throw new Error(`missing claim verdict for ${id}`);
+	return verdicts;
+}
+
+export function claimClient(
+	config: LedgerConfig,
+	fetchFn: ClaimFetchFn = fetch,
+	sleep: (ms: number) => Promise<void> = async (ms) => {
+		const { promise, resolve } = Promise.withResolvers<void>();
+		setTimeout(resolve, ms);
+		await promise;
+	},
+): ClaimFetch {
+	const baseUrl = config.counter.url.replace(/\/+$/, "");
+	return async (lane, ids) => {
+		const result = new Map<string, ClaimVerdict>();
+		let waited = 0;
+		for (let start = 0; start < ids.length; start += 100) {
+			const batch = ids.slice(start, start + 100);
+			const url = new URL(`${baseUrl}/claims`);
+			url.searchParams.set("repo", config.counter.partition);
+			url.searchParams.set("lane", lane);
+			url.searchParams.set("ids", batch.join(","));
+			let attempts = 0;
+			while (true) {
+				let response: Response;
+				try {
+					response = await fetchFn(url, {
+						signal: AbortSignal.timeout(CLAIM_CHECK_TIMEOUT_MS),
+					});
+				} catch (error) {
+					attempts += 1;
+					if (attempts >= CLAIM_CHECK_ATTEMPTS)
+						throw unreachableClaimError(
+							baseUrl,
+							error instanceof Error ? error.message : String(error),
+						);
+					await sleep(CLAIM_CHECK_BACKOFF_MS[attempts - 1] ?? 0);
+					continue;
+				}
+				if (response.status === 429) {
+					const rawRetryAfter = response.headers.get("retry-after");
+					const retryAfter =
+						rawRetryAfter === null ? Number.NaN : Number(rawRetryAfter);
+					const requestedWait =
+						Number.isFinite(retryAfter) && retryAfter > 0
+							? retryAfter * 1_000
+							: 60_000;
+					const remaining = CLAIM_CHECK_RATE_WAIT_MAX_MS - waited;
+					if (remaining <= 0)
+						throw new ClaimServiceError(
+							"rate_limited",
+							"design-ledger-gate: the DL claim service rate-limited this runner for 65 s.\nRe-run the pipeline in a minute.",
+						);
+					const wait = Math.min(requestedWait, remaining);
+					await sleep(wait);
+					waited += wait;
+					if (waited >= CLAIM_CHECK_RATE_WAIT_MAX_MS)
+						throw new ClaimServiceError(
+							"rate_limited",
+							"design-ledger-gate: the DL claim service rate-limited this runner for 65 s.\nRe-run the pipeline in a minute.",
+						);
+					continue;
+				}
+				if (response.status >= 500) {
+					attempts += 1;
+					if (attempts >= CLAIM_CHECK_ATTEMPTS)
+						throw unreachableClaimError(baseUrl, `HTTP ${response.status}`);
+					await sleep(CLAIM_CHECK_BACKOFF_MS[attempts - 1] ?? 0);
+					continue;
+				}
+				if (!response.ok)
+					throw unreachableClaimError(baseUrl, `HTTP ${response.status}`);
+				let payload: unknown;
+				try {
+					payload = await response.json();
+				} catch (error) {
+					throw unreachableClaimError(
+						baseUrl,
+						error instanceof Error ? error.message : "malformed response body",
+					);
+				}
+				let batchVerdicts: ReadonlyMap<string, ClaimVerdict>;
+				try {
+					batchVerdicts = parseClaimResponse(payload, batch);
+				} catch (error) {
+					throw unreachableClaimError(
+						baseUrl,
+						error instanceof Error ? error.message : String(error),
+					);
+				}
+				for (const [id, verdict] of batchVerdicts) result.set(id, verdict);
+				break;
+			}
+		}
+		return result;
+	};
 }
 
 const CITATION_RE =
@@ -912,6 +1153,8 @@ export async function runOnce(
 		readBaseDecisionPaths,
 		baseRef,
 		changed,
+		fetchClaims,
+		readPullRequestDetails,
 		log,
 		err,
 	} = deps;
@@ -1159,6 +1402,85 @@ export async function runOnce(
 			return 2;
 		}
 	}
+	let claimChecked = 0;
+	let lane = changed.headBranch;
+	let author = process.env.CI_COMMIT_AUTHOR;
+	let crossRepository: boolean | undefined;
+	let headRepositoryOwner: string | null = null;
+	if (
+		(config.legs?.mainIds || config.legs?.claimCheck) &&
+		readPullRequestDetails
+	) {
+		try {
+			const details = await readPullRequestDetails();
+			author ??= details.author ?? undefined;
+			crossRepository = details.isCrossRepository;
+			headRepositoryOwner = details.headRepositoryOwner;
+		} catch (error) {
+			err(
+				`design-ledger-gate: cannot read pull request details: ${errorMessage(error)}`,
+			);
+			return 2;
+		}
+	}
+	const networkExempt =
+		config.legs?.claimCheck === true &&
+		changed.body !== null &&
+		botExempt(changed.headBranch, author, config.exemptAuthors ?? {});
+	if (
+		crossRepository === true &&
+		headRepositoryOwner !== null &&
+		headRepositoryOwner.length > 0
+	)
+		lane = `${headRepositoryOwner}:${changed.headBranch}`;
+	if (
+		config.legs?.claimCheck &&
+		changed.body !== null &&
+		changed.headBranch.length === 0
+	) {
+		err("design-ledger-gate: the claim check needs the PR head branch");
+		return 2;
+	}
+	if (config.legs?.claimCheck && changed.body !== null && !networkExempt) {
+		try {
+			const [mergeBasePaths, basePaths] = await Promise.all([
+				readMergeBaseDecisionPaths(root, baseRef),
+				readBaseDecisionPaths(root, baseRef),
+			]);
+			const mergeBaseIds = new Set(
+				mergeBasePaths.map((path) =>
+					pathPosix.basename(path).replace(/\.md$/, ""),
+				),
+			);
+			const baseTipIds = new Set(
+				basePaths.map((path) => pathPosix.basename(path).replace(/\.md$/, "")),
+			);
+			const rows = claimCheckIds(
+				corpus.rows,
+				changed.files,
+				mergeBaseIds,
+				baseTipIds,
+			);
+			if (rows.length > 0) {
+				const verdicts = await fetchClaims(
+					lane,
+					rows.map(({ id }) => id),
+				);
+				claimChecked = rows.length;
+				violations.push(...checkClaims(rows, lane, verdicts));
+			}
+		} catch (error) {
+			if (error instanceof ClaimServiceError) err(error.message);
+			else
+				err(
+					unreachableClaimError(
+						config.counter.url.replace(/\/+$/, ""),
+						errorMessage(error),
+					).message,
+				);
+			return 2;
+		}
+	}
 	if (violations.length === 0) {
 		const pr =
 			changed.body === null
@@ -1171,12 +1493,16 @@ export async function runOnce(
 			config.recordStatusScope === "changed" && changed.body === null
 				? "record Status skipped (no PR context)"
 				: `${records.length} record(s) status-checked`;
+		const claims = config.legs?.claimCheck
+			? `claims: ${claimChecked} new id(s) checked for ${lane}`
+			: "claim checks off";
 		log(
-			`design-ledger-gate: OK — ${corpus.rows.length} decision file(s), ${recordStatus}; ${pr}; ${citations}.`,
+			`design-ledger-gate: OK — ${corpus.rows.length} decision file(s), ${recordStatus}; ${pr}; ${citations}; ${claims}.`,
 		);
 		return 0;
 	}
-	violations.sort((a, b) => a.file.localeCompare(b.file) || a.line - b.line);
+	if (config.legs?.claimCheck && claimChecked > 0)
+		log(`claims: ${claimChecked} new id(s) checked for ${lane}`);
 	err("");
 	err(`design-ledger-gate: ${violations.length} violation(s):`);
 	for (const { file, line, message } of violations)
@@ -1283,12 +1609,13 @@ async function main(args: readonly string[]): Promise<number> {
 		const config = loadLedgerConfig(configPath);
 		const root = scanRoot();
 		let changed: Changed = { files: [], body: null, headBranch: "" };
+		let pullRequestDetails: PullRequestDetails | undefined;
 		const context = prContextFrom(process.env);
 		if (context.kind === "error") throw new Error(context.message);
 		if (context.kind === "woodpecker") changed = context.changed;
 		else if (context.kind === "pr") {
 			const view =
-				await $`timeout 30 gh pr view ${context.prNumber} --repo ${context.repo} --json headRefName,body`.json();
+				await $`timeout 30 gh pr view ${context.prNumber} --repo ${context.repo} --json headRefName,body,isCrossRepository,headRepositoryOwner,author`.json();
 			const files =
 				await $`timeout 60 gh api --paginate repos/${context.repo}/pulls/${context.prNumber}/files --jq .[].filename`.text();
 			changed = {
@@ -1296,7 +1623,28 @@ async function main(args: readonly string[]): Promise<number> {
 				body: view.body,
 				headBranch: view.headRefName,
 			};
+			const author = view.author;
+			pullRequestDetails = {
+				isCrossRepository: view.isCrossRepository,
+				headRepositoryOwner:
+					typeof view.headRepositoryOwner === "object" &&
+					view.headRepositoryOwner !== null &&
+					"login" in view.headRepositoryOwner &&
+					typeof view.headRepositoryOwner.login === "string"
+						? view.headRepositoryOwner.login
+						: null,
+				author:
+					typeof author === "object" &&
+					author !== null &&
+					"login" in author &&
+					typeof author.login === "string"
+						? author.login.startsWith("app/")
+							? `${author.login.slice(4)}[bot]`
+							: author.login
+						: null,
+			};
 		}
+
 		return await runOnce(
 			{
 				root,
@@ -1345,6 +1693,11 @@ async function main(args: readonly string[]): Promise<number> {
 				readBaseDecisionPaths: async (workspaceRoot, baseRef) =>
 					readDecisionPaths(workspaceRoot, `origin/${baseRef}`, config),
 				changed,
+				fetchClaims: claimClient(config),
+				readPullRequestDetails:
+					pullRequestDetails === undefined
+						? undefined
+						: async () => pullRequestDetails,
 				log: (message) => console.log(message),
 				err: (message) => console.error(message),
 			},

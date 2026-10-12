@@ -6,6 +6,10 @@ import { join } from "node:path";
 import {
 	buildDecisionCorpus,
 	type Changed,
+	ClaimServiceError,
+	checkClaims,
+	claimCheckIds,
+	claimClient,
 	classifyDesignPath,
 	conflictMarkerViolations,
 	type DecisionCorpus,
@@ -818,6 +822,7 @@ describe("runOnce", () => {
 			baseRef: "main",
 			changed: options.changed ?? noChange,
 			log: (message) => out.push(message),
+			fetchClaims: async () => new Map(),
 			err: (message) => errs.push(message),
 		};
 		return { deps, out, errs };
@@ -834,7 +839,7 @@ describe("runOnce", () => {
 		expect(await runOnce(deps, CONFIG)).toBe(0);
 		expect(listingCalls).toBe(1);
 		expect(out).toEqual([
-			"design-ledger-gate: OK — 1 decision file(s), 1 record(s) status-checked; PR checks skipped (no PR context); citation checks off.",
+			"design-ledger-gate: OK — 1 decision file(s), 1 record(s) status-checked; PR checks skipped (no PR context); citation checks off; claim checks off.",
 		]);
 	});
 
@@ -1112,6 +1117,7 @@ function ledgerFixture(options: {
 		readBaseDecisionPaths: async () => options.basePaths ?? [],
 		baseRef: "main",
 		changed: options.changed ?? noChange,
+		fetchClaims: async () => new Map(),
 		log: (message) => logs.push(message),
 		err: (message) => errors.push(message),
 	};
@@ -1864,5 +1870,331 @@ describe("optional validation legs", () => {
 			}),
 		);
 		expect(failures).toEqual([1, 1, 1, 1]);
+	});
+});
+
+describe("claim check", () => {
+	const decision = (id: string) => {
+		const path = `${DECISION_DIR}/ui/${id}.md`;
+		return { path, text: decisionAt(path, "../../ui/record/design.md") };
+	};
+
+	test("selects only changed ids absent from merge base and base tip", () => {
+		const files = [decision("DL-004"), decision("DL-002"), decision("DL-003")];
+		const rows = buildDecisionCorpus(files).rows;
+		const checked = claimCheckIds(
+			rows,
+			files.map(({ path }) => path),
+			new Set(["DL-002"]),
+			new Set(["DL-003"]),
+		);
+		expect(checked.map(({ id }) => id)).toEqual(["DL-004"]);
+		expect(claimCheckIds(rows, [], new Set(), new Set())).toEqual([]);
+	});
+
+	test("not-lane and missing verdicts each fail with dl-claim lane guidance", () => {
+		const rows = buildDecisionCorpus([
+			decision("DL-004"),
+			decision("DL-005"),
+		]).rows;
+		const violations = checkClaims(
+			rows,
+			"feature/head",
+			new Map([["DL-004", "not-lane"]]),
+		);
+		expect(violations).toHaveLength(2);
+		expect(violations.map(({ message }) => message).join("\n")).toContain(
+			"dl-claim --lane feature/head",
+		);
+	});
+
+	test("claim client uses config partition and batches 150 IDs into two requests", async () => {
+		const requests: URL[] = [];
+		const ids = Array.from(
+			{ length: 150 },
+			(_, index) => `DL-${String(index + 1).padStart(3, "0")}`,
+		);
+		const config = {
+			...validConfig(),
+			counter: {
+				url: "https://counter.example.test/base/",
+				partition: "public-docs",
+			},
+		};
+		const fetchClaims = claimClient(config, async (input) => {
+			const url = new URL(String(input));
+			requests.push(url);
+			return Response.json({
+				claims: (url.searchParams.get("ids") ?? "")
+					.split(",")
+					.map((id) => ({ id, state: "lane" })),
+			});
+		});
+		const verdicts = await fetchClaims("feature/head", ids);
+		expect(requests).toHaveLength(2);
+		expect(
+			requests.map((url) => url.searchParams.get("ids")?.split(",").length),
+		).toEqual([100, 50]);
+		expect(requests[0]?.pathname).toBe("/base/claims");
+		expect(requests[0]?.searchParams.get("repo")).toBe("public-docs");
+		expect(requests[0]?.searchParams.get("lane")).toBe("feature/head");
+		expect(verdicts.size).toBe(150);
+	});
+
+	test.each(["network error", "server error"] as const)(
+		"retries %s twice with the configured backoff",
+		async (failure) => {
+			let calls = 0;
+			const sleeps: number[] = [];
+			const fetchClaims = claimClient(
+				validConfig(),
+				async () => {
+					calls += 1;
+					if (calls < 3) {
+						if (failure === "network error") throw new Error("offline");
+						return new Response("busy", { status: 503 });
+					}
+					return Response.json({ claims: [{ id: "DL-004", state: "lane" }] });
+				},
+				async (ms) => {
+					sleeps.push(ms);
+				},
+			);
+			await expect(fetchClaims("feature/head", ["DL-004"])).resolves.toEqual(
+				new Map([["DL-004", "lane"]]),
+			);
+			expect(calls).toBe(3);
+			expect(sleeps).toEqual([1_000, 3_000]);
+		},
+	);
+
+	test("429 retries after Retry-After and stops at the 65 second total", async () => {
+		const sleeps: number[] = [];
+		let calls = 0;
+		const fetchClaims = claimClient(
+			validConfig(),
+			async () => {
+				calls += 1;
+				return new Response("limited", {
+					status: 429,
+					headers: { "retry-after": calls === 1 ? "60" : "10" },
+				});
+			},
+			async (ms) => {
+				sleeps.push(ms);
+			},
+		);
+		await expect(fetchClaims("feature/head", ["DL-004"])).rejects.toMatchObject(
+			{
+				kind: "rate_limited",
+			},
+		);
+		expect(sleeps).toEqual([60_000, 5_000]);
+		expect(calls).toBe(2);
+	});
+
+	test.each([
+		["malformed body", "not-json"],
+		["missing id", JSON.stringify({ claims: [] })],
+		[
+			"unknown state",
+			JSON.stringify({ claims: [{ id: "DL-004", state: "unknown" }] }),
+		],
+	] as const)("rejects %s without retry", async (_label, body) => {
+		let calls = 0;
+		const fetchClaims = claimClient(validConfig(), async () => {
+			calls += 1;
+			return new Response(body);
+		});
+		await expect(
+			fetchClaims("feature/head", ["DL-004"]),
+		).rejects.toBeInstanceOf(ClaimServiceError);
+		expect(calls).toBe(1);
+	});
+
+	test("request timeout is attached to each fetch", async () => {
+		let signal: AbortSignal | null | undefined;
+		await claimClient(validConfig(), async (_input, init) => {
+			signal = init?.signal;
+			return Response.json({ claims: [{ id: "DL-004", state: "lane" }] });
+		})("feature/head", ["DL-004"]);
+		expect(signal).toBeInstanceOf(AbortSignal);
+	});
+
+	test("claim check runs only when enabled and reports its count", async () => {
+		const path = `${DECISION_DIR}/ui/DL-004.md`;
+		const files = new Map([
+			[path, decisionAt(path, "../../ui/record/design.md")],
+			["docs/designs/ui/record/design.md", "# Record\n"],
+		]);
+		const changed: Changed = {
+			files: [path],
+			body: "",
+			headBranch: "feature/head",
+		};
+		const fixture = ledgerFixture({
+			config: { ...validConfig(), legs: { claimCheck: true } },
+			files,
+			changed,
+		});
+		const requests: Array<{ lane: string; ids: readonly string[] }> = [];
+		const deps: Deps = {
+			...fixture.deps,
+			readMergeBaseDecisionPaths: async () => [],
+			readBaseDecisionPaths: async () => [],
+			fetchClaims: async (lane, ids) => {
+				requests.push({ lane, ids });
+				return new Map([["DL-004", "lane"]]);
+			},
+			readPullRequestDetails: async () => ({
+				isCrossRepository: false,
+				headRepositoryOwner: null,
+				author: null,
+			}),
+		};
+		expect(await runOnce(deps, fixture.config)).toBe(0);
+		expect(requests).toEqual([{ lane: "feature/head", ids: ["DL-004"] }]);
+		expect(fixture.logs.join("\n")).toContain(
+			"claims: 1 new id(s) checked for feature/head",
+		);
+		const disabled = ledgerFixture({ files, changed });
+		let calls = 0;
+		const offDeps: Deps = {
+			...disabled.deps,
+			fetchClaims: async () => {
+				calls += 1;
+				return new Map();
+			},
+		};
+		expect(await runOnce(offDeps, disabled.config)).toBe(0);
+		expect(calls).toBe(0);
+	});
+
+	test("cross-repository claims use owner-qualified lane and empty head fails closed", async () => {
+		const path = `${DECISION_DIR}/ui/DL-004.md`;
+		const files = new Map([
+			[path, decisionAt(path, "../../ui/record/design.md")],
+			["docs/designs/ui/record/design.md", "# Record\n"],
+		]);
+		const base = ledgerFixture({
+			config: { ...validConfig(), legs: { claimCheck: true } },
+			files,
+			changed: { files: [path], body: "", headBranch: "feature/head" },
+		});
+		let seenLane = "";
+		const crossDeps: Deps = {
+			...base.deps,
+			fetchClaims: async (lane) => {
+				seenLane = lane;
+				return new Map([["DL-004", "lane"]]);
+			},
+			readPullRequestDetails: async () => ({
+				isCrossRepository: true,
+				headRepositoryOwner: "contributor",
+				author: "person",
+			}),
+		};
+		expect(await runOnce(crossDeps, base.config)).toBe(0);
+		expect(seenLane).toBe("contributor:feature/head");
+		let calls = 0;
+		const emptyDeps: Deps = {
+			...base.deps,
+			changed: { files: [path], body: "", headBranch: "" },
+			fetchClaims: async () => {
+				calls += 1;
+				return new Map();
+			},
+		};
+		expect(await runOnce(emptyDeps, base.config)).toBe(2);
+		expect(base.errors.join("\n")).toContain(
+			"design-ledger-gate: the claim check needs the PR head branch",
+		);
+		expect(calls).toBe(0);
+	});
+
+	test("exemption requires matching PR author; service failures exit 2", async () => {
+		const path = `${DECISION_DIR}/ui/DL-004.md`;
+		const files = new Map([
+			[path, decisionAt(path, "../../ui/record/design.md")],
+			["docs/designs/ui/record/design.md", "# Record\n"],
+		]);
+		const config: LedgerConfig = {
+			...validConfig(),
+			legs: { claimCheck: true },
+			exemptAuthors: { "automation/": "trusted[bot]" },
+		};
+		const fixture = ledgerFixture({
+			config,
+			files,
+			changed: { files: [path], body: "", headBranch: "automation/update" },
+		});
+		let calls = 0;
+		const deps: Deps = {
+			...fixture.deps,
+			fetchClaims: async () => {
+				calls += 1;
+				return new Map([["DL-004", "lane"]]);
+			},
+			readPullRequestDetails: async () => ({
+				isCrossRepository: false,
+				headRepositoryOwner: null,
+				author: "untrusted",
+			}),
+		};
+		expect(await runOnce(deps, config)).toBe(0);
+		expect(calls).toBe(1);
+		const exemptDeps: Deps = {
+			...deps,
+			readPullRequestDetails: async () => ({
+				isCrossRepository: false,
+				headRepositoryOwner: null,
+				author: "trusted[bot]",
+			}),
+		};
+		expect(await runOnce(exemptDeps, config)).toBe(0);
+		expect(calls).toBe(1);
+		const failedDeps: Deps = {
+			...fixture.deps,
+			fetchClaims: async () => {
+				throw new Error("service down");
+			},
+			readPullRequestDetails: async () => ({
+				isCrossRepository: false,
+				headRepositoryOwner: null,
+				author: "person",
+			}),
+		};
+		expect(await runOnce(failedDeps, config)).toBe(2);
+		expect(fixture.errors.join("\n")).toContain(
+			"cannot reach the DL claim service",
+		);
+	});
+
+	test("config validates claimCheck and author bindings", () => {
+		const path = join(temporaryDirectory(), "config.json");
+		const base = {
+			designsRoot: "docs/designs",
+			surfaceDepth: 1,
+			counter: {
+				url: "https://counter.example.test",
+				partition: "public-docs",
+			},
+		};
+		writeFileSync(path, JSON.stringify(base));
+		expect(loadLedgerConfig(path).legs?.claimCheck).toBeUndefined();
+		writeFileSync(
+			path,
+			JSON.stringify({ ...base, legs: { claimCheck: "yes" } }),
+		);
+		expect(() => loadLedgerConfig(path)).toThrow(
+			"legs.claimCheck must be a boolean",
+		);
+		writeFileSync(
+			path,
+			JSON.stringify({ ...base, exemptAuthors: { "bot/": 2 } }),
+		);
+		expect(() => loadLedgerConfig(path)).toThrow(
+			"exemptAuthors.bot/ must be a non-empty string",
+		);
 	});
 });
