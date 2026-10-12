@@ -31,6 +31,10 @@ extends = "$RUMDL_BASE_CONFIG"
 
 The policy is the shared `[MD0nn]` rule set in Compass's [`.rumdl.toml`](https://github.com/RigelBuild/compass/blob/main/.rumdl.toml). Meissa's own development shell also provides Bun, Node.js, and moon from its pinned nixpkgs.
 
+## Renovate preset
+
+Consumers extend `github>RigelBuild/meissa//tools/renovate/preset.json5`.
+
 ## Packages
 
 Packages under `packages/` are published to npm as `@rigelbuild/<tool>` and versioned independently.

@@ -7,6 +7,7 @@ type Json5Record = Record<string, unknown>;
 const root = join(import.meta.dir, "../..");
 const botPath = join(import.meta.dir, "bot-config.json5");
 const configPath = join(import.meta.dir, "config.json5");
+const presetPath = join(import.meta.dir, "preset.json5");
 const lockPath = join(root, "devenv.lock");
 
 async function readJson5(path: string): Promise<Json5Record> {
@@ -32,19 +33,26 @@ describe("Renovate policy", () => {
     ]);
   });
 
-  test("the workflow cron alone sets the cadence; nixpkgs and bun/npm managers have a 5-day cooldown", async () => {
-    const config = await readJson5(configPath);
+  test("the shared preset holds cooldown policy while meissa keeps its local managers", async () => {
+    const [config, preset] = await Promise.all([readJson5(configPath), readJson5(presetPath)]);
     // A Renovate schedule window misses runs once GitHub starts the cron hours late.
-    expect(Array.isArray(config.extends)).toBe(true);
-    expect(config.extends.filter((preset: unknown) => String(preset).startsWith("schedule:"))).toEqual([]);
+    expect(config.extends).toEqual(["github>RigelBuild/meissa//tools/renovate/preset.json5"]);
     expect(config.schedule).toBeUndefined();
     expect(config.lockFileMaintenance).toBeUndefined();
     expect(Array.isArray(config.packageRules)).toBe(true);
     expect(config.packageRules.filter((entry: unknown) => "schedule" in asRecord(entry, "package rule"))).toEqual([]);
-    expect(config.extends).not.toContain("helpers:pinGitHubActionDigests");
     expect(config.enabledManagers).toEqual(["custom.regex", "bun", "npm"]);
-    expect(config.minimumReleaseAge).toBe("5 days");
-    expect(config.internalChecksFilter).toBe("strict");
+    expect(config.minimumReleaseAge).toBeUndefined();
+    expect(config.internalChecksFilter).toBeUndefined();
+
+    expect(preset.extends).toEqual(["config:recommended"]);
+    expect(preset.dependencyDashboard).toBe(true);
+    expect(preset.rebaseWhen).toBe("behind-base-branch");
+    // Each consumer enables its own managers; a shared list would disable theirs.
+    expect(preset.enabledManagers).toBeUndefined();
+    expect(preset.minimumReleaseAge).toBe("5 days");
+    expect(preset.internalChecksFilter).toBe("strict");
+    expect(preset.customManagers).toBeUndefined();
   });
 
   test("the cooldown exemptions match bunfig minimumReleaseAgeExcludes", async () => {
