@@ -1,18 +1,13 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.5.9/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.5.13/schema.json",
 	"root": true,
-	"vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+	"extends": ["@rigelbuild/biome-config/biome"],
 	"files": {
 		"includes": [
 			"**",
 			"!rumdl-extends.test.ts",
 			"!tools/renovate/config.test.ts"
 		]
-	},
-	"formatter": { "indentStyle": "tab" },
-	"linter": {
-		"enabled": true,
-		"rules": { "preset": "recommended" }
 	},
 	"overrides": [
 		{

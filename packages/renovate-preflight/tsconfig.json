@@ -5,7 +5,6 @@
 		"moduleDetection": "force",
 		"allowJs": true,
 		"allowImportingTsExtensions": true,
-		"noUncheckedIndexedAccess": true,
 		"types": ["bun"]
 	},
 	"include": ["*.ts"]

@@ -1,14 +1,6 @@
 {
+	"extends": "@rigelbuild/tsconfig/base.json",
 	"compilerOptions": {
-		"target": "ES2022",
-		"module": "preserve",
-		"moduleResolution": "bundler",
-		"verbatimModuleSyntax": true,
-		"noEmit": true,
-		"strict": true,
-		"skipLibCheck": true,
-		"noFallthroughCasesInSwitch": true,
-		"noImplicitOverride": true,
 		"noUncheckedIndexedAccess": true
 	}
 }

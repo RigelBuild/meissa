@@ -1,0 +1,22 @@
+{
+	"name": "@rigelbuild/biome-config",
+	"version": "1.0.0",
+	"type": "module",
+	"license": "MIT OR Apache-2.0",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/RigelBuild/meissa.git",
+		"directory": "packages/biome-config"
+	},
+	"exports": {
+		"./biome": "./biome.json"
+	},
+	"files": [
+		"package.json",
+		"README.md",
+		"biome.json"
+	],
+	"publishConfig": {
+		"access": "public"
+	}
+}
