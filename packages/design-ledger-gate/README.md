@@ -15,12 +15,13 @@ Pass a JSON file with these fields:
   "exemptBranchPrefixes": ["renovate/", "trunk-merge/"],
   "surfaces": ["alpha"],
   "citationAmbiguousPaths": ["shared/README.md"],
-  "legs": {
-    "citations": false,
-    "errata": false,
-    "recordLinks": false,
-    "mainIds": false
-  },
+	"legs": {
+		"citations": false,
+		"errata": false,
+		"recordLinks": false,
+		"mainIds": false,
+		"claimCheck": false
+	},
   "counter": {
     "url": "https://example.invalid/counter",
     "partition": "public-docs"
@@ -36,6 +37,8 @@ Record `Status:` headers are case-insensitive. The key may be bold, and spaces m
 When `errata` is enabled, an `## Errata` section must be the final H2. Each entry starts with `### E<n> — YYYY-MM-DD (<who>)`, with IDs in order from E1. The first quoted text after each entry heading must appear verbatim above the section. The first header-zone `Errata: E1, E2` marker must list the same IDs in order. The marker and section require each other.
 
 Citation references use backtick-wrapped `path.md:N` or `path.md:N-M` on a Markdown line. Paths resolve relative to the citing file first. Only directory-qualified targets retry from the repository root; a bare filename never falls back to the root. Missing targets are counted as unresolvable, and configured root targets are counted as repo-ambiguous. The success summary reports checked and seen citations and both counts. Record links must use a live heading anchor when the target exists. The `mainIds` check reads the fetched base ref tree and rejects new decision IDs that already occur on that base tip.
+
+The optional `legs.claimCheck` checks new decision IDs on PRs against the counter. It is off by default. The check uses `counter.url` and `counter.partition`. It requires each new ID to be claimed for the PR head branch; cross-repository heads use `<owner>:<branch>`. A configured exemption requires a matching PR author. Use `dl-claim --rebind` to move a claim from another lane.
 
 ## CLI
 

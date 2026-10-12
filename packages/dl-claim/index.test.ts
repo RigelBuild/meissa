@@ -11,6 +11,7 @@ import {
 	buildClaimBody,
 	claim,
 	formatClaimed,
+	maintain,
 	parseArgs,
 	runOnce,
 } from "./index.ts";
@@ -40,6 +41,7 @@ afterEach(() => {
 describe("claim arguments and request", () => {
 	test("defaults to the only configured surface", () => {
 		expect(parseArgs(["--ref=none", "--lane=feature/b"], oneSurface)).toEqual({
+			mode: "claim",
 			ref: "none",
 			lane: "feature/b",
 			count: 1,
@@ -93,13 +95,25 @@ describe("claim arguments and request", () => {
 				["--ref", "RIG-42", "--lane", "feature/a", "--count", "2"],
 				oneSurface,
 			),
-		).toEqual({ ref: "RIG-42", lane: "feature/a", count: 2, surface: "alpha" });
+		).toEqual({
+			mode: "claim",
+			ref: "RIG-42",
+			lane: "feature/a",
+			count: 2,
+			surface: "alpha",
+		});
 		expect(
 			parseArgs(
 				["--ref=none", "--lane=feature/b", "--surface=beta"],
 				severalSurfaces,
 			),
-		).toEqual({ ref: "none", lane: "feature/b", count: 1, surface: "beta" });
+		).toEqual({
+			mode: "claim",
+			ref: "none",
+			lane: "feature/b",
+			count: 1,
+			surface: "beta",
+		});
 	});
 });
 
@@ -349,4 +363,160 @@ test("rejects a token containing an interior newline without logging it", async 
 	);
 	expect(result).toBe(2);
 	expect(output.join("\n")).not.toContain("safe\nsecret");
+});
+
+describe("claim maintenance", () => {
+	test.each([
+		[
+			[
+				"--rebind",
+				"--from",
+				"old/head",
+				"--lane",
+				"new/head",
+				"--ids",
+				"DL-004,DL-005",
+			],
+			{
+				mode: "rebind",
+				from: "old/head",
+				lane: "new/head",
+				ids: ["DL-004", "DL-005"],
+			},
+		],
+		[
+			["--release", "--lane=new/head", "--ids=DL-004,DL-005"],
+			{ mode: "release", lane: "new/head", ids: ["DL-004", "DL-005"] },
+		],
+	] as const)("parses %s", (argv, expected) => {
+		expect(parseArgs(argv, oneSurface)).toEqual(expected);
+	});
+
+	test.each([
+		[
+			"mixed modes",
+			[
+				"--rebind",
+				"--release",
+				"--from",
+				"old",
+				"--lane",
+				"new",
+				"--ids",
+				"DL-004",
+			],
+		],
+		[
+			"mixed claim flags",
+			["--release", "--lane", "new", "--ids", "DL-004", "--ref", "none"],
+		],
+		["missing old lane", ["--rebind", "--lane", "new", "--ids", "DL-004"]],
+		["invalid id", ["--release", "--lane", "new", "--ids", "nope"]],
+		["duplicate id", ["--release", "--lane", "new", "--ids", "DL-004,DL-4"]],
+	])("rejects %s", (_label, argv) => {
+		expect(() => parseArgs(argv, oneSurface)).toThrow();
+	});
+
+	test.each([
+		[
+			"rebind",
+			{
+				mode: "rebind",
+				from: "old/head",
+				lane: "new/head",
+				ids: ["DL-004", "DL-005"],
+			},
+		],
+		[
+			"release",
+			{ mode: "release", lane: "new/head", ids: ["DL-004", "DL-005"] },
+		],
+	] as const)(
+		"posts %s to the configured partition and reports ids",
+		async (mode, args) => {
+			let request: Request | undefined;
+			const ids = await maintain(args, " token ", oneSurface, {
+				fetchFn: async (input, init) => {
+					request = new Request(String(input), init);
+					return Response.json({ ids: ["DL-004", "DL-005"] });
+				},
+			});
+			expect(request?.url).toBe(`https://counter.example.test/claims/${mode}`);
+			expect(request?.method).toBe("POST");
+			expect(request?.headers.get("Authorization")).toBe("Bearer token");
+			expect(await request?.json()).toEqual(
+				mode === "rebind"
+					? {
+							repo: "public-docs",
+							ids: ["DL-004", "DL-005"],
+							from: "old/head",
+							to: "new/head",
+						}
+					: {
+							repo: "public-docs",
+							ids: ["DL-004", "DL-005"],
+							lane: "new/head",
+						},
+			);
+			expect(ids).toEqual(["DL-004", "DL-005"]);
+		},
+	);
+
+	test("a lane mismatch refuses atomically and names the affected IDs", async () => {
+		await expect(
+			maintain(
+				{
+					mode: "rebind",
+					from: "old/head",
+					lane: "new/head",
+					ids: ["DL-004", "DL-005"],
+				},
+				"token",
+				oneSurface,
+				{
+					fetchFn: async () =>
+						Response.json(
+							{ error: "lane_mismatch", ids: ["DL-005"] },
+							{ status: 409 },
+						),
+				},
+			),
+		).rejects.toThrow(
+			"rebind refused, nothing changed: DL-005 not claimed for lane old/head",
+		);
+	});
+
+	test("maintenance needs a token and CLI runs against configured endpoints", async () => {
+		await expect(
+			maintain(
+				{ mode: "release", lane: "old/head", ids: ["DL-004"] },
+				" ",
+				oneSurface,
+				{ fetchFn: async () => Response.json({ ids: ["DL-004"] }) },
+			),
+		).rejects.toThrow("DL_CLAIM_TOKEN is required");
+		const directory = mkdtempSync(join(tmpdir(), "dl-claim-maintenance-"));
+		temporaryDirectories.push(directory);
+		const configPath = join(directory, "config.json");
+		writeFileSync(configPath, JSON.stringify(oneSurface));
+		const output: string[] = [];
+		const result = await runOnce(
+			[
+				"--config",
+				configPath,
+				"--release",
+				"--lane",
+				"old/head",
+				"--ids",
+				"DL-004",
+			],
+			{
+				token: "token",
+				fetchFn: async () => Response.json({ ids: ["DL-004"] }),
+				log: (message) => output.push(message),
+			},
+		);
+		expect(result).toBe(0);
+		expect(output).toEqual(["DL-004"]);
+	});
 });
