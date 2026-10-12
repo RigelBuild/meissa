@@ -2,7 +2,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { posix as pathPosix, resolve } from "node:path";
-import { $ } from "bun";
 import { type DecisionRow, parseDecisionFile } from "./decision-files.ts";
 
 export interface LedgerConfig {
@@ -59,6 +58,47 @@ export interface PullRequestDetails {
 	readonly headRepositoryOwner: string | null;
 	readonly author: string | null;
 }
+
+export interface PrMetadata {
+	readonly changed: Changed;
+	readonly pullRequestDetails: PullRequestDetails;
+}
+
+export function parsePrMetadata(value: unknown): PrMetadata {
+	const view = asRecord(value, "Pull request metadata");
+	if (
+		typeof view.headRefName !== "string" ||
+		typeof view.body !== "string" ||
+		typeof view.isCrossRepository !== "boolean"
+	)
+		throw new Error("Pull request metadata is malformed");
+	const owner = view.headRepositoryOwner;
+	const author = view.author;
+	return {
+		changed: { files: [], body: view.body, headBranch: view.headRefName },
+		pullRequestDetails: {
+			isCrossRepository: view.isCrossRepository,
+			headRepositoryOwner:
+				typeof owner === "object" &&
+				owner !== null &&
+				"login" in owner &&
+				typeof owner.login === "string"
+					? owner.login
+					: null,
+			author:
+				typeof author === "object" &&
+				author !== null &&
+				"login" in author &&
+				typeof author.login === "string"
+					? author.login.startsWith("app/")
+						? `${author.login.slice(4)}[bot]`
+						: author.login
+					: null,
+		},
+	};
+}
+
+export type GhRun = (args: readonly string[]) => Promise<string>;
 
 export function botExempt(
 	headBranch: string,
@@ -1543,6 +1583,42 @@ export function prContextFrom(
 	return { kind: "skip" };
 }
 
+export async function readPullRequest(
+	context: Extract<PrContext, { kind: "pr" }>,
+	ghRun: GhRun,
+): Promise<PrMetadata> {
+	const metadataText = await ghRun([
+		"timeout",
+		"30",
+		"gh",
+		"pr",
+		"view",
+		context.prNumber,
+		"--repo",
+		context.repo,
+		"--json",
+		"headRefName,body,isCrossRepository,headRepositoryOwner,author",
+	]);
+	const metadata = parsePrMetadata(JSON.parse(metadataText));
+	const files = await ghRun([
+		"timeout",
+		"60",
+		"gh",
+		"api",
+		"--paginate",
+		`repos/${context.repo}/pulls/${context.prNumber}/files`,
+		"--jq",
+		".[].filename",
+	]);
+	return {
+		changed: {
+			...metadata.changed,
+			files: files.split("\n").filter((line) => line.length > 0),
+		},
+		pullRequestDetails: metadata.pullRequestDetails,
+	};
+}
+
 function parseWoodpeckerFiles(value: string | undefined): string[] | null {
 	if (value === undefined) return null;
 	try {
@@ -1614,35 +1690,19 @@ async function main(args: readonly string[]): Promise<number> {
 		if (context.kind === "error") throw new Error(context.message);
 		if (context.kind === "woodpecker") changed = context.changed;
 		else if (context.kind === "pr") {
-			const view =
-				await $`timeout 30 gh pr view ${context.prNumber} --repo ${context.repo} --json headRefName,body,isCrossRepository,headRepositoryOwner,author`.json();
-			const files =
-				await $`timeout 60 gh api --paginate repos/${context.repo}/pulls/${context.prNumber}/files --jq .[].filename`.text();
-			changed = {
-				files: files.split("\n").filter((line) => line.length > 0),
-				body: view.body,
-				headBranch: view.headRefName,
+			const runGh: GhRun = async (command) => {
+				const result = Bun.spawnSync({
+					cmd: [...command],
+					stdout: "pipe",
+					stderr: "pipe",
+				});
+				if (result.exitCode !== 0)
+					throw new Error(new TextDecoder().decode(result.stderr).trim());
+				return new TextDecoder().decode(result.stdout);
 			};
-			const author = view.author;
-			pullRequestDetails = {
-				isCrossRepository: view.isCrossRepository,
-				headRepositoryOwner:
-					typeof view.headRepositoryOwner === "object" &&
-					view.headRepositoryOwner !== null &&
-					"login" in view.headRepositoryOwner &&
-					typeof view.headRepositoryOwner.login === "string"
-						? view.headRepositoryOwner.login
-						: null,
-				author:
-					typeof author === "object" &&
-					author !== null &&
-					"login" in author &&
-					typeof author.login === "string"
-						? author.login.startsWith("app/")
-							? `${author.login.slice(4)}[bot]`
-							: author.login
-						: null,
-			};
+			const metadata = await readPullRequest(context, runGh);
+			changed = metadata.changed;
+			pullRequestDetails = metadata.pullRequestDetails;
 		}
 
 		return await runOnce(

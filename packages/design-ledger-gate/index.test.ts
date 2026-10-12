@@ -18,11 +18,13 @@ import {
 	KEY_LINE,
 	type LedgerConfig,
 	loadLedgerConfig,
+	parsePrMetadata,
 	parseRecordHeader,
 	parseStatusValue,
 	prContextFrom,
 	type RecordContent,
 	type RecordHeader,
+	readPullRequest,
 	recordContentFromText,
 	resolveRecordRelative,
 	runOnce,
@@ -1991,6 +1993,107 @@ describe("claim check", () => {
 		);
 		expect(sleeps).toEqual([60_000, 5_000]);
 		expect(calls).toBe(2);
+	});
+
+	test("parses cross-repository owner and GitHub App author metadata", () => {
+		expect(
+			parsePrMetadata({
+				headRefName: "feature/head",
+				body: "body",
+				isCrossRepository: true,
+				headRepositoryOwner: { login: "contributor" },
+				author: { login: "app/renovate" },
+			}),
+		).toEqual({
+			changed: {
+				files: [],
+				body: "body",
+				headBranch: "feature/head",
+			},
+			pullRequestDetails: {
+				isCrossRepository: true,
+				headRepositoryOwner: "contributor",
+				author: "renovate[bot]",
+			},
+		});
+	});
+
+	test("reads PR metadata and file names through injected GitHub runner", async () => {
+		const calls: string[][] = [];
+		const metadata = await readPullRequest(
+			{ kind: "pr", repo: "public/project", prNumber: "12" },
+			async (args) => {
+				calls.push([...args]);
+				if (args.includes("view"))
+					return JSON.stringify({
+						headRefName: "feature/head",
+						body: "body",
+						isCrossRepository: true,
+						headRepositoryOwner: { login: "contributor" },
+						author: { login: "app/renovate" },
+					});
+				return "src/main.ts\ndocs/designs/decision.md\n";
+			},
+		);
+		expect(metadata.changed).toEqual({
+			files: ["src/main.ts", "docs/designs/decision.md"],
+			body: "body",
+			headBranch: "feature/head",
+		});
+		expect(metadata.pullRequestDetails).toEqual({
+			isCrossRepository: true,
+			headRepositoryOwner: "contributor",
+			author: "renovate[bot]",
+		});
+		expect(calls).toHaveLength(2);
+	});
+
+	test("claim client shares one 429 wait budget across batches", async () => {
+		const ids = Array.from({ length: 150 }, (_, index) => `DL-${index + 1}`);
+		let calls = 0;
+		const sleeps: number[] = [];
+		const fetchClaims = claimClient(
+			validConfig(),
+			async (input) => {
+				calls += 1;
+				if (calls === 2) {
+					const batch = new URL(String(input)).searchParams.get("ids") ?? "";
+					const claims = batch.split(",").map((id) => ({ id, state: "lane" }));
+					return Response.json({ claims });
+				}
+				return new Response("limited", {
+					status: 429,
+					headers: { "retry-after": "40" },
+				});
+			},
+			async (ms) => {
+				sleeps.push(ms);
+			},
+		);
+		await expect(fetchClaims("feature/head", ids)).rejects.toMatchObject({
+			kind: "rate_limited",
+		});
+		expect(sleeps).toEqual([40_000, 25_000]);
+	});
+
+	test("a bad request fails once without sleeping", async () => {
+		let calls = 0;
+		let sleeps = 0;
+		const fetchClaims = claimClient(
+			validConfig(),
+			async () => {
+				calls += 1;
+				return new Response("invalid", { status: 400 });
+			},
+			async () => {
+				sleeps += 1;
+			},
+		);
+		await expect(
+			fetchClaims("feature/head", ["DL-004"]),
+		).rejects.toBeInstanceOf(ClaimServiceError);
+		expect(calls).toBe(1);
+		expect(sleeps).toBe(0);
 	});
 
 	test.each([
