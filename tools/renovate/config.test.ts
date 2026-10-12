@@ -22,6 +22,36 @@ function asRecord(value: unknown, label: string): Json5Record {
   return Object.fromEntries(Object.entries(value));
 }
 
+const sharedPresetReference = "github>RigelBuild/meissa//tools/renovate/preset.json5";
+
+function mergeChildConfig(parent: Json5Record, child: Json5Record): Json5Record {
+  return { ...parent, ...child };
+}
+
+// Expand the local preset before the consumer; later config keys replace earlier keys.
+async function resolvePresets(config: Json5Record): Promise<Json5Record> {
+  const references = config.extends;
+  if (!Array.isArray(references)) throw new Error("Renovate extends must be an array");
+
+  let resolved: Json5Record = {};
+  const expandedReferences: string[] = [];
+  for (const reference of references) {
+    if (typeof reference !== "string") throw new Error("Renovate preset references must be strings");
+    expandedReferences.push(reference);
+    if (reference === "config:recommended") continue;
+    if (reference !== sharedPresetReference) throw new Error(`Unsupported Renovate preset: ${reference}`);
+
+    const preset = await resolvePresets(await readJson5(presetPath));
+    resolved = mergeChildConfig(resolved, preset);
+    if (Array.isArray(preset.extends)) {
+      expandedReferences.push(...preset.extends.filter((entry): entry is string => typeof entry === "string"));
+    }
+  }
+
+  const localConfig = Object.fromEntries(Object.entries(config).filter(([key]) => key !== "extends"));
+  return { ...mergeChildConfig(resolved, localConfig), extends: [...new Set(expandedReferences)] };
+}
+
 describe("Renovate policy", () => {
   test("bot scope, onboarding, and relock commands are pinned", async () => {
     const bot = await readJson5(botPath);
@@ -53,6 +83,17 @@ describe("Renovate policy", () => {
     expect(preset.minimumReleaseAge).toBe("5 days");
     expect(preset.internalChecksFilter).toBe("strict");
     expect(preset.customManagers).toBeUndefined();
+  });
+
+  test("the resolved preset preserves the original shared policy", async () => {
+    const effective = await resolvePresets(await readJson5(configPath));
+
+    expect(effective.minimumReleaseAge).toBe("5 days");
+    expect(effective.internalChecksFilter).toBe("strict");
+    expect(effective.dependencyDashboard).toBe(true);
+    expect(effective.rebaseWhen).toBe("behind-base-branch");
+    expect(effective.extends).toContain("config:recommended");
+    expect(effective.enabledManagers).toEqual(["custom.regex", "bun", "npm"]);
   });
 
   test("the cooldown exemptions match bunfig minimumReleaseAgeExcludes", async () => {
