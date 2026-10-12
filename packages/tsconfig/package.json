@@ -1,0 +1,24 @@
+{
+	"name": "@rigelbuild/tsconfig",
+	"version": "0.0.0",
+	"type": "module",
+	"license": "MIT OR Apache-2.0",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/RigelBuild/meissa.git",
+		"directory": "packages/tsconfig"
+	},
+	"exports": {
+		"./base.json": "./base.json"
+	},
+	"files": [
+		"package.json",
+		"README.md",
+		"base.json",
+		"LICENSE-MIT",
+		"LICENSE-APACHE"
+	],
+	"publishConfig": {
+		"access": "public"
+	}
+}

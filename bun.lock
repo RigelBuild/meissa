@@ -5,13 +5,19 @@
     "": {
       "name": "@rigelbuild/meissa",
       "devDependencies": {
+        "@rigelbuild/biome-config": "workspace:*",
+        "@rigelbuild/tsconfig": "workspace:*",
         "@types/bun": "1.4.2",
         "typescript": "6.0.3",
       },
     },
+    "packages/biome-config": {
+      "name": "@rigelbuild/biome-config",
+      "version": "0.0.0",
+    },
     "packages/design-ledger-gate": {
       "name": "@rigelbuild/design-ledger-gate",
-      "version": "0.0.0",
+      "version": "1.0.1",
       "bin": {
         "design-ledger-gate": "./index.ts",
       },
@@ -22,12 +28,12 @@
     },
     "packages/dl-claim": {
       "name": "@rigelbuild/dl-claim",
-      "version": "0.0.0",
+      "version": "1.0.1",
       "bin": {
         "dl-claim": "./index.ts",
       },
       "dependencies": {
-        "@rigelbuild/design-ledger-gate": "0.0.0",
+        "@rigelbuild/design-ledger-gate": "1.0.1",
       },
       "devDependencies": {
         "@types/bun": "1.4.2",
@@ -36,12 +42,12 @@
     },
     "packages/dl-reconcile": {
       "name": "@rigelbuild/dl-reconcile",
-      "version": "0.0.0",
+      "version": "1.0.1",
       "bin": {
         "dl-reconcile": "./index.ts",
       },
       "dependencies": {
-        "@rigelbuild/design-ledger-gate": "0.0.0",
+        "@rigelbuild/design-ledger-gate": "1.0.1",
       },
       "devDependencies": {
         "@types/bun": "1.4.2",
@@ -50,7 +56,7 @@
     },
     "packages/ref-gate": {
       "name": "@rigelbuild/ref-gate",
-      "version": "0.0.0",
+      "version": "1.0.0",
       "bin": {
         "ref-gate": "./index.ts",
       },
@@ -61,7 +67,7 @@
     },
     "packages/renovate-preflight": {
       "name": "@rigelbuild/renovate-preflight",
-      "version": "0.0.0",
+      "version": "1.0.0",
       "bin": {
         "renovate-preflight": "./index.ts",
       },
@@ -70,8 +76,14 @@
         "typescript": "6.0.3",
       },
     },
+    "packages/tsconfig": {
+      "name": "@rigelbuild/tsconfig",
+      "version": "0.0.0",
+    },
   },
   "packages": {
+    "@rigelbuild/biome-config": ["@rigelbuild/biome-config@workspace:packages/biome-config"],
+
     "@rigelbuild/design-ledger-gate": ["@rigelbuild/design-ledger-gate@workspace:packages/design-ledger-gate"],
 
     "@rigelbuild/dl-claim": ["@rigelbuild/dl-claim@workspace:packages/dl-claim"],
@@ -81,6 +93,8 @@
     "@rigelbuild/ref-gate": ["@rigelbuild/ref-gate@workspace:packages/ref-gate"],
 
     "@rigelbuild/renovate-preflight": ["@rigelbuild/renovate-preflight@workspace:packages/renovate-preflight"],
+
+    "@rigelbuild/tsconfig": ["@rigelbuild/tsconfig@workspace:packages/tsconfig"],
 
     "@types/bun": ["@types/bun@1.4.2", "", { "dependencies": { "bun-types": "1.4.2" } }, "sha512-GimotNn7+ZV0uVArItBbriZsR1oNf0+WTzPkdcFrzShI7k2norL0uzEaJT8T33dWr7O/c9ZDuAFQrctKCi72oQ=="],
 

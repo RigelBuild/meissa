@@ -3,5 +3,7 @@
 	"packages/design-ledger-gate": "1.0.1",
 	"packages/dl-claim": "1.0.1",
 	"packages/dl-reconcile": "1.0.1",
-	"packages/renovate-preflight": "1.0.0"
+	"packages/renovate-preflight": "1.0.0",
+	"packages/biome-config": "0.0.0",
+	"packages/tsconfig": "0.0.0"
 }

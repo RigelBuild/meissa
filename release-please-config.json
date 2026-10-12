@@ -22,6 +22,14 @@
 			"component": "dl-reconcile",
 			"package-name": "@rigelbuild/dl-reconcile"
 		},
+		"packages/biome-config": {
+			"component": "biome-config",
+			"package-name": "@rigelbuild/biome-config"
+		},
+		"packages/tsconfig": {
+			"component": "tsconfig",
+			"package-name": "@rigelbuild/tsconfig"
+		},
 		"packages/renovate-preflight": {
 			"component": "renovate-preflight",
 			"package-name": "@rigelbuild/renovate-preflight"

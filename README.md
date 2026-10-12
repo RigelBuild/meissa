@@ -37,7 +37,7 @@ Consumers extend `github>RigelBuild/meissa//tools/renovate/preset.json5`.
 
 ## Packages
 
-Packages under `packages/` are published to npm as `@rigelbuild/<tool>` and versioned independently.
+Packages under `packages/` are published to npm as `@rigelbuild/<tool>` and versioned independently. This includes `@rigelbuild/tsconfig` and `@rigelbuild/biome-config` for shared TypeScript and Biome configuration.
 
 Meissa is public: never name or cite a private repository. `ref-gate` enforces this with `ref-gate.config.json`.
 
