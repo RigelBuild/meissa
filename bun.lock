@@ -40,6 +40,20 @@
         "typescript": "6.0.3",
       },
     },
+    "packages/dl-list": {
+      "name": "@rigelbuild/dl-list",
+      "version": "0.0.0",
+      "bin": {
+        "dl-list": "./index.ts",
+      },
+      "dependencies": {
+        "@rigelbuild/design-ledger-gate": "1.0.1",
+      },
+      "devDependencies": {
+        "@types/bun": "1.4.2",
+        "typescript": "6.0.3",
+      },
+    },
     "packages/dl-reconcile": {
       "name": "@rigelbuild/dl-reconcile",
       "version": "1.0.1",
@@ -87,6 +101,8 @@
     "@rigelbuild/design-ledger-gate": ["@rigelbuild/design-ledger-gate@workspace:packages/design-ledger-gate"],
 
     "@rigelbuild/dl-claim": ["@rigelbuild/dl-claim@workspace:packages/dl-claim"],
+
+    "@rigelbuild/dl-list": ["@rigelbuild/dl-list@workspace:packages/dl-list"],
 
     "@rigelbuild/dl-reconcile": ["@rigelbuild/dl-reconcile@workspace:packages/dl-reconcile"],
 

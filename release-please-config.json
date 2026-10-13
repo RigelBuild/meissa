@@ -18,6 +18,10 @@
 			"component": "dl-claim",
 			"package-name": "@rigelbuild/dl-claim"
 		},
+		"packages/dl-list": {
+			"component": "dl-list",
+			"package-name": "@rigelbuild/dl-list"
+		},
 		"packages/dl-reconcile": {
 			"component": "dl-reconcile",
 			"package-name": "@rigelbuild/dl-reconcile"
