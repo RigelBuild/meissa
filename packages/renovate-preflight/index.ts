@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 // The Renovate preflight CI entry point (see preflight.ts for the pure decision
 // core). Run by the `renovate` job (.github/workflows/renovate.yml) immediately
 // before `bunx renovate`: it probes GitHub with RENOVATE_TOKEN via a single
