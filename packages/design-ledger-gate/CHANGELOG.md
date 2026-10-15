@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.0.0](https://github.com/RigelBuild/meissa/compare/design-ledger-gate@v1.0.1...design-ledger-gate@v2.0.0) (2026-10-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* **design-ledger-gate:** exemptBranchPrefixes and exemptAuthors are replaced by
+
+### Features
+
+* **design-ledger-gate:** optional claim-check leg; dl-claim rebind and release (RIG-5214) ([#20](https://github.com/RigelBuild/meissa/issues/20)) ([307a90d](https://github.com/RigelBuild/meissa/commit/307a90d4c102ddf5cf6d136a504dfa52e9f7110c))
+
+
+### Bug Fixes
+
+* **design-ledger-gate:** bind branch exemptions to author and same-repo PRs (RIG-5295) ([#21](https://github.com/RigelBuild/meissa/issues/21)) ([3ff623c](https://github.com/RigelBuild/meissa/commit/3ff623c64209018bca3f4dfe04300a545c2b5058))
+
 ## [1.0.1](https://github.com/RigelBuild/meissa/compare/design-ledger-gate@v1.0.0...design-ledger-gate@v1.0.1) (2026-10-11)
 
 

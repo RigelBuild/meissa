@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.2](https://github.com/RigelBuild/meissa/compare/dl-reconcile@v1.0.1...dl-reconcile@v1.0.2) (2026-10-15)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @rigelbuild/design-ledger-gate bumped from 1.0.1 to 2.0.0
+
 ## [1.0.1](https://github.com/RigelBuild/meissa/compare/dl-reconcile@v1.0.0...dl-reconcile@v1.0.1) (2026-10-11)
 
 

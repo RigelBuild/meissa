@@ -1,10 +1,10 @@
 {
 	"packages/ref-gate": "1.0.0",
-	"packages/design-ledger-gate": "1.0.1",
-	"packages/dl-claim": "1.0.1",
-	"packages/dl-list": "0.0.0",
-	"packages/dl-reconcile": "1.0.1",
-	"packages/renovate-preflight": "1.0.0",
-	"packages/biome-config": "0.0.0",
-	"packages/tsconfig": "0.0.0"
+	"packages/design-ledger-gate": "2.0.0",
+	"packages/dl-claim": "1.1.0",
+	"packages/dl-list": "1.0.0",
+	"packages/dl-reconcile": "1.0.2",
+	"packages/renovate-preflight": "1.1.0",
+	"packages/biome-config": "1.0.0",
+	"packages/tsconfig": "1.0.0"
 }
