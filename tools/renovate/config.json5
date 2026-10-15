@@ -16,6 +16,25 @@
       currentValueTemplate: "rolling",
       datasourceTemplate: "git-refs",
     },
+    {
+      customType: "regex",
+      managerFilePatterns: ["/^tools/toolchain/go-analysis-pins\\.nix$/"],
+      matchStrings: ["golangci-lint = \\{\\s*version = \"(?<currentValue>[^\"]+)\""],
+      depNameTemplate: "golangci/golangci-lint",
+      datasourceTemplate: "github-releases",
+      extractVersionTemplate: "^v(?<version>.+)$",
+      depTypeTemplate: "go-analysis",
+    },
+    {
+      customType: "regex",
+      managerFilePatterns: ["/^tools/toolchain/go-analysis-pins\\.nix$/"],
+      matchStrings: ["rev = \"(?<currentDigest>[a-f0-9]{40})\""],
+      depNameTemplate: "uber-go/nilaway",
+      packageNameTemplate: "https://github.com/uber-go/nilaway",
+      currentValueTemplate: "main",
+      datasourceTemplate: "git-refs",
+      depTypeTemplate: "go-analysis",
+    },
   ],
   packageRules: [
     {
@@ -42,5 +61,16 @@
         executionMode: "branch",
       },
     },
+    {
+      matchManagers: ["custom.regex"],
+      matchDepNames: ["uber-go/nilaway"],
+      minimumReleaseAge: null,
+      dependencyDashboardApproval: true,
+    },
   ],
+  postUpgradeTasks: {
+    commands: ["bun tools/renovate/refresh-go-analysis-hashes.ts"],
+    fileFilters: ["tools/toolchain/go-analysis-pins.nix"],
+    executionMode: "branch",
+  },
 }

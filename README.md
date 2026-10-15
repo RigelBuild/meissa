@@ -6,6 +6,18 @@ Shared public tooling for RigelBuild repositories. Meissa pins the toolchain and
 
 The flake exports `packages.<system>.rumdl`, `packages.<system>.biome`, and `packages.<system>.rumdl-base-config`. The last package contains `rumdl/base.toml`. It also exports `devenvModules.default`, which adds only rumdl and Biome to PATH and sets `RUMDL_BASE_CONFIG` to that store file.
 
+The opt-in `devenvModules.go` module adds golangci-lint, govulncheck, go-licenses, and nilaway. Set `meissa.go.toolchain` to the Go package used by the project; the analyzers are rebuilt with that toolchain.
+
+```nix
+{ inputs, pkgs, ... }:
+{
+  imports = [ inputs.meissa.devenvModules.go ];
+  meissa.go.toolchain = pkgs.go;
+}
+```
+
+Consumers must use a Go toolchain that produces matching vendor output for the pinned Go analysis tools.
+
 Import the module in a consumer's `devenv.nix`:
 
 ```nix
