@@ -5,6 +5,7 @@
 	"packages/dl-list": "1.0.0",
 	"packages/dl-reconcile": "1.0.2",
 	"packages/renovate-preflight": "1.1.0",
+	"packages/comment-scan": "0.0.0",
 	"packages/biome-config": "1.0.0",
 	"packages/tsconfig": "1.0.0"
 }

@@ -1,0 +1,190 @@
+import { describe, expect, test } from "bun:test";
+import { commentBlocks, isCgo } from "./index.ts";
+
+function blocks(text: string, ext = ".go") {
+	const result = commentBlocks(text, ext);
+	if (result === null) throw new Error(`missing scanner for ${ext}`);
+	return result;
+}
+
+describe("commentBlocks", () => {
+	test("a five-line comment run is one block and a blank line splits runs", () => {
+		const result = blocks(
+			"// one\n// two\n// three\n// four\n// five\n\n// next\npackage p",
+		);
+		expect(result.blocks.map(({ start, lines }) => [start, lines])).toEqual([
+			[1, 5],
+			[7, 1],
+		]);
+	});
+
+	test("a go:embed directive ends the comment block", () => {
+		const result = blocks(
+			"// one\n// two\n//go:embed data.txt\n// three\npackage p",
+		);
+		expect(result.blocks.map(({ start, lines }) => [start, lines])).toEqual([
+			[1, 2],
+			[4, 1],
+		]);
+	});
+
+	test("slash doc comments and block doc comments are doc blocks", () => {
+		const result = commentBlocks(
+			"/// doc\nfunc f() {}\n\n/** block */\nfunc g() {}",
+			".ts",
+		);
+		expect(result?.blocks.map(({ doc }) => doc)).toEqual([true, true]);
+	});
+
+	test("Go package comments are doc comments regardless of package case", () => {
+		for (const name of ["p", "Private", "MixedCase"]) {
+			expect(blocks(`// package note\npackage ${name}`).blocks[0]?.doc).toBe(
+				true,
+			);
+		}
+	});
+
+	test("Go exported and unexported standalone declarations classify", () => {
+		const declarations = [
+			"func Exported() {}",
+			"func (r *T) Exported() {}",
+			"const Exported = 1",
+			"type Exported struct{}",
+			"var Exported int",
+		];
+		const result = blocks(
+			declarations.map((declaration) => `// note\n${declaration}`).join("\n\n"),
+		);
+		expect(result.blocks.map(({ doc }) => doc)).toEqual([
+			true,
+			true,
+			true,
+			true,
+			true,
+		]);
+		const unexported = [
+			"func hidden() {}",
+			"func (r *T) hidden() {}",
+			"const hidden = 1",
+			"type hidden struct{}",
+			"var hidden int",
+		];
+		expect(
+			blocks(
+				unexported.map((declaration) => `// note\n${declaration}`).join("\n\n"),
+			).blocks.map(({ doc }) => doc),
+		).toEqual([false, false, false, false, false]);
+	});
+
+	test("a blank line detaches Go declaration comments", () => {
+		expect(blocks("// note\n\nfunc Exported() {}").blocks[0]?.doc).toBe(false);
+	});
+
+	test("Go grouped declarations are exported when any spec name is exported", () => {
+		const text =
+			"// group\nconst (\n\tprivate = 1\n\tExported = 2\n)\n\n// spec\nvar (\n\tValue, hidden int\n)";
+		expect(blocks(text).blocks.map(({ doc }) => doc)).toEqual([true, true]);
+		expect(
+			blocks("// private group\nvar (\n\ta int\n\tb int\n)").blocks[0]?.doc,
+		).toBe(false);
+	});
+
+	test("Go multiple names are exported if any name is exported", () => {
+		const text =
+			"// var exported\nvar a, B int\n\n// var private\nvar a, b int\n\n// const exported\nconst a, B = 1, 2\n\n// const private\nconst a, b = 1, 2";
+		expect(blocks(text).blocks.map(({ doc }) => doc)).toEqual([
+			true,
+			false,
+			true,
+			false,
+		]);
+	});
+
+	test("proto comments attach to declarations without an intervening blank line", () => {
+		const text = [
+			"// Header",
+			"",
+			'syntax = "proto3";',
+			"// Message",
+			"message M {",
+			"  // Field",
+			"  string value = 1;",
+			"}",
+			"// enum",
+			"enum E { ZERO = 0; }",
+			"// Service",
+			"service Other {",
+			"  // Method",
+			"  rpc Call (Req) returns (Res);",
+			"}",
+		].join("\n");
+		const result = blocks(text, ".proto");
+		expect(result.blocks.map(({ doc }) => doc)).toEqual([
+			false,
+			true,
+			true,
+			true,
+			true,
+			true,
+		]);
+	});
+
+	test("proto blank lines detach comment blocks", () => {
+		const text =
+			'// header\n\nsyntax = "proto3";\n\n// detached\n\nmessage M {}';
+		expect(blocks(text, ".proto").blocks.map(({ doc }) => doc)).toEqual([
+			false,
+			false,
+		]);
+	});
+
+	test("comment markers inside proto strings are not comments", () => {
+		const result = blocks(
+			'option java_package = "example//path";\n// note\nmessage M {}',
+			".proto",
+		);
+		expect(result.blocks).toHaveLength(1);
+		expect(result.blocks[0]?.doc).toBe(true);
+	});
+
+	test("unknown extensions return null", () => {
+		expect(commentBlocks("// note", ".unknown")).toBeNull();
+	});
+
+	test("cgo files are ambiguous for both import forms", () => {
+		for (const text of [
+			'package p\n/* preamble */\nimport "C"',
+			'package p\nimport (\n\t"fmt"\n\t"C"\n)',
+		]) {
+			expect(isCgo(text)).toBe(true);
+			expect(blocks(text)).toMatchObject({ ambiguous: true });
+		}
+	});
+
+	test("non-cgo imports do not classify as cgo", () => {
+		expect(isCgo('package p\nimport "fmt"')).toBe(false);
+		expect(isCgo('package p\nimport (\n"fmt"\n)')).toBe(false);
+	});
+	test("generated headers exempt all comment blocks when found in the first five lines", () => {
+		const result = blocks(
+			"// Code generated by tool. DO NOT EDIT.\npackage p\n// ordinary note\nconst value = 1\n// trailing note",
+		);
+		expect(result.blocks.map(({ doc }) => doc)).toEqual([true, true, true]);
+	});
+
+	test("@generated in the first five lines exempts separated comment runs", () => {
+		const result = commentBlocks(
+			"// @generated\nconst value = 1;\n// generated prose",
+			".ts",
+		);
+		expect(result?.blocks.map(({ doc }) => doc)).toEqual([true, true]);
+	});
+
+	test("a generated marker after line five does not exempt comment blocks", () => {
+		const result = commentBlocks(
+			"const a = 1;\nconst b = 2;\nconst c = 3;\nconst d = 4;\nconst e = 5;\n// @generated\n// ordinary note",
+			".ts",
+		);
+		expect(result?.blocks.map(({ doc }) => doc)).toEqual([false]);
+	});
+});
