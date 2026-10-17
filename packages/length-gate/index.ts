@@ -516,9 +516,11 @@ export function judgeFile(
 	const beforeText = file.oldPath === file.newPath ? texts.before : "";
 	if (docClass !== null && beforeText !== texts.after) {
 		const lines = texts.after.replace(/\r\n?/gu, "\n").split("\n");
-		const markerIndex = docMarkerLines(lines)[0] ?? -1;
+		const markerLines = docMarkerLines(lines);
+		const addedMarker = markerLines.find((index) => addedLines.has(index + 1));
+		const markerIndex = addedMarker ?? markerLines[0] ?? -1;
 		let liveDocMarker: ParsedDocMarker | null = null;
-		const liveMarker = markerIndex !== -1 && addedLines.has(markerIndex + 1);
+		const liveMarker = addedMarker !== undefined;
 		if (liveMarker && !docClass.markerAllowed) {
 			findings.push({
 				kind: "bad-marker",
@@ -573,7 +575,7 @@ export function judgeFile(
 
 export function formatFinding(
 	finding: Finding,
-	config?: LengthGateConfig,
+	config: LengthGateConfig,
 ): string[] {
 	switch (finding.kind) {
 		case "comment":
@@ -582,11 +584,9 @@ export function formatFinding(
 				`Trim it to ${CEILING} lines, or add a LENGTH marker with a reason.`,
 			];
 		case "doc": {
-			const docClass = config?.docs.find(
-				({ name }) => name === finding.docClass,
-			);
 			const markerAllowed =
-				docClass?.markerAllowed ?? finding.docClass !== "spec";
+				config.docs.find(({ name }) => name === finding.docClass)
+					?.markerAllowed ?? false;
 			return [
 				`${finding.path}: ${finding.words.toLocaleString("en-US")} prose words (${finding.docClass} target ${finding.target.toLocaleString("en-US")})`,
 				markerAllowed

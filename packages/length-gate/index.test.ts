@@ -200,7 +200,7 @@ describe("comment ratchet", () => {
 	test("an untouched long block in a changed file passes", () => {
 		const before = `${comments(6)}\n\nconst oldValue = 1;`;
 		const after = `${comments(6)}\n\nconst newValue = 1;`;
-		expect(judgeComment(before, after).findings).toEqual([]);
+		expect(judgeComment(before, after, [8]).findings).toEqual([]);
 	});
 
 	test("reindent, same-file movement, and a full reworded trim pass", () => {
@@ -221,16 +221,21 @@ describe("comment ratchet", () => {
 		expect(judgeComment(before, after).findings).toEqual([]);
 	});
 
-	test("a long block moved into a new file fails", () => {
-		const result = judgeFile(COMMENT_CONFIG, diffFile("src/new.ts", [1]), {
-			before: "",
-			after: comments(5),
+	test("a ten-line block moved to a new file fails", () => {
+		const file: FileDiff = {
+			...diffFile("src/new.ts", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+			oldPath: "src/old.ts",
+			added: true,
+		};
+		const result = judgeFile(COMMENT_CONFIG, file, {
+			before: comments(10),
+			after: comments(10),
 		});
 		expect(result.findings).toContainEqual({
 			kind: "comment",
 			path: "src/new.ts",
 			line: 1,
-			lines: 5,
+			lines: 10,
 			baseLines: 0,
 		});
 		expect(judgeComment("", comments(5)).findings).toHaveLength(1);
@@ -427,6 +432,20 @@ describe("doc ratchet", () => {
 		).toEqual([]);
 	});
 
+	test("a newly added second doc marker is bad-marker even when the first is unchanged", () => {
+		const marker = "<!-- LENGTH §Plan: preserve the old interface details -->";
+		const before = `${marker}\n\n## Plan\n\n${words(10)}`;
+		const after = `${marker}\n<!-- LENGTH §Plan: add more interface details -->\n\n## Plan\n\n${words(10)}`;
+		expect(
+			judgeDoc("docs/designs/tools/record.md", before, after, [2]).findings,
+		).toContainEqual({
+			kind: "bad-marker",
+			path: "docs/designs/tools/record.md",
+			line: 2,
+			reason: "only one doc LENGTH marker is allowed",
+		});
+	});
+
 	test("a disallowed doc marker is reported and does not exempt an over-target spec", () => {
 		const text = `<!-- LENGTH §Plan: split the chapters across files -->\n\n## Plan\n\n${words(1599)}`;
 		const result = judgeDoc("docs/specs/gate.md", "", text, [1]);
@@ -473,7 +492,10 @@ describe("line pairing and failure output", () => {
 			baseWords: 0,
 			target: 1500,
 		};
-		const lines = formatFinding(finding);
+		const lines = formatFinding(finding, DOC_CONFIG);
+		expect(
+			formatFinding({ ...finding, docClass: "repo doc" }, DOC_CONFIG)[1],
+		).toContain("LENGTH marker");
 		expect(lines[0]).toContain("(spec target 1,500)");
 		expect(lines[1]?.toLowerCase()).toContain("split");
 		expect(lines[1]?.toLowerCase()).not.toContain("marker");
@@ -487,11 +509,11 @@ describe("line pairing and failure output", () => {
 			reason: "reason must have 3 words",
 		};
 		const unscannable: Finding = { kind: "unscannable", path: "src/file.ts" };
-		expect(formatFinding(bad)).toEqual([
+		expect(formatFinding(bad, DOC_CONFIG)).toEqual([
 			"src/file.ts:4: bad LENGTH marker: reason must have 3 words",
 			expect.stringContaining("Fix the reason"),
 		]);
-		expect(formatFinding(unscannable)).toEqual([
+		expect(formatFinding(unscannable, DOC_CONFIG)).toEqual([
 			"src/file.ts: no scanner could place comments",
 			expect.stringContaining("add scanner support"),
 		]);
