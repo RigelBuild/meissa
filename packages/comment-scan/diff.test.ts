@@ -157,6 +157,68 @@ describe("parseDiff", () => {
 		]);
 	});
 
+	test("a CRLF-saved diff keeps clean header paths", () => {
+		const [quoted, renamed] = parseDiff(
+			[
+				'diff --git "a/\\303\\251 x.ts" "b/\\303\\251 x.ts"',
+				"index 1111111..2222222 100644",
+				'--- "a/\\303\\251 x.ts"',
+				'+++ "b/\\303\\251 x.ts"',
+				"@@ -1 +1 @@",
+				"-a",
+				"+b",
+				"diff --git a/old.ts b/new.ts",
+				"similarity index 100%",
+				"rename from old.ts",
+				"rename to new.ts",
+				"",
+			].join("\r\n"),
+		);
+		expect([quoted?.oldPath, quoted?.path]).toEqual([
+			"\u00e9 x.ts",
+			"\u00e9 x.ts",
+		]);
+		expect(quoted?.hunks[0]?.lines.map((line) => line.text)).toEqual([
+			"a\r",
+			"b\r",
+		]);
+		expect([renamed?.oldPath, renamed?.path]).toEqual(["old.ts", "new.ts"]);
+	});
+
+	test("quoted astral characters and trailing spaces in names survive", () => {
+		const emoji = parseDiff(
+			[
+				'diff --git "a/\u{1F600}\\tx.ts" "b/\u{1F600}\\tx.ts"',
+				"new file mode 100644",
+				"index 0000000..e69de29",
+			].join("\n"),
+		)[0];
+		expect(emoji?.path).toBe("\u{1F600}\tx.ts");
+		const trailing = parseDiff(
+			[
+				"diff --git a/src/x.ts  b/src/x.ts ",
+				"index 1111111..2222222 100644",
+				"--- a/src/x.ts \t",
+				"+++ b/src/x.ts \t",
+				"@@ -1 +1 @@",
+				"-a",
+				"+b",
+			].join("\n"),
+		)[0];
+		expect([trailing?.oldPath, trailing?.path]).toEqual([
+			"src/x.ts ",
+			"src/x.ts ",
+		]);
+		const empty = parseDiff(
+			[
+				"diff --git a/src/x.ts  b/src/x.ts ",
+				"new file mode 100644",
+				"index 0000000..e69de29",
+			].join("\n"),
+		)[0];
+		expect(empty?.path).toBe("src/x.ts ");
+	});
+
 	test("empty and binary files added or deleted are flagged by their mode header", () => {
 		const added = parseDiff(
 			[

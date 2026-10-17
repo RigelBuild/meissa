@@ -49,26 +49,23 @@ const C_ESCAPES: Record<string, number> = {
 
 // Git C-quotes unusual paths; octal escapes are UTF-8 bytes, so decode bytes, not chars.
 function unquotePath(raw: string): string {
-	if (!raw.startsWith('"') || !raw.endsWith('"')) return raw;
-	const body = raw.slice(1, -1);
+	if (raw.length < 2 || !raw.startsWith('"') || !raw.endsWith('"')) return raw;
+	const encoder = new TextEncoder();
 	const bytes: number[] = [];
-	for (let at = 0; at < body.length; at++) {
-		const char = body[at] ?? "";
-		if (char !== "\\") {
-			bytes.push(...new TextEncoder().encode(char));
-			continue;
-		}
-		const next = body[at + 1] ?? "";
-		const octal = /^[0-7]{3}/.exec(body.slice(at + 1));
-		if (octal) {
-			bytes.push(Number.parseInt(octal[0], 8));
-			at += 3;
-		} else {
-			bytes.push(C_ESCAPES[next] ?? next.charCodeAt(0));
-			at += 1;
-		}
+	for (const part of raw
+		.slice(1, -1)
+		.split(/(\\[0-3][0-7]{2}|\\[abfnrtv"\\])/u)) {
+		const code = part.startsWith("\\") ? part.slice(1) : "";
+		if (/^[0-7]{3}$/u.test(code)) bytes.push(Number.parseInt(code, 8));
+		else if (code) bytes.push(C_ESCAPES[code] ?? code.charCodeAt(0));
+		else bytes.push(...encoder.encode(part));
 	}
 	return new TextDecoder().decode(new Uint8Array(bytes));
+}
+
+// Git ends a ---/+++ path that holds a space with one tab; the name's own spaces stay.
+function diffLinePath(rest: string): string {
+	return unquotePath(rest.endsWith("\t") ? rest.slice(0, -1) : rest);
 }
 
 function stripPrefix(path: string): string {
@@ -88,7 +85,7 @@ const HUNK_RE = /^@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@/;
 // The b-side of `diff --git <a> <b>`. Without a rename both halves name one path,
 // so an unquoted header splits at its midpoint even when the path holds " b/".
 function parseHeaderPath(line: string): string {
-	const rest = line.slice("diff --git ".length).trim();
+	const rest = line.slice("diff --git ".length).replace(/\r$/u, "");
 	if (rest.endsWith('"')) {
 		const open = rest.lastIndexOf(' "');
 		if (open !== -1) return stripPrefix(unquotePath(rest.slice(open + 1)));
@@ -181,35 +178,40 @@ export function parseDiff(diff: string): FileDiff[] {
 			continue;
 		}
 		if (beforeFirstHunk) {
+			// Header lines of a CRLF-saved diff end in \r; content lines keep theirs.
+			const header = line.replace(/\r$/u, "");
 			// Rename and copy records carry repository paths with no a/ or b/ prefix.
-			if (line.startsWith("rename from ")) {
+			if (header.startsWith("rename from ")) {
 				renameFrom = true;
-				fromPath = unquotePath(line.slice(12).trim());
+				fromPath = unquotePath(header.slice(12));
 			}
-			if (line.startsWith("rename to ")) {
+			if (header.startsWith("rename to ")) {
 				renameTo = true;
-				headerPath = unquotePath(line.slice(10).trim());
+				headerPath = unquotePath(header.slice(10));
 			}
-			if (line.startsWith("copy from ")) {
+			if (header.startsWith("copy from ")) {
 				copyFrom = true;
-				fromPath = unquotePath(line.slice(10).trim());
+				fromPath = unquotePath(header.slice(10));
 			}
-			if (line.startsWith("copy to ")) {
+			if (header.startsWith("copy to ")) {
 				copyTo = true;
-				headerPath = unquotePath(line.slice(8).trim());
+				headerPath = unquotePath(header.slice(8));
 			}
-			if (line.startsWith("old mode ")) oldMode = true;
-			if (line.startsWith("new mode ")) newMode = true;
-			if (line.startsWith("new file mode ")) newFile = true;
-			if (line.startsWith("deleted file mode ")) deletedFile = true;
-			if (line.startsWith("Binary files ") || line.startsWith("GIT binary "))
+			if (header.startsWith("old mode ")) oldMode = true;
+			if (header.startsWith("new mode ")) newMode = true;
+			if (header.startsWith("new file mode ")) newFile = true;
+			if (header.startsWith("deleted file mode ")) deletedFile = true;
+			if (
+				header.startsWith("Binary files ") ||
+				header.startsWith("GIT binary ")
+			)
 				file.binary = true;
-			if (line.startsWith("--- ")) {
-				oldPath = unquotePath(line.slice(4).trim());
+			if (header.startsWith("--- ")) {
+				oldPath = diffLinePath(header.slice(4));
 				continue;
 			}
-			if (line.startsWith("+++ ")) {
-				newPath = unquotePath(line.slice(4).trim());
+			if (header.startsWith("+++ ")) {
+				newPath = diffLinePath(header.slice(4));
 				continue;
 			}
 			continue;
