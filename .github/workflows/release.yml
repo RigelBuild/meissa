@@ -37,7 +37,8 @@ jobs:
           target-branch: main
 
   publish:
-    if: github.ref == 'refs/heads/main' && needs.release-pr.outputs.releases_created == 'true'
+    # A manual dispatch publishes every package; the script skips versions already on npm.
+    if: github.ref == 'refs/heads/main' && (needs.release-pr.outputs.releases_created == 'true' || github.event_name == 'workflow_dispatch')
     needs: release-pr
     runs-on: ubuntu-latest
     environment: main
@@ -68,11 +69,8 @@ jobs:
 
       # npm trusted publishing (OIDC) needs npm >= 11.5.1; the pinned Node 24 ships 11.x.
       # Each package is published once by hand first, then gets its trusted publisher.
+      # A re-run skips versions already on npm, so it can finish a partial release.
       - name: Publish released packages
-        run: |
-          # A malformed or empty list must fail, not publish nothing and pass.
-          paths_text="$(jq -er 'if type == "array" and length > 0 and all(type == "string") then .[] else error("bad paths_released") end' <<< "$PATHS_RELEASED")"
-          mapfile -t paths <<< "$paths_text"
-          for path in "${paths[@]}"; do
-            (cd "$GITHUB_WORKSPACE/$path" && npm publish --provenance --access public)
-          done
+        run: bun tools/release/publish.ts
+        env:
+          PUBLISH_ALL: ${{ github.event_name == 'workflow_dispatch' }}
