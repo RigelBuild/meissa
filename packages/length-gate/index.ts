@@ -149,7 +149,7 @@ function normalizeHeading(heading: string): string {
 function htmlText(html: string): string {
 	return html
 		.replace(/<!--[\s\S]*?(?:-->|$)/gu, " ")
-		.replace(/<(script|style)\b[\s\S]*?(?:<\/\1\s*>|$)/giu, " ")
+		.replace(/<(script|style)(?=[\s/>])[\s\S]*?(?:<\/\1\s*>|$)/giu, " ")
 		.replace(/<[^>]*>/gu, " ");
 }
 
@@ -233,11 +233,14 @@ function inlineChildren(
 	let out = "";
 	let skipping = false;
 	for (const node of nodes) {
-		if (node.type === "html" && /^<(?:script|style)\b/iu.test(node.value))
+		if (
+			node.type === "html" &&
+			/^<(?:script|style)(?=[\s/>])/iu.test(node.value)
+		)
 			skipping = !/<\/(?:script|style)\s*>\s*$/iu.test(node.value);
 		else if (
 			node.type === "html" &&
-			/^<\/(?:script|style)\b/iu.test(node.value)
+			/^<\/(?:script|style)(?=[\s>])/iu.test(node.value)
 		)
 			skipping = false;
 		else if (!skipping) out += inlineText(node, source);
@@ -301,7 +304,9 @@ function proseBlocks(
 }
 
 export function proseWords(markdown: string, dropErrata: boolean): number {
-	return proseBlocks(parseMarkdown(markdown), dropErrata, markdown)
+	// micromark drops a leading BOM, so drop it here too to keep offsets aligned with source.
+	const source = markdown.replace(/^\uFEFF/u, "");
+	return proseBlocks(parseMarkdown(source), dropErrata, source)
 		.join("\n")
 		.split(/\s+/u)
 		.filter((token) => /[\p{L}\p{N}]/u.test(token)).length;

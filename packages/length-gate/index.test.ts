@@ -512,6 +512,16 @@ describe("doc ratchet", () => {
 		).toContainEqual(expect.objectContaining({ kind: "doc", baseWords: 0 }));
 	});
 
+	test("a BOM does not hide link labels, and custom elements named style-* keep their text", () => {
+		expect(proseWords("\uFEFF[alpha beta](https://x.io) gamma", false)).toBe(3);
+		expect(proseWords("a <style-guide>alpha beta</style-guide> b", false)).toBe(
+			4,
+		);
+		expect(
+			proseWords("<style-guide>\nalpha beta\n</style-guide>\n\na b", false),
+		).toBe(4);
+	});
+
 	test("a 3,000-word record trimmed to 2,900 passes", () => {
 		const before = designRecord(words(3000));
 		const after = designRecord(words(2900));
