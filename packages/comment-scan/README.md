@@ -14,3 +14,5 @@ scanText("ts", "const value = 1; // note");
 `commentBlocks` returns comment runs with 1-based start lines, raw first lines, and doc-comment classification. It returns `null` for unsupported extensions and marks scanner failures as ambiguous.
 
 `scanText` returns one code residue per source line. TypeScript-backed JSX and Astro parsing is included as a runtime dependency.
+
+Go declaration comments are classified only at package scope. Parser-backed JSX and Astro scans normalize CRLF input before parsing.

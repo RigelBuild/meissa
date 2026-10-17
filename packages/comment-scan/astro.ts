@@ -248,6 +248,7 @@ export function scanAstro(text: string): {
 	residues: string[];
 	ambiguous: boolean;
 } {
+	text = text.replace(/\r\n/g, "\n");
 	const walk = walkAstro(text);
 	if (walk.ambiguous) return { residues: text.split("\n"), ambiguous: true };
 	return { residues: walk.residues, ambiguous: false };

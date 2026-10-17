@@ -318,6 +318,36 @@ describe("commentBlocks", () => {
 			false,
 		]);
 	});
+
+	test("Go semicolon insertion keeps continued declaration names together", () => {
+		for (const text of [
+			"// doc\nvar a,\nB int",
+			"// doc\nvar (\n a,\n B int\n)",
+		]) {
+			expect(blocks(text).blocks.map(({ doc }) => doc)).toEqual([true]);
+		}
+	});
+
+	test("local declarations do not classify as package documentation", () => {
+		const text = [
+			"func run() {",
+			"  // local var",
+			"  var Exported int",
+			"  // local const group",
+			"  const (",
+			"    Exported = 1",
+			"  )",
+			"}",
+		].join("\n");
+		expect(blocks(text).blocks.map(({ doc }) => doc)).toEqual([false, false]);
+	});
+
+	test("Go directives in trailing comments do not create cgo imports", () => {
+		expect(isCgo('package p\nvar x = 1 //go:generate echo import "C"')).toBe(
+			false,
+		);
+	});
+
 	test("cgo tokenization supports same-line and grouped separators", () => {
 		for (const text of [
 			'package p; import "C"',

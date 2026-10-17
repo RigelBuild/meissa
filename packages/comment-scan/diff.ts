@@ -192,7 +192,7 @@ export function residueScannerFor(
 	ext: string,
 ): ((text: string) => Residues) | null {
 	const parser = PARSER_BY_EXT[ext];
-	if (parser) return parser;
+	if (parser) return (text) => parser(text.replace(/\r\n/g, "\n"));
 	const lang = LANG_BY_EXT[ext];
 	if (!lang) return null;
 	return (text) => {

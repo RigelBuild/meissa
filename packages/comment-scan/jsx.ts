@@ -65,6 +65,7 @@ export function scanJsx(text: string): {
 	residues: string[];
 	ambiguous: boolean;
 } {
+	text = text.replace(/\r\n/g, "\n");
 	const source: ParsedSource = ts.createSourceFile(
 		"input.tsx",
 		text,

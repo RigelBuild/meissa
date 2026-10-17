@@ -32,6 +32,19 @@ describe("scanJsx", () => {
 		);
 	});
 
+	test("normalizes CRLF before scanning JSX", () => {
+		const result = scanJsx(
+			"const E = () => (\r\n  <a>x</a>\r\n);\r\n// note\r\n",
+		);
+		expect(result.residues).toEqual([
+			"const E = () => (",
+			"  <a>x</a>",
+			");",
+			"",
+			"",
+		]);
+	});
+
 	test("generic arrows are not treated as JSX", () => {
 		expect(scanJsx("const f = <T,>(x: T) => x; // note").residues[0]).toBe(
 			"const f = <T,>(x: T) => x;",

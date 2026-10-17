@@ -216,6 +216,18 @@ describe("residueScannerFor", () => {
 			residueScannerFor(".proto")?.('// note\nsyntax = "proto3";').residues[0],
 		).toBe("");
 	});
+	test("normalizes CRLF for parser-backed TSX scanner", () => {
+		const result = residueScannerFor(".tsx")?.(
+			"const A = () => (\r\n  <div />\r\n);\r\n// note\r\n",
+		);
+		expect(result?.residues).toEqual([
+			"const A = () => (",
+			"  <div />",
+			");",
+			"",
+			"",
+		]);
+	});
 	test("normalizes CRLF block scalar input", () => {
 		const result = residueScannerFor(".yaml")?.(
 			"script: |\r\n  # payload\r\n  text\r\n# note\r\nnext: 1",
