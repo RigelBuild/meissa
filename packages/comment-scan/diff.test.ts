@@ -123,6 +123,34 @@ describe("parseDiff", () => {
 		].join("\n");
 		expect(parseDiff(text)[0]?.binary).toBe(true);
 	});
+
+	test("empty and binary files added or deleted are flagged by their mode header", () => {
+		const added = parseDiff(
+			[
+				"diff --git a/pkg/.gitkeep b/pkg/.gitkeep",
+				"new file mode 100644",
+				"index 0000000..e69de29",
+			].join("\n"),
+		)[0];
+		expect([added?.added, added?.deleted, added?.path]).toEqual([
+			true,
+			false,
+			"pkg/.gitkeep",
+		]);
+		const deleted = parseDiff(
+			[
+				"diff --git a/img.png b/img.png",
+				"deleted file mode 100644",
+				"index 1111111..0000000",
+				"Binary files a/img.png and /dev/null differ",
+			].join("\n"),
+		)[0];
+		expect([deleted?.added, deleted?.deleted, deleted?.binary]).toEqual([
+			false,
+			true,
+			true,
+		]);
+	});
 });
 
 test("extOf finds a case-insensitive filename extension", () => {

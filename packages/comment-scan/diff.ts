@@ -81,13 +81,16 @@ export function parseDiff(diff: string): FileDiff[] {
 		copyFrom = false,
 		copyTo = false;
 	let oldMode = false,
-		newMode = false;
+		newMode = false,
+		newFile = false,
+		deletedFile = false;
 	let oldNo = 0,
 		newNo = 0;
 	const finishFile = () => {
 		if (!file) return;
-		file.added = oldPath === "/dev/null";
-		file.deleted = newPath === "/dev/null";
+		// Empty and binary files have no ---/+++ lines; their mode header says added or deleted.
+		file.added = oldPath === "/dev/null" || newFile;
+		file.deleted = newPath === "/dev/null" || deletedFile;
 		file.oldPath =
 			oldPath && oldPath !== "/dev/null"
 				? stripPrefix(oldPath)
@@ -123,6 +126,8 @@ export function parseDiff(diff: string): FileDiff[] {
 			oldPath = "";
 			newPath = "";
 			fromPath = "";
+			newFile = false;
+			deletedFile = false;
 			headerPath = parseHeaderPath(line);
 			continue;
 		}
@@ -156,6 +161,8 @@ export function parseDiff(diff: string): FileDiff[] {
 			}
 			if (line.startsWith("old mode ")) oldMode = true;
 			if (line.startsWith("new mode ")) newMode = true;
+			if (line.startsWith("new file mode ")) newFile = true;
+			if (line.startsWith("deleted file mode ")) deletedFile = true;
 			if (line.startsWith("Binary files ") || line.startsWith("GIT binary "))
 				file.binary = true;
 			if (line.startsWith("--- ")) {
