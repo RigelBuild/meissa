@@ -1,5 +1,5 @@
 import { afterEach, expect, test } from "bun:test";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -39,19 +39,22 @@ test("packed package installs without a workspace and finds TSX comment blocks",
 		stderr: "pipe",
 	});
 	if (install.exitCode !== 0) throw new Error(install.stderr.toString());
-	const entry = join(
-		isolatedDirectory,
-		"node_modules",
-		"@rigelbuild",
-		"comment-scan",
-		"index.ts",
+	const consumerFile = join(isolatedDirectory, "consumer.ts");
+	writeFileSync(
+		consumerFile,
+		[
+			'import { commentBlocks } from "@rigelbuild/comment-scan";',
+			'console.log(JSON.stringify(commentBlocks("// note\\nconst View = () => <div />;", ".tsx")));',
+		].join("\n"),
 	);
-	const installed = await import(entry);
-	const result = installed.commentBlocks(
-		"// note\nconst View = () => <div />;",
-		".tsx",
-	);
-	expect(result).toEqual({
+	const consumer = Bun.spawnSync({
+		cmd: ["bun", consumerFile],
+		cwd: isolatedDirectory,
+		stdout: "pipe",
+		stderr: "pipe",
+	});
+	if (consumer.exitCode !== 0) throw new Error(consumer.stderr.toString());
+	expect(JSON.parse(consumer.stdout.toString())).toEqual({
 		blocks: [{ start: 1, lines: 1, first: "// note", doc: false }],
 		ambiguous: false,
 	});

@@ -88,6 +88,92 @@ describe("commentBlocks", () => {
 			blocks("// private group\nvar (\n\ta int\n\tb int\n)").blocks[0]?.doc,
 		).toBe(false);
 	});
+	test("Go group comments classify exported names at the keyword and spec", () => {
+		const text = [
+			"// exported const group",
+			"const (",
+			"  hidden = 1",
+			"  Exported = 2",
+			")",
+			"// const spec",
+			"const (",
+			"  // exported spec doc",
+			"  ExportedSpec = 3",
+			")",
+			"// private const group",
+			"const (",
+			"  hidden = 4",
+			")",
+			"// private const spec",
+			"const (",
+			"  // private spec doc",
+			"  hiddenSpec = 5",
+			")",
+			"// exported var group",
+			"var (",
+			"  hiddenVar int",
+			"  ExportedVar int",
+			")",
+			"// var spec",
+			"var (",
+			"  // exported spec doc",
+			"  ExportedVarSpec int",
+			")",
+			"// private var group",
+			"var (",
+			"  hiddenVar int",
+			")",
+			"// private var spec",
+			"var (",
+			"  // private spec doc",
+			"  hiddenVarSpec int",
+			")",
+			"// exported type group",
+			"type (",
+			"  hiddenType struct{}",
+			"  ExportedType struct{}",
+			")",
+			"// type spec",
+			"type (",
+			"  // exported spec doc",
+			"  ExportedTypeSpec struct{}",
+			")",
+			"// private type group",
+			"type (",
+			"  hiddenType struct{}",
+			")",
+			"// private type spec",
+			"type (",
+			"  // private spec doc",
+			"  hiddenTypeSpec struct{}",
+			")",
+		].join("\n");
+		expect(blocks(text).blocks.map(({ doc }) => doc)).toEqual([
+			true,
+			true,
+			true,
+			false,
+			false,
+			false,
+			true,
+			true,
+			true,
+			false,
+			false,
+			false,
+			true,
+			true,
+			true,
+			false,
+			false,
+			false,
+		]);
+	});
+
+	test("Go group detection ignores parentheses inside string literals", () => {
+		const text = '// group\nconst (\n  hidden = ")"\n  // )\n  Exported = 1\n)';
+		expect(blocks(text).blocks[0]?.doc).toBe(true);
+	});
 
 	test("Go multiple names are exported if any name is exported", () => {
 		const text =
@@ -98,6 +184,19 @@ describe("commentBlocks", () => {
 			true,
 			false,
 		]);
+	});
+	test("nested struct fields do not make a Go type group exported", () => {
+		const result = blocks(
+			"// group\ntype (\n  hidden struct {\n    Exported int\n  }\n)",
+		);
+		expect(result.blocks.map(({ doc }) => doc)).toEqual([false]);
+	});
+	test("proto enum value comments attach to enum values", () => {
+		expect(
+			blocks("enum E {\n  // doc\n  ZERO = 0;\n}", ".proto").blocks.map(
+				({ doc }) => doc,
+			),
+		).toEqual([true]);
 	});
 
 	test("proto comments attach to declarations without an intervening blank line", () => {
@@ -127,6 +226,14 @@ describe("commentBlocks", () => {
 			true,
 			true,
 		]);
+	});
+
+	test("single-quoted braces do not end a proto message scope", () => {
+		const result = blocks(
+			"message M {\n  string value = 1 [default = '}'];\n  // Field\n  string next = 2;\n}",
+			".proto",
+		);
+		expect(result.blocks.map(({ doc }) => doc)).toEqual([true]);
 	});
 
 	test("proto blank lines detach comment blocks", () => {
@@ -183,6 +290,14 @@ describe("commentBlocks", () => {
 	test("a generated marker after line five does not exempt comment blocks", () => {
 		const result = commentBlocks(
 			"const a = 1;\nconst b = 2;\nconst c = 3;\nconst d = 4;\nconst e = 5;\n// @generated\n// ordinary note",
+			".ts",
+		);
+		expect(result?.blocks.map(({ doc }) => doc)).toEqual([false]);
+	});
+
+	test("generated marker inside a code string does not exempt the file", () => {
+		const result = commentBlocks(
+			'const m = "@generated";\n// ordinary note',
 			".ts",
 		);
 		expect(result?.blocks.map(({ doc }) => doc)).toEqual([false]);

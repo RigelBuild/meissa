@@ -9,7 +9,7 @@ export type CommentBlock = {
 	doc: boolean;
 };
 
-type ProtoScope = "message" | "service" | "other";
+type ProtoScope = "message" | "service" | "enum" | "other";
 type GoGroup = "const" | "type" | "var";
 
 function exportedName(name: string): boolean {
@@ -34,49 +34,72 @@ function goSpecExported(line: string): boolean {
 	return declaredNames(line).some(exportedName);
 }
 
+function withoutGoLiterals(residues: readonly string[]): string[] {
+	const lang = LANG_BY_EXT[".go"];
+	if (lang === undefined) return [...residues];
+	let quote = "";
+	return residues.map((line) => {
+		let result = "";
+		for (let i = 0; i < line.length; i++) {
+			const char = line[i] ?? "";
+			if (quote !== "") {
+				result += " ";
+				if (quote !== "`" && char === "\\") {
+					if (i + 1 < line.length) {
+						result += " ";
+						i++;
+					}
+				} else if (char === quote) quote = "";
+				continue;
+			}
+			if (lang.strings.some(({ open }) => open === char)) {
+				quote = char;
+				result += " ";
+			} else result += char;
+		}
+		return result;
+	});
+}
+
 function groupHasExportedSpec(
-	lines: readonly string[],
+	residues: readonly string[],
 	start: number,
 ): boolean {
-	let depth = 1;
-	for (let i = start + 1; i < lines.length; i++) {
-		const line = lines[i] ?? "";
-		if (goSpecExported(line)) return true;
-		for (const char of line) {
-			if (char === "(") depth++;
-			if (char === ")") depth--;
+	let parenDepth = 1;
+	let braceDepth = 0;
+	for (let i = start + 1; i < residues.length; i++) {
+		const code = residues[i] ?? "";
+		if (parenDepth === 1 && braceDepth === 0 && goSpecExported(code))
+			return true;
+		for (const char of code) {
+			if (char === "(") parenDepth++;
+			if (char === ")") parenDepth--;
+			if (char === "{") braceDepth++;
+			if (char === "}") braceDepth--;
 		}
-		if (depth <= 0) return false;
+		if (parenDepth <= 0) return false;
 	}
 	return false;
 }
 
-function goDocAt(
-	lines: readonly string[],
-	lineNo: number,
-	line: string,
-): boolean {
-	const text = line.trim();
+function goDocAt(residues: readonly string[], lineNo: number): boolean {
+	const text = (residues[lineNo] ?? "").trim();
 	if (/^package\s+[\p{L}_][\p{L}\p{N}_]*\s*$/u.test(text)) return true;
 	const fn = /^func\s+(?:\([^)]*\)\s*)?([\p{L}_][\p{L}\p{N}_]*)/u.exec(
 		text,
 	)?.[1];
 	if (fn !== undefined) return exportedName(fn);
-	const group = /^(const|type|var)\s*\(/.exec(text);
-	if (group) return groupHasExportedSpec(lines, lineNo);
+	if (/^(const|type|var)\s*\(/.test(text))
+		return groupHasExportedSpec(residues, lineNo);
 	const declaration = /^(?:const|type|var)\s+(.+)$/.exec(text)?.[1];
 	return declaration !== undefined && goSpecExported(declaration);
 }
 
-function goGroupKinds(
-	lines: readonly string[],
-	residues: readonly string[],
-): (GoGroup | null)[] {
+function goGroupKinds(residues: readonly string[]): (GoGroup | null)[] {
 	const groups: (GoGroup | null)[] = [];
 	let active: GoGroup | null = null;
-	for (let i = 0; i < lines.length; i++) {
+	for (const code of residues) {
 		groups.push(active);
-		const code = residues[i] ?? "";
 		const opener = /^\s*(const|type|var)\s*\(/.exec(code)?.[1];
 		if (active === null && opener !== undefined) active = opener as GoGroup;
 		if (active !== null && /^\s*\)/.test(code)) active = null;
@@ -84,37 +107,38 @@ function goGroupKinds(
 	return groups;
 }
 
-function protoScopes(lines: readonly string[]): ProtoScope[][] {
+function protoScopes(residues: readonly string[]): ProtoScope[][] {
 	const scopes: ProtoScope[][] = [];
 	const stack: ProtoScope[] = [];
-	for (const line of lines) {
+	for (const residue of residues) {
 		scopes.push([...stack]);
-		let quote = false;
+		let quote = "";
 		let escaped = false;
-		for (let i = 0; i < line.length; i++) {
-			const char = line[i] ?? "";
-			if (quote) {
+		for (let i = 0; i < residue.length; i++) {
+			const char = residue[i] ?? "";
+			if (quote !== "") {
 				if (escaped) escaped = false;
 				else if (char === "\\") escaped = true;
-				else if (char === '"') quote = false;
+				else if (char === quote) quote = "";
 				continue;
 			}
-			if (char === '"') {
-				quote = true;
+			if (char === '"' || char === "'") {
+				quote = char;
 				continue;
 			}
 			if (char === "}") stack.pop();
 			if (char === "{") {
-				const prefix = line.slice(0, i);
-				const declaration = /\b(message|service)\s+[\w.]+\s*$/.exec(
-					prefix,
+				const declaration = /\b(message|service|enum)\s+[\w.]+\s*$/.exec(
+					residue.slice(0, i),
 				)?.[1];
 				stack.push(
 					declaration === "message"
 						? "message"
 						: declaration === "service"
 							? "service"
-							: "other",
+							: declaration === "enum"
+								? "enum"
+								: "other",
 				);
 			}
 		}
@@ -126,6 +150,7 @@ function protoDocAt(line: string, scopes: readonly ProtoScope[]): boolean {
 	const text = line.trim();
 	if (/^(?:message|enum|service)\s+[\w.]+\b/.test(text)) return true;
 	if (scopes.includes("service") && /^rpc\s+[\w]+\s*\(/.test(text)) return true;
+	if (scopes.includes("enum") && /^[\w]+\s*=\s*-?\d+\b/.test(text)) return true;
 	return (
 		scopes.includes("message") &&
 		/^(?:(?:optional|required|repeated)\s+)?(?:map\s*<[^>]+>|[\w.]+)\s+[\w]+\s*=\s*\d+\b/.test(
@@ -144,6 +169,18 @@ function docMarker(first: string): boolean {
 	);
 }
 
+function generatedMarkerInComment(line: string, residue: string): boolean {
+	let residueIndex = 0;
+	let commentText = "";
+	for (const char of line) {
+		if (residueIndex < residue.length && char === residue[residueIndex]) {
+			residueIndex++;
+		} else {
+			commentText += char;
+		}
+	}
+	return /Code generated\b.*DO NOT EDIT\.|@generated\b/.test(commentText);
+}
 function commentRuns(
 	lines: readonly string[],
 	residues: readonly string[],
@@ -178,9 +215,13 @@ export function commentBlocks(
 	const lines = text.split("\n");
 	const generated = lines
 		.slice(0, 5)
-		.some((line) => /Code generated\b.*DO NOT EDIT\.|@generated\b/.test(line));
+		.some((line, index) =>
+			generatedMarkerInComment(line, scan.residues[index] ?? ""),
+		);
 	const runs = commentRuns(lines, scan.residues);
-	const goGroups = ext === ".go" ? goGroupKinds(lines, scan.residues) : [];
+	const goResidues =
+		ext === ".go" ? withoutGoLiterals(scan.residues) : scan.residues;
+	const goGroups = ext === ".go" ? goGroupKinds(goResidues) : [];
 	const proto = ext === ".proto" ? protoScopes(scan.residues) : [];
 	return {
 		blocks: runs.map(({ start, lines: count }) => {
@@ -193,8 +234,8 @@ export function commentBlocks(
 			if (attached && ext === ".go") {
 				doc ||=
 					goGroups[nextIndex] !== null
-						? goSpecExported(next)
-						: goDocAt(lines, nextIndex, next);
+						? goSpecExported(goResidues[nextIndex] ?? "")
+						: goDocAt(goResidues, nextIndex);
 			}
 			if (attached && ext === ".proto")
 				doc ||= protoDocAt(next, proto[nextIndex] ?? []);

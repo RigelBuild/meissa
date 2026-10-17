@@ -494,7 +494,7 @@ const PROTO: LangConfig = {
 	nestBlock: false,
 	rustChar: false,
 	regexLiteral: false,
-	strings: [dq],
+	strings: [dq, sq],
 	directive: NEVER,
 };
 

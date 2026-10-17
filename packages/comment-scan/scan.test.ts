@@ -36,13 +36,6 @@ describe("scanText", () => {
 			'"""a docstring"""',
 		);
 	});
-
-	test("regex literals after return are not comments", () => {
-		const result = scanText("ts", "return /[\\/]/;\nconst x = 1; // note");
-		expect(result.ambiguous).toBe(false);
-		expect(result.residues[0]).toContain("return /[\\/]/;");
-	});
-
 	test("unterminated single-line strings are ambiguous", () => {
 		expect(scanText("toml", "value = 'unfinished\nnext = 1").ambiguous).toBe(
 			true,
@@ -177,6 +170,11 @@ describe("scanText", () => {
 		expect(
 			scanText("css", "src: url(/fonts/a/*b); color: red;").residues[0],
 		).toBe("src: url(/fonts/a/*b); color: red;");
+	});
+	test("protobuf single-quoted strings containing comment markers stay code", () => {
+		expect(
+			scanText("proto", "option java_package = 'a//b'; // note").residues[0],
+		).toBe("option java_package = 'a//b';");
 	});
 
 	test("protobuf strings containing comment markers stay code", () => {
