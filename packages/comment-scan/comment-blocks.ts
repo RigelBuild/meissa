@@ -13,13 +13,7 @@ type ProtoScope = "message" | "service" | "enum" | "other";
 type GoGroup = "const" | "type" | "var";
 
 function exportedName(name: string): boolean {
-	const first = name.charAt(0);
-	return (
-		first !== "" &&
-		first !== "_" &&
-		first === first.toUpperCase() &&
-		first !== first.toLowerCase()
-	);
+	return /^\p{Lu}/u.test(name);
 }
 
 function declaredNames(text: string): string[] {
@@ -65,19 +59,24 @@ function groupHasExportedSpec(
 	residues: readonly string[],
 	start: number,
 ): boolean {
-	let parenDepth = 1;
+	let parenDepth = 0;
 	let braceDepth = 0;
-	for (let i = start + 1; i < residues.length; i++) {
+	for (let i = start; i < residues.length; i++) {
 		const code = residues[i] ?? "";
-		if (parenDepth === 1 && braceDepth === 0 && goSpecExported(code))
-			return true;
 		for (const char of code) {
 			if (char === "(") parenDepth++;
 			if (char === ")") parenDepth--;
 			if (char === "{") braceDepth++;
 			if (char === "}") braceDepth--;
 		}
-		if (parenDepth <= 0) return false;
+		if (
+			i > start &&
+			parenDepth === 1 &&
+			braceDepth === 0 &&
+			goSpecExported(code)
+		)
+			return true;
+		if (i > start && parenDepth === 0) return false;
 	}
 	return false;
 }
@@ -98,11 +97,32 @@ function goDocAt(residues: readonly string[], lineNo: number): boolean {
 function goGroupKinds(residues: readonly string[]): (GoGroup | null)[] {
 	const groups: (GoGroup | null)[] = [];
 	let active: GoGroup | null = null;
+	let parenDepth = 0;
+	let braceDepth = 0;
 	for (const code of residues) {
-		groups.push(active);
-		const opener = /^\s*(const|type|var)\s*\(/.exec(code)?.[1];
-		if (active === null && opener !== undefined) active = opener as GoGroup;
-		if (active !== null && /^\s*\)/.test(code)) active = null;
+		const opener: RegExpExecArray | null =
+			active === null ? /^\s*(const|type|var)\s*\(/.exec(code) : null;
+		if (opener !== null) {
+			const kind: string | undefined = opener[1];
+			if (kind === "const" || kind === "type" || kind === "var") {
+				active = kind;
+				parenDepth = 0;
+				braceDepth = 0;
+			}
+		}
+		groups.push(
+			active !== null && opener === null && parenDepth === 1 && braceDepth === 0
+				? active
+				: null,
+		);
+		if (active === null) continue;
+		for (const char of code) {
+			if (char === "(") parenDepth++;
+			if (char === ")") parenDepth--;
+			if (char === "{") braceDepth++;
+			if (char === "}") braceDepth--;
+		}
+		if (parenDepth === 0 && braceDepth === 0) active = null;
 	}
 	return groups;
 }
@@ -169,7 +189,11 @@ function docMarker(first: string): boolean {
 	);
 }
 
-function generatedMarkerInComment(line: string, residue: string): boolean {
+function generatedMarkerInComment(
+	line: string,
+	residue: string,
+	directive?: RegExp,
+): boolean {
 	let residueIndex = 0;
 	let commentText = "";
 	for (const char of line) {
@@ -179,7 +203,11 @@ function generatedMarkerInComment(line: string, residue: string): boolean {
 			commentText += char;
 		}
 	}
-	return /Code generated\b.*DO NOT EDIT\.|@generated\b/.test(commentText);
+	const marker = /Code generated\b.*DO NOT EDIT\.|@generated\b/;
+	return (
+		marker.test(commentText) ||
+		(directive?.test(line.trimStart()) === true && marker.test(line))
+	);
 }
 function commentRuns(
 	lines: readonly string[],
@@ -207,16 +235,22 @@ export function commentBlocks(
 	text: string,
 	ext: string,
 ): { blocks: CommentBlock[]; ambiguous: boolean } | null {
+	text = text.replace(/\r\n/g, "\n");
 	const scanner = residueScannerFor(ext);
 	if (scanner === null) return null;
 	if (ext === ".go" && isCgo(text)) return { blocks: [], ambiguous: true };
 	const scan: Residues = scanner(text);
+
 	if (scan.ambiguous) return { blocks: [], ambiguous: true };
 	const lines = text.split("\n");
 	const generated = lines
 		.slice(0, 5)
 		.some((line, index) =>
-			generatedMarkerInComment(line, scan.residues[index] ?? ""),
+			generatedMarkerInComment(
+				line,
+				scan.residues[index] ?? "",
+				LANG_BY_EXT[ext]?.directive,
+			),
 		);
 	const runs = commentRuns(lines, scan.residues);
 	const goResidues =

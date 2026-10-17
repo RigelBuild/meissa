@@ -176,6 +176,7 @@ export function parseDiff(diff: string): FileDiff[] {
 }
 
 export function scanText(langId: LanguageId, text: string): Residues {
+	text = text.replace(/\r\n/g, "\n");
 	const parser = PARSER_BY_ID[langId];
 	if (parser) return parser(text);
 	const lang = LANG_BY_ID[langId];

@@ -55,6 +55,20 @@ describe("scanText", () => {
 		expect(result.residues[3]).toBe("");
 		expect(result.residues[4]).toBe("next: 1");
 	});
+	test("YAML block scalars preserve comment payload with CRLF input", () => {
+		const result = scanText(
+			"yaml",
+			"script: |\r\n  # payload\r\n  text\r\n# note\r\nnext: 1",
+		);
+		expect(result.residues).toEqual([
+			"script: |",
+			"  # payload",
+			"  text",
+			"",
+			"next: 1",
+		]);
+		expect(result.ambiguous).toBe(false);
+	});
 
 	test("YAML apostrophes in plain scalars do not open strings", () => {
 		expect(
