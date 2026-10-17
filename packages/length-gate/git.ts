@@ -96,7 +96,11 @@ export function createGitDeps(
 		path: string,
 	): Promise<string | null> => {
 		const result = gitResult(repository, ["show", `${revision}:${path}`]);
-		return result.exitCode === 0 ? textDecoder.decode(result.stdout) : null;
+		if (result.exitCode === 0) return textDecoder.decode(result.stdout);
+		// A gitlink (e.g. a file replaced by a submodule) has no text to judge.
+		const entry = gitResult(repository, ["ls-tree", revision, "--", path]);
+		const mode = textDecoder.decode(entry.stdout).split(" ", 1)[0];
+		return entry.exitCode === 0 && mode === "160000" ? "" : null;
 	};
 	const listFiles = async (revision: string): Promise<string[]> => {
 		const result = gitResult(repository, ["ls-tree", "-r", "-z", revision]);

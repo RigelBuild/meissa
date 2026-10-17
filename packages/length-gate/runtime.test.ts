@@ -356,6 +356,30 @@ describe("runOnce pull request mode", () => {
 		expect(result.errors).toEqual([]);
 	});
 
+	test("a gated file replaced by a gitlink is not read", async () => {
+		const repository = trackedRepository("pr-typechange-", {
+			"src/file.ts": "clean\n",
+			"vendor/sub.ts": "clean\n",
+		});
+		runGit(repository, "checkout", "-q", "-b", "feature");
+		runGit(repository, "rm", "-q", "--cached", "vendor/sub.ts");
+		runGit(
+			repository,
+			"update-index",
+			"--add",
+			"--cacheinfo",
+			"160000,1234567890123456789012345678901234567890,vendor/sub.ts",
+		);
+		runGit(repository, "commit", "-q", "-m", "file to gitlink");
+		const result = await expectRun(repository, {
+			event: "pull_request",
+			base: "main",
+			head: "HEAD",
+		});
+		expect(await result.result).toBe(0);
+		expect(result.errors).toEqual([]);
+	});
+
 	test("diff.suppressBlankEmpty cannot drop an added marker after a blank line", async () => {
 		const repository = trackedRepository("blank-empty-", {
 			"src/a.ts": "const a = 1;\n\nconst b = 2;\n",
