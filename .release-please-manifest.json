@@ -1,12 +1,12 @@
 {
-	"packages/ref-gate": "1.0.0",
-	"packages/design-ledger-gate": "2.0.0",
-	"packages/dl-claim": "1.1.0",
-	"packages/dl-list": "1.0.0",
-	"packages/dl-reconcile": "1.0.2",
-	"packages/renovate-preflight": "1.1.0",
-	"packages/comment-scan": "0.0.0",
-	"packages/length-gate": "0.0.0",
-	"packages/biome-config": "1.0.0",
+	"packages/ref-gate": "1.0.1",
+	"packages/design-ledger-gate": "2.0.1",
+	"packages/dl-claim": "1.1.1",
+	"packages/dl-list": "1.0.1",
+	"packages/dl-reconcile": "1.0.3",
+	"packages/renovate-preflight": "1.1.1",
+	"packages/comment-scan": "1.0.0",
+	"packages/length-gate": "1.0.0",
+	"packages/biome-config": "1.0.1",
 	"packages/tsconfig": "1.0.0"
 }
