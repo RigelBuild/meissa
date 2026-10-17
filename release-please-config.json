@@ -37,6 +37,10 @@
 		"packages/renovate-preflight": {
 			"component": "renovate-preflight",
 			"package-name": "@rigelbuild/renovate-preflight"
+		},
+		"packages/comment-scan": {
+			"component": "comment-scan",
+			"package-name": "@rigelbuild/comment-scan"
 		}
 	},
 	"plugins": ["node-workspace"]
