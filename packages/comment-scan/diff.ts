@@ -72,7 +72,8 @@ export function parseDiff(diff: string): FileDiff[] {
 	let file: FileDiff | null = null;
 	let oldPath = "",
 		newPath = "",
-		headerPath = "";
+		headerPath = "",
+		fromPath = "";
 	let hunk: { lines: DiffLine[] } | null = null;
 	let beforeFirstHunk = true;
 	let renameFrom = false,
@@ -88,7 +89,9 @@ export function parseDiff(diff: string): FileDiff[] {
 		file.added = oldPath === "/dev/null";
 		file.deleted = newPath === "/dev/null";
 		file.oldPath =
-			oldPath && oldPath !== "/dev/null" ? stripPrefix(oldPath) : headerPath;
+			oldPath && oldPath !== "/dev/null"
+				? stripPrefix(oldPath)
+				: fromPath || headerPath;
 		file.newPath =
 			newPath && newPath !== "/dev/null" ? stripPrefix(newPath) : headerPath;
 		file.path = file.newPath || file.oldPath || headerPath;
@@ -119,6 +122,7 @@ export function parseDiff(diff: string): FileDiff[] {
 			newMode = false;
 			oldPath = "";
 			newPath = "";
+			fromPath = "";
 			headerPath = parseHeaderPath(line);
 			continue;
 		}
@@ -133,15 +137,21 @@ export function parseDiff(diff: string): FileDiff[] {
 			continue;
 		}
 		if (beforeFirstHunk) {
-			if (line.startsWith("rename from ")) renameFrom = true;
+			if (line.startsWith("rename from ")) {
+				renameFrom = true;
+				fromPath = stripPrefix(unquotePath(line.slice(12).trim()));
+			}
 			if (line.startsWith("rename to ")) {
 				renameTo = true;
 				headerPath = stripPrefix(unquotePath(line.slice(10).trim()));
 			}
-			if (line.startsWith("copy from ")) copyFrom = true;
+			if (line.startsWith("copy from ")) {
+				copyFrom = true;
+				fromPath = stripPrefix(unquotePath(line.slice(10).trim()));
+			}
 			if (line.startsWith("copy to ")) {
 				copyTo = true;
-				headerPath = stripPrefix(unquotePath(line.slice(9).trim()));
+				headerPath = stripPrefix(unquotePath(line.slice(8).trim()));
 			}
 			if (line.startsWith("old mode ")) oldMode = true;
 			if (line.startsWith("new mode ")) newMode = true;

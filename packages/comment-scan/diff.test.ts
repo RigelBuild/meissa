@@ -82,6 +82,30 @@ describe("parseDiff", () => {
 		expect(parseDiff(mode)[0]?.metadataOnly).toBe(true);
 	});
 
+	test("a pure rename or copy keeps its source as oldPath", () => {
+		const rename = parseDiff(
+			[
+				"diff --git a/src/old.ts b/src/new.ts",
+				"similarity index 100%",
+				"rename from src/old.ts",
+				"rename to src/new.ts",
+			].join("\n"),
+		)[0];
+		expect([rename?.oldPath, rename?.newPath]).toEqual([
+			"src/old.ts",
+			"src/new.ts",
+		]);
+		const copy = parseDiff(
+			[
+				"diff --git a/a.ts b/b.ts",
+				"similarity index 100%",
+				"copy from a.ts",
+				"copy to b.ts",
+			].join("\n"),
+		)[0];
+		expect([copy?.oldPath, copy?.newPath]).toEqual(["a.ts", "b.ts"]);
+	});
+
 	test("binary diff records are identified", () => {
 		const text = [
 			"diff --git a/image.png b/image.png",
