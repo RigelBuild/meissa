@@ -124,6 +124,39 @@ describe("parseDiff", () => {
 		expect(parseDiff(text)[0]?.binary).toBe(true);
 	});
 
+	test('header paths survive " b/" inside a name and git C-quoting', () => {
+		const spaced = parseDiff(
+			[
+				"diff --git a/x b/y.ts b/x b/y.ts",
+				"new file mode 100644",
+				"index 0000000..e69de29",
+			].join("\n"),
+		)[0];
+		expect(spaced?.path).toBe("x b/y.ts");
+		const tab = parseDiff(
+			[
+				'diff --git "a/t\\tb.ts" "b/t\\tb.ts"',
+				"index 1111111..2222222 100644",
+				'Binary files "a/t\\tb.ts" and "b/t\\tb.ts" differ',
+			].join("\n"),
+		)[0];
+		expect(tab?.path).toBe("t\tb.ts");
+		const quoted = parseDiff(
+			[
+				'diff --git "a/caf\\303\\251\\nx.ts" "b/caf\\303\\251\\nx.ts"',
+				'--- "a/caf\\303\\251\\nx.ts"',
+				'+++ "b/caf\\303\\251\\nx.ts"',
+				"@@ -1 +1 @@",
+				"-a",
+				"+b",
+			].join("\n"),
+		)[0];
+		expect([quoted?.oldPath, quoted?.path]).toEqual([
+			"café\nx.ts",
+			"café\nx.ts",
+		]);
+	});
+
 	test("empty and binary files added or deleted are flagged by their mode header", () => {
 		const added = parseDiff(
 			[

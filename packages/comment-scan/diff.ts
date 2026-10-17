@@ -37,12 +37,38 @@ export type FileDiff = {
 	metadataOnly: boolean;
 };
 
+const C_ESCAPES: Record<string, number> = {
+	a: 7,
+	b: 8,
+	f: 12,
+	n: 10,
+	r: 13,
+	t: 9,
+	v: 11,
+};
+
+// Git C-quotes unusual paths; octal escapes are UTF-8 bytes, so decode bytes, not chars.
 function unquotePath(raw: string): string {
-	if (!raw.startsWith('"')) return raw;
-	return raw
-		.slice(1, -1)
-		.replace(/\\([\\"])/g, "$1")
-		.replace(/\\t/g, "\t");
+	if (!raw.startsWith('"') || !raw.endsWith('"')) return raw;
+	const body = raw.slice(1, -1);
+	const bytes: number[] = [];
+	for (let at = 0; at < body.length; at++) {
+		const char = body[at] ?? "";
+		if (char !== "\\") {
+			bytes.push(...new TextEncoder().encode(char));
+			continue;
+		}
+		const next = body[at + 1] ?? "";
+		const octal = /^[0-7]{3}/.exec(body.slice(at + 1));
+		if (octal) {
+			bytes.push(Number.parseInt(octal[0], 8));
+			at += 3;
+		} else {
+			bytes.push(C_ESCAPES[next] ?? next.charCodeAt(0));
+			at += 1;
+		}
+	}
+	return new TextDecoder().decode(new Uint8Array(bytes));
 }
 
 function stripPrefix(path: string): string {
@@ -59,8 +85,21 @@ export function extOf(path: string): string {
 
 const HUNK_RE = /^@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@/;
 
+// The b-side of `diff --git <a> <b>`. Without a rename both halves name one path,
+// so an unquoted header splits at its midpoint even when the path holds " b/".
 function parseHeaderPath(line: string): string {
 	const rest = line.slice("diff --git ".length).trim();
+	if (rest.endsWith('"')) {
+		const open = rest.lastIndexOf(' "');
+		if (open !== -1) return stripPrefix(unquotePath(rest.slice(open + 1)));
+	}
+	const middle = (rest.length - 1) / 2;
+	if (
+		Number.isInteger(middle) &&
+		rest[middle] === " " &&
+		rest.slice(2, middle) === rest.slice(middle + 3)
+	)
+		return rest.slice(middle + 3);
 	const at = rest.lastIndexOf(" b/");
 	if (at === -1) return "";
 	return stripPrefix(unquotePath(rest.slice(at + 1)));
