@@ -131,6 +131,7 @@ function goGroupKinds(residues: readonly string[]): (GoGroup | null)[] {
 function protoScopes(residues: readonly string[]): ProtoScope[][] {
 	const scopes: ProtoScope[][] = [];
 	const stack: ProtoScope[] = [];
+	let pending: ProtoScope | null = null;
 	for (const residue of residues) {
 		scopes.push([...stack]);
 		let quote = "";
@@ -152,19 +153,53 @@ function protoScopes(residues: readonly string[]): ProtoScope[][] {
 				const declaration = /\b(message|service|enum)\s+[\w.]+\s*$/.exec(
 					residue.slice(0, i),
 				)?.[1];
+				const kind = declaration ?? pending;
 				stack.push(
-					declaration === "message"
-						? "message"
-						: declaration === "service"
-							? "service"
-							: declaration === "enum"
-								? "enum"
-								: "other",
+					kind === "message" || kind === "service" || kind === "enum"
+						? kind
+						: "other",
 				);
+				pending = null;
 			}
 		}
+		const declaration = /^\s*(message|service|enum)\s+[\w.]+\s*$/.exec(
+			residue,
+		)?.[1];
+		if (
+			declaration === "message" ||
+			declaration === "service" ||
+			declaration === "enum"
+		)
+			pending = declaration;
 	}
 	return scopes;
+}
+
+function withoutGoRawStrings(residues: readonly string[]): string[] {
+	let inRawString = false;
+	return residues.map((line) => {
+		let code = "";
+		let quote = "";
+		let escaped = false;
+		for (const char of line) {
+			if (inRawString) {
+				if (char === "`") inRawString = false;
+				code += " ";
+			} else if (quote !== "") {
+				code += char;
+				if (escaped) escaped = false;
+				else if (char === "\\") escaped = true;
+				else if (char === quote) quote = "";
+			} else if (char === "`") {
+				inRawString = true;
+				code += " ";
+			} else {
+				if (char === '"' || char === "'") quote = char;
+				code += char;
+			}
+		}
+		return code;
+	});
 }
 
 function protoDocAt(line: string, scopes: readonly ProtoScope[]): boolean {
@@ -283,16 +318,17 @@ export function commentBlocks(
 export function isCgo(text: string): boolean {
 	const go = LANG_BY_EXT[".go"];
 	if (go === undefined) return false;
-	const residues = scanComplete(go, text).residues;
-	if (residues.some((line) => /^\s*import\s+"C"\s*$/.test(line))) return true;
+	const residues = withoutGoRawStrings(scanComplete(go, text).residues);
+	if (residues.some((line) => /^\s*import\s+"C"\s*;?\s*$/.test(line)))
+		return true;
 	let inGroup = false;
 	for (const line of residues) {
 		if (!inGroup && /^\s*import\s*\(\s*$/.test(line)) {
 			inGroup = true;
 			continue;
 		}
-		if (inGroup && /^\s*"C"\s*$/.test(line)) return true;
-		if (inGroup && /^\s*\)\s*$/.test(line)) inGroup = false;
+		if (inGroup && /^\s*"C"\s*;?\s*$/.test(line)) return true;
+		if (inGroup && /^\s*\)\s*;?\s*$/.test(line)) inGroup = false;
 	}
 	return false;
 }

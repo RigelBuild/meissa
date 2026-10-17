@@ -256,6 +256,68 @@ describe("commentBlocks", () => {
 			false,
 		]);
 	});
+	test("proto scopes open when declaration braces start on the next line", () => {
+		const text = [
+			"message M",
+			"{",
+			"  // field",
+			"  string value = 1;",
+			"}",
+			"service S",
+			"{",
+			"  // rpc",
+			"  rpc Call (Req) returns (Res);",
+			"}",
+			"enum E",
+			"{",
+			"  // value",
+			"  ZERO = 0;",
+			"}",
+		].join("\n");
+		expect(blocks(text, ".proto").blocks.map(({ doc }) => doc)).toEqual([
+			true,
+			true,
+			true,
+		]);
+	});
+
+	test("cgo recognizes standalone and grouped imports with semicolons", () => {
+		for (const text of [
+			'package p\nimport "C";',
+			'package p\nimport (\n"C"\n)',
+			'package p\nimport (\n"fmt"\n"C"\n)',
+			'package p\nimport (\n"C";\n)',
+		]) {
+			expect(isCgo(text)).toBe(true);
+		}
+	});
+
+	test("raw strings containing import C do not classify as cgo", () => {
+		expect(isCgo('package p\nvar source = `\nimport "C"\n`')).toBe(false);
+	});
+
+	test("Go grouped multi-name spec comments classify exported names", () => {
+		const text = [
+			"const (",
+			"  // exported const spec",
+			"  a, B = 1, 2",
+			"  // private const spec",
+			"  a, b = 3, 4",
+			")",
+			"var (",
+			"  // exported var spec",
+			"  a, B int",
+			"  // private var spec",
+			"  a, b int",
+			")",
+		].join("\n");
+		expect(blocks(text).blocks.map(({ doc }) => doc)).toEqual([
+			true,
+			false,
+			true,
+			false,
+		]);
+	});
 	test("proto enum value comments attach to enum values", () => {
 		expect(
 			blocks("enum E {\n  // doc\n  ZERO = 0;\n}", ".proto").blocks.map(
@@ -350,6 +412,13 @@ describe("commentBlocks", () => {
 			".ts",
 		);
 		expect(result?.blocks.map(({ doc }) => doc)).toEqual([true, true]);
+	});
+	test("a generated marker on line five exempts comment blocks", () => {
+		const result = commentBlocks(
+			"const a = 1;\nconst b = 2;\nconst c = 3;\nconst d = 4;\n// @generated\n// ordinary note",
+			".ts",
+		);
+		expect(result?.blocks.map(({ doc }) => doc)).toEqual([true]);
 	});
 
 	test("a generated marker after line five does not exempt comment blocks", () => {
