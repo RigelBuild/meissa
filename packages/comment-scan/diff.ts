@@ -196,7 +196,8 @@ export function residueScannerFor(
 	const lang = LANG_BY_EXT[ext];
 	if (!lang) return null;
 	return (text) => {
-		const scan = scanComplete(lang, text);
+		const normalized = text.replace(/\r\n/g, "\n");
+		const scan = scanComplete(lang, normalized);
 		return {
 			residues: scan.residues,
 			ambiguous: scan.underflow || scan.unclosed || scan.malformed,

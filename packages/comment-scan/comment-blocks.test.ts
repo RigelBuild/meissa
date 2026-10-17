@@ -318,6 +318,22 @@ describe("commentBlocks", () => {
 			false,
 		]);
 	});
+	test("cgo tokenization supports same-line and grouped separators", () => {
+		for (const text of [
+			'package p; import "C"',
+			'import ("C";)',
+			'import ("C")',
+			'package p\n//go:generate tool `\nimport "C"',
+		]) {
+			expect(isCgo(text)).toBe(true);
+		}
+	});
+
+	test("grouped inline Go specs classify the first exported name", () => {
+		expect(
+			blocks("// g\nvar (Exported int;)").blocks.map(({ doc }) => doc),
+		).toEqual([true]);
+	});
 	test("proto enum value comments attach to enum values", () => {
 		expect(
 			blocks("enum E {\n  // doc\n  ZERO = 0;\n}", ".proto").blocks.map(

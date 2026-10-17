@@ -216,4 +216,16 @@ describe("residueScannerFor", () => {
 			residueScannerFor(".proto")?.('// note\nsyntax = "proto3";').residues[0],
 		).toBe("");
 	});
+	test("normalizes CRLF block scalar input", () => {
+		const result = residueScannerFor(".yaml")?.(
+			"script: |\r\n  # payload\r\n  text\r\n# note\r\nnext: 1",
+		);
+		expect(result?.residues).toEqual([
+			"script: |",
+			"  # payload",
+			"  text",
+			"",
+			"next: 1",
+		]);
+	});
 });
