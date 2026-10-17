@@ -5,6 +5,12 @@ import {
 	type FileDiff,
 } from "@rigelbuild/comment-scan";
 import { diffArrays } from "diff";
+import type { Heading, Nodes as MarkdownNode, Root } from "mdast";
+import { fromMarkdown } from "mdast-util-from-markdown";
+import { frontmatterFromMarkdown } from "mdast-util-frontmatter";
+import { gfmFromMarkdown } from "mdast-util-gfm";
+import { frontmatter } from "micromark-extension-frontmatter";
+import { gfm } from "micromark-extension-gfm";
 
 export const CEILING = 4;
 export const MARKER = "LENGTH";
@@ -51,10 +57,6 @@ type CommentScan = { blocks: CommentBlock[]; ambiguous: boolean };
 
 const COMMENT_PREFIX = /^\s*(?:\/\/+|#+|\/\*+|<!--|--|;|%)\s*/u;
 const GENERATED_HEADER = /Code generated\b.*DO NOT EDIT\.|@generated\b/u;
-const DOC_MARKER_START = /<!--\s*LENGTH\b/u;
-const DOC_MARKER_LINE = /^\s*<!--\s*LENGTH\s+§([^:]+):\s*(.*?)\s*-->\s*$/u;
-const H2_HEADING = /^ {0,3}##(?!#)\s+(.+?)\s*#*\s*$/u;
-const TABLE_SEPARATOR = /^\s*\|?\s*:?-{3,}:?(?:\s*\|\s*:?-{3,}:?)*\s*\|?\s*$/u;
 
 function wordsInReason(reason: string): number {
 	return reason
@@ -76,239 +78,119 @@ export function commentMarker(
 	if (!prefix) return null;
 	let content = firstLine.slice(prefix[0].length).trim();
 	if (!/^LENGTH\b/u.test(content)) return null;
-	if (!/^LENGTH\s*:/u.test(content))
-		return { error: "marker must use LENGTH: <reason>" };
+	if (!/^LENGTH\s*:/u.test(content)) return null;
 	content = content.replace(/^LENGTH\s*:/u, "");
 	content = content.replace(/(?:\*\/|-->)\s*$/u, "").trim();
 	const error = invalidReason(content);
 	return error ? { error } : { reason: content };
 }
 
-function frontMatterEnd(lines: readonly string[]): number {
-	if (lines[0]?.replace(/^\uFEFF/u, "").trim() !== "---") return 0;
-	for (let index = 1; index < lines.length; index++) {
-		const line = lines[index]?.trim();
-		if (line === "---" || line === "...") return index + 1;
-	}
-	return lines.length;
+const DOC_MARKER_NODE = /^<!--\s*LENGTH\b[\s\S]*-->$/u;
+const DOC_MARKER_LINE = /^<!--\s*LENGTH\s+§([^:]+):\s*(.*?)\s*-->$/u;
+const HEADING_ID = /\s+\{#[^}]+\}\s*$/u;
+
+function parseMarkdown(markdown: string): Root {
+	return fromMarkdown(markdown, {
+		extensions: [gfm(), frontmatter(["yaml"])],
+		mdastExtensions: [gfmFromMarkdown(), frontmatterFromMarkdown(["yaml"])],
+	});
 }
 
-function markdownWithoutComments(markdown: string): string {
-	const lines = markdown.replace(/\r\n?/gu, "\n").split("\n");
-	const start = frontMatterEnd(lines);
-	let fence: { char: string; length: number } | null = null;
-	let inComment = false;
-	for (let index = start; index < lines.length; index++) {
-		const line = lines[index] ?? "";
-		if (fence) {
-			if (
-				new RegExp(`^ {0,3}${fence.char}{${fence.length},}\\s*$`, "u").test(
-					line,
-				)
-			)
-				fence = null;
-			continue;
-		}
-		const opening = /^ {0,3}(`{3,}|~{3,})/u.exec(line)?.[1];
-		if (opening) {
-			fence = { char: opening[0] ?? "`", length: opening.length };
-			continue;
-		}
-		let visible = "";
-		let offset = 0;
-		while (offset < line.length) {
-			if (inComment) {
-				const end = line.indexOf("-->", offset);
-				if (end === -1) break;
-				offset = end + 3;
-				inComment = false;
-				continue;
-			}
-			const begin = line.indexOf("<!--", offset);
-			if (begin === -1) {
-				visible += line.slice(offset);
-				break;
-			}
-			visible += line.slice(offset, begin);
-			const end = line.indexOf("-->", begin + 4);
-			if (end === -1) {
-				inComment = true;
-				break;
-			}
-			offset = end + 3;
-		}
-		lines[index] = visible;
-	}
-	return lines.join("\n");
+function childrenOf(node: MarkdownNode): readonly MarkdownNode[] {
+	if ("children" in node && Array.isArray(node.children)) return node.children;
+	return [];
 }
 
-function visibleMarkdownLines(markdown: string, dropErrata: boolean): string[] {
-	const lines = markdown.replace(/\r\n?/gu, "\n").split("\n");
-	const start = frontMatterEnd(lines);
-	for (let index = 0; index < start; index++) lines[index] = "";
+function headingText(node: MarkdownNode): string {
+	if (node.type === "text" || node.type === "inlineCode") return node.value;
+	if (node.type === "image" || node.type === "imageReference")
+		return node.alt ?? "";
+	return childrenOf(node).map(headingText).join("");
+}
 
-	let fence: { char: string; length: number } | null = null;
-	let inComment = false;
-	for (let index = start; index < lines.length; index++) {
-		const line = lines[index] ?? "";
-		if (fence) {
-			lines[index] = "";
-			if (
-				new RegExp(`^ {0,3}${fence.char}{${fence.length},}\\s*$`, "u").test(
-					line,
-				)
-			)
-				fence = null;
-			continue;
-		}
-		const opening = /^ {0,3}(`{3,}|~{3,})/u.exec(line)?.[1];
-		if (opening) {
-			fence = { char: opening[0] ?? "`", length: opening.length };
-			lines[index] = "";
-			continue;
-		}
+function headingsIn(root: Root): Heading[] {
+	const headings: Heading[] = [];
+	const visit = (node: MarkdownNode) => {
+		if (node.type === "heading") headings.push(node);
+		for (const child of childrenOf(node)) visit(child);
+	};
+	visit(root);
+	return headings;
+}
 
-		let visible = "";
-		let offset = 0;
-		while (offset < line.length) {
-			if (inComment) {
-				const end = line.indexOf("-->", offset);
-				if (end === -1) break;
-				offset = end + 3;
-				inComment = false;
-				continue;
-			}
-			const commentStart = line.indexOf("<!--", offset);
-			if (commentStart === -1) {
-				visible += line.slice(offset);
-				break;
-			}
-			visible += line.slice(offset, commentStart);
-			const commentEnd = line.indexOf("-->", commentStart + 4);
-			if (commentEnd === -1) {
-				inComment = true;
-				break;
-			}
-			offset = commentEnd + 3;
-		}
-		lines[index] = visible;
-	}
-
-	if (dropErrata) {
-		const errata = lines.findIndex((line) =>
-			/^ {0,3}##(?!#)\s+Errata\s*#*\s*$/u.test(line),
-		);
-		if (errata !== -1) {
-			let end = lines.length;
-			for (let index = errata + 1; index < lines.length; index++) {
-				if (/^ {0,3}#{1,2}\s+/u.test(lines[index] ?? "")) {
-					end = index;
-					break;
-				}
-			}
-			for (let index = errata; index < end; index++) lines[index] = "";
-		}
-	}
-
-	for (let index = 0; index < lines.length; index++) {
-		if (!TABLE_SEPARATOR.test(lines[index] ?? "")) continue;
-		let tableStart = index;
-		if (tableStart > 0 && (lines[tableStart - 1] ?? "").includes("|"))
-			tableStart--;
-		let tableEnd = index;
-		while (
-			tableEnd + 1 < lines.length &&
-			(lines[tableEnd + 1] ?? "").trim() !== "" &&
-			(lines[tableEnd + 1] ?? "").includes("|")
+function markerNodes(
+	root: Root,
+): Array<{ node: Extract<MarkdownNode, { type: "html" }>; line: number }> {
+	const markers: Array<{
+		node: Extract<MarkdownNode, { type: "html" }>;
+		line: number;
+	}> = [];
+	for (const node of root.children) {
+		if (node.type !== "html") continue;
+		if (
+			node.value.includes("\n") ||
+			node.value.includes("\r") ||
+			!DOC_MARKER_NODE.test(node.value)
 		)
-			tableEnd++;
-		for (let row = tableStart; row <= tableEnd; row++) lines[row] = "";
-	}
-
-	return lines.map((line) =>
-		line
-			.replace(/^\s{0,3}\[[^\]]+\]:\s*\S+.*$/u, "")
-			.replace(
-				/!?\[([^\]]+)\]\((?:<[^>]*>|[^)\s]+)(?:\s+["'][^"']*["'])?\)/gu,
-				"$1",
-			)
-			.replace(/\[([^\]]+)\]\[[^\]]*\]/gu, "$1")
-			.replace(/<(?:https?:\/\/|mailto:)[^>]+>/giu, ""),
-	);
-}
-
-function docMarkerLines(lines: readonly string[]): number[] {
-	const start = frontMatterEnd(lines);
-	const markers: number[] = [];
-	let fence: { char: string; length: number } | null = null;
-	for (let index = start; index < lines.length; index++) {
-		const line = lines[index] ?? "";
-		if (fence) {
-			if (
-				new RegExp(`^ {0,3}${fence.char}{${fence.length},}\\s*$`, "u").test(
-					line,
-				)
-			)
-				fence = null;
 			continue;
-		}
-		const opening = /^ {0,3}(`{3,}|~{3,})/u.exec(line)?.[1];
-		if (opening) {
-			fence = { char: opening[0] ?? "`", length: opening.length };
-			continue;
-		}
-		if (DOC_MARKER_START.test(line)) markers.push(index);
+		const line = node.position?.start.line;
+		if (line !== undefined) markers.push({ node, line });
 	}
 	return markers;
 }
-export function docMarker(
-	text: string,
-): ParsedDocMarker | { error: string } | null {
-	const lines = text.replace(/\r\n?/gu, "\n").split("\n");
-	const markerLines = docMarkerLines(lines);
-	if (markerLines.length === 0) return null;
-	if (markerLines.length > 1)
-		return { error: "only one doc LENGTH marker is allowed" };
 
-	const markerIndex = markerLines[0];
-	if (markerIndex === undefined) return null;
-	const start = frontMatterEnd(lines);
-	const headings = visibleMarkdownLines(markdownWithoutComments(text), false)
-		.map((line, index) => ({ match: H2_HEADING.exec(line), index }))
-		.filter((entry) => entry.match !== null);
-	const firstHeading = headings[0]?.index;
+function normalizeHeading(heading: string): string {
+	return heading
+		.replace(HEADING_ID, "")
+		.replace(/^§/u, "")
+		.replace(/\s+/gu, " ")
+		.trim()
+		.toLocaleLowerCase("en-US");
+}
+
+function docMarkerFromTree(
+	root: Root,
+): ParsedDocMarker | { error: string } | null {
+	const markers = markerNodes(root);
+	if (markers.length === 0) return null;
+	if (markers.length > 1)
+		return { error: "only one doc LENGTH marker is allowed" };
+	const marker = markers[0];
+	if (!marker) return null;
+	const markerValue = marker.node.value;
+	if (typeof markerValue !== "string") return null;
+
+	const headings = headingsIn(root).filter((node) => node.depth === 2);
+	const firstHeading = headings[0];
+	const yamlEnd = root.children.reduce((end, node) => {
+		if (node.type !== "yaml") return end;
+		return Math.max(end, node.position?.end.line ?? 0);
+	}, 0);
 	if (
-		markerIndex < start ||
+		marker.line <= yamlEnd ||
 		firstHeading === undefined ||
-		markerIndex >= firstHeading
+		(firstHeading.position?.start.line ?? Number.POSITIVE_INFINITY) <=
+			marker.line
 	)
 		return {
 			error:
-				"doc marker must be before the first ## heading and name an existing section",
+				"doc marker must be after front matter, before the first ## heading, and name an existing section",
 		};
 
-	const marker = DOC_MARKER_LINE.exec(lines[markerIndex] ?? "");
-	if (!marker)
+	const parsed = DOC_MARKER_LINE.exec(markerValue);
+	if (!parsed)
 		return {
 			error:
 				"doc marker must be one HTML comment line: <!-- LENGTH §Section: reason -->",
 		};
-	const section = marker[1]?.trim() ?? "";
-	const reason = marker[2]?.trim() ?? "";
+	const section = parsed[1]?.trim() ?? "";
+	const reason = parsed[2]?.trim() ?? "";
 	const reasonError = invalidReason(reason);
 	if (reasonError) return { error: reasonError };
-	const normalizeHeading = (heading: string) =>
-		heading
-			.replace(/\s+\{#[^}]+\}\s*$/u, "")
-			.replace(/^§/u, "")
-			.replace(/\s+/gu, " ")
-			.trim()
-			.toLocaleLowerCase("en-US");
 	const target = normalizeHeading(section);
-	const exists = headings.some((entry) => {
-		const title = entry.match?.[1];
-		return title !== undefined && normalizeHeading(title) === target;
-	});
+	const exists = headings.some(
+		(node) => normalizeHeading(headingText(node)) === target,
+	);
 	if (!section || !exists)
 		return {
 			error: `doc marker section §${section} does not match an existing ## heading`,
@@ -316,11 +198,72 @@ export function docMarker(
 	return { section, reason };
 }
 
-export function proseWords(markdown: string, dropErrata: boolean): number {
-	return visibleMarkdownLines(markdown, dropErrata)
+function inlineText(node: MarkdownNode): string {
+	if (node.type === "text") return node.value;
+	if (node.type === "link" || node.type === "linkReference")
+		return childrenOf(node).map(inlineText).join("");
+	if (
+		node.type === "html" ||
+		node.type === "inlineCode" ||
+		node.type === "footnoteReference"
+	)
+		return "";
+	if (node.type === "image" || node.type === "imageReference")
+		return node.alt ?? "";
+	if (node.type === "break") return " ";
+	return childrenOf(node).map(inlineText).join("");
+}
+
+function proseBlocks(root: Root, dropErrata: boolean): string[] {
+	const blocks: string[] = [];
+	let inErrata = false;
+	const visit = (node: MarkdownNode) => {
+		if (
+			node.type === "yaml" ||
+			node.type === "code" ||
+			node.type === "inlineCode" ||
+			node.type === "html" ||
+			node.type === "table" ||
+			node.type === "definition"
+		)
+			return;
+		if (node.type === "heading") {
+			if (dropErrata && node.depth <= 2) inErrata = false;
+			if (
+				dropErrata &&
+				node.depth === 2 &&
+				normalizeHeading(headingText(node)) === "errata"
+			) {
+				inErrata = true;
+				return;
+			}
+		}
+		if (dropErrata && inErrata) return;
+		if (node.type === "heading" || node.type === "paragraph") {
+			blocks.push(childrenOf(node).map(inlineText).join(""));
+			return;
+		}
+		for (const child of childrenOf(node)) visit(child);
+	};
+	visit(root);
+	return blocks;
+}
+
+function countProseWords(root: Root, dropErrata: boolean): number {
+	return proseBlocks(root, dropErrata)
 		.join("\n")
 		.split(/\s+/u)
 		.filter((token) => /[\p{L}\p{N}]/u.test(token)).length;
+}
+
+export function docMarker(
+	text: string,
+): ParsedDocMarker | { error: string } | null {
+	return docMarkerFromTree(parseMarkdown(text));
+}
+
+export function proseWords(markdown: string, dropErrata: boolean): number {
+	return countProseWords(parseMarkdown(markdown), dropErrata);
 }
 
 export function lineMap(
@@ -336,6 +279,8 @@ export function lineMap(
 		.split("\n")
 		.map((line) => line.trim());
 	const mapping = new Map<number, number>();
+	const mappedBefore = new Set<number>();
+	const mappedAfter = new Set<number>();
 	let beforeLine = 1;
 	let afterLine = 1;
 	for (const change of diffArrays(beforeLines, afterLines)) {
@@ -344,11 +289,37 @@ export function lineMap(
 		} else if (change.removed) {
 			beforeLine += change.value.length;
 		} else {
-			for (let offset = 0; offset < change.value.length; offset++)
-				mapping.set(afterLine + offset, beforeLine + offset);
+			for (let offset = 0; offset < change.value.length; offset++) {
+				const oldLine = beforeLine + offset;
+				const newLine = afterLine + offset;
+				mapping.set(newLine, oldLine);
+				mappedBefore.add(oldLine);
+				mappedAfter.add(newLine);
+			}
 			beforeLine += change.value.length;
 			afterLine += change.value.length;
 		}
+	}
+	const beforeCounts = new Map<string, { count: number; line: number }>();
+	for (let index = 0; index < beforeLines.length; index++) {
+		const line = index + 1;
+		const text = beforeLines[index] ?? "";
+		if (mappedBefore.has(line) || text === "") continue;
+		const entry = beforeCounts.get(text);
+		beforeCounts.set(text, { count: (entry?.count ?? 0) + 1, line });
+	}
+	const afterCounts = new Map<string, { count: number; line: number }>();
+	for (let index = 0; index < afterLines.length; index++) {
+		const line = index + 1;
+		const text = afterLines[index] ?? "";
+		if (mappedAfter.has(line) || text === "") continue;
+		const entry = afterCounts.get(text);
+		afterCounts.set(text, { count: (entry?.count ?? 0) + 1, line });
+	}
+	for (const [text, base] of beforeCounts) {
+		const head = afterCounts.get(text);
+		if (base.count === 1 && head?.count === 1)
+			mapping.set(head.line, base.line);
 	}
 	return (headLine) => mapping.get(headLine) ?? null;
 }
@@ -387,6 +358,7 @@ function isGeneratedHeader(
 	}
 	return false;
 }
+
 function changedHeadLines(file: FileDiff): Set<number> {
 	const changed = new Set<number>();
 	for (const hunk of file.hunks) {
@@ -428,7 +400,7 @@ export function judgeFile(
 	const notes: Note[] = [];
 	if (
 		file.deleted ||
-		file.metadataOnly ||
+		(file.metadataOnly && file.hunks.length === 0) ||
 		matchesAny(file.path, config.exclude)
 	)
 		return { findings, notes };
@@ -451,8 +423,7 @@ export function judgeFile(
 			return { findings, notes };
 
 		const before = scanSource(file.path, beforeText, extension);
-		if ("kind" in before) return { findings: [before], notes };
-		beforeBlocks = before.blocks;
+		beforeBlocks = "kind" in before ? [] : before.blocks;
 	}
 
 	const addedLines = changedHeadLines(file);
@@ -515,45 +486,45 @@ export function judgeFile(
 
 	const beforeText = file.oldPath === file.newPath ? texts.before : "";
 	if (docClass !== null && beforeText !== texts.after) {
-		const lines = texts.after.replace(/\r\n?/gu, "\n").split("\n");
-		const markerLines = docMarkerLines(lines);
-		const addedMarker = markerLines.find((index) => addedLines.has(index + 1));
-		const markerIndex = addedMarker ?? markerLines[0] ?? -1;
+		const parsedAfter = parseMarkdown(texts.after);
+		const markerLines = markerNodes(parsedAfter).map(({ line }) => line);
+		const addedMarker = markerLines.find((line) => addedLines.has(line));
+		const markerLine = addedMarker ?? markerLines[0] ?? -1;
 		let liveDocMarker: ParsedDocMarker | null = null;
 		const liveMarker = addedMarker !== undefined;
 		if (liveMarker && !docClass.markerAllowed) {
 			findings.push({
 				kind: "bad-marker",
 				path: file.path,
-				line: markerIndex + 1,
+				line: markerLine,
 				reason: "LENGTH markers are not allowed for this doc class",
 			});
 		} else if (liveMarker) {
-			const marker = docMarker(texts.after);
+			const marker = docMarkerFromTree(parsedAfter);
 			if (marker === null || "error" in marker) {
 				findings.push({
 					kind: "bad-marker",
 					path: file.path,
-					line: markerIndex + 1,
+					line: markerLine,
 					reason: marker === null ? "invalid doc LENGTH marker" : marker.error,
 				});
 			} else {
 				liveDocMarker = marker;
 			}
 		}
-		const wordsAfter = proseWords(
-			texts.after,
+		const wordsAfter = countProseWords(
+			parsedAfter,
 			docClass.name === "design record",
 		);
-		const wordsBefore = proseWords(
-			beforeText,
+		const wordsBefore = countProseWords(
+			parseMarkdown(beforeText),
 			docClass.name === "design record",
 		);
 		if (liveDocMarker !== null && wordsAfter <= docClass.target)
 			notes.push({
 				kind: "unneeded-marker",
 				path: file.path,
-				line: markerIndex + 1,
+				line: markerLine,
 			});
 		if (
 			wordsAfter > docClass.target &&

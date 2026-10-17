@@ -129,6 +129,9 @@ describe("fixed policy and marker parsers", () => {
 		});
 		expect(commentMarker("// ordinary note")).toBeNull();
 	});
+	test("a LENGTH prefix without a colon is ordinary comment text", () => {
+		expect(commentMarker("// LENGTH must stay a power of two.")).toBeNull();
+	});
 
 	test("parses doc markers, checks reason length, and rejects missing sections", () => {
 		expect(
@@ -275,6 +278,47 @@ describe("comment ratchet", () => {
 		]);
 		expect(judgeComment("", "const value = 1;").findings).toEqual([]);
 	});
+	test("metadata-only diffs with hunks still judge added comment blocks", () => {
+		const file: FileDiff = {
+			...diffFile(
+				"src/file.ts",
+				Array.from({ length: 10 }, (_, i) => i + 1),
+			),
+			metadataOnly: true,
+		};
+		expect(
+			judgeFile(COMMENT_CONFIG, file, { before: "", after: comments(10) })
+				.findings,
+		).toContainEqual({
+			kind: "comment",
+			path: "src/file.ts",
+			line: 1,
+			lines: 10,
+			baseLines: 0,
+		});
+	});
+
+	test("an unscannable base is treated as having no comment blocks", () => {
+		const before = 'const s = "unclosed\nconst t = 1;\n';
+		expect(judgeComment(before, "const value = 1;")).toEqual({
+			findings: [],
+			notes: [],
+		});
+	});
+
+	test("a moved block keeps its base pairing when another block grows", () => {
+		const before = `${comments(10, "", "A")}\n\n${comments(6, "", "B")}`;
+		const after = `${comments(6, "", "B")}\n\n${comments(11, "", "A")}`;
+		expect(judgeComment(before, after).findings).toEqual([
+			{
+				kind: "comment",
+				path: "src/file.ts",
+				line: 8,
+				lines: 11,
+				baseLines: 10,
+			},
+		]);
+	});
 
 	test("the first matching doc class wins", () => {
 		const result = judgeDoc("docs/designs/tools/record.md", "", words(20), [], {
@@ -346,7 +390,9 @@ describe("doc ratchet", () => {
 			`title: ${words(20)}`,
 			"---",
 			`Counted ${words(2)} [label](https://example.test/target) and [ref][destination].`,
+			"",
 			"[destination]: https://example.test/reference-target",
+			"",
 			"```ts",
 			words(40),
 			"```",
@@ -369,6 +415,41 @@ describe("doc ratchet", () => {
 		expect(proseWords("foo-bar/baz x.y -- ->", false)).toBe(2);
 	});
 
+	test("inline HTML delimiter prose and code-span markers are handled as text", () => {
+		const markdown = `HTML comments open with \`<!--\` in markdown.\n\n## Body\n\n${words(3000)}`;
+		expect(proseWords(markdown, false)).toBeGreaterThanOrEqual(3000);
+		expect(proseWords(markdown, false)).toBeLessThan(3010);
+	});
+
+	test("four-space fenced code under a list item is excluded", () => {
+		const markdown = `10. Step\n\n    \`\`\`ts\n    ${words(40)}\n    \`\`\``;
+		expect(proseWords(markdown, false)).toBe(1);
+	});
+
+	test("setext heading with pipes is not mistaken for a table", () => {
+		expect(proseWords("a | b\n---\nmore | words", false)).toBe(4);
+	});
+
+	test("footnote definition text is counted", () => {
+		expect(proseWords("[^1]: some note text", false)).toBe(3);
+	});
+
+	test("inline marker mention in a spec is not a bad marker", () => {
+		const spec = `\`<!-- LENGTH §Plan: preserve the old interface details -->\`\n\n${words(1600)}`;
+		const result = judgeDoc("docs/specs/gate.md", "", spec, [1]);
+		expect(result.findings).not.toContainEqual(
+			expect.objectContaining({ kind: "bad-marker" }),
+		);
+		expect(result.findings).toContainEqual(
+			expect.objectContaining({ kind: "doc", docClass: "spec" }),
+		);
+	});
+
+	test("inline marker mention does not invalidate a valid design marker", () => {
+		const record = `<!-- LENGTH §Plan: preserve the old interface details -->\n# Record\n\n## Plan\n\nInline \`<!-- LENGTH is not a marker -->\`.\n\n${words(2510)}`;
+		const result = judgeDoc("docs/designs/tools/record.md", "", record, [1]);
+		expect(result.findings).toEqual([]);
+	});
 	test("an excluded path is final and a class exclusion permits a later class match", () => {
 		const globallyExcluded = judgeDoc(
 			"docs/specs/private.md",
@@ -481,6 +562,13 @@ describe("line pairing and failure output", () => {
 		expect(map(1)).toBeNull();
 		expect(map(2)).toBe(2);
 		expect(map(3)).toBe(3);
+	});
+	test("lineMap uniquely pairs moved lines left unmatched by the diff", () => {
+		const before = `${comments(10, "", "A")}\n\n${comments(6, "", "B")}`;
+		const after = `${comments(6, "", "B")}\n\n${comments(11, "", "A")}`;
+		const map = lineMap(before, after);
+		expect(map(1)).toBe(12);
+		expect(map(8)).toBe(1);
 	});
 
 	test("spec output names the target and recommends splitting instead of a marker", () => {
