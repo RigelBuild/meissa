@@ -104,6 +104,15 @@ describe("parseDiff", () => {
 			].join("\n"),
 		)[0];
 		expect([copy?.oldPath, copy?.newPath]).toEqual(["a.ts", "b.ts"]);
+		const nested = parseDiff(
+			[
+				"diff --git a/a/old.ts b/b/new.ts",
+				"similarity index 100%",
+				"rename from a/old.ts",
+				"rename to b/new.ts",
+			].join("\n"),
+		)[0];
+		expect([nested?.oldPath, nested?.path]).toEqual(["a/old.ts", "b/new.ts"]);
 	});
 
 	test("binary diff records are identified", () => {

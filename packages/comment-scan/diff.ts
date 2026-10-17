@@ -137,21 +137,22 @@ export function parseDiff(diff: string): FileDiff[] {
 			continue;
 		}
 		if (beforeFirstHunk) {
+			// Rename and copy records carry repository paths with no a/ or b/ prefix.
 			if (line.startsWith("rename from ")) {
 				renameFrom = true;
-				fromPath = stripPrefix(unquotePath(line.slice(12).trim()));
+				fromPath = unquotePath(line.slice(12).trim());
 			}
 			if (line.startsWith("rename to ")) {
 				renameTo = true;
-				headerPath = stripPrefix(unquotePath(line.slice(10).trim()));
+				headerPath = unquotePath(line.slice(10).trim());
 			}
 			if (line.startsWith("copy from ")) {
 				copyFrom = true;
-				fromPath = stripPrefix(unquotePath(line.slice(10).trim()));
+				fromPath = unquotePath(line.slice(10).trim());
 			}
 			if (line.startsWith("copy to ")) {
 				copyTo = true;
-				headerPath = stripPrefix(unquotePath(line.slice(8).trim()));
+				headerPath = unquotePath(line.slice(8).trim());
 			}
 			if (line.startsWith("old mode ")) oldMode = true;
 			if (line.startsWith("new mode ")) newMode = true;
