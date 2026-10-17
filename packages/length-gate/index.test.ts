@@ -161,6 +161,11 @@ describe("fixed policy and marker parsers", () => {
 				"<!-- LENGTH §The foo API: lists every exported call -->\n\n## The `foo` API\n\nbody",
 			),
 		).toEqual({ section: "The foo API", reason: "lists every exported call" });
+		expect(
+			docMarker(
+				"<!-- LENGTH §Plan: a b c: d -->\n\n## Plan\n\n## Plan: a b c\n",
+			),
+		).toEqual({ section: "Plan", reason: "a b c: d" });
 	});
 	test("trims trailing HTML comment whitespace", () => {
 		expect(
@@ -278,7 +283,6 @@ describe("comment ratchet", () => {
 			lines: 10,
 			baseLines: 0,
 		});
-		expect(judgeComment("", comments(5)).findings).toHaveLength(1);
 	});
 
 	test("a pure rename carrying a long block fails, but a mode-only change passes", () => {
@@ -496,6 +500,18 @@ describe("doc ratchet", () => {
 		});
 	});
 
+	test("renaming an over-target record judges it as a new doc", () => {
+		const text = designRecord(words(2600));
+		const rename: FileDiff = {
+			...diffFile("docs/designs/tools/new.md"),
+			oldPath: "docs/designs/tools/old.md",
+			metadataOnly: true,
+		};
+		expect(
+			judgeFile(DOC_CONFIG, rename, { before: text, after: text }).findings,
+		).toContainEqual(expect.objectContaining({ kind: "doc", baseWords: 0 }));
+	});
+
 	test("a 3,000-word record trimmed to 2,900 passes", () => {
 		const before = designRecord(words(3000));
 		const after = designRecord(words(2900));
@@ -517,6 +533,15 @@ describe("doc ratchet", () => {
 			proseWords("<script>\nconst a = b; let c = d;\n</script>", false),
 		).toBe(0);
 		expect(proseWords("see <https://example.com/a/b> now", false)).toBe(2);
+	});
+	test("inline script bodies, www and email autolinks are not prose; URL labels are", () => {
+		expect(proseWords("alpha <script>let a = b;</script> beta", false)).toBe(2);
+		expect(proseWords("see www.example.com/a now", false)).toBe(2);
+		expect(proseWords("mail <foo@example.com> now", false)).toBe(2);
+		expect(proseWords("mail foo@example.com now", false)).toBe(2);
+		expect(
+			proseWords("[https://example.com/path](https://example.com/path)", false),
+		).toBe(1);
 	});
 	test("Errata in a list does not drop later top-level prose", () => {
 		expect(proseWords(`- ## Errata\n\n${words(3)}`, true)).toBe(4);

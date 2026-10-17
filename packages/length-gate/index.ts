@@ -194,9 +194,20 @@ function docMarkerFromTree(
 	const names = new Set(
 		headings.map((node) => normalizeHeading(headingText(node))),
 	);
-	let split = body.indexOf(":");
-	for (let at = split; at !== -1; at = body.indexOf(":", at + 1))
-		if (names.has(normalizeHeading(body.slice(0, at)))) split = at;
+	// Prefer the longest heading prefix that also leaves a valid reason.
+	const colons: number[] = [];
+	for (let at = body.indexOf(":"); at !== -1; at = body.indexOf(":", at + 1))
+		colons.unshift(at);
+	const isHeading = (at: number) =>
+		names.has(normalizeHeading(body.slice(0, at)));
+	const split =
+		colons.find(
+			(at) =>
+				isHeading(at) && invalidReason(body.slice(at + 1).trim()) === null,
+		) ??
+		colons.find(isHeading) ??
+		colons.at(-1) ??
+		0;
 	const section = body.slice(0, split).trim();
 	const reason = body.slice(split + 1).trim();
 	const reasonError = invalidReason(reason);
@@ -208,23 +219,48 @@ function docMarkerFromTree(
 	return { section, reason };
 }
 
-function inlineText(node: MarkdownNode): string {
-	if (node.type === "text" || node.type === "inlineCode") return node.value;
-	if (node.type === "link" && node.children.length === 1) {
-		const only = node.children[0];
-		if (only?.type === "text" && only.value === node.url) return "";
+// An autolink's text is its target; an explicit `[label](url)` label is visible prose.
+function isAutolink(node: MarkdownNode, source: string): boolean {
+	if (node.type !== "link") return false;
+	return source[node.position?.start.offset ?? 0] !== "[";
+}
+
+// Inline <script>/<style> splits into tag and text nodes, so skip the text between the tags.
+function inlineChildren(
+	nodes: readonly MarkdownNode[],
+	source: string,
+): string {
+	let out = "";
+	let skipping = false;
+	for (const node of nodes) {
+		if (node.type === "html" && /^<(?:script|style)\b/iu.test(node.value))
+			skipping = !/<\/(?:script|style)\s*>\s*$/iu.test(node.value);
+		else if (
+			node.type === "html" &&
+			/^<\/(?:script|style)\b/iu.test(node.value)
+		)
+			skipping = false;
+		else if (!skipping) out += inlineText(node, source);
 	}
-	if (node.type === "link" || node.type === "linkReference")
-		return childrenOf(node).map(inlineText).join("");
+	return out;
+}
+
+function inlineText(node: MarkdownNode, source: string): string {
+	if (node.type === "text" || node.type === "inlineCode") return node.value;
+	if (isAutolink(node, source)) return "";
 	if (node.type === "html") return ` ${htmlText(node.value)} `;
 	if (node.type === "footnoteReference") return "";
 	if (node.type === "image" || node.type === "imageReference")
 		return node.alt ?? "";
 	if (node.type === "break") return " ";
-	return childrenOf(node).map(inlineText).join("");
+	return inlineChildren(childrenOf(node), source);
 }
 
-function proseBlocks(root: Root, dropErrata: boolean): string[] {
+function proseBlocks(
+	root: Root,
+	dropErrata: boolean,
+	source: string,
+): string[] {
 	const blocks: string[] = [];
 	let inErrata = false;
 	const visit = (node: MarkdownNode) => {
@@ -250,7 +286,7 @@ function proseBlocks(root: Root, dropErrata: boolean): string[] {
 		}
 		if (dropErrata && inErrata) return;
 		if (node.type === "heading" || node.type === "paragraph") {
-			blocks.push(childrenOf(node).map(inlineText).join(""));
+			blocks.push(inlineChildren(childrenOf(node), source));
 			return;
 		}
 		if (node.type === "html") {
@@ -264,8 +300,8 @@ function proseBlocks(root: Root, dropErrata: boolean): string[] {
 	return blocks;
 }
 
-function countProseWords(root: Root, dropErrata: boolean): number {
-	return proseBlocks(root, dropErrata)
+export function proseWords(markdown: string, dropErrata: boolean): number {
+	return proseBlocks(parseMarkdown(markdown), dropErrata, markdown)
 		.join("\n")
 		.split(/\s+/u)
 		.filter((token) => /[\p{L}\p{N}]/u.test(token)).length;
@@ -275,10 +311,6 @@ export function docMarker(
 	text: string,
 ): ParsedDocMarker | { error: string } | null {
 	return docMarkerFromTree(parseMarkdown(text));
-}
-
-export function proseWords(markdown: string, dropErrata: boolean): number {
-	return countProseWords(parseMarkdown(markdown), dropErrata);
 }
 
 // Strips comment tokens so a moved line pairs on its text; "" when it holds no letter or digit.
@@ -539,14 +571,9 @@ export function judgeFile(
 				liveDocMarker = marker;
 			}
 		}
-		const wordsAfter = countProseWords(
-			parsedAfter,
-			docClass.name === "design record",
-		);
-		const wordsBefore = countProseWords(
-			parseMarkdown(beforeText),
-			docClass.name === "design record",
-		);
+		const dropErrata = docClass.name === "design record";
+		const wordsAfter = proseWords(texts.after, dropErrata);
+		const wordsBefore = proseWords(beforeText, dropErrata);
 		if (liveDocMarker !== null && wordsAfter <= docClass.target)
 			notes.push({
 				kind: "unneeded-marker",
