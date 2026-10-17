@@ -1,4 +1,6 @@
-import { describe, expect, test } from "bun:test";
+import { afterAll, describe, expect, test } from "bun:test";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
 	allPackages,
@@ -8,11 +10,24 @@ import {
 	publishAll,
 } from "./publish.ts";
 
-test("a manual dispatch covers every public package", () => {
-	const paths = allPackages(join(import.meta.dir, "../.."));
-	expect(paths).toContain("packages/dl-list");
-	expect(paths).toContain("packages/dl-reconcile");
-	expect(paths).toEqual([...paths].sort());
+const tree = mkdtempSync(join(tmpdir(), "publish-"));
+afterAll(() => rmSync(tree, { recursive: true, force: true }));
+
+test("a manual dispatch lists exactly the public packages, sorted", () => {
+	const pkgs: Record<string, object> = {
+		zeta: { name: "@rigelbuild/zeta" },
+		alpha: { name: "@rigelbuild/alpha", private: false },
+		internal: { name: "@rigelbuild/internal", private: true },
+	};
+	for (const [dir, manifest] of Object.entries(pkgs)) {
+		mkdirSync(join(tree, "packages", dir), { recursive: true });
+		writeFileSync(
+			join(tree, "packages", dir, "package.json"),
+			JSON.stringify(manifest),
+		);
+	}
+	writeFileSync(join(tree, "packages", "README.md"), "not a package");
+	expect(allPackages(tree)).toEqual(["packages/alpha", "packages/zeta"]);
 });
 
 const registry =
