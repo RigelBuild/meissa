@@ -63,12 +63,7 @@ function groupHasExportedSpec(
 	let braceDepth = 0;
 	for (let i = start; i < residues.length; i++) {
 		const code = residues[i] ?? "";
-		for (const char of code) {
-			if (char === "(") parenDepth++;
-			if (char === ")") parenDepth--;
-			if (char === "{") braceDepth++;
-			if (char === "}") braceDepth--;
-		}
+		// A spec is judged at the depth its line starts at, before its own delimiters.
 		if (
 			i > start &&
 			parenDepth === 1 &&
@@ -76,6 +71,12 @@ function groupHasExportedSpec(
 			goSpecExported(code)
 		)
 			return true;
+		for (const char of code) {
+			if (char === "(") parenDepth++;
+			if (char === ")") parenDepth--;
+			if (char === "{") braceDepth++;
+			if (char === "}") braceDepth--;
+		}
 		if (i > start && parenDepth === 0) return false;
 	}
 	return false;

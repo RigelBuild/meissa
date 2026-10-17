@@ -212,6 +212,10 @@ describe("commentBlocks", () => {
 		].join("\n");
 		expect(blocks(text).blocks.map(({ doc }) => doc)).toEqual([true, false]);
 	});
+	test("an exported spec that opens parentheses still exports its group", () => {
+		const text = "// group\nvar (\n  Exported func(\n    x int,\n  )\n)";
+		expect(blocks(text).blocks.map(({ doc }) => doc)).toEqual([true]);
+	});
 
 	test("Go exported names use Unicode uppercase code points", () => {
 		const text = [

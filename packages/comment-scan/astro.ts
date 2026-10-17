@@ -243,8 +243,7 @@ export function segmentAstro(text: string): Segment[] | null {
 	return walk.segments.length === 0 && walk.ambiguous ? null : walk.segments;
 }
 
-// One residue per source line, so `sameCode`, the offender listing and the
-// ambiguous fallback in classify.ts are reused unchanged.
+// One residue per source line, so callers can compare and report Astro lines like any other file.
 export function scanAstro(text: string): {
 	residues: string[];
 	ambiguous: boolean;
