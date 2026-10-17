@@ -1,0 +1,33 @@
+{
+	"name": "@rigelbuild/length-gate",
+	"version": "0.0.0",
+	"type": "module",
+	"description": "Pure ratchet and marker parsing core for comment and document length checks.",
+	"license": "MIT OR Apache-2.0",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/RigelBuild/meissa.git",
+		"directory": "packages/length-gate"
+	},
+	"exports": {
+		".": "./index.ts"
+	},
+	"files": [
+		"package.json",
+		"index.ts",
+		"README.md",
+		"LICENSE-MIT",
+		"LICENSE-APACHE"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"dependencies": {
+		"@rigelbuild/comment-scan": "0.0.0",
+		"diff": "9.0.0"
+	},
+	"devDependencies": {
+		"@types/bun": "1.4.3",
+		"typescript": "6.0.3"
+	}
+}

@@ -40,7 +40,7 @@
         "dl-claim": "./index.ts",
       },
       "dependencies": {
-        "@rigelbuild/design-ledger-gate": "1.0.1",
+        "@rigelbuild/design-ledger-gate": "2.0.0",
       },
       "devDependencies": {
         "@types/bun": "1.4.3",
@@ -54,7 +54,7 @@
         "dl-list": "./index.ts",
       },
       "dependencies": {
-        "@rigelbuild/design-ledger-gate": "1.0.1",
+        "@rigelbuild/design-ledger-gate": "2.0.0",
       },
       "devDependencies": {
         "@types/bun": "1.4.3",
@@ -68,7 +68,19 @@
         "dl-reconcile": "./index.ts",
       },
       "dependencies": {
-        "@rigelbuild/design-ledger-gate": "1.0.1",
+        "@rigelbuild/design-ledger-gate": "2.0.0",
+      },
+      "devDependencies": {
+        "@types/bun": "1.4.3",
+        "typescript": "6.0.3",
+      },
+    },
+    "packages/length-gate": {
+      "name": "@rigelbuild/length-gate",
+      "version": "0.0.0",
+      "dependencies": {
+        "@rigelbuild/comment-scan": "0.0.0",
+        "diff": "9.0.0",
       },
       "devDependencies": {
         "@types/bun": "1.4.3",
@@ -115,6 +127,8 @@
 
     "@rigelbuild/dl-reconcile": ["@rigelbuild/dl-reconcile@workspace:packages/dl-reconcile"],
 
+    "@rigelbuild/length-gate": ["@rigelbuild/length-gate@workspace:packages/length-gate"],
+
     "@rigelbuild/ref-gate": ["@rigelbuild/ref-gate@workspace:packages/ref-gate"],
 
     "@rigelbuild/renovate-preflight": ["@rigelbuild/renovate-preflight@workspace:packages/renovate-preflight"],
@@ -126,6 +140,8 @@
     "@types/node": ["@types/node@26.6.3", "", { "dependencies": { "undici-types": "~8.9.0" } }, "sha512-dsqMQQoeTLqu9wynDD00q573mNzso3IdQOAfHRJqLCcmCFPoGo9A1bDpUcv/9tnKpErQWv9uKeGfl37EIS02Yg=="],
 
     "bun-types": ["bun-types@1.4.3", "", { "dependencies": { "@types/node": "*", "undici-types": "*" } }, "sha512-tinRJNGOmUN+tEAsn2y2e942n9JHRHR42iUYzDH75NmhJqVBokGSQkkfSFdNWwsANIdrK6ACH9t01M452YyTwg=="],
+
+    "diff": ["diff@9.0.0", "", {}, "sha512-svtcdpS8CgJyqAjEQIXdb3OjhFVVYjzGAPO8WGCmRbrml64SPw/jJD4GoE98aR7r25A0XcgrK3F02yw9R/vhQw=="],
 
     "typescript": ["typescript@6.0.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw=="],
 

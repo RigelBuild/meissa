@@ -41,6 +41,10 @@
 		"packages/comment-scan": {
 			"component": "comment-scan",
 			"package-name": "@rigelbuild/comment-scan"
+		},
+		"packages/length-gate": {
+			"component": "length-gate",
+			"package-name": "@rigelbuild/length-gate"
 		}
 	},
 	"plugins": ["node-workspace"]
