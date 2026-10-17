@@ -37,12 +37,35 @@ export type FileDiff = {
 	metadataOnly: boolean;
 };
 
+const C_ESCAPES: Record<string, number> = {
+	a: 7,
+	b: 8,
+	f: 12,
+	n: 10,
+	r: 13,
+	t: 9,
+	v: 11,
+};
+
+// Git C-quotes unusual paths; octal escapes are UTF-8 bytes, so decode bytes, not chars.
 function unquotePath(raw: string): string {
-	if (!raw.startsWith('"')) return raw;
-	return raw
+	if (raw.length < 2 || !raw.startsWith('"') || !raw.endsWith('"')) return raw;
+	const encoder = new TextEncoder();
+	const bytes: number[] = [];
+	for (const part of raw
 		.slice(1, -1)
-		.replace(/\\([\\"])/g, "$1")
-		.replace(/\\t/g, "\t");
+		.split(/(\\[0-3][0-7]{2}|\\[abfnrtv"\\])/u)) {
+		const code = part.startsWith("\\") ? part.slice(1) : "";
+		if (/^[0-7]{3}$/u.test(code)) bytes.push(Number.parseInt(code, 8));
+		else if (code) bytes.push(C_ESCAPES[code] ?? code.charCodeAt(0));
+		else bytes.push(...encoder.encode(part));
+	}
+	return new TextDecoder().decode(new Uint8Array(bytes));
+}
+
+// Git ends a ---/+++ path that holds a space with one tab; the name's own spaces stay.
+function diffLinePath(rest: string): string {
+	return unquotePath(rest.endsWith("\t") ? rest.slice(0, -1) : rest);
 }
 
 function stripPrefix(path: string): string {
@@ -59,8 +82,21 @@ export function extOf(path: string): string {
 
 const HUNK_RE = /^@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@/;
 
+// The b-side of `diff --git <a> <b>`. Without a rename both halves name one path,
+// so an unquoted header splits at its midpoint even when the path holds " b/".
 function parseHeaderPath(line: string): string {
-	const rest = line.slice("diff --git ".length).trim();
+	const rest = line.slice("diff --git ".length).replace(/\r$/u, "");
+	if (rest.endsWith('"')) {
+		const open = rest.lastIndexOf(' "');
+		if (open !== -1) return stripPrefix(unquotePath(rest.slice(open + 1)));
+	}
+	const middle = (rest.length - 1) / 2;
+	if (
+		Number.isInteger(middle) &&
+		rest[middle] === " " &&
+		rest.slice(2, middle) === rest.slice(middle + 3)
+	)
+		return rest.slice(middle + 3);
 	const at = rest.lastIndexOf(" b/");
 	if (at === -1) return "";
 	return stripPrefix(unquotePath(rest.slice(at + 1)));
@@ -72,7 +108,8 @@ export function parseDiff(diff: string): FileDiff[] {
 	let file: FileDiff | null = null;
 	let oldPath = "",
 		newPath = "",
-		headerPath = "";
+		headerPath = "",
+		fromPath = "";
 	let hunk: { lines: DiffLine[] } | null = null;
 	let beforeFirstHunk = true;
 	let renameFrom = false,
@@ -80,15 +117,20 @@ export function parseDiff(diff: string): FileDiff[] {
 		copyFrom = false,
 		copyTo = false;
 	let oldMode = false,
-		newMode = false;
+		newMode = false,
+		newFile = false,
+		deletedFile = false;
 	let oldNo = 0,
 		newNo = 0;
 	const finishFile = () => {
 		if (!file) return;
-		file.added = oldPath === "/dev/null";
-		file.deleted = newPath === "/dev/null";
+		// Empty and binary files have no ---/+++ lines; their mode header says added or deleted.
+		file.added = oldPath === "/dev/null" || newFile;
+		file.deleted = newPath === "/dev/null" || deletedFile;
 		file.oldPath =
-			oldPath && oldPath !== "/dev/null" ? stripPrefix(oldPath) : headerPath;
+			oldPath && oldPath !== "/dev/null"
+				? stripPrefix(oldPath)
+				: fromPath || headerPath;
 		file.newPath =
 			newPath && newPath !== "/dev/null" ? stripPrefix(newPath) : headerPath;
 		file.path = file.newPath || file.oldPath || headerPath;
@@ -119,6 +161,9 @@ export function parseDiff(diff: string): FileDiff[] {
 			newMode = false;
 			oldPath = "";
 			newPath = "";
+			fromPath = "";
+			newFile = false;
+			deletedFile = false;
 			headerPath = parseHeaderPath(line);
 			continue;
 		}
@@ -133,26 +178,40 @@ export function parseDiff(diff: string): FileDiff[] {
 			continue;
 		}
 		if (beforeFirstHunk) {
-			if (line.startsWith("rename from ")) renameFrom = true;
-			if (line.startsWith("rename to ")) {
+			// Header lines of a CRLF-saved diff end in \r; content lines keep theirs.
+			const header = line.replace(/\r$/u, "");
+			// Rename and copy records carry repository paths with no a/ or b/ prefix.
+			if (header.startsWith("rename from ")) {
+				renameFrom = true;
+				fromPath = unquotePath(header.slice(12));
+			}
+			if (header.startsWith("rename to ")) {
 				renameTo = true;
-				headerPath = stripPrefix(unquotePath(line.slice(10).trim()));
+				headerPath = unquotePath(header.slice(10));
 			}
-			if (line.startsWith("copy from ")) copyFrom = true;
-			if (line.startsWith("copy to ")) {
+			if (header.startsWith("copy from ")) {
+				copyFrom = true;
+				fromPath = unquotePath(header.slice(10));
+			}
+			if (header.startsWith("copy to ")) {
 				copyTo = true;
-				headerPath = stripPrefix(unquotePath(line.slice(9).trim()));
+				headerPath = unquotePath(header.slice(8));
 			}
-			if (line.startsWith("old mode ")) oldMode = true;
-			if (line.startsWith("new mode ")) newMode = true;
-			if (line.startsWith("Binary files ") || line.startsWith("GIT binary "))
+			if (header.startsWith("old mode ")) oldMode = true;
+			if (header.startsWith("new mode ")) newMode = true;
+			if (header.startsWith("new file mode ")) newFile = true;
+			if (header.startsWith("deleted file mode ")) deletedFile = true;
+			if (
+				header.startsWith("Binary files ") ||
+				header.startsWith("GIT binary ")
+			)
 				file.binary = true;
-			if (line.startsWith("--- ")) {
-				oldPath = unquotePath(line.slice(4).trim());
+			if (header.startsWith("--- ")) {
+				oldPath = diffLinePath(header.slice(4));
 				continue;
 			}
-			if (line.startsWith("+++ ")) {
-				newPath = unquotePath(line.slice(4).trim());
+			if (header.startsWith("+++ ")) {
+				newPath = diffLinePath(header.slice(4));
 				continue;
 			}
 			continue;
