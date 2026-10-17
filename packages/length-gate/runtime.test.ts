@@ -334,6 +334,28 @@ describe("runOnce pull request mode", () => {
 		expect(result.errors).toEqual([]);
 	});
 
+	test("a gitlink named like a gated file is not read", async () => {
+		const repository = trackedRepository("pr-gitlink-", {
+			"src/file.ts": "clean\n",
+		});
+		runGit(repository, "checkout", "-q", "-b", "feature");
+		runGit(
+			repository,
+			"update-index",
+			"--add",
+			"--cacheinfo",
+			"160000,1234567890123456789012345678901234567890,vendor/sub.ts",
+		);
+		runGit(repository, "commit", "-q", "-m", "gitlink");
+		const result = await expectRun(repository, {
+			event: "pull_request",
+			base: "main",
+			head: "HEAD",
+		});
+		expect(await result.result).toBe(0);
+		expect(result.errors).toEqual([]);
+	});
+
 	test("diff.suppressBlankEmpty cannot drop an added marker after a blank line", async () => {
 		const repository = trackedRepository("blank-empty-", {
 			"src/a.ts": "const a = 1;\n\nconst b = 2;\n",
@@ -523,6 +545,19 @@ describe("runOnce all mode", () => {
 	test("a clean tree exits 0", async () => {
 		const repository = trackedRepository("all-clean-", {
 			"src/file.ts": "clean\n",
+		});
+		const result = await expectRun(repository, {
+			event: "push",
+			head: "HEAD",
+			all: true,
+		});
+		expect(await result.result).toBe(0);
+		expect(result.errors).toEqual([]);
+	});
+
+	test("a live marker exempts its block under --all", async () => {
+		const repository = trackedRepository("all-marker-", {
+			"src/file.ts": `// LENGTH: frame header bit layout\n${longComment()}`,
 		});
 		const result = await expectRun(repository, {
 			event: "push",
