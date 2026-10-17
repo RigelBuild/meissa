@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import type { FileDiff } from "@rigelbuild/comment-scan";
+import { type FileDiff, parseDiff } from "@rigelbuild/comment-scan";
 import {
 	CEILING,
 	commentMarker,
@@ -147,6 +147,21 @@ describe("fixed policy and marker parsers", () => {
 		).toEqual({ error: expect.stringContaining("Nope") });
 		expect(docMarker("## Plan\nNo marker")).toBeNull();
 	});
+	test("a doc marker may name a heading that contains a colon or code", () => {
+		expect(
+			docMarker(
+				"<!-- LENGTH §Plan: phase one: carries the per-task interfaces -->\n\n## Plan: phase one\n\nbody",
+			),
+		).toEqual({
+			section: "Plan: phase one",
+			reason: "carries the per-task interfaces",
+		});
+		expect(
+			docMarker(
+				"<!-- LENGTH §The foo API: lists every exported call -->\n\n## The `foo` API\n\nbody",
+			),
+		).toEqual({ section: "The foo API", reason: "lists every exported call" });
+	});
 	test("trims trailing HTML comment whitespace", () => {
 		expect(
 			docMarker(
@@ -266,6 +281,24 @@ describe("comment ratchet", () => {
 		expect(judgeComment("", comments(5)).findings).toHaveLength(1);
 	});
 
+	test("a pure rename carrying a long block fails, but a mode-only change passes", () => {
+		const rename: FileDiff = {
+			...diffFile("src/new.ts"),
+			oldPath: "src/old.ts",
+			metadataOnly: true,
+		};
+		const texts = { before: comments(10), after: comments(10) };
+		expect(judgeFile(COMMENT_CONFIG, rename, texts).findings).toContainEqual({
+			kind: "comment",
+			path: "src/new.ts",
+			line: 1,
+			lines: 10,
+			baseLines: 0,
+		});
+		const mode: FileDiff = { ...diffFile("src/file.ts"), metadataOnly: true };
+		expect(judgeFile(COMMENT_CONFIG, mode, texts).findings).toEqual([]);
+	});
+
 	test("a marker line must change before it exempts a growing comment block", () => {
 		const before = `// LENGTH: preserve old protocol details\n${comments(9)}`;
 		const unchanged = `// LENGTH: preserve old protocol details\n${comments(10)}`;
@@ -379,31 +412,29 @@ describe("comment ratchet", () => {
 			baseLines: 0,
 		});
 	});
-	test("a live marker cannot free base excess for a new block", () => {
-		const added = Array.from({ length: 10 }, (_, index) => index + 22);
-		const markerLine = "// LENGTH: new protocol layout details";
-		const oldMarked = `// LENGTH: old protocol layout notes\n${comments(19)}`;
-		const reworded = `${markerLine}\n${comments(19)}\n\n${comments(10, "", "new")}`;
-		expect(
-			judgeComment(oldMarked, reworded, [1, ...added]).findings,
-		).toContainEqual({
-			kind: "comment",
-			path: "src/file.ts",
-			line: 22,
-			lines: 10,
-			baseLines: 0,
-		});
+	test("marking part of a split block does not fail an unrelated block that stays in budget", () => {
+		const tail = (from: number) =>
+			Array.from({ length: 4 }, (_, i) => `// a ${from + i}`).join("\n");
+		const before = `${comments(12, "", "a")}\nconst x = 1;\n\n${comments(10, "", "b")}\nconst y = 1;`;
+		const after = `${comments(8, "", "a")}\nconst x = 1;\n\n// LENGTH: keeps wire layout notes\n${tail(9)}\nconst w = 1;\n\n${comments(11, "", "b")}\nconst y = 1;`;
+		expect(judgeComment(before, after, [11, 15, 16, 28]).findings).toEqual([]);
 	});
-	test("adding a marker cannot free base excess for a new block", () => {
-		const added = Array.from({ length: 10 }, (_, index) => index + 22);
-		const markerLine = "// LENGTH: new protocol layout details";
-		const newlyMarked = `${markerLine}\n${comments(19)}\n\n${comments(10, "", "new")}`;
-		expect(
-			judgeComment(comments(20), newlyMarked, [1, ...added]).findings,
-		).toContainEqual({
+
+	test("a pure rename parsed from git keeps the long block failing", () => {
+		const [file] = parseDiff(
+			[
+				"diff --git a/src/old.ts b/src/new.ts",
+				"similarity index 100%",
+				"rename from src/old.ts",
+				"rename to src/new.ts",
+			].join("\n"),
+		);
+		if (!file) throw new Error("no file parsed");
+		const texts = { before: comments(10), after: comments(10) };
+		expect(judgeFile(COMMENT_CONFIG, file, texts).findings).toContainEqual({
 			kind: "comment",
-			path: "src/file.ts",
-			line: 22,
+			path: "src/new.ts",
+			line: 1,
 			lines: 10,
 			baseLines: 0,
 		});
@@ -478,6 +509,14 @@ describe("doc ratchet", () => {
 	test("HTML elements preserve prose text and inline tags separate words", () => {
 		expect(proseWords("alpha<br>beta", false)).toBe(2);
 		expect(proseWords(`<div>\n${words(5)}\n</div>`, false)).toBe(5);
+	});
+	test("HTML comment text never counts, script bodies are not prose, and bare URLs are targets", () => {
+		expect(proseWords("<!-- note --> visible words here", false)).toBe(3);
+		expect(proseWords("alpha <!-- a > hidden words --> beta", false)).toBe(2);
+		expect(
+			proseWords("<script>\nconst a = b; let c = d;\n</script>", false),
+		).toBe(0);
+		expect(proseWords("see <https://example.com/a/b> now", false)).toBe(2);
 	});
 	test("Errata in a list does not drop later top-level prose", () => {
 		expect(proseWords(`- ## Errata\n\n${words(3)}`, true)).toBe(4);

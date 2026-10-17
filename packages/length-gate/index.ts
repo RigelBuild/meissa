@@ -85,7 +85,7 @@ export function commentMarker(
 	return error ? { error } : { reason: content };
 }
 
-const DOC_MARKER_LINE = /^<!--\s*LENGTH\s+§([^:]+):\s*(.*?)\s*-->$/u;
+const DOC_MARKER_LINE = /^<!--\s*LENGTH\s+§([^:]+:.*?)\s*-->$/u;
 const HEADING_ID = /\s+\{#[^}]+\}\s*$/u;
 
 function parseMarkdown(markdown: string): Root {
@@ -139,9 +139,18 @@ function normalizeHeading(heading: string): string {
 	return heading
 		.replace(HEADING_ID, "")
 		.replace(/^§/u, "")
+		.replace(/`/gu, "")
 		.replace(/\s+/gu, " ")
 		.trim()
 		.toLocaleLowerCase("en-US");
+}
+
+// HTML comments and script/style bodies are not prose; other tags are stripped to their text.
+function htmlText(html: string): string {
+	return html
+		.replace(/<!--[\s\S]*?(?:-->|$)/gu, " ")
+		.replace(/<(script|style)\b[\s\S]*?(?:<\/\1\s*>|$)/giu, " ")
+		.replace(/<[^>]*>/gu, " ");
 }
 
 function docMarkerFromTree(
@@ -154,7 +163,6 @@ function docMarkerFromTree(
 	const marker = markers[0];
 	if (!marker) return null;
 	const markerValue = marker.node.value.trim();
-	if (typeof markerValue !== "string") return null;
 
 	const headings = headingsIn(root).filter((node) => node.depth === 2);
 	const firstHeading = headings[0];
@@ -181,15 +189,19 @@ function docMarkerFromTree(
 			error:
 				"doc marker must be one HTML comment line: <!-- LENGTH §Section: reason -->",
 		};
-	const section = parsed[1]?.trim() ?? "";
-	const reason = parsed[2]?.trim() ?? "";
+	// A heading may itself contain ":", so split at the last colon that ends a real heading.
+	const body = parsed[1] ?? "";
+	const names = new Set(
+		headings.map((node) => normalizeHeading(headingText(node))),
+	);
+	let split = body.indexOf(":");
+	for (let at = split; at !== -1; at = body.indexOf(":", at + 1))
+		if (names.has(normalizeHeading(body.slice(0, at)))) split = at;
+	const section = body.slice(0, split).trim();
+	const reason = body.slice(split + 1).trim();
 	const reasonError = invalidReason(reason);
 	if (reasonError) return { error: reasonError };
-	const target = normalizeHeading(section);
-	const exists = headings.some(
-		(node) => normalizeHeading(headingText(node)) === target,
-	);
-	if (!section || !exists)
+	if (!section || !names.has(normalizeHeading(section)))
 		return {
 			error: `doc marker section §${section} does not match an existing ## heading`,
 		};
@@ -198,9 +210,13 @@ function docMarkerFromTree(
 
 function inlineText(node: MarkdownNode): string {
 	if (node.type === "text" || node.type === "inlineCode") return node.value;
+	if (node.type === "link" && node.children.length === 1) {
+		const only = node.children[0];
+		if (only?.type === "text" && only.value === node.url) return "";
+	}
 	if (node.type === "link" || node.type === "linkReference")
 		return childrenOf(node).map(inlineText).join("");
-	if (node.type === "html") return ` ${node.value.replace(/<[^>]*>/gu, " ")} `;
+	if (node.type === "html") return ` ${htmlText(node.value)} `;
 	if (node.type === "footnoteReference") return "";
 	if (node.type === "image" || node.type === "imageReference")
 		return node.alt ?? "";
@@ -216,8 +232,7 @@ function proseBlocks(root: Root, dropErrata: boolean): string[] {
 			node.type === "yaml" ||
 			node.type === "code" ||
 			node.type === "table" ||
-			node.type === "definition" ||
-			(node.type === "html" && /^<!--/u.test(node.value.trim()))
+			node.type === "definition"
 		)
 			return;
 		if (node.type === "heading") {
@@ -239,7 +254,7 @@ function proseBlocks(root: Root, dropErrata: boolean): string[] {
 			return;
 		}
 		if (node.type === "html") {
-			const text = node.value.replace(/<[^>]*>/gu, " ").trim();
+			const text = htmlText(node.value).trim();
 			if (text) blocks.push(text);
 			return;
 		}
@@ -266,14 +281,12 @@ export function proseWords(markdown: string, dropErrata: boolean): number {
 	return countProseWords(parseMarkdown(markdown), dropErrata);
 }
 
-function hasCommentContent(line: string): boolean {
+// Strips comment tokens so a moved line pairs on its text; "" when it holds no letter or digit.
+function fallbackCommentKey(line: string): string {
 	const content = line.replace(/^\s*(?:(?:\/\/|#|\*|--|;|\/\*|\*\/)\s*)+/u, "");
-	return /[\p{L}\p{N}]/u.test(content);
+	return /[\p{L}\p{N}]/u.test(content) ? content : "";
 }
 
-function fallbackCommentKey(line: string): string {
-	return line.replace(/^\s*(?:(?:\/\/|#|\*|--|;|\/\*|\*\/)\s*)+/u, "");
-}
 export function lineMap(
 	before: string,
 	after: string,
@@ -313,8 +326,8 @@ export function lineMap(
 		const line = index + 1;
 		const text = beforeLines[index] ?? "";
 		if (mappedBefore.has(line) || text === "") continue;
-		if (!hasCommentContent(text)) continue;
 		const key = fallbackCommentKey(text);
+		if (key === "") continue;
 		const entry = beforeCounts.get(key);
 		beforeCounts.set(key, { count: (entry?.count ?? 0) + 1, line });
 	}
@@ -323,8 +336,8 @@ export function lineMap(
 		const line = index + 1;
 		const text = afterLines[index] ?? "";
 		if (mappedAfter.has(line) || text === "") continue;
-		if (!hasCommentContent(text)) continue;
 		const key = fallbackCommentKey(text);
+		if (key === "") continue;
 		const entry = afterCounts.get(key);
 		afterCounts.set(key, { count: (entry?.count ?? 0) + 1, line });
 	}
@@ -412,7 +425,9 @@ export function judgeFile(
 	const notes: Note[] = [];
 	if (
 		file.deleted ||
-		(file.metadataOnly && file.hunks.length === 0) ||
+		(file.metadataOnly &&
+			file.hunks.length === 0 &&
+			file.oldPath === file.newPath) ||
 		matchesAny(file.path, config.exclude)
 	)
 		return { findings, notes };
@@ -463,27 +478,10 @@ export function judgeFile(
 				});
 		}
 
-		const lineMapping = lineMap(texts.before, texts.after);
-		const baseLiveMarkers = new Set<number>();
-		for (const block of afterBlocks) {
-			if (!liveMarkers.has(block.start)) continue;
-			for (let line = block.start; line < block.start + block.lines; line++) {
-				const baseLine = lineMapping(line);
-				if (baseLine === null) continue;
-				for (const baseBlock of beforeBlocks) {
-					if (
-						!baseBlock.doc &&
-						baseLine >= baseBlock.start &&
-						baseLine < baseBlock.start + baseBlock.lines
-					)
-						baseLiveMarkers.add(baseBlock.start);
-				}
-			}
-		}
 		if (
-			fileExcess(afterBlocks, liveMarkers) >
-			fileExcess(beforeBlocks, baseLiveMarkers)
+			fileExcess(afterBlocks, liveMarkers) > fileExcess(beforeBlocks, new Set())
 		) {
+			const lineMapping = lineMap(texts.before, texts.after);
 			for (const block of afterBlocks) {
 				if (block.doc || block.lines <= CEILING || liveMarkers.has(block.start))
 					continue;
