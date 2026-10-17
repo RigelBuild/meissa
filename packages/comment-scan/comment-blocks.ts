@@ -351,6 +351,34 @@ function protoScopes(residues: readonly string[]): ProtoScope[][] {
 	}
 	return scopes;
 }
+// Per-line proto text with comments blanked and line count kept, so `message/* c */M {` stays two tokens.
+function protoScopeText(text: string): string[] {
+	let out = "";
+	let quote = "";
+	for (let i = 0; i < text.length; i++) {
+		const char = text[i] ?? "";
+		if (quote !== "") {
+			out += char;
+			if (char === "\\") out += text[++i] ?? "";
+			else if (char === quote) quote = "";
+			continue;
+		}
+		if (char === '"' || char === "'") quote = char;
+		else if (char === "/" && text[i + 1] === "/") {
+			while (i < text.length && text[i] !== "\n") i++;
+			out += "\n";
+			continue;
+		} else if (char === "/" && text[i + 1] === "*") {
+			const end = text.indexOf("*/", i + 2);
+			const body = text.slice(i, end === -1 ? text.length : end + 2);
+			out += ` ${"\n".repeat(body.split("\n").length - 1)}`;
+			i += body.length - 1;
+			continue;
+		}
+		out += char;
+	}
+	return out.split("\n");
+}
 function protoDocAt(line: string, scopes: readonly ProtoScope[]): boolean {
 	const text = line.replace(/\/\*[\s\S]*?\*\//g, " ").trim();
 	if (/^(?:message|enum|service)\s+[\w.]+\b/.test(text)) return true;
@@ -441,7 +469,7 @@ export function commentBlocks(
 		);
 	const runs = commentRuns(lines, scan.residues);
 	const goGroupInfo = ext === ".go" ? goAnalysis(goTokensResult) : null;
-	const proto = ext === ".proto" ? protoScopes(scan.residues) : [];
+	const proto = ext === ".proto" ? protoScopes(protoScopeText(text)) : [];
 	return {
 		blocks: runs.map(({ start, lines: count }) => {
 			const first = lines[start] ?? "";

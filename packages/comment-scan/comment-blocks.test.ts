@@ -351,9 +351,12 @@ describe("commentBlocks", () => {
 	});
 
 	test("proto declaration matching treats block comments as whitespace", () => {
-		expect(
-			blocks("// message\nmessage/* c */M {", ".proto").blocks[0]?.doc,
-		).toBe(true);
+		const text =
+			"// message\nmessage/* c */M {\n  // field\n  string value = 1;\n}";
+		expect(blocks(text, ".proto").blocks.map(({ doc }) => doc)).toEqual([
+			true,
+			true,
+		]);
 	});
 
 	test("local declarations do not classify as package documentation", () => {
