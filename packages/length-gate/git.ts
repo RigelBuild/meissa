@@ -77,6 +77,7 @@ export function createGitDeps(
 			"--no-color",
 			"--no-ext-diff",
 			"--no-textconv",
+			"--submodule=short",
 			"--src-prefix=a/",
 			"--dst-prefix=b/",
 			`${base}...${head}`,

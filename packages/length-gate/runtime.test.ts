@@ -295,6 +295,45 @@ describe("runOnce pull request mode", () => {
 		expect(result.errors.join("\n")).toContain("src/new.ts:1:");
 	});
 
+	test("diff.submodule=diff cannot inline a submodule's files into the diff", async () => {
+		const submodule = trackedRepository("submodule-", { "lib.ts": "clean\n" });
+		const repository = trackedRepository("superproject-", {
+			"src/file.ts": "clean\n",
+		});
+		runGit(
+			repository,
+			"-c",
+			"protocol.file.allow=always",
+			"submodule",
+			"add",
+			"-q",
+			submodule,
+			"vendor/sub",
+		);
+		commitChange(repository, "add submodule");
+		runGit(repository, "checkout", "-q", "-b", "feature");
+		writeRepositoryFile(submodule, "lib.ts", longComment());
+		commitChange(submodule, "long comment");
+		runGit(
+			join(repository, "vendor/sub"),
+			"-c",
+			"protocol.file.allow=always",
+			"pull",
+			"-q",
+			"origin",
+			"main",
+		);
+		commitChange(repository, "bump submodule");
+		runGit(repository, "config", "diff.submodule", "diff");
+		const result = await expectRun(repository, {
+			event: "pull_request",
+			base: "main",
+			head: "HEAD",
+		});
+		expect(await result.result).toBe(0);
+		expect(result.errors).toEqual([]);
+	});
+
 	test("diff.suppressBlankEmpty cannot drop an added marker after a blank line", async () => {
 		const repository = trackedRepository("blank-empty-", {
 			"src/a.ts": "const a = 1;\n\nconst b = 2;\n",
