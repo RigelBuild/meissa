@@ -9,7 +9,7 @@
 		"directory": "packages/dl-list"
 	},
 	"bin": {
-		"dl-list": "./index.ts"
+		"dl-list": "index.ts"
 	},
 	"files": [
 		"package.json",

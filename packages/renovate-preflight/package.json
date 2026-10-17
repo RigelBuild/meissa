@@ -10,7 +10,7 @@
 		"directory": "packages/renovate-preflight"
 	},
 	"bin": {
-		"renovate-preflight": "./index.ts"
+		"renovate-preflight": "index.ts"
 	},
 	"exports": "./preflight.ts",
 	"files": [
