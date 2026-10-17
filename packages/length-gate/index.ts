@@ -85,7 +85,6 @@ export function commentMarker(
 	return error ? { error } : { reason: content };
 }
 
-const DOC_MARKER_NODE = /^<!--\s*LENGTH\b[\s\S]*-->$/u;
 const DOC_MARKER_LINE = /^<!--\s*LENGTH\s+§([^:]+):\s*(.*?)\s*-->$/u;
 const HEADING_ID = /\s+\{#[^}]+\}\s*$/u;
 
@@ -118,21 +117,18 @@ function headingsIn(root: Root): Heading[] {
 	return headings;
 }
 
-function markerNodes(
-	root: Root,
-): Array<{ node: Extract<MarkdownNode, { type: "html" }>; line: number }> {
+function markerNodes(root: Root): Array<{
+	node: Extract<MarkdownNode, { type: "html" }>;
+	line: number;
+}> {
 	const markers: Array<{
 		node: Extract<MarkdownNode, { type: "html" }>;
 		line: number;
 	}> = [];
 	for (const node of root.children) {
 		if (node.type !== "html") continue;
-		if (
-			node.value.includes("\n") ||
-			node.value.includes("\r") ||
-			!DOC_MARKER_NODE.test(node.value)
-		)
-			continue;
+		const value = node.value.trim();
+		if (!/^<!--\s*LENGTH\b/u.test(value)) continue;
 		const line = node.position?.start.line;
 		if (line !== undefined) markers.push({ node, line });
 	}
@@ -157,7 +153,7 @@ function docMarkerFromTree(
 		return { error: "only one doc LENGTH marker is allowed" };
 	const marker = markers[0];
 	if (!marker) return null;
-	const markerValue = marker.node.value;
+	const markerValue = marker.node.value.trim();
 	if (typeof markerValue !== "string") return null;
 
 	const headings = headingsIn(root).filter((node) => node.depth === 2);
@@ -177,6 +173,8 @@ function docMarkerFromTree(
 				"doc marker must be after front matter, before the first ## heading, and name an existing section",
 		};
 
+	if (markerValue.includes("\n") || markerValue.includes("\r"))
+		return { error: "doc LENGTH marker must be one line" };
 	const parsed = DOC_MARKER_LINE.exec(markerValue);
 	if (!parsed)
 		return {
@@ -199,15 +197,11 @@ function docMarkerFromTree(
 }
 
 function inlineText(node: MarkdownNode): string {
-	if (node.type === "text") return node.value;
+	if (node.type === "text" || node.type === "inlineCode") return node.value;
 	if (node.type === "link" || node.type === "linkReference")
 		return childrenOf(node).map(inlineText).join("");
-	if (
-		node.type === "html" ||
-		node.type === "inlineCode" ||
-		node.type === "footnoteReference"
-	)
-		return "";
+	if (node.type === "html") return ` ${node.value.replace(/<[^>]*>/gu, " ")} `;
+	if (node.type === "footnoteReference") return "";
 	if (node.type === "image" || node.type === "imageReference")
 		return node.alt ?? "";
 	if (node.type === "break") return " ";
@@ -221,17 +215,18 @@ function proseBlocks(root: Root, dropErrata: boolean): string[] {
 		if (
 			node.type === "yaml" ||
 			node.type === "code" ||
-			node.type === "inlineCode" ||
-			node.type === "html" ||
 			node.type === "table" ||
-			node.type === "definition"
+			node.type === "definition" ||
+			(node.type === "html" && /^<!--/u.test(node.value.trim()))
 		)
 			return;
 		if (node.type === "heading") {
-			if (dropErrata && node.depth <= 2) inErrata = false;
+			if (dropErrata && root.children.includes(node) && node.depth <= 2)
+				inErrata = false;
 			if (
 				dropErrata &&
 				node.depth === 2 &&
+				root.children.includes(node) &&
 				normalizeHeading(headingText(node)) === "errata"
 			) {
 				inErrata = true;
@@ -241,6 +236,11 @@ function proseBlocks(root: Root, dropErrata: boolean): string[] {
 		if (dropErrata && inErrata) return;
 		if (node.type === "heading" || node.type === "paragraph") {
 			blocks.push(childrenOf(node).map(inlineText).join(""));
+			return;
+		}
+		if (node.type === "html") {
+			const text = node.value.replace(/<[^>]*>/gu, " ").trim();
+			if (text) blocks.push(text);
 			return;
 		}
 		for (const child of childrenOf(node)) visit(child);
@@ -266,6 +266,14 @@ export function proseWords(markdown: string, dropErrata: boolean): number {
 	return countProseWords(parseMarkdown(markdown), dropErrata);
 }
 
+function hasCommentContent(line: string): boolean {
+	const content = line.replace(/^\s*(?:(?:\/\/|#|\*|--|;|\/\*|\*\/)\s*)+/u, "");
+	return /[\p{L}\p{N}]/u.test(content);
+}
+
+function fallbackCommentKey(line: string): string {
+	return line.replace(/^\s*(?:(?:\/\/|#|\*|--|;|\/\*|\*\/)\s*)+/u, "");
+}
 export function lineMap(
 	before: string,
 	after: string,
@@ -305,16 +313,20 @@ export function lineMap(
 		const line = index + 1;
 		const text = beforeLines[index] ?? "";
 		if (mappedBefore.has(line) || text === "") continue;
-		const entry = beforeCounts.get(text);
-		beforeCounts.set(text, { count: (entry?.count ?? 0) + 1, line });
+		if (!hasCommentContent(text)) continue;
+		const key = fallbackCommentKey(text);
+		const entry = beforeCounts.get(key);
+		beforeCounts.set(key, { count: (entry?.count ?? 0) + 1, line });
 	}
 	const afterCounts = new Map<string, { count: number; line: number }>();
 	for (let index = 0; index < afterLines.length; index++) {
 		const line = index + 1;
 		const text = afterLines[index] ?? "";
 		if (mappedAfter.has(line) || text === "") continue;
-		const entry = afterCounts.get(text);
-		afterCounts.set(text, { count: (entry?.count ?? 0) + 1, line });
+		if (!hasCommentContent(text)) continue;
+		const key = fallbackCommentKey(text);
+		const entry = afterCounts.get(key);
+		afterCounts.set(key, { count: (entry?.count ?? 0) + 1, line });
 	}
 	for (const [text, base] of beforeCounts) {
 		const head = afterCounts.get(text);
@@ -451,10 +463,27 @@ export function judgeFile(
 				});
 		}
 
+		const lineMapping = lineMap(texts.before, texts.after);
+		const baseLiveMarkers = new Set<number>();
+		for (const block of afterBlocks) {
+			if (!liveMarkers.has(block.start)) continue;
+			for (let line = block.start; line < block.start + block.lines; line++) {
+				const baseLine = lineMapping(line);
+				if (baseLine === null) continue;
+				for (const baseBlock of beforeBlocks) {
+					if (
+						!baseBlock.doc &&
+						baseLine >= baseBlock.start &&
+						baseLine < baseBlock.start + baseBlock.lines
+					)
+						baseLiveMarkers.add(baseBlock.start);
+				}
+			}
+		}
 		if (
-			fileExcess(afterBlocks, liveMarkers) > fileExcess(beforeBlocks, new Set())
+			fileExcess(afterBlocks, liveMarkers) >
+			fileExcess(beforeBlocks, baseLiveMarkers)
 		) {
-			const lineMapping = lineMap(texts.before, texts.after);
 			for (const block of afterBlocks) {
 				if (block.doc || block.lines <= CEILING || liveMarkers.has(block.start))
 					continue;

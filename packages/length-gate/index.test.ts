@@ -147,6 +147,28 @@ describe("fixed policy and marker parsers", () => {
 		).toEqual({ error: expect.stringContaining("Nope") });
 		expect(docMarker("## Plan\nNo marker")).toBeNull();
 	});
+	test("trims trailing HTML comment whitespace", () => {
+		expect(
+			docMarker(
+				"<!-- LENGTH §Plan: preserve interface details here -->   \n## Plan",
+			),
+		).toEqual({ section: "Plan", reason: "preserve interface details here" });
+	});
+	test("multiline doc markers are bad-marker findings", () => {
+		const multiline =
+			"<!-- LENGTH §Plan: preserve interface details\nacross these lines -->\n\n## Plan";
+		expect(docMarker(multiline)).toEqual({
+			error: expect.stringContaining("one line"),
+		});
+		expect(
+			judgeDoc("docs/designs/tools/record.md", "", multiline, [1]).findings,
+		).toContainEqual({
+			kind: "bad-marker",
+			path: "docs/designs/tools/record.md",
+			line: 1,
+			reason: expect.stringContaining("one line"),
+		});
+	});
 });
 
 describe("comment ratchet", () => {
@@ -319,6 +341,73 @@ describe("comment ratchet", () => {
 			},
 		]);
 	});
+	test("a trim to eight cannot fund a new nine-line block", () => {
+		const before = comments(10);
+		const after = `${comments(8)}\n\n${comments(9, "", "new")}`;
+		expect(
+			judgeComment(
+				before,
+				after,
+				Array.from({ length: 9 }, (_, i) => i + 10),
+			).findings,
+		).toContainEqual({
+			kind: "comment",
+			path: "src/file.ts",
+			line: 10,
+			lines: 9,
+			baseLines: 0,
+		});
+	});
+	test("unique fallback does not pair bare Go comment lines", () => {
+		const baseLines = comments(10, "", "A").split("\n");
+		baseLines[6] = "//";
+		const addedLines = comments(9, "", "B").split("\n");
+		addedLines[6] = "//";
+		const after = `${baseLines.filter((_, index) => index !== 6).join("\n")}\n\n${addedLines.join("\n")}`;
+		const config = { ...COMMENT_CONFIG, extensions: [".go"] };
+		const file = diffFile(
+			"src/file.go",
+			Array.from({ length: 9 }, (_, index) => index + 11),
+		);
+		expect(
+			judgeFile(config, file, { before: baseLines.join("\n"), after }).findings,
+		).toContainEqual({
+			kind: "comment",
+			path: "src/file.go",
+			line: 11,
+			lines: 9,
+			baseLines: 0,
+		});
+	});
+	test("a live marker cannot free base excess for a new block", () => {
+		const added = Array.from({ length: 10 }, (_, index) => index + 22);
+		const markerLine = "// LENGTH: new protocol layout details";
+		const oldMarked = `// LENGTH: old protocol layout notes\n${comments(19)}`;
+		const reworded = `${markerLine}\n${comments(19)}\n\n${comments(10, "", "new")}`;
+		expect(
+			judgeComment(oldMarked, reworded, [1, ...added]).findings,
+		).toContainEqual({
+			kind: "comment",
+			path: "src/file.ts",
+			line: 22,
+			lines: 10,
+			baseLines: 0,
+		});
+	});
+	test("adding a marker cannot free base excess for a new block", () => {
+		const added = Array.from({ length: 10 }, (_, index) => index + 22);
+		const markerLine = "// LENGTH: new protocol layout details";
+		const newlyMarked = `${markerLine}\n${comments(19)}\n\n${comments(10, "", "new")}`;
+		expect(
+			judgeComment(comments(20), newlyMarked, [1, ...added]).findings,
+		).toContainEqual({
+			kind: "comment",
+			path: "src/file.ts",
+			line: 22,
+			lines: 10,
+			baseLines: 0,
+		});
+	});
 
 	test("the first matching doc class wins", () => {
 		const result = judgeDoc("docs/designs/tools/record.md", "", words(20), [], {
@@ -382,6 +471,16 @@ describe("doc ratchet", () => {
 		expect(
 			judgeDoc("docs/designs/tools/record.md", before, after).findings,
 		).toEqual([]);
+	});
+	test("inline code counts as prose", () => {
+		expect(proseWords("Run `foo` and `bar` now.", false)).toBe(5);
+	});
+	test("HTML elements preserve prose text and inline tags separate words", () => {
+		expect(proseWords("alpha<br>beta", false)).toBe(2);
+		expect(proseWords(`<div>\n${words(5)}\n</div>`, false)).toBe(5);
+	});
+	test("Errata in a list does not drop later top-level prose", () => {
+		expect(proseWords(`- ## Errata\n\n${words(3)}`, true)).toBe(4);
 	});
 
 	test("front matter, fences, HTML comments, tables, links, and Errata are excluded", () => {
