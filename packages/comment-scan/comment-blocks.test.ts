@@ -358,6 +358,14 @@ describe("commentBlocks", () => {
 			true,
 		]);
 	});
+	test("proto declarations may span lines around a block comment", () => {
+		const text =
+			"// message\nmessage /* c\n*/ M\n{\n  // field\n  string value = 1; // tail";
+		expect(blocks(text, ".proto").blocks.map(({ doc }) => doc)).toEqual([
+			true,
+			true,
+		]);
+	});
 
 	test("local declarations do not classify as package documentation", () => {
 		const text = [

@@ -305,49 +305,29 @@ function goDocAt(analysis: GoAnalysis, lineNo: number): boolean {
 	);
 }
 
-function protoScopes(residues: readonly string[]): ProtoScope[][] {
+// Token pass over comment-blanked lines: `message|service|enum <name> {` may span lines.
+function protoScopes(lines: readonly string[]): ProtoScope[][] {
 	const scopes: ProtoScope[][] = [];
 	const stack: ProtoScope[] = [];
-	let pending: ProtoScope | null = null;
-	for (const residue of residues) {
+	let prev2 = "";
+	let prev1 = "";
+	for (const line of lines) {
 		scopes.push([...stack]);
-		let quote = "";
-		let escaped = false;
-		for (let i = 0; i < residue.length; i++) {
-			const char = residue[i] ?? "";
-			if (quote !== "") {
-				if (escaped) escaped = false;
-				else if (char === "\\") escaped = true;
-				else if (char === quote) quote = "";
-				continue;
+		const tokens =
+			line.match(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[\w.]+|\S/g) ?? [];
+		for (const token of tokens) {
+			if (token === "}") stack.pop();
+			if (token === "{") {
+				const kind =
+					/^[\w.]+$/.test(prev1) &&
+					(prev2 === "message" || prev2 === "service" || prev2 === "enum")
+						? prev2
+						: "other";
+				stack.push(kind);
 			}
-			if (char === '"' || char === "'") {
-				quote = char;
-				continue;
-			}
-			if (char === "}") stack.pop();
-			if (char === "{") {
-				const declaration = /\b(message|service|enum)\s+[\w.]+\s*$/.exec(
-					residue.slice(0, i),
-				)?.[1];
-				const kind = declaration ?? pending;
-				stack.push(
-					kind === "message" || kind === "service" || kind === "enum"
-						? kind
-						: "other",
-				);
-				pending = null;
-			}
+			prev2 = prev1;
+			prev1 = token;
 		}
-		const declaration = /^\s*(message|service|enum)\s+[\w.]+\s*$/.exec(
-			residue,
-		)?.[1];
-		if (
-			declaration === "message" ||
-			declaration === "service" ||
-			declaration === "enum"
-		)
-			pending = declaration;
 	}
 	return scopes;
 }
@@ -381,7 +361,7 @@ function protoScopeText(text: string): string[] {
 }
 function protoDocAt(line: string, scopes: readonly ProtoScope[]): boolean {
 	const text = line.replace(/\/\*[\s\S]*?\*\//g, " ").trim();
-	if (/^(?:message|enum|service)\s+[\w.]+\b/.test(text)) return true;
+	if (/^(?:message|enum|service)(?:\s|$)/.test(text)) return true;
 	if (scopes.includes("service") && /^rpc\s+[\w]+\s*\(/.test(text)) return true;
 	if (scopes.includes("enum") && /^[\w]+\s*=\s*-?\d+\b/.test(text)) return true;
 	return (
