@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test } from "bun:test";
+import { afterAll, afterEach, describe, expect, test } from "bun:test";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -11,10 +11,10 @@ import { type GateEnv, runOnce } from "./run.ts";
 const packageDirectory = fileURLToPath(new URL(".", import.meta.url));
 const temporaryDirectories: string[] = [];
 // Every git child, including the ones createGitDeps spawns, ignores the user's and system config.
-const emptyGlobalConfig = join(
-	mkdtempSync(join(tmpdir(), "length-gate-gitconfig-")),
-	"config",
+const gitConfigDirectory = mkdtempSync(
+	join(tmpdir(), "length-gate-gitconfig-"),
 );
+const emptyGlobalConfig = join(gitConfigDirectory, "config");
 writeFileSync(emptyGlobalConfig, "");
 Object.assign(process.env, {
 	GIT_CONFIG_GLOBAL: emptyGlobalConfig,
@@ -24,6 +24,7 @@ Object.assign(process.env, {
 	GIT_COMMITTER_NAME: "t",
 	GIT_COMMITTER_EMAIL: "t@t",
 });
+afterAll(() => rmSync(gitConfigDirectory, { recursive: true, force: true }));
 const COMMENT_CONFIG: LengthGateConfig = {
 	extensions: [".ts"],
 	exclude: [],
@@ -294,6 +295,34 @@ describe("runOnce pull request mode", () => {
 		expect(result.errors.join("\n")).toContain("src/new.ts:1:");
 	});
 
+	test("diff.suppressBlankEmpty cannot drop an added marker after a blank line", async () => {
+		const repository = trackedRepository("blank-empty-", {
+			"src/a.ts": "const a = 1;\n\nconst b = 2;\n",
+		});
+		runGit(repository, "config", "diff.suppressBlankEmpty", "true");
+		runGit(repository, "checkout", "-q", "-b", "feature");
+		const marked = `// LENGTH: frame header bit layout\n${longComment()}`;
+		writeRepositoryFile(
+			repository,
+			"src/a.ts",
+			`const a = 1;\n\nconst b = 2;\n${marked}`,
+		);
+		commitChange(repository, "add marked block");
+		const result = await expectRun(repository, {
+			event: "pull_request",
+			base: "main",
+			head: "HEAD",
+		});
+		expect(await result.result).toBe(0);
+		expect(result.errors).toEqual([]);
+		writeRepositoryFile(repository, "src/empty.ts", "");
+		commitChange(repository, "add empty file");
+		const { deps } = capture(repository);
+		expect(await deps.diff("main", "HEAD")).toContain(
+			"diff --git a/src/empty.ts",
+		);
+	});
+
 	test("fetches enough shallow history to find the merge base", async () => {
 		const source = trackedRepository("shallow-source-", {
 			"src/file.ts": "clean\n",
@@ -480,6 +509,11 @@ describe("runOnce all mode", () => {
 			`160000,${head},vendor/sub`,
 		);
 		runGit(repository, "commit", "-q", "-m", "gitlink");
+		const { deps } = capture(repository);
+		expect((await deps.listFiles("HEAD")).sort()).toEqual([
+			"img.png",
+			"src/file.ts",
+		]);
 		const result = await expectRun(repository, {
 			event: "push",
 			head: "HEAD",

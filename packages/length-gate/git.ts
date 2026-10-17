@@ -71,6 +71,8 @@ export function createGitDeps(
 		const result = gitResult(repository, [
 			"-c",
 			"core.quotePath=false",
+			"-c",
+			"diff.suppressBlankEmpty=false",
 			"diff",
 			"--no-color",
 			"--no-ext-diff",
