@@ -9,7 +9,7 @@
 		"directory": "packages/dl-reconcile"
 	},
 	"bin": {
-		"dl-reconcile": "./index.ts"
+		"dl-reconcile": "index.ts"
 	},
 	"files": [
 		"package.json",

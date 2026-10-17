@@ -9,7 +9,7 @@
 		"directory": "packages/ref-gate"
 	},
 	"bin": {
-		"ref-gate": "./index.ts"
+		"ref-gate": "index.ts"
 	},
 	"exports": "./index.ts",
 	"files": [

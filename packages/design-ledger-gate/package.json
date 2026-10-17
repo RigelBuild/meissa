@@ -9,7 +9,7 @@
 		"directory": "packages/design-ledger-gate"
 	},
 	"bin": {
-		"design-ledger-gate": "./index.ts"
+		"design-ledger-gate": "index.ts"
 	},
 	"exports": {
 		".": "./index.ts",

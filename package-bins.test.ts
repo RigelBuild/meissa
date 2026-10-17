@@ -11,15 +11,16 @@ function declaredBins(manifest: { bin?: unknown }): string[] {
 	return Object.values(bin as Record<string, string>);
 }
 
-const bins = readdirSync(PACKAGES, { withFileTypes: true })
+const declared = readdirSync(PACKAGES, { withFileTypes: true })
 	.filter((entry) => entry.isDirectory())
 	.flatMap((entry) =>
 		declaredBins(
 			JSON.parse(
 				readFileSync(join(PACKAGES, entry.name, "package.json"), "utf8"),
 			),
-		).map((bin) => join(PACKAGES, entry.name, bin)),
+		).map((bin) => ({ pkg: entry.name, bin })),
 	);
+const bins = declared.map(({ pkg, bin }) => join(PACKAGES, pkg, bin));
 
 // A bin without a shebang fails with ENOEXEC when run from node_modules/.bin.
 describe("package bins", () => {
@@ -40,5 +41,10 @@ describe("package bins", () => {
 		expect(readFileSync(path, "utf8").split("\n", 1)[0]).toBe(
 			"#!/usr/bin/env bun",
 		);
+	});
+
+	// npm publish rewrites a "./" bin path and warns; keep manifests in the form npm publishes.
+	test.each(declared)("$pkg bin $bin is npm-normalized", ({ bin }) => {
+		expect(bin.startsWith("./")).toBe(false);
 	});
 });

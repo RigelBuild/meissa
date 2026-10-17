@@ -9,7 +9,7 @@
 		"directory": "packages/dl-claim"
 	},
 	"bin": {
-		"dl-claim": "./index.ts"
+		"dl-claim": "index.ts"
 	},
 	"exports": {
 		".": "./index.ts"
