@@ -10,7 +10,7 @@
 		"directory": "packages/length-gate"
 	},
 	"bin": {
-		"length-gate": "./index.ts"
+		"length-gate": "index.ts"
 	},
 	"exports": {
 		".": "./index.ts"
