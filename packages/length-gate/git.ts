@@ -78,7 +78,7 @@ export function createGitDeps(
 			"--no-ext-diff",
 			"--no-textconv",
 			"--submodule=short",
-			// A gitlink has no text to judge, and `git show` cannot read it.
+			// A gitlink has no text to judge.
 			"--ignore-submodules=all",
 			"--src-prefix=a/",
 			"--dst-prefix=b/",
