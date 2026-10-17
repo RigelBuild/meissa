@@ -356,6 +356,24 @@ describe("runOnce pull request mode", () => {
 		expect(result.errors).toEqual([]);
 	});
 
+	test("readAt treats a path as literal, never as a pathspec", async () => {
+		const repository = trackedRepository("literal-", {
+			"lit1.ts": "clean\n",
+		});
+		runGit(
+			repository,
+			"update-index",
+			"--add",
+			"--cacheinfo",
+			"160000,1234567890123456789012345678901234567890,sub",
+		);
+		runGit(repository, "commit", "-q", "-m", "gitlink");
+		const { deps } = capture(repository);
+		expect(await deps.readAt("HEAD", "lit?.ts")).toBeNull();
+		expect(await deps.readAt("HEAD", ":(top)sub")).toBeNull();
+		expect(await deps.readAt("HEAD", "sub")).toBe("");
+	});
+
 	test("a gated file replaced by a gitlink is not read", async () => {
 		const repository = trackedRepository("pr-typechange-", {
 			"src/file.ts": "clean\n",

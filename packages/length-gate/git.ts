@@ -95,10 +95,20 @@ export function createGitDeps(
 		revision: string,
 		path: string,
 	): Promise<string | null> => {
-		const result = gitResult(repository, ["show", `${revision}:${path}`]);
+		const result = gitResult(repository, [
+			"cat-file",
+			"blob",
+			`${revision}:${path}`,
+		]);
 		if (result.exitCode === 0) return textDecoder.decode(result.stdout);
 		// A gitlink (e.g. a file replaced by a submodule) has no text to judge.
-		const entry = gitResult(repository, ["ls-tree", revision, "--", path]);
+		const entry = gitResult(repository, [
+			"--literal-pathspecs",
+			"ls-tree",
+			revision,
+			"--",
+			path,
+		]);
 		const mode = textDecoder.decode(entry.stdout).split(" ", 1)[0];
 		return entry.exitCode === 0 && mode === "160000" ? "" : null;
 	};
