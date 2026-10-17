@@ -328,6 +328,34 @@ describe("commentBlocks", () => {
 		}
 	});
 
+	test("Go declaration classification uses original tokens and keyword lines", () => {
+		for (const text of [
+			"// var comment\nvar/* c */Exported int",
+			"// func comment\nfunc/* c */Exported() {}",
+			"// var comment\nvar\nExported int",
+			"// func comment\nfunc\nExported() {}",
+			"// package comment\npackage\np",
+		]) {
+			expect(blocks(text).blocks.map(({ doc }) => doc)).toEqual([true]);
+		}
+	});
+
+	test("the first Go declaration on a line determines its doc class", () => {
+		for (const text of [
+			"// doc\nvar (hidden int); var (Exported int)",
+			"// doc\nvar hidden int; var Exported int",
+			"// doc\nvar hidden int; var (Exported int)",
+		]) {
+			expect(blocks(text).blocks.map(({ doc }) => doc)).toEqual([false]);
+		}
+	});
+
+	test("proto declaration matching treats block comments as whitespace", () => {
+		expect(
+			blocks("// message\nmessage/* c */M {", ".proto").blocks[0]?.doc,
+		).toBe(true);
+	});
+
 	test("local declarations do not classify as package documentation", () => {
 		const text = [
 			"func run() {",

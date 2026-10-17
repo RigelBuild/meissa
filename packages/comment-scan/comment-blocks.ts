@@ -1,6 +1,5 @@
 import { type Residues, residueScannerFor } from "./diff.ts";
 import { LANG_BY_EXT } from "./languages.ts";
-import { scanComplete } from "./scan.ts";
 
 export type CommentBlock = {
 	start: number;
@@ -22,10 +21,9 @@ type GoToken = {
 	braceDepth: number;
 };
 
-type GoGroups = {
+type GoAnalysis = {
+	docByLine: Map<number, boolean>;
 	specByLine: Map<number, boolean>;
-	groupByLine: Map<number, boolean>;
-	scopeByLine: Map<number, number>;
 };
 
 const GO_KEYWORDS = new Set([
@@ -76,8 +74,8 @@ function canInsertSemicolon(token: GoToken | undefined): boolean {
 
 const GO_IDENTIFIER = /[\p{L}_][\p{L}\p{N}_]*/uy;
 
-function goTokens(residues: readonly string[]): GoToken[] {
-	const source = residues.join("\n");
+function goTokens(source: string): GoToken[] {
+	source = source.replace(/\r\n/g, "\n");
 	const tokens: GoToken[] = [];
 	let line = 0;
 	let braceDepth = 0;
@@ -112,19 +110,35 @@ function goTokens(residues: readonly string[]): GoToken[] {
 			i = end === -1 ? source.length : end;
 			continue;
 		}
+		if (char === "/" && source[i + 1] === "*") {
+			i += 2;
+			while (
+				i < source.length &&
+				!(source[i] === "*" && source[i + 1] === "/")
+			) {
+				if (source[i] === "\n") {
+					if (canInsertSemicolon(previous)) push("symbol", ";");
+					line++;
+				}
+				i++;
+			}
+			if (i < source.length) i += 2;
+			continue;
+		}
 		if (char === "`") {
+			const start = i++;
 			const startLine = line;
-			i++;
 			while (i < source.length && source[i] !== "`") {
 				if (source[i] === "\n") line++;
 				i++;
 			}
 			if (i < source.length) i++;
-			push("literal", "`raw`", startLine);
+			push("string", source.slice(start, i), startLine);
 			continue;
 		}
 		if (char === '"' || char === "'") {
 			const start = i++;
+			const startLine = line;
 			const quote = char;
 			let escaped = false;
 			while (i < source.length && source[i] !== "\n") {
@@ -134,7 +148,11 @@ function goTokens(residues: readonly string[]): GoToken[] {
 				else if (current === "\\") escaped = true;
 				else if (current === quote) break;
 			}
-			push("string", source.slice(start, i));
+			push(
+				quote === '"' ? "string" : "literal",
+				source.slice(start, i),
+				startLine,
+			);
 			continue;
 		}
 		if (/[0-9]/u.test(char)) {
@@ -162,7 +180,6 @@ function goTokens(residues: readonly string[]): GoToken[] {
 	}
 	return tokens;
 }
-
 function namesExported(tokens: readonly GoToken[]): boolean {
 	if (tokens[0]?.kind !== "identifier") return false;
 	if (exportedName(tokens[0].value)) return true;
@@ -174,24 +191,47 @@ function namesExported(tokens: readonly GoToken[]): boolean {
 	return false;
 }
 
-function goGroups(tokens: readonly GoToken[]): GoGroups {
+function goAnalysis(tokens: readonly GoToken[]): GoAnalysis {
+	const docByLine = new Map<number, boolean>();
 	const specByLine = new Map<number, boolean>();
-	const groupByLine = new Map<number, boolean>();
-	const scopeByLine = new Map<number, number>();
-	for (const token of tokens) {
-		if (!scopeByLine.has(token.line))
-			scopeByLine.set(token.line, token.braceDepth);
-	}
+	const recordDeclaration = (line: number, doc: boolean): void => {
+		if (!docByLine.has(line)) docByLine.set(line, doc);
+	};
 	for (let i = 0; i < tokens.length; i++) {
 		const keyword = tokens[i];
+		if (keyword?.kind !== "keyword") continue;
+		if (keyword.value === "package") {
+			if (keyword.braceDepth === 0 && tokens[i + 1]?.kind === "identifier")
+				recordDeclaration(keyword.line, true);
+			continue;
+		}
+		if (keyword.value === "func") {
+			let nameIndex = i + 1;
+			if (tokens[nameIndex]?.value === "(") {
+				let depth = 1;
+				nameIndex++;
+				while (nameIndex < tokens.length && depth > 0) {
+					const token = tokens[nameIndex];
+					if (token?.value === "(") depth++;
+					if (token?.value === ")") depth--;
+					nameIndex++;
+				}
+			}
+			const name = tokens[nameIndex];
+			if (keyword.braceDepth === 0 && name?.kind === "identifier")
+				recordDeclaration(keyword.line, exportedName(name.value));
+			continue;
+		}
 		if (
-			keyword?.kind !== "keyword" ||
-			(keyword.value !== "const" &&
-				keyword.value !== "type" &&
-				keyword.value !== "var") ||
-			keyword.braceDepth !== 0
+			keyword.value !== "const" &&
+			keyword.value !== "type" &&
+			keyword.value !== "var"
 		)
 			continue;
+		if (keyword.braceDepth !== 0) {
+			recordDeclaration(keyword.line, false);
+			continue;
+		}
 		const open = tokens[i + 1];
 		if (open?.value !== "(") {
 			const spec: GoToken[] = [];
@@ -216,8 +256,7 @@ function goGroups(tokens: readonly GoToken[]): GoGroups {
 				if (token.value === "{") braces++;
 				if (token.value === "}") braces--;
 			}
-			const first = spec[0];
-			if (first !== undefined) specByLine.set(first.line, namesExported(spec));
+			recordDeclaration(keyword.line, namesExported(spec));
 			continue;
 		}
 		let parenDepth = 1;
@@ -229,10 +268,7 @@ function goGroups(tokens: readonly GoToken[]): GoGroups {
 			const first = segment[0];
 			if (first?.kind === "identifier") {
 				const exported = namesExported(segment);
-				specByLine.set(
-					first.line,
-					(specByLine.get(first.line) ?? false) || exported,
-				);
+				if (!specByLine.has(first.line)) specByLine.set(first.line, exported);
 				groupExported ||= exported;
 			}
 			segment = [];
@@ -255,25 +291,18 @@ function goGroups(tokens: readonly GoToken[]): GoGroups {
 			if (token.value === "{") braceDepth++;
 			if (token.value === "}") braceDepth--;
 		}
-		groupByLine.set(keyword.line, groupExported);
+		if (keyword.braceDepth === 0)
+			recordDeclaration(keyword.line, groupExported);
+		else recordDeclaration(keyword.line, false);
 		i = close;
 	}
-	return { specByLine, groupByLine, scopeByLine };
+	return { docByLine, specByLine };
 }
 
-function goDocAt(
-	residues: readonly string[],
-	lineNo: number,
-	groups: GoGroups,
-): boolean {
-	if (groups.scopeByLine.get(lineNo) !== 0) return false;
-	const text = (residues[lineNo] ?? "").trim();
-	if (/^package\s+[\p{L}_][\p{L}\p{N}_]*\s*$/u.test(text)) return true;
-	const fn = /^func\s+(?:\([^)]*\)\s*)?([\p{L}_][\p{L}\p{N}_]*)/u.exec(
-		text,
-	)?.[1];
-	if (fn !== undefined) return exportedName(fn);
-	return groups.specByLine.get(lineNo) ?? false;
+function goDocAt(analysis: GoAnalysis, lineNo: number): boolean {
+	return (
+		analysis.docByLine.get(lineNo) ?? analysis.specByLine.get(lineNo) ?? false
+	);
 }
 
 function protoScopes(residues: readonly string[]): ProtoScope[][] {
@@ -323,7 +352,7 @@ function protoScopes(residues: readonly string[]): ProtoScope[][] {
 	return scopes;
 }
 function protoDocAt(line: string, scopes: readonly ProtoScope[]): boolean {
-	const text = line.trim();
+	const text = line.replace(/\/\*[\s\S]*?\*\//g, " ").trim();
 	if (/^(?:message|enum|service)\s+[\w.]+\b/.test(text)) return true;
 	if (scopes.includes("service") && /^rpc\s+[\w]+\s*\(/.test(text)) return true;
 	if (scopes.includes("enum") && /^[\w]+\s*=\s*-?\d+\b/.test(text)) return true;
@@ -394,7 +423,9 @@ export function commentBlocks(
 	text = text.replace(/\r\n/g, "\n");
 	const scanner = residueScannerFor(ext);
 	if (scanner === null) return null;
-	if (ext === ".go" && isCgo(text)) return { blocks: [], ambiguous: true };
+	const goTokensResult = ext === ".go" ? goTokens(text) : [];
+	if (ext === ".go" && isCgoTokens(goTokensResult))
+		return { blocks: [], ambiguous: true };
 	const scan: Residues = scanner(text);
 
 	if (scan.ambiguous) return { blocks: [], ambiguous: true };
@@ -409,7 +440,7 @@ export function commentBlocks(
 			),
 		);
 	const runs = commentRuns(lines, scan.residues);
-	const goGroupInfo = ext === ".go" ? goGroups(goTokens(scan.residues)) : null;
+	const goGroupInfo = ext === ".go" ? goAnalysis(goTokensResult) : null;
 	const proto = ext === ".proto" ? protoScopes(scan.residues) : [];
 	return {
 		blocks: runs.map(({ start, lines: count }) => {
@@ -420,12 +451,7 @@ export function commentBlocks(
 				next.trim() !== "" && (scan.residues[nextIndex] ?? "").trim() !== "";
 			let doc = docMarker(first);
 			if (attached && ext === ".go" && goGroupInfo !== null) {
-				const group = goGroupInfo.groupByLine.get(nextIndex);
-				const spec = goGroupInfo.specByLine.get(nextIndex);
-				doc ||=
-					group !== undefined
-						? group
-						: (spec ?? goDocAt(scan.residues, nextIndex, goGroupInfo));
+				doc ||= goDocAt(goGroupInfo, nextIndex);
 			}
 			if (attached && ext === ".proto")
 				doc ||= protoDocAt(next, proto[nextIndex] ?? []);
@@ -436,9 +462,10 @@ export function commentBlocks(
 }
 
 export function isCgo(text: string): boolean {
-	const go = LANG_BY_EXT[".go"];
-	if (go === undefined) return false;
-	const tokens = goTokens(scanComplete(go, text).residues);
+	return isCgoTokens(goTokens(text));
+}
+
+function isCgoTokens(tokens: readonly GoToken[]): boolean {
 	for (let i = 0; i < tokens.length; i++) {
 		if (tokens[i]?.value !== "import") continue;
 		const next = tokens[i + 1];

@@ -182,3 +182,13 @@ describe("scanAstro", () => {
 		expect(result.residues[0]).toBe("<p>{title}</p>");
 	});
 });
+
+describe("scanAstro CRLF input", () => {
+	test("matches LF residues and line count", () => {
+		const crlf = scanAstro(PAGE.replace(/\n/g, "\r\n"));
+		const lf = scanAstro(PAGE);
+		expect(crlf.ambiguous).toBe(lf.ambiguous);
+		expect(crlf.residues).toEqual(lf.residues);
+		expect(crlf.residues).toHaveLength(PAGE.split("\n").length);
+	});
+});
