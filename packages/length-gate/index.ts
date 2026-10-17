@@ -83,7 +83,11 @@ async function main(args: readonly string[]): Promise<number> {
 				? {}
 				: { skipClasses: parsed.skipClasses }),
 		};
-		return await runOnce(createGitDeps(root), config, env);
+		return await runOnce(
+			createGitDeps(root, console.log, console.error, env.head),
+			config,
+			env,
+		);
 	} catch (error) {
 		console.error(`length-gate: ${errorMessage(error)}`);
 		return 2;

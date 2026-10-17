@@ -10,6 +10,20 @@ import { type GateEnv, runOnce } from "./run.ts";
 
 const packageDirectory = fileURLToPath(new URL(".", import.meta.url));
 const temporaryDirectories: string[] = [];
+// Every git child, including the ones createGitDeps spawns, ignores the user's and system config.
+const emptyGlobalConfig = join(
+	mkdtempSync(join(tmpdir(), "length-gate-gitconfig-")),
+	"config",
+);
+writeFileSync(emptyGlobalConfig, "");
+Object.assign(process.env, {
+	GIT_CONFIG_GLOBAL: emptyGlobalConfig,
+	GIT_CONFIG_NOSYSTEM: "1",
+	GIT_AUTHOR_NAME: "t",
+	GIT_AUTHOR_EMAIL: "t@t",
+	GIT_COMMITTER_NAME: "t",
+	GIT_COMMITTER_EMAIL: "t@t",
+});
 const COMMENT_CONFIG: LengthGateConfig = {
 	extensions: [".ts"],
 	exclude: [],
@@ -216,7 +230,6 @@ describe("runOnce pull request mode", () => {
 		});
 		const result = await expectRun(repository, {
 			event: "pull_request",
-			base: "main",
 			head: "HEAD",
 			merge: true,
 		});
@@ -235,9 +248,47 @@ describe("runOnce pull request mode", () => {
 		runGit(repository, "merge", "--no-ff", "-q", "feature", "-m", "merge");
 		const result = await expectRun(repository, {
 			event: "pull_request",
-			base: "feature",
 			head: "HEAD",
 			merge: true,
+		});
+		expect(await result.result).toBe(1);
+		expect(result.errors.join("\n")).toContain("src/new.ts:1:");
+	});
+
+	test("empty, binary and non-ASCII files in a diff do not break the run", async () => {
+		const repository = trackedRepository("odd-files-", {
+			"src/file.ts": "clean\n",
+			"old.png": "\u0000\u0001binary",
+		});
+		runGit(repository, "checkout", "-q", "-b", "feature");
+		writeRepositoryFile(repository, "pkg/.gitkeep", "");
+		writeRepositoryFile(repository, "src/empty.ts", "");
+		writeRepositoryFile(repository, "img.png", "\u0000\u0002binary");
+		writeRepositoryFile(repository, "src/café.ts", longComment());
+		rmSync(join(repository, "old.png"));
+		commitChange(repository, "odd files");
+		const result = await expectRun(repository, {
+			event: "pull_request",
+			base: "main",
+			head: "HEAD",
+		});
+		expect(await result.result).toBe(1);
+		expect(result.errors.join("\n")).toContain("src/café.ts:1:");
+	});
+
+	test("repository diff config cannot hide a change", async () => {
+		const repository = trackedRepository("diff-config-", {
+			"src/file.ts": "clean\n",
+		});
+		runGit(repository, "config", "diff.external", "true");
+		runGit(repository, "config", "diff.srcPrefix", "x/");
+		runGit(repository, "checkout", "-q", "-b", "feature");
+		writeRepositoryFile(repository, "src/new.ts", longComment());
+		commitChange(repository, "add long comment");
+		const result = await expectRun(repository, {
+			event: "pull_request",
+			base: "main",
+			head: "HEAD",
 		});
 		expect(await result.result).toBe(1);
 		expect(result.errors.join("\n")).toContain("src/new.ts:1:");
@@ -405,6 +456,30 @@ describe("runOnce all mode", () => {
 		const repository = trackedRepository("all-clean-", {
 			"src/file.ts": "clean\n",
 		});
+		const result = await expectRun(repository, {
+			event: "push",
+			head: "HEAD",
+			all: true,
+		});
+		expect(await result.result).toBe(0);
+		expect(result.errors).toEqual([]);
+	});
+
+	test("a submodule gitlink and binary files do not break --all", async () => {
+		const repository = trackedRepository("all-gitlink-", {
+			"src/file.ts": "clean\n",
+			"img.png": "\u0000\u0001binary",
+		});
+		// A gitlink names a commit in another repository, so its object is absent here.
+		const head = "1234567890123456789012345678901234567890";
+		runGit(
+			repository,
+			"update-index",
+			"--add",
+			"--cacheinfo",
+			`160000,${head},vendor/sub`,
+		);
+		runGit(repository, "commit", "-q", "-m", "gitlink");
 		const result = await expectRun(repository, {
 			event: "push",
 			head: "HEAD",

@@ -1,4 +1,4 @@
-import { type FileDiff, parseDiff } from "@rigelbuild/comment-scan";
+import { extOf, type FileDiff, parseDiff } from "@rigelbuild/comment-scan";
 import {
 	type Finding,
 	formatFinding,
@@ -42,8 +42,18 @@ function withSkippedClasses(
 	};
 }
 
-function isExcluded(path: string, config: LengthGateConfig): boolean {
-	return config.exclude.some((glob) => new Bun.Glob(glob).match(path));
+// Only read files judgeFile would judge, so binary or unrelated paths never need a readable blob.
+function isGated(path: string, config: LengthGateConfig): boolean {
+	if (config.exclude.some((glob) => new Bun.Glob(glob).match(path)))
+		return false;
+	return (
+		config.extensions.includes(extOf(path)) ||
+		config.docs.some(
+			(docClass) =>
+				docClass.include.some((glob) => new Bun.Glob(glob).match(path)) &&
+				!docClass.exclude.some((glob) => new Bun.Glob(glob).match(path)),
+		)
+	);
 }
 
 function allAddedFile(path: string, text: string): FileDiff {
@@ -103,12 +113,12 @@ export async function runOnce(
 		}
 		if (
 			!env.all &&
-			env.event === "pull_request" &&
+			!env.merge &&
 			env.base === undefined &&
 			env.fetch === undefined
 		)
 			throw new Error(
-				"pull_request requires LENGTH_GATE_BASE or LENGTH_GATE_FETCH",
+				"pull_request requires LENGTH_GATE_BASE, LENGTH_GATE_FETCH or LENGTH_GATE_MERGE=1",
 			);
 
 		if (env.all) {
@@ -119,7 +129,7 @@ export async function runOnce(
 				);
 			const findings: Finding[] = [];
 			for (const path of await deps.listFiles(head)) {
-				if (isExcluded(path, selectedConfig)) continue;
+				if (!isGated(path, selectedConfig)) continue;
 				const text = await deps.readAt(head, path);
 				if (text === null)
 					throw new Error(
@@ -189,7 +199,7 @@ export async function runOnce(
 		}
 		const findings: Finding[] = [];
 		for (const file of parseDiff(rawDiff)) {
-			if (file.deleted || isExcluded(file.path, selectedConfig)) continue;
+			if (file.deleted || !isGated(file.path, selectedConfig)) continue;
 			const beforePath = file.oldPath || file.path;
 			const afterPath = file.newPath || file.path;
 			const before = file.added ? "" : await deps.readAt(mergeBase, beforePath);

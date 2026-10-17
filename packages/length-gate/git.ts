@@ -48,6 +48,8 @@ export function createGitDeps(
 	root: string,
 	log: (message: string) => void = console.log,
 	err: (message: string) => void = console.error,
+	// The commit under test; shallow deepening stops once it shares history with the base.
+	headRevision = "HEAD",
 ): Deps {
 	const repository = resolvePath(root);
 	const resolve = async (revision: string): Promise<string | null> =>
@@ -65,9 +67,16 @@ export function createGitDeps(
 		return result;
 	};
 	const diff = async (base: string, head: string): Promise<string> => {
+		// Pin output-shaping config so repo settings cannot empty or reshape the diff.
 		const result = gitResult(repository, [
+			"-c",
+			"core.quotePath=false",
 			"diff",
 			"--no-color",
+			"--no-ext-diff",
+			"--no-textconv",
+			"--src-prefix=a/",
+			"--dst-prefix=b/",
 			`${base}...${head}`,
 		]);
 		if (result.exitCode !== 0)
@@ -85,19 +94,20 @@ export function createGitDeps(
 		return result.exitCode === 0 ? textDecoder.decode(result.stdout) : null;
 	};
 	const listFiles = async (revision: string): Promise<string[]> => {
-		const result = gitResult(repository, [
-			"ls-tree",
-			"-r",
-			"--name-only",
-			"-z",
-			revision,
-		]);
+		const result = gitResult(repository, ["ls-tree", "-r", "-z", revision]);
 		if (result.exitCode !== 0) {
 			const detail = textDecoder.decode(result.stderr).trim();
 			throw new Error(detail || `git ls-tree exited ${result.exitCode}`);
 		}
-		const output = textDecoder.decode(result.stdout);
-		return output.length === 0 ? [] : output.split("\0").filter(Boolean);
+		// Keep blobs only; a submodule gitlink has no readable content.
+		return textDecoder
+			.decode(result.stdout)
+			.split("\0")
+			.flatMap((entry) => {
+				const tab = entry.indexOf("\t");
+				if (tab === -1 || entry.split(" ")[1] !== "blob") return [];
+				return [entry.slice(tab + 1)];
+			});
 	};
 	const fetchBase = async (branch: string): Promise<string> => {
 		const shallow = nullableGit(
@@ -145,7 +155,7 @@ export function createGitDeps(
 				"rev-parse",
 				"--verify",
 				"--quiet",
-				"HEAD^{commit}",
+				`${headRevision}^{commit}`,
 			);
 			if (
 				head !== null &&
