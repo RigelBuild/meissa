@@ -457,6 +457,81 @@ describe("runOnce pull request mode", () => {
 		expect(result.errors.join("\n")).toContain("src/file.ts:1:");
 	});
 
+	// Full history can be hundreds of MB; a near merge base needs only a deepen.
+	test("finds a near merge base without fetching full history", async () => {
+		const source = trackedRepository("deep-source-", {
+			"src/file.ts": "clean\n",
+		});
+		for (let n = 0; n < 250; n += 1)
+			runGit(source, "commit", "-q", "--allow-empty", "-m", `old ${n}`);
+		makePullRequest(source, "src/file.ts", longComment());
+		const shallow = join(temporaryDirectory("deep-clone-"), "repo");
+		const clone = Bun.spawnSync({
+			cmd: [
+				"git",
+				"clone",
+				"-q",
+				"--depth",
+				"1",
+				"--branch",
+				"feature",
+				`file://${source}`,
+				shallow,
+			],
+			stdout: "pipe",
+			stderr: "pipe",
+		});
+		expect(clone.exitCode).toBe(0);
+		const result = await expectRun(shallow, {
+			event: "pull_request",
+			fetch: "main",
+			head: "HEAD",
+		});
+		expect(await result.result).toBe(1);
+		const stillShallow = Bun.spawnSync({
+			cmd: ["git", "-C", shallow, "rev-parse", "--is-shallow-repository"],
+			stdout: "pipe",
+		});
+		expect(stillShallow.stdout.toString().trim()).toBe("true");
+	});
+
+	test("never shortens a clone that is already deeper than one step", async () => {
+		const source = trackedRepository("deeper-source-", {
+			"src/file.ts": "clean\n",
+		});
+		for (let n = 0; n < 400; n += 1)
+			runGit(source, "commit", "-q", "--allow-empty", "-m", `old ${n}`);
+		makePullRequest(source, "src/file.ts", longComment());
+		const shallow = join(temporaryDirectory("deeper-clone-"), "repo");
+		const clone = Bun.spawnSync({
+			cmd: [
+				"git",
+				"clone",
+				"-q",
+				"--depth",
+				"400",
+				"--branch",
+				"feature",
+				`file://${source}`,
+				shallow,
+			],
+			stdout: "pipe",
+			stderr: "pipe",
+		});
+		expect(clone.exitCode).toBe(0);
+		const result = await expectRun(shallow, {
+			event: "pull_request",
+			fetch: "main",
+			head: "HEAD",
+		});
+		expect(await result.result).toBe(1);
+		const old = Bun.spawnSync({
+			cmd: ["git", "-C", shallow, "rev-parse", "--verify", "-q", "HEAD~399"],
+			stdout: "pipe",
+		});
+		expect(old.exitCode).toBe(0);
+	});
+
 	test("an empty diff exits 0 with nothing changed", async () => {
 		const repository = trackedRepository("empty-diff-", {
 			"src/file.ts": "clean\n",
