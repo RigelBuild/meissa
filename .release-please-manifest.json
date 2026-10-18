@@ -6,7 +6,7 @@
 	"packages/dl-reconcile": "1.0.3",
 	"packages/renovate-preflight": "1.1.1",
 	"packages/comment-scan": "1.0.0",
-	"packages/length-gate": "1.0.0",
+	"packages/length-gate": "1.0.1",
 	"packages/biome-config": "1.0.1",
 	"packages/tsconfig": "1.0.0"
 }

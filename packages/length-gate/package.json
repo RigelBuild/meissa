@@ -1,6 +1,6 @@
 {
 	"name": "@rigelbuild/length-gate",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"type": "module",
 	"description": "Comment and document length ratchet CLI and pure core.",
 	"license": "MIT OR Apache-2.0",

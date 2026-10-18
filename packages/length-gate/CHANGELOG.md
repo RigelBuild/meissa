@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/RigelBuild/meissa/compare/length-gate@v1.0.0...length-gate@v1.0.1) (2026-10-18)
+
+
+### Bug Fixes
+
+* **length-gate:** deepen shallow clones before fetching full history (RIG-5635) ([#37](https://github.com/RigelBuild/meissa/issues/37)) ([ab9e527](https://github.com/RigelBuild/meissa/commit/ab9e527b25911709018c90f457f2a6bd2890163f))
+
 ## 1.0.0 (2026-10-17)
 
 
