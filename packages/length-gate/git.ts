@@ -138,12 +138,22 @@ export function createGitDeps(
 			throw new Error("cannot determine whether repository is shallow");
 		const refspec = `+refs/heads/${branch}:refs/remotes/origin/${branch}`;
 		const fetch = (...depth: string[]) => {
+			const head = nullableGit(
+				repository,
+				"rev-parse",
+				"--verify",
+				"--quiet",
+				`${headRevision}^{commit}`,
+			);
+			// A deepen moves only the fetched tips' shallow boundary, so the head
+			// must be fetched too or its own history stays cut at depth 1.
 			const result = gitResult(repository, [
 				"fetch",
 				"--no-tags",
 				...depth,
 				"origin",
 				refspec,
+				...(depth.length > 0 && head !== null ? [head] : []),
 			]);
 			if (result.exitCode !== 0)
 				throw new Error(
@@ -151,15 +161,11 @@ export function createGitDeps(
 						`git fetch exited ${result.exitCode}`,
 				);
 		};
-		for (let attempt = 0; attempt < 20; attempt += 1) {
-			try {
-				if (shallow === "true")
-					fetch(attempt === 0 ? "--unshallow" : "--deepen=100");
-				else fetch();
-			} catch (error) {
-				if (!(shallow === "true" && attempt === 0)) throw error;
-				fetch("--deepen=100");
-			}
+		// Deepen in steps first: a PR's merge base is usually near, and full
+		// history can be hundreds of MB. `--deepen` never shortens what is there.
+		for (const step of ["--deepen=200", "--deepen=1000", "--unshallow"]) {
+			if (shallow === "true") fetch(step);
+			else fetch();
 			const base = nullableGit(
 				repository,
 				"rev-parse",
