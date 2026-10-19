@@ -176,6 +176,21 @@ describe("scanAstro", () => {
 		).toBe(true);
 	});
 
+	test("template text after a markup expression's closing brace stays template", () => {
+		const text =
+			'<p>\n\t{url ? (\n\t\t<a href={url}>{label}</a>\n\t) : (\n\t\tlabel\n\t)}, or email // not a comment\n\t<a href="mailto:x">x</a>.\n</p>';
+		const result = scanAstro(text);
+		expect(result.ambiguous).toBe(false);
+		expect(result.residues).toHaveLength(8);
+		expect(result.residues[5]).toBe("\t)}, or email // not a comment");
+	});
+
+	test("a comment inside an expression with trailing text is still stripped", () => {
+		const result = scanAstro("<p>\n{<a>x</a> /* note */}, or\n</p>");
+		expect(result.ambiguous).toBe(false);
+		expect(result.residues[1]).toBe("{<a>x</a> }, or");
+	});
+
 	test("plain brace expressions use the lexical scanner", () => {
 		const result = scanAstro("<p>{title}</p>\n<p>after</p>");
 		expect(result.ambiguous).toBe(false);
