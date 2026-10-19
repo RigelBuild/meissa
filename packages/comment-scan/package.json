@@ -1,6 +1,6 @@
 {
 	"name": "@rigelbuild/comment-scan",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"type": "module",
 	"description": "Language-aware source comment scanning and Markdown structure fingerprinting.",
 	"license": "MIT OR Apache-2.0",

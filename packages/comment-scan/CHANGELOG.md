@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/RigelBuild/meissa/compare/comment-scan@v1.0.0...comment-scan@v1.0.1) (2026-10-19)
+
+
+### Bug Fixes
+
+* **comment-scan:** scan template text after a markup expression (RIG-5717) ([#39](https://github.com/RigelBuild/meissa/issues/39)) ([de57c71](https://github.com/RigelBuild/meissa/commit/de57c71a9ff4fa6eb28fb0ea394b218471f5fa42))
+
 ## 1.0.0 (2026-10-17)
 
 
