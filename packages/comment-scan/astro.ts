@@ -40,11 +40,14 @@ const MARKUP_EXPR = /\{[^}]*<[A-Za-z/]/;
 const EXPR_OPEN = /\{[^}]*$/;
 const MARKUP_LINE = /<[A-Za-z/]/;
 
-// The lines of the `{ … }` region starting at `from`, or null when it does not
-// close (or holds no markup, so the scanner handles it). Brace depth is
-// counted on the region text, which is exact for the shapes here: a `{` inside
-// a string or comment would need the parser this function is selecting.
-function markupRegion(lines: readonly string[], from: number): string[] | null {
+// The lines of the `{ … }` region starting at `from`, plus the column just past
+// the `}` that closes it on the last line, or null when it holds no markup (so
+// the scanner handles it). Brace depth is counted on the region text, which is
+// exact for the shapes here: a `{` inside a string or comment needs the parser.
+function markupRegion(
+	lines: readonly string[],
+	from: number,
+): { lines: string[]; end: number } | null {
 	const first = lines[from] ?? "";
 	if (!MARKUP_EXPR.test(first) && !EXPR_OPEN.test(first)) return null;
 	let depth = 0;
@@ -54,6 +57,7 @@ function markupRegion(lines: readonly string[], from: number): string[] | null {
 	for (let k = from; k < lines.length; k++) {
 		const line = lines[k] ?? "";
 		lineComment = false;
+		let end = -1;
 		if (k > from && MARKUP_LINE.test(line) && quote === null) markup = true;
 		for (let j = 0; j < line.length; j++) {
 			const ch = line[j] ?? "";
@@ -79,12 +83,42 @@ function markupRegion(lines: readonly string[], from: number): string[] | null {
 				continue;
 			}
 			if (ch === "{") depth++;
-			else if (ch === "}") depth--;
+			else if (ch === "}") {
+				depth--;
+				if (depth <= 0 && end === -1) end = j + 1;
+			}
 		}
 		if (depth <= 0 && quote === null)
-			return markup ? lines.slice(from, k + 1) : null;
+			return markup
+				? {
+						lines: lines.slice(from, k + 1),
+						end: end === -1 ? line.length : end,
+					}
+				: null;
 	}
-	return markup ? lines.slice(from) : null;
+	return markup
+		? { lines: lines.slice(from), end: (lines.at(-1) ?? "").length }
+		: null;
+}
+
+// Parses a region as TSX. When the whole region does not parse, retries with
+// the text after the closing `}` split off and scanned as template: a line such
+// as `)}, or email` ends an expression and continues as prose.
+function scanRegion(region: { lines: string[]; end: number }): string[] | null {
+	const whole = scanJsx(region.lines.join("\n"));
+	if (!whole.ambiguous && whole.residues.length === region.lines.length)
+		return whole.residues;
+	const last = region.lines.length - 1;
+	const lastLine = region.lines[last] ?? "";
+	const tail = lastLine.slice(region.end);
+	if (tail.trim() === "") return null;
+	const body = [...region.lines.slice(0, last), lastLine.slice(0, region.end)];
+	const parsed = scanJsx(body.join("\n"));
+	if (parsed.ambiguous || parsed.residues.length !== body.length) return null;
+	const tailScan = scanLines(HTML, [tail], DEFAULT_STATE);
+	if (tailScan.underflow || tailScan.state.stack.length > 0) return null;
+	const joined = `${parsed.residues[last] ?? ""}${tailScan.residues[0] ?? ""}`;
+	return [...parsed.residues.slice(0, last), joined.replace(/[ \t]+$/, "")];
 }
 
 type Walk = {
@@ -159,14 +193,12 @@ function walkAstro(text: string): Walk {
 			// hand the parser a fragment, and a fragment holding only the JSX half
 			// of the expression falls back to the token scanner, where a `//` in
 			// element text strips the rest of the line.
-			const parsed = scanJsx(region.join("\n"));
+			const parsed = scanRegion(region);
 			// A region that does not parse cannot have its comments placed.
-			if (parsed.ambiguous || parsed.residues.length !== region.length) {
-				return UNMODELLED;
-			}
-			template.push(...region);
-			residues.push(...parsed.residues);
-			i += region.length;
+			if (parsed === null) return UNMODELLED;
+			template.push(...region.lines);
+			residues.push(...parsed);
+			i += region.lines.length;
 			continue;
 		}
 
