@@ -191,6 +191,12 @@ describe("scanAstro", () => {
 		expect(result.residues[1]).toBe("{<a>x</a> }, or");
 	});
 
+	test("a later expression in the template tail stays template", () => {
+		const result = scanAstro("<p>\n{<a>x</a>}, or email {name}\n</p>");
+		expect(result.ambiguous).toBe(false);
+		expect(result.residues[1]).toBe("{<a>x</a>}, or email {name}");
+	});
+
 	test("plain brace expressions use the lexical scanner", () => {
 		const result = scanAstro("<p>{title}</p>\n<p>after</p>");
 		expect(result.ambiguous).toBe(false);

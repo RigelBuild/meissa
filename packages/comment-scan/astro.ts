@@ -57,7 +57,7 @@ function markupRegion(
 	for (let k = from; k < lines.length; k++) {
 		const line = lines[k] ?? "";
 		lineComment = false;
-		let end = line.length;
+		let end = -1;
 		if (k > from && MARKUP_LINE.test(line) && quote === null) markup = true;
 		for (let j = 0; j < line.length; j++) {
 			const ch = line[j] ?? "";
@@ -85,11 +85,16 @@ function markupRegion(
 			if (ch === "{") depth++;
 			else if (ch === "}") {
 				depth--;
-				if (depth <= 0) end = j + 1;
+				if (depth <= 0 && end === -1) end = j + 1;
 			}
 		}
 		if (depth <= 0 && quote === null)
-			return markup ? { lines: lines.slice(from, k + 1), end } : null;
+			return markup
+				? {
+						lines: lines.slice(from, k + 1),
+						end: end === -1 ? line.length : end,
+					}
+				: null;
 	}
 	return markup
 		? { lines: lines.slice(from), end: (lines.at(-1) ?? "").length }
