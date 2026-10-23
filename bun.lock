@@ -7,79 +7,82 @@
       "devDependencies": {
         "@rigelbuild/biome-config": "workspace:*",
         "@rigelbuild/tsconfig": "workspace:*",
-        "@types/bun": "1.4.3",
+        "@types/bun": "1.4.4",
         "typescript": "6.0.3",
       },
     },
     "packages/biome-config": {
       "name": "@rigelbuild/biome-config",
-      "version": "1.0.0",
+      "version": "1.0.1",
     },
     "packages/comment-scan": {
       "name": "@rigelbuild/comment-scan",
-      "version": "0.0.0",
+      "version": "1.0.0",
       "dependencies": {
         "typescript": "6.0.3",
       },
     },
     "packages/design-ledger-gate": {
       "name": "@rigelbuild/design-ledger-gate",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "bin": {
-        "design-ledger-gate": "./index.ts",
+        "design-ledger-gate": "index.ts",
       },
       "devDependencies": {
-        "@types/bun": "1.4.3",
+        "@types/bun": "1.4.4",
         "typescript": "6.0.3",
       },
     },
     "packages/dl-claim": {
       "name": "@rigelbuild/dl-claim",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "bin": {
-        "dl-claim": "./index.ts",
+        "dl-claim": "index.ts",
       },
       "dependencies": {
-        "@rigelbuild/design-ledger-gate": "2.0.0",
+        "@rigelbuild/design-ledger-gate": "2.0.1",
       },
       "devDependencies": {
-        "@types/bun": "1.4.3",
+        "@types/bun": "1.4.4",
         "typescript": "6.0.3",
       },
     },
     "packages/dl-list": {
       "name": "@rigelbuild/dl-list",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "bin": {
-        "dl-list": "./index.ts",
+        "dl-list": "index.ts",
       },
       "dependencies": {
-        "@rigelbuild/design-ledger-gate": "2.0.0",
+        "@rigelbuild/design-ledger-gate": "2.0.1",
       },
       "devDependencies": {
-        "@types/bun": "1.4.3",
+        "@types/bun": "1.4.4",
         "typescript": "6.0.3",
       },
     },
     "packages/dl-reconcile": {
       "name": "@rigelbuild/dl-reconcile",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "bin": {
-        "dl-reconcile": "./index.ts",
+        "dl-reconcile": "index.ts",
       },
       "dependencies": {
-        "@rigelbuild/design-ledger-gate": "2.0.0",
+        "@rigelbuild/design-ledger-gate": "2.0.1",
       },
       "devDependencies": {
-        "@types/bun": "1.4.3",
+        "@types/bun": "1.4.4",
         "typescript": "6.0.3",
       },
     },
     "packages/length-gate": {
       "name": "@rigelbuild/length-gate",
-      "version": "0.0.0",
+      "version": "1.0.1",
+      "bin": {
+        "length-gate": "index.ts",
+      },
       "dependencies": {
-        "@rigelbuild/comment-scan": "0.0.0",
+        "@rigelbuild/comment-scan": "1.0.0",
         "diff": "9.0.0",
         "mdast-util-from-markdown": "2.1.0",
         "mdast-util-frontmatter": "2.0.1",
@@ -88,30 +91,30 @@
         "micromark-extension-gfm": "3.0.0",
       },
       "devDependencies": {
-        "@types/bun": "1.4.3",
+        "@types/bun": "1.4.4",
         "@types/mdast": "4.0.4",
         "typescript": "6.0.3",
       },
     },
     "packages/ref-gate": {
       "name": "@rigelbuild/ref-gate",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "bin": {
-        "ref-gate": "./index.ts",
+        "ref-gate": "index.ts",
       },
       "devDependencies": {
-        "@types/bun": "1.4.3",
+        "@types/bun": "1.4.4",
         "typescript": "6.0.3",
       },
     },
     "packages/renovate-preflight": {
       "name": "@rigelbuild/renovate-preflight",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "bin": {
-        "renovate-preflight": "./index.ts",
+        "renovate-preflight": "index.ts",
       },
       "devDependencies": {
-        "@types/bun": "1.4.3",
+        "@types/bun": "1.4.4",
         "typescript": "6.0.3",
       },
     },
@@ -141,7 +144,7 @@
 
     "@rigelbuild/tsconfig": ["@rigelbuild/tsconfig@workspace:packages/tsconfig"],
 
-    "@types/bun": ["@types/bun@1.4.3", "", { "dependencies": { "bun-types": "1.4.3" } }, "sha512-N67Pqy8JXbAY/j0tNraS3V5mubGvc6rrrNDmDCtZLlFzccbUJPDb0tvgUBC5q4m8ybkP93Jcn1QB+RYQ6PvBhw=="],
+    "@types/bun": ["@types/bun@1.4.4", "", { "dependencies": { "bun-types": "1.4.4" } }, "sha512-9wkRDXUXK124pEnAutE6n/l18j+i9GC5IAHK8TmX/2nlySETmky0OU6yL5U8pW1AoKh++AN9auDCr647BfurjQ=="],
 
     "@types/debug": ["@types/debug@4.1.13", "", { "dependencies": { "@types/ms": "*" } }, "sha512-KSVgmQmzMwPlmtljOomayoR89W4FynCAi3E8PPs7vmDVPe84hT+vGPKkJfThkmXs0x0jAaa9U8uW8bbfyS2fWw=="],
 
@@ -153,7 +156,7 @@
 
     "@types/unist": ["@types/unist@3.0.3", "", {}, "sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q=="],
 
-    "bun-types": ["bun-types@1.4.3", "", { "dependencies": { "@types/node": "*", "undici-types": "*" } }, "sha512-tinRJNGOmUN+tEAsn2y2e942n9JHRHR42iUYzDH75NmhJqVBokGSQkkfSFdNWwsANIdrK6ACH9t01M452YyTwg=="],
+    "bun-types": ["bun-types@1.4.4", "", { "dependencies": { "@types/node": "*", "undici-types": "*" } }, "sha512-yjrJh5oGX7mMPKGd19YXyIjmEuj4G4zNC30bs7PM9Az7NQ3ndF3j6hbeRdvJTRQEhJ/FYQwW0a2moweEi2hMxQ=="],
 
     "ccount": ["ccount@2.0.1", "", {}, "sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg=="],
 
