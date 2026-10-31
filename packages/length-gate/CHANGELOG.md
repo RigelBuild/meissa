@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.2](https://github.com/RigelBuild/meissa/compare/length-gate@v1.0.1...length-gate@v1.0.2) (2026-10-31)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @rigelbuild/comment-scan bumped from 1.0.0 to 1.0.1
+
 ## [1.0.1](https://github.com/RigelBuild/meissa/compare/length-gate@v1.0.0...length-gate@v1.0.1) (2026-10-18)
 
 

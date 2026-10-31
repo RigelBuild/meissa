@@ -1,6 +1,6 @@
 {
 	"name": "@rigelbuild/length-gate",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"type": "module",
 	"description": "Comment and document length ratchet CLI and pure core.",
 	"license": "MIT OR Apache-2.0",
@@ -30,7 +30,7 @@
 		"access": "public"
 	},
 	"dependencies": {
-		"@rigelbuild/comment-scan": "1.0.0",
+		"@rigelbuild/comment-scan": "1.0.1",
 		"diff": "9.0.0",
 		"mdast-util-from-markdown": "2.1.0",
 		"mdast-util-frontmatter": "2.0.1",
