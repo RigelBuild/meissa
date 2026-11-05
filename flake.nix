@@ -18,10 +18,16 @@
           value = f system;
         }) systems);
       packagesFor = system:
-        let pkgs = nixpkgs.legacyPackages.${system};
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+          goAnalysis = self.lib.goAnalysis { inherit pkgs; goToolchain = pkgs.go_1_27; };
         in {
           rumdl = pkgs.rumdl;
           biome = pkgs.biome;
+          go-dev = pkgs.symlinkJoin {
+            name = "meissa-go-dev";
+            paths = [ pkgs.go_1_27 ] ++ builtins.attrValues goAnalysis;
+          };
           "rumdl-base-config" = import ./rumdl-base-config.nix { inherit pkgs; };
         };
       moduleCheck = system:

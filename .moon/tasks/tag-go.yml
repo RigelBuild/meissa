@@ -1,0 +1,60 @@
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/tasks.json
+inheritedBy:
+  tag: 'go'
+
+tasks:
+  build:
+    command: 'go build ./...'
+    env:
+      GOTOOLCHAIN: 'local'
+      GOWORK: 'off'
+      GOFLAGS: '-mod=readonly'
+      CGO_ENABLED: '0'
+
+  test:
+    command: 'go test -race ./...'
+    env:
+      GOTOOLCHAIN: 'local'
+      GOWORK: 'off'
+      GOFLAGS: '-mod=readonly'
+      CGO_ENABLED: '1'
+
+  lint:
+    command: 'golangci-lint run ./...'
+    env:
+      GOTOOLCHAIN: 'local'
+      GOWORK: 'off'
+      GOFLAGS: '-mod=readonly'
+
+  vuln:
+    command: 'govulncheck ./...'
+    env:
+      GOTOOLCHAIN: 'local'
+      GOWORK: 'off'
+      GOFLAGS: '-mod=readonly'
+
+  licenses:
+    command: 'go-licenses check ./...'
+    env:
+      GOTOOLCHAIN: 'local'
+      GOWORK: 'off'
+      GOFLAGS: '-mod=readonly'
+
+  nilaway:
+    command: 'nilaway ./...'
+    env:
+      GOTOOLCHAIN: 'local'
+      GOWORK: 'off'
+      GOFLAGS: '-mod=readonly'
+    options:
+      allowFailure: true
+    # Advisory: moon forbids allowFailure tasks as dependencies, so ci does not depend on nilaway.
+
+  ci:
+    env:
+      GOTOOLCHAIN: 'local'
+      GOWORK: 'off'
+      GOFLAGS: '-mod=readonly'
+    deps: ['build', 'test', 'lint', 'vuln', 'licenses']
+    options:
+      cache: false

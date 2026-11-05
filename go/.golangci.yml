@@ -1,0 +1,45 @@
+version: '2'
+
+linters:
+  default: all
+  disable:
+    # Parser format constants are intentionally numeric; tests mirror the TS suite verbatim.
+    - mnd
+    # The Go standard library's short local names and blank-line style are retained.
+    - varnamelen
+    - wsl
+    - wsl_v5
+    # The parser's single-pass state machine is easier to review as a direct port.
+    - cyclop
+    - gocognit
+    - gocyclo
+    - maintidx
+    # Long tests and repeated diff snippets preserve one-to-one parity with TypeScript.
+    - funlen
+    - dupl
+    - goconst
+    # This API is frozen by the design contract; interface-count heuristics do not apply.
+    - ireturn
+    # Default rules reject imports of this module's required internal text package.
+    - depguard
+    # Use the v2 replacement for the deprecated legacy linter.
+    - gomodguard
+    - nlreturn
+    - exhaustruct
+  enable:
+    - gomodguard_v2
+  exclusions:
+    rules:
+      - path: '_test\.go'
+        linters:
+          - gochecknoglobals
+          - paralleltest
+          - testpackage
+          - funlen
+          - goconst
+          - dupl
+          - gosec
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
