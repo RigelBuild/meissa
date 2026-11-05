@@ -59,6 +59,75 @@ func TestScanJSX(t *testing.T) {
 		})
 	}
 }
+
+func TestScanJSXFailClosedDivergences(t *testing.T) {
+	tests := []struct {
+		name           string
+		input          string
+		oracleResidues []string
+	}{
+		{
+			name:           "comment before attribute after ampersand",
+			input:          `const x = <a /* it's */ b="&" />; // c`,
+			oracleResidues: []string{`const x = <a  b="&" />;`},
+		},
+		{
+			name:           "member element with ampersand attribute",
+			input:          `const x = <a.b c="&" />; /* c */`,
+			oracleResidues: []string{`const x = <a.b c="&" />;`},
+		},
+		{
+			name:           "namespaced element with ampersand attribute",
+			input:          `const x = <a:b c="&" />; /* c */`,
+			oracleResidues: []string{`const x = <a:b c="&" />;`},
+		},
+		{
+			name:           "spread before ampersand attribute",
+			input:          `const x = <a {...p} c="&" />; /* c */`,
+			oracleResidues: []string{`const x = <a {...p} c="&" />;`},
+		},
+		{
+			name:           "fragment with ampersand attribute",
+			input:          `const x = <><a c="&" /></>; /* c */`,
+			oracleResidues: []string{`const x = <><a c="&" /></>;`},
+		},
+		{
+			name:           "lone ampersand attribute",
+			input:          `<a b="&" />`,
+			oracleResidues: []string{`<a b="&" />`},
+		},
+		{
+			name:           "ampersand before line comment",
+			input:          `<a href="a&b // c" />`,
+			oracleResidues: []string{`<a href="a&b // c" />`},
+		},
+		{
+			name:           "query ampersand",
+			input:          `<a href="?q=1&r=/* keep */" />`,
+			oracleResidues: []string{`<a href="?q=1&r=/* keep */" />`},
+		},
+		{
+			name:           "trailing ampersand",
+			input:          `<a b="x&" />`,
+			oracleResidues: []string{`<a b="x&" />`},
+		},
+		{
+			name:           "second JSX element after quote-containing comment",
+			input:          `const first = <a b="&" />; /* " trailing */ const second = <b c="&" />;`,
+			oracleResidues: []string{`const first = <a b="&" />;  const second = <b c="&" />;`},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := ScanJSX(test.input)
+			equalResidues := reflect.DeepEqual(got.Residues, test.oracleResidues)
+			t.Logf("TS residues: %#v; Go residues: %#v; equal: %t", test.oracleResidues, got.Residues, equalResidues)
+			if !got.Ambiguous {
+				t.Fatalf("ScanJSX() = %+v, want ambiguous true", got)
+			}
+		})
+	}
+}
 func TestScanJSXReviewCases(t *testing.T) {
 	t.Run("block-form Biome directives stay in the residue", func(t *testing.T) {
 		text := strings.Join([]string{

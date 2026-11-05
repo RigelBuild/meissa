@@ -1,6 +1,6 @@
 {
   "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
-  "path": "docs/designs/compass/infra/runtime/compass-elastic-session-runtime/microvm-v2a-guest-image-boot-spike.md",
+  "path": "packages/comment-scan/markdown.ts",
   "corpus": "go/commentscan/testdata/corpus/markdown/docs-0055.md",
   "fingerprint": [
     {

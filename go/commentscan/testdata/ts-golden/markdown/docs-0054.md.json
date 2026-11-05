@@ -1,6 +1,6 @@
 {
   "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
-  "path": "docs/designs/compass/infra/ci/compass-test-harness-tiers/design.md",
+  "path": "packages/comment-scan/markdown.ts",
   "corpus": "go/commentscan/testdata/corpus/markdown/docs-0054.md",
   "fingerprint": [
     {

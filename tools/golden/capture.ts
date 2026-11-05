@@ -125,21 +125,10 @@ async function main(args: readonly string[]): Promise<void> {
 				if (!isMarkdownCompare(compareCandidate)) {
 					throw new Error(`revision ${commit} does not export compareMarkdown`);
 				}
-				const previousPath = join(goldenDir, `${basename(inputPath)}.json`);
-				let source = corpus;
-				if (existsSync(previousPath)) {
-					const previous: unknown = JSON.parse(
-						readFileSync(previousPath, "utf8"),
-					);
-					if (typeof previous === "object" && previous !== null) {
-						const previousSource = Reflect.get(previous, "path");
-						if (typeof previousSource === "string") source = previousSource;
-					}
-				}
 				const verdict = compareCandidate(text, text);
 				golden = {
 					revision: commit,
-					path: source,
+					path: sourcePath,
 					corpus,
 					fingerprint: scan(text),
 					comparison: { kind: verdict.kind },

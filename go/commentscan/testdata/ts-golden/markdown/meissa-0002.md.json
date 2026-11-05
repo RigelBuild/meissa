@@ -1,6 +1,6 @@
 {
   "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
-  "path": "go/commentscan/testdata/corpus/markdown/meissa-0001.md",
+  "path": "packages/comment-scan/markdown.ts",
   "corpus": "go/commentscan/testdata/corpus/markdown/meissa-0002.md",
   "fingerprint": [
     {

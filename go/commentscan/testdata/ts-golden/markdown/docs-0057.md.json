@@ -1,6 +1,6 @@
 {
   "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
-  "path": "docs/designs/compass/infra/runtime/compass-runner-gateway-error-sentinels/design.md",
+  "path": "packages/comment-scan/markdown.ts",
   "corpus": "go/commentscan/testdata/corpus/markdown/docs-0057.md",
   "fingerprint": [
     {
