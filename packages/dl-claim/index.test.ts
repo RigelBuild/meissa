@@ -171,6 +171,9 @@ describe("claim service", () => {
 		expect(await failureMessage(429, { error: "limited" })).toContain(
 			"Rate limited",
 		);
+		const full = await failureMessage(429, { error: "too_many_open_claims" });
+		expect(full).toContain("--release");
+		expect(full).not.toContain("Rate limited");
 		expect(await failureMessage(503, { error: "not_hydrated" })).toContain(
 			"has not hydrated",
 		);
