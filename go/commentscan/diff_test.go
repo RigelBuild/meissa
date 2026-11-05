@@ -41,6 +41,27 @@ func TestParseDiff(t *testing.T) {
 		}
 	})
 
+	t.Run("mixed hunk lines retain old and new line numbers", func(t *testing.T) {
+		input := strings.Join([]string{
+			"diff --git a/x.ts b/x.ts",
+			"--- a/x.ts",
+			"+++ b/x.ts",
+			"@@ -7,3 +11,3 @@",
+			" context",
+			"-old",
+			"+new",
+			" context",
+		}, "\n")
+		lines := firstFile(t, input).Hunks[0].Lines
+		got := make([][3]int, len(lines))
+		for i, line := range lines {
+			got[i] = [3]int{int(line.Kind), line.OldNo, line.NewNo}
+		}
+		want := [][3]int{{' ', 7, 11}, {'-', 8, 12}, {'+', 9, 12}, {' ', 9, 13}}
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("line kinds/numbers = %#v, want %#v", got, want)
+		}
+	})
 	t.Run("added lines beginning with plus signs remain additions", func(t *testing.T) {
 		file := firstFile(t, diff("x.md", " a\n+++ b\n c"))
 		got := make([][2]string, len(file.Hunks[0].Lines))

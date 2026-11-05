@@ -60,5 +60,15 @@ func isCased(r rune) bool {
 }
 
 func isCaseIgnorable(r rune) bool {
-	return unicode.In(r, unicode.Mn, unicode.Me, unicode.Cf, unicode.Lm, unicode.Sk) || r == '\'' || r == '\u2019'
+	if unicode.In(r, unicode.Mn, unicode.Me, unicode.Cf, unicode.Lm, unicode.Sk) {
+		return true
+	}
+	switch r {
+	case '\'', ':', '.', '\u00b7', '\u0387', '\u055f', '\u05f4',
+		'\u2018', '\u2019', '\u2024', '\u2027', '\ufe13', '\ufe52',
+		'\ufe55', '\uff07', '\uff0e', '\uff1a':
+		return true
+	default:
+		return false
+	}
 }
