@@ -112,6 +112,40 @@ function commitChange(repository: string, message: string): void {
 	runGit(repository, "commit", "-q", "-m", message);
 }
 
+function appendEmptyCommits(
+	repository: string,
+	count: number,
+	message: (n: number) => string,
+): void {
+	const parent = runGit(repository, "rev-parse", "refs/heads/main");
+	const encoder = new TextEncoder();
+	const stream: string[] = [];
+	for (let n = 0; n < count; n += 1) {
+		const commitMessage = message(n);
+		const timestamp = 1_700_000_000 + n;
+		stream.push(
+			"commit refs/heads/main",
+			`mark :${n + 1}`,
+			`author t <t@t> ${timestamp} +0000`,
+			`committer t <t@t> ${timestamp} +0000`,
+			`data ${encoder.encode(commitMessage).byteLength}`,
+			commitMessage,
+			`from ${n === 0 ? parent : `:${n}`}`,
+			"",
+		);
+	}
+	stream.push("done");
+	const result = Bun.spawnSync({
+		cmd: ["git", "-C", repository, "fast-import"],
+		stdin: encoder.encode(stream.join("\n")),
+		stdout: "pipe",
+		stderr: "pipe",
+	});
+	if (result.exitCode !== 0)
+		throw new Error(new TextDecoder().decode(result.stderr));
+	runGit(repository, "checkout", "-f", "main");
+}
+
 function longComment(): string {
 	return `${[1, 2, 3, 4, 5].map((line) => `// line ${line}`).join("\n")}\n`;
 }
@@ -462,8 +496,7 @@ describe("runOnce pull request mode", () => {
 		const source = trackedRepository("deep-source-", {
 			"src/file.ts": "clean\n",
 		});
-		for (let n = 0; n < 250; n += 1)
-			runGit(source, "commit", "-q", "--allow-empty", "-m", `old ${n}`);
+		appendEmptyCommits(source, 250, (n) => `old ${n}`);
 		makePullRequest(source, "src/file.ts", longComment());
 		const shallow = join(temporaryDirectory("deep-clone-"), "repo");
 		const clone = Bun.spawnSync({
@@ -499,8 +532,7 @@ describe("runOnce pull request mode", () => {
 		const source = trackedRepository("deeper-source-", {
 			"src/file.ts": "clean\n",
 		});
-		for (let n = 0; n < 400; n += 1)
-			runGit(source, "commit", "-q", "--allow-empty", "-m", `old ${n}`);
+		appendEmptyCommits(source, 400, (n) => `old ${n}`);
 		makePullRequest(source, "src/file.ts", longComment());
 		const shallow = join(temporaryDirectory("deeper-clone-"), "repo");
 		const clone = Bun.spawnSync({
