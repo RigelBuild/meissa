@@ -232,13 +232,15 @@ function formatServiceError(
 	const hint =
 		status === 401
 			? " Token missing or wrong."
-			: status === 429
-				? " Rate limited; retry later."
-				: status === 503 && code === "not_hydrated"
-					? ` The reconcile process has not hydrated the ${config.counter.partition} partition yet.`
-					: status === 400
-						? ""
-						: maybeMinted(config);
+			: status === 429 && code === "too_many_open_claims"
+				? " Too many open claims; land them or remove abandoned ones with --release."
+				: status === 429
+					? " Rate limited; retry later."
+					: status === 503 && code === "not_hydrated"
+						? ` The reconcile process has not hydrated the ${config.counter.partition} partition yet.`
+						: status === 400
+							? ""
+							: maybeMinted(config);
 	return new Error(
 		`claim failed with HTTP ${status}${code ? ` (${code})` : ""}.${hint}`,
 	);
