@@ -193,7 +193,7 @@ func dq() StringSpec { return newStringSpec(`"`, `"`, EscapeBackslash, false) }
 
 func sq() StringSpec { return newStringSpec(`'`, `'`, EscapeBackslash, false) }
 
-func langGo() *LangConfig {
+func newLangGo() *LangConfig {
 	lang := newLangConfig(LanguageGo, goDirective)
 	lang.LineComment = []string{"//"}
 	lang.BlockComment = true
@@ -201,7 +201,7 @@ func langGo() *LangConfig {
 	return lang
 }
 
-func langTS() *LangConfig {
+func newLangTS() *LangConfig {
 	lang := newLangConfig(LanguageTS, tsDirective)
 	lang.LineComment = []string{"//"}
 	lang.BlockComment = true
@@ -210,8 +210,8 @@ func langTS() *LangConfig {
 	return lang
 }
 
-// langRust treats `"…"` as multiline: a Rust string legally spans lines.
-func langRust() *LangConfig {
+// newLangRust treats `"…"` as multiline: a Rust string legally spans lines.
+func newLangRust() *LangConfig {
 	lang := newLangConfig(LanguageRust, rustDirective)
 	lang.LineComment = []string{"//"}
 	lang.BlockComment = true
@@ -221,7 +221,7 @@ func langRust() *LangConfig {
 	return lang
 }
 
-func langNix() *LangConfig {
+func newLangNix() *LangConfig {
 	lang := newLangConfig(LanguageNix, nixDirective)
 	lang.LineComment = []string{"#"}
 	lang.BlockComment = true
@@ -232,7 +232,7 @@ func langNix() *LangConfig {
 	return lang
 }
 
-func langPython() *LangConfig {
+func newLangPython() *LangConfig {
 	lang := newLangConfig(LanguagePython, pythonDirective)
 	lang.LineComment = []string{"#"}
 	lang.Strings = []StringSpec{
@@ -244,7 +244,7 @@ func langPython() *LangConfig {
 	return lang
 }
 
-func langTOML() *LangConfig {
+func newLangTOML() *LangConfig {
 	lang := newLangConfig(LanguageTOML, never)
 	lang.LineComment = []string{"#"}
 	lang.Strings = []StringSpec{
@@ -256,7 +256,7 @@ func langTOML() *LangConfig {
 	return lang
 }
 
-func langYAML() *LangConfig {
+func newLangYAML() *LangConfig {
 	lang := newLangConfig(LanguageYAML, yamlDirective)
 	lang.LineComment = []string{"#"}
 	lang.LineCommentAfter = yamlCommentAfter
@@ -274,8 +274,8 @@ func shSingle() StringSpec { return newStringSpec("'", "'", EscapeNone, true) }
 
 func shBacktick() StringSpec { return newStringSpec("`", "`", EscapeBackslash, true) }
 
-// langShellInterp scans the body of a `$( … )` substitution inside a double-quoted string.
-func langShellInterp() *LangConfig {
+// newLangShellInterp scans the body of a `$( … )` substitution inside a double-quoted string.
+func newLangShellInterp() *LangConfig {
 	lang := newLangConfig(LanguageShell, never)
 	lang.Strings = []StringSpec{
 		shAnsiC(),
@@ -286,11 +286,11 @@ func langShellInterp() *LangConfig {
 	return lang
 }
 
-func langShell() *LangConfig {
+func newLangShell(interp *LangConfig) *LangConfig {
 	doubleQuoted := interpolated(newStringSpec(`"`, `"`, EscapeBackslash, true))
 	doubleQuoted.InterpOpen = "$("
 	doubleQuoted.InterpClose = ")"
-	doubleQuoted.InterpLang = langShellInterp()
+	doubleQuoted.InterpLang = interp
 
 	lang := newLangConfig(LanguageShell, shellDirective)
 	lang.LineComment = []string{"#"}
@@ -306,7 +306,7 @@ func langShell() *LangConfig {
 	return lang
 }
 
-func langSQL() *LangConfig {
+func newLangSQL() *LangConfig {
 	tagged := newStringSpec("$tag$", "", EscapeNone, true)
 	tagged.CloseIsOpen = true
 	tagged.OpenRe = sqlTagOpen
@@ -325,7 +325,7 @@ func langSQL() *LangConfig {
 	return lang
 }
 
-func langKDL() *LangConfig {
+func newLangKDL() *LangConfig {
 	lang := newLangConfig(LanguageKDL, never)
 	lang.LineComment = []string{"//"}
 	lang.BlockComment = true
@@ -337,7 +337,7 @@ func langKDL() *LangConfig {
 	return lang
 }
 
-func langCSS() *LangConfig {
+func newLangCSS() *LangConfig {
 	url := newStringSpec("url(", ")", EscapeBackslash, true)
 	url.OpenRe = cssURLOpenRe
 
@@ -347,8 +347,8 @@ func langCSS() *LangConfig {
 	return lang
 }
 
-// langHTML is the `.astro` template: HTML comments, attribute strings, and TS `{ … }` expressions.
-func langHTML() *LangConfig {
+// newLangHTML is the `.astro` template: HTML comments, attribute strings, and TS `{ … }` expressions.
+func newLangHTML(ts *LangConfig) *LangConfig {
 	lang := newLangConfig(LanguageHTML, htmlDirective)
 	lang.BlockComment = true
 	lang.BlockOpen = "<!--"
@@ -357,11 +357,11 @@ func langHTML() *LangConfig {
 		openingAfter(newStringSpec(`"`, `"`, EscapeNone, true), attrValueStart),
 		openingAfter(newStringSpec(`'`, `'`, EscapeNone, true), attrValueStart),
 	}
-	lang.Expr = &ExprSpec{Open: "{", Close: "}", Lang: langTS()}
+	lang.Expr = &ExprSpec{Open: "{", Close: "}", Lang: ts}
 	return lang
 }
 
-func langProto() *LangConfig {
+func newLangProto() *LangConfig {
 	lang := newLangConfig(LanguageProto, never)
 	lang.LineComment = []string{"//"}
 	lang.BlockComment = true
@@ -369,52 +369,74 @@ func langProto() *LangConfig {
 	return lang
 }
 
-// langByExt maps a lowercase file extension to its language config.
-func langByExt() map[string]*LangConfig {
-	goConfig, ts, python, yaml, shell := langGo(), langTS(), langPython(), langYAML(), langShell()
-	return map[string]*LangConfig{
-		".go":    goConfig,
-		".ts":    ts,
-		".js":    ts,
-		".mts":   ts,
-		".cts":   ts,
-		".mjs":   ts,
-		".cjs":   ts,
-		".rs":    langRust(),
-		".nix":   langNix(),
-		".py":    python,
-		".pyi":   python,
-		".toml":  langTOML(),
-		".yaml":  yaml,
-		".yml":   yaml,
-		".sh":    shell,
-		".bash":  shell,
-		".zsh":   shell,
-		".sql":   langSQL(),
-		".kdl":   langKDL(),
-		".css":   langCSS(),
-		".proto": langProto(),
+// languageTable holds one shared config per language. Lookups and the nested InterpLang and
+// Expr.Lang references all return these entries, so configs can be compared by pointer.
+type languageTable struct {
+	byID        map[LanguageID]*LangConfig
+	byExt       map[string]*LangConfig
+	sql         *LangConfig
+	shellInterp *LangConfig
+}
+
+func buildLanguageTable() languageTable {
+	goConfig, ts, rust, nix, python := newLangGo(), newLangTS(), newLangRust(), newLangNix(), newLangPython()
+	toml, yaml, sql, kdl, shellInterp := newLangTOML(), newLangYAML(), newLangSQL(), newLangKDL(), newLangShellInterp()
+	shell, css, html, proto := newLangShell(shellInterp), newLangCSS(), newLangHTML(ts), newLangProto()
+	return languageTable{
+		byID: map[LanguageID]*LangConfig{
+			LanguageGo:     goConfig,
+			LanguageTS:     ts,
+			LanguageRust:   rust,
+			LanguageNix:    nix,
+			LanguagePython: python,
+			LanguageTOML:   toml,
+			LanguageYAML:   yaml,
+			LanguageShell:  shell,
+			LanguageSQL:    sql,
+			LanguageKDL:    kdl,
+			LanguageCSS:    css,
+			LanguageHTML:   html,
+			LanguageProto:  proto,
+		},
+		byExt: map[string]*LangConfig{
+			".go":    goConfig,
+			".ts":    ts,
+			".js":    ts,
+			".mts":   ts,
+			".cts":   ts,
+			".mjs":   ts,
+			".cjs":   ts,
+			".rs":    rust,
+			".nix":   nix,
+			".py":    python,
+			".pyi":   python,
+			".toml":  toml,
+			".yaml":  yaml,
+			".yml":   yaml,
+			".sh":    shell,
+			".bash":  shell,
+			".zsh":   shell,
+			".sql":   sql,
+			".kdl":   kdl,
+			".css":   css,
+			".proto": proto,
+		},
+		sql:         sql,
+		shellInterp: shellInterp,
 	}
 }
 
-// langByID maps a language ID to its config. TSX and Astro use parser-based scanners instead.
-func langByID() map[LanguageID]*LangConfig {
-	return map[LanguageID]*LangConfig{
-		LanguageGo:     langGo(),
-		LanguageTS:     langTS(),
-		LanguageRust:   langRust(),
-		LanguageNix:    langNix(),
-		LanguagePython: langPython(),
-		LanguageTOML:   langTOML(),
-		LanguageYAML:   langYAML(),
-		LanguageShell:  langShell(),
-		LanguageSQL:    langSQL(),
-		LanguageKDL:    langKDL(),
-		LanguageCSS:    langCSS(),
-		LanguageHTML:   langHTML(),
-		LanguageProto:  langProto(),
-	}
-}
+// languages is built once. Segment.Lang compares configs by pointer, so every lookup must share it.
+var languages = buildLanguageTable() //nolint:gochecknoglobals // shared language table
+
+// langByExt maps a lowercase file extension to its shared language config.
+func langByExt() map[string]*LangConfig { return languages.byExt }
+
+// langByID maps a language ID to its shared config. TSX and Astro use parser-based scanners instead.
+func langByID() map[LanguageID]*LangConfig { return languages.byID }
+
+// langSQL returns the shared SQL config.
+func langSQL() *LangConfig { return languages.sql }
 
 // cssURLOpen implements the CSS URL negative lookahead without regex lookahead.
 func cssURLOpen(text string) (string, bool) {

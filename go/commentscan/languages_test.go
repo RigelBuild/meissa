@@ -23,3 +23,22 @@ func TestIndentScalar(t *testing.T) {
 		})
 	}
 }
+
+func TestLanguageTableSharesEntries(t *testing.T) {
+	t.Parallel()
+
+	shell := langByID()[LanguageShell]
+	if langByExt()[".sh"] != shell {
+		t.Fatal(`langByExt()[".sh"] is not the langByID()["shell"] entry`)
+	}
+	if langByExt()[".bash"] != shell || langByExt()[".zsh"] != shell {
+		t.Fatal("shell extensions do not share one entry")
+	}
+	interp := shell.Strings[2].InterpLang
+	if interp == nil || interp != languages.shellInterp || langByID()[LanguageShell].Strings[2].InterpLang != interp {
+		t.Fatal("shell InterpLang is not the shared shell-interpolation entry")
+	}
+	if langByID()[LanguageHTML].Expr.Lang != langByID()[LanguageTS] {
+		t.Fatal("HTML Expr.Lang is not the shared TS entry")
+	}
+}
