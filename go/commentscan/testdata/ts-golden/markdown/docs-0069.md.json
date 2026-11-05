@@ -1,0 +1,1550 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "docs/designs/compass/ui/compass-ui-fixture-boot/design.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0069.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Compass UI fixture boot — fully offline, fixture-seeded UI"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Problem / Intent"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/e2e/visual-smoke.spec.ts"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Global Constraints"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "STUB_ISSUES"
+    },
+    {
+      "kind": "code-span",
+      "value": "STUB_AGENTS"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/stub-data.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "STUB_COMMS_STATE"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/comms-stub.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-fake.ts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go test -tags podman ./e2e/..."
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "index.tsx"
+    },
+    {
+      "kind": "code-span",
+      "value": "envConnectionProvider"
+    },
+    {
+      "kind": "code-span",
+      "value": "createLiveClients"
+    },
+    {
+      "kind": "code-span",
+      "value": "createAppStore"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": ".env*"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/env-secrecy.test.ts"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Approach"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 What actually blocks offline boot (ground truth)"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/store.ts:685"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\nconst [issues, setIssues] = createSignal<Issue[]>(STUB_ISSUES);"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ts:946,959-961"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\nif (options.compass) {\n    ...\n    void runEventStream({\n        client,\n        onIssues: setIssues,"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ts:847-849"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\nconst agents = createMemo<readonly Agent[]>(() =>\n    options.comms ? joinAgents(accounts(), presence()) : STUB_AGENTS,\n);"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ts:945"
+    },
+    {
+      "kind": "raw-html",
+      "value": "<DaemonInfo>"
+    },
+    {
+      "kind": "code-span",
+      "value": "options.compass"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ts:573"
+    },
+    {
+      "kind": "code-span",
+      "value": "readonly comms?: CommsClient;"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ts:595"
+    },
+    {
+      "kind": "code-span",
+      "value": "readonly compass?: CompassClient;"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ts:557-559"
+    },
+    {
+      "kind": "code-span",
+      "value": "initialComms"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.test.ts:35-38"
+    },
+    {
+      "kind": "code-span",
+      "value": "test-router.tsx:43-46"
+    },
+    {
+      "kind": "code-span",
+      "value": "initialComms: STUB_COMMS_STATE"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/index.tsx"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "index.tsx:46-49"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\n  const bootConnectionForMode =\n      shellMode() === \"client\"\n          ? () => bootNativeClient(root)\n          : () => bootConnection(root, () => envConnectionProvider().resolve());"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/live/connection.ts:46-51"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\n  const baseUrl = env.VITE_COMPASS_BASE_URL?.trim();\n  if (!baseUrl) {\n      throw new Error(\n          \"VITE_COMPASS_BASE_URL is required to reach the Compass server; \" +"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "index.tsx:80-87"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\n  const clients = createLiveClients(connection);\n  const callerId = await bootCaller(root, () => resolveCaller(clients.compass));\n  ...\n  if (!callerId) {\n      return;\n  }"
+    },
+    {
+      "kind": "code-span",
+      "value": "visual-smoke.spec.ts:3-9"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 A1 — Mode selection + the hard wall (the load-bearing choice)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "VITE_COMPASS_FIXTURE=1"
+    },
+    {
+      "kind": "code-span",
+      "value": "VITE_*"
+    },
+    {
+      "kind": "code-span",
+      "value": ".env"
+    },
+    {
+      "kind": "code-span",
+      "value": "env-secrecy.test.ts:1-9"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture.html"
+    },
+    {
+      "kind": "code-span",
+      "value": "index.html"
+    },
+    {
+      "kind": "code-span",
+      "value": "/fixture.html#/…"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite build"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "vite --mode fixture"
+    },
+    {
+      "kind": "code-span",
+      "value": "index.tsx:46-49"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "import.meta.env.MODE"
+    },
+    {
+      "kind": "code-span",
+      "value": "VITE_*"
+    },
+    {
+      "kind": "code-span",
+      "value": "mode"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite.config.ts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "import.meta.env.MODE"
+    },
+    {
+      "kind": "code-span",
+      "value": "if (import.meta.env.MODE === \"fixture\")"
+    },
+    {
+      "kind": "code-span",
+      "value": "import()"
+    },
+    {
+      "kind": "code-span",
+      "value": "if (import.meta.env.MODE === \"fixture\")"
+    },
+    {
+      "kind": "code-span",
+      "value": "const m = import.meta.env.MODE; if (m === \"fixture\")"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "boot-fixture.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "src"
+    },
+    {
+      "kind": "code-span",
+      "value": "import()"
+    },
+    {
+      "kind": "code-span",
+      "value": "import { … } from \"./boot-fixture\""
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture-wall.test.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "FIXTURE_SENTINEL"
+    },
+    {
+      "kind": "code-span",
+      "value": "boot-fixture.ts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/preview-build.test.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "bunx vite build --outDir …"
+    },
+    {
+      "kind": "code-span",
+      "value": "preview-build.test.ts:79"
+    },
+    {
+      "kind": "code-span",
+      "value": "dist/"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "--mode fixture"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite build"
+    },
+    {
+      "kind": "code-span",
+      "value": "NODE_ENV"
+    },
+    {
+      "kind": "code-span",
+      "value": "import.meta.env.PROD"
+    },
+    {
+      "kind": "code-span",
+      "value": "NODE_ENV=development vite build --mode fixture"
+    },
+    {
+      "kind": "code-span",
+      "value": "NODE_ENV"
+    },
+    {
+      "kind": "code-span",
+      "value": "PROD"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "--mode fixture"
+    },
+    {
+      "kind": "code-span",
+      "value": ".env.development"
+    },
+    {
+      "kind": "code-span",
+      "value": "VITE_COMPASS_BASE_URL"
+    },
+    {
+      "kind": "code-span",
+      "value": "connection.ts:48"
+    },
+    {
+      "kind": "code-span",
+      "value": "index.tsx:23-33"
+    },
+    {
+      "kind": "code-span",
+      "value": "--mode fixture"
+    },
+    {
+      "kind": "code-span",
+      "value": "visual-smoke.spec.ts:19-23"
+    },
+    {
+      "kind": "code-span",
+      "value": "test-router.tsx:37-56"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 A2 — The fixture boot module (`apps/ui/src/boot-fixture.ts`)"
+    },
+    {
+      "kind": "code-span",
+      "value": "boot-native.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "main()"
+    },
+    {
+      "kind": "code-span",
+      "value": "index.tsx:76-145"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "QueryClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "index.tsx:97-99"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": " — **no "
+    },
+    {
+      "kind": "code-span",
+      "value": "compass"
+    },
+    {
+      "kind": "code-span",
+      "value": "STUB_ISSUES"
+    },
+    {
+      "kind": "code-span",
+      "value": "STUB_AGENTS"
+    },
+    {
+      "kind": "code-span",
+      "value": "STUB_DAEMON"
+    },
+    {
+      "kind": "code-span",
+      "value": "callerId"
+    },
+    {
+      "kind": "code-span",
+      "value": "CALLER_ID"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ts:74"
+    },
+    {
+      "kind": "code-span",
+      "value": "export const CALLER_ID = \"acc-matt\";"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ts:681"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "index.tsx:133-144"
+    },
+    {
+      "kind": "code-span",
+      "value": " helper both "
+    },
+    {
+      "kind": "code-span",
+      "value": " and "
+    },
+    {
+      "kind": "code-span",
+      "value": "mountShell"
+    },
+    {
+      "kind": "code-span",
+      "value": "mountApp"
+    },
+    {
+      "kind": "code-span",
+      "value": "test-router.tsx:37"
+    },
+    {
+      "kind": "code-span",
+      "value": "mountApp"
+    },
+    {
+      "kind": "code-span",
+      "value": "{store,container}"
+    },
+    {
+      "kind": "code-span",
+      "value": "src"
+    },
+    {
+      "kind": "code-span",
+      "value": "CompassClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "options.compass"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/live/compass-fake.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "createFakeCompass()"
+    },
+    {
+      "kind": "code-span",
+      "value": "whoAmI"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-fake.ts:82"
+    },
+    {
+      "kind": "code-span",
+      "value": "getServerInfo"
+    },
+    {
+      "kind": "code-span",
+      "value": ":71"
+    },
+    {
+      "kind": "code-span",
+      "value": "subscribeEvents"
+    },
+    {
+      "kind": "code-span",
+      "value": ":96-105"
+    },
+    {
+      "kind": "code-span",
+      "value": "client as unknown as CompassClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-fake.ts:112"
+    },
+    {
+      "kind": "code-span",
+      "value": "createFakeCompass"
+    },
+    {
+      "kind": "code-span",
+      "value": "subscribeEvents"
+    },
+    {
+      "kind": "code-span",
+      "value": "listBoardIssues"
+    },
+    {
+      "kind": "code-span",
+      "value": "live/events.test.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "scriptedTransport"
+    },
+    {
+      "kind": "code-span",
+      "value": "live/events.test.ts:116-122"
+    },
+    {
+      "kind": "code-span",
+      "value": "STUB_ISSUES"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 A3 — Harness pointing + determinism"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/playwright.config.ts:41"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\ncommand: \"bunx vite --port 5173 --strictPort\","
+    },
+    {
+      "kind": "code-span",
+      "value": "--mode fixture"
+    },
+    {
+      "kind": "code-span",
+      "value": "visual-smoke.spec.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": ".state-dot"
+    },
+    {
+      "kind": "code-span",
+      "value": ".bridge"
+    },
+    {
+      "kind": "code-span",
+      "value": "use"
+    },
+    {
+      "kind": "code-span",
+      "value": "reducedMotion: \"reduce\""
+    },
+    {
+      "kind": "code-span",
+      "value": "deviceScaleFactor: 1"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ts:984"
+    },
+    {
+      "kind": "code-span",
+      "value": " `ui-${Date.now().toString(36)}-${Math.random()…` "
+    },
+    {
+      "kind": "code-span",
+      "value": "events.ts:121"
+    },
+    {
+      "kind": "code-span",
+      "value": "stream.ts:314"
+    },
+    {
+      "kind": "code-span",
+      "value": "ChannelView.tsx:35-39"
+    },
+    {
+      "kind": "code-span",
+      "value": "src/components"
+    },
+    {
+      "kind": "code-span",
+      "value": "Date.now|ago|toLocale"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "MarkdownText.tsx:303"
+    },
+    {
+      "kind": "code-span",
+      "value": "HIGHLIGHT_DEBOUNCE_MS = 150"
+    },
+    {
+      "kind": "code-span",
+      "value": ":337-341"
+    },
+    {
+      "kind": "code-span",
+      "value": "<pre>"
+    },
+    {
+      "kind": "code-span",
+      "value": "animations: \"disabled\""
+    },
+    {
+      "kind": "code-span",
+      "value": "language-"
+    },
+    {
+      "kind": "code-span",
+      "value": "stub-data.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms-stub.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "session-events-stub.ts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "assignedIssues"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.test.ts:1757-1758"
+    },
+    {
+      "kind": "code-span",
+      "value": "[]"
+    },
+    {
+      "kind": "code-span",
+      "value": "BacklogView.tsx:111"
+    },
+    {
+      "kind": "code-span",
+      "value": "LeftSidebar.tsx:427-428"
+    },
+    {
+      "kind": "code-span",
+      "value": "#backlog-section-assigned-to-me .backlog-row"
+    },
+    {
+      "kind": "code-span",
+      "value": ".backlog-row"
+    },
+    {
+      "kind": "code-span",
+      "value": ".backlog-view"
+    },
+    {
+      "kind": "code-span",
+      "value": ".backlog-row"
+    },
+    {
+      "kind": "code-span",
+      "value": "BacklogView"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.issues()"
+    },
+    {
+      "kind": "code-span",
+      "value": "BacklogView.tsx:93-94"
+    },
+    {
+      "kind": "code-span",
+      "value": "assignedIssues"
+    },
+    {
+      "kind": "code-span",
+      "value": "BacklogView.tsx:109-113"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.assignedIssues()"
+    },
+    {
+      "kind": "code-span",
+      "value": "STUB_ASSIGNED_ISSUES"
+    },
+    {
+      "kind": "code-span",
+      "value": "tracker.ts:99"
+    },
+    {
+      "kind": "code-span",
+      "value": "DEFAULT_TRACKER_CONFIG.handle = \"matt@rigelbuild\""
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "screenshot({ animations: \"disabled\", scale: \"css\" })"
+    },
+    {
+      "kind": "code-span",
+      "value": " and "
+    },
+    {
+      "kind": "code-span",
+      "value": " in "
+    },
+    {
+      "kind": "code-span",
+      "value": ", and an "
+    },
+    {
+      "kind": "heading",
+      "value": "H3 A4 — What this is not"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite build --mode fixture"
+    },
+    {
+      "kind": "code-span",
+      "value": ".env*"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Plan"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T1 — Extract `mountShell` and add the fixture dispatch arm"
+    },
+    {
+      "kind": "code-span",
+      "value": "index.tsx:133-144"
+    },
+    {
+      "kind": "code-span",
+      "value": "bootConnectionForMode"
+    },
+    {
+      "kind": "code-span",
+      "value": "main()"
+    },
+    {
+      "kind": "code-span",
+      "value": "mountShell"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/mount.tsx"
+    },
+    {
+      "kind": "code-span",
+      "value": "export function mountShell(root: HTMLElement, store: AppStore, queryClient: QueryClient): void"
+    },
+    {
+      "kind": "code-span",
+      "value": "StoreContext.Provider"
+    },
+    {
+      "kind": "code-span",
+      "value": "QueryClientProvider"
+    },
+    {
+      "kind": "code-span",
+      "value": "HashRouter"
+    },
+    {
+      "kind": "code-span",
+      "value": "mountShell"
+    },
+    {
+      "kind": "code-span",
+      "value": "mountApp"
+    },
+    {
+      "kind": "code-span",
+      "value": "test-router.tsx:37"
+    },
+    {
+      "kind": "code-span",
+      "value": "export function newAppQueryClient(): QueryClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30_000 } } })"
+    },
+    {
+      "kind": "code-span",
+      "value": "index.tsx:97-99"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/index.tsx"
+    },
+    {
+      "kind": "code-span",
+      "value": "if (import.meta.env.MODE === \"fixture\") { void import(\"./boot-fixture\").then((m) => m.bootFixture(root)).catch((error) => renderBootError(root, \"Compass UI cannot start\", …)); } else { …existing chain… }"
+    },
+    {
+      "kind": "code-span",
+      "value": ".catch"
+    },
+    {
+      "kind": "code-span",
+      "value": "index.tsx:57"
+    },
+    {
+      "kind": "code-span",
+      "value": "#root"
+    },
+    {
+      "kind": "code-span",
+      "value": "main()"
+    },
+    {
+      "kind": "code-span",
+      "value": "new QueryClient({…})"
+    },
+    {
+      "kind": "code-span",
+      "value": "index.tsx:97-99"
+    },
+    {
+      "kind": "code-span",
+      "value": "newAppQueryClient()"
+    },
+    {
+      "kind": "code-span",
+      "value": "render(...)"
+    },
+    {
+      "kind": "code-span",
+      "value": "mountShell(root, store, queryClient)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "AppStore"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "QueryClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "@tanstack/solid-query"
+    },
+    {
+      "kind": "code-span",
+      "value": "App"
+    },
+    {
+      "kind": "code-span",
+      "value": "AppRoutes"
+    },
+    {
+      "kind": "code-span",
+      "value": "StoreContext"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon run compass-ui:test"
+    },
+    {
+      "kind": "code-span",
+      "value": "bunx vite"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T2 — `boot-fixture.ts`: the offline store boot + PROD tripwire"
+    },
+    {
+      "kind": "code-span",
+      "value": "mountShell"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/boot-fixture.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "export function bootFixture(root: HTMLElement): void"
+    },
+    {
+      "kind": "code-span",
+      "value": "if (import.meta.env.PROD) throw new Error(FIXTURE_SENTINEL + \" must never boot in a production build\")"
+    },
+    {
+      "kind": "code-span",
+      "value": "const queryClient = newAppQueryClient()"
+    },
+    {
+      "kind": "code-span",
+      "value": "const store = createRoot(() => createAppStore({ queryClient, initialComms: STUB_COMMS_STATE, workspaceKey: \"fixture\" }))"
+    },
+    {
+      "kind": "code-span",
+      "value": "mountShell(root, store, queryClient)"
+    },
+    {
+      "kind": "code-span",
+      "value": "export const FIXTURE_SENTINEL = \"COMPASS-FIXTURE-BOOT-SENTINEL-7f3a\""
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "createAppStore"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ts:680"
+    },
+    {
+      "kind": "code-span",
+      "value": "STUB_COMMS_STATE"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms-stub.ts:714"
+    },
+    {
+      "kind": "code-span",
+      "value": "mountShell"
+    },
+    {
+      "kind": "code-span",
+      "value": "newAppQueryClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "boot-fixture.test.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "STUB_ISSUES"
+    },
+    {
+      "kind": "code-span",
+      "value": "bootFixture"
+    },
+    {
+      "kind": "code-span",
+      "value": "import.meta.env.PROD"
+    },
+    {
+      "kind": "code-span",
+      "value": "bunx vite --mode fixture"
+    },
+    {
+      "kind": "code-span",
+      "value": "VITE_COMPASS_BASE_URL"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T3 — Hard-wall build gate"
+    },
+    {
+      "kind": "code-span",
+      "value": "preview-build.test.ts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/fixture-wall.test.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "bunx vite build --outDir <tmp> --emptyOutDir"
+    },
+    {
+      "kind": "code-span",
+      "value": "VITE_COMPASS_BASE_URL"
+    },
+    {
+      "kind": "code-span",
+      "value": "preview-build.test.ts:79-82"
+    },
+    {
+      "kind": "code-span",
+      "value": "dist/assets/*.js"
+    },
+    {
+      "kind": "code-span",
+      "value": "FIXTURE_SENTINEL"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"missing #root element\""
+    },
+    {
+      "kind": "code-span",
+      "value": "index.tsx:20"
+    },
+    {
+      "kind": "code-span",
+      "value": "dist/assets"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite.config"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "FIXTURE_SENTINEL"
+    },
+    {
+      "kind": "code-span",
+      "value": "boot-fixture.ts"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T4 — Point the visual-smoke harness at fixture mode"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/playwright.config.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "webServer.command"
+    },
+    {
+      "kind": "code-span",
+      "value": "; "
+    },
+    {
+      "kind": "code-span",
+      "value": " gains "
+    },
+    {
+      "kind": "code-span",
+      "value": " and "
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/e2e/visual-smoke.spec.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "page.screenshot(...)"
+    },
+    {
+      "kind": "code-span",
+      "value": "locator.screenshot(...)"
+    },
+    {
+      "kind": "code-span",
+      "value": "animations: \"disabled\""
+    },
+    {
+      "kind": "code-span",
+      "value": "scale: \"css\""
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/e2e/visual-smoke.spec.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "#backlog-section-assigned-to-me .backlog-row"
+    },
+    {
+      "kind": "code-span",
+      "value": ".backlog-row"
+    },
+    {
+      "kind": "code-span",
+      "value": ".backlog-view"
+    },
+    {
+      "kind": "code-span",
+      "value": "assignedIssues"
+    },
+    {
+      "kind": "code-span",
+      "value": ".state-dot"
+    },
+    {
+      "kind": "code-span",
+      "value": ".bridge"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "cmp"
+    },
+    {
+      "kind": "code-span",
+      "value": "bridge.png"
+    },
+    {
+      "kind": "code-span",
+      "value": "toHaveScreenshot"
+    },
+    {
+      "kind": "code-span",
+      "value": "maxDiffPixelRatio"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T5 (deferred fast-follow — filed as its own issue) — scripted event replay"
+    },
+    {
+      "kind": "code-span",
+      "value": "createFakeCompass"
+    },
+    {
+      "kind": "code-span",
+      "value": "client"
+    },
+    {
+      "kind": "code-span",
+      "value": "options.compass"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Tasks"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "mountShell"
+    },
+    {
+      "kind": "code-span",
+      "value": "test-router.tsx:37"
+    },
+    {
+      "kind": "code-span",
+      "value": "mountApp"
+    },
+    {
+      "kind": "code-span",
+      "value": "MODE === \"fixture\""
+    },
+    {
+      "kind": "code-span",
+      "value": ".catch"
+    },
+    {
+      "kind": "code-span",
+      "value": "renderBootError"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "boot-fixture.ts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture-wall.test.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "FIXTURE_SENTINEL"
+    },
+    {
+      "kind": "code-span",
+      "value": "dist/"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"missing #root element\""
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "--mode fixture"
+    },
+    {
+      "kind": "code-span",
+      "value": "animations: \"disabled\""
+    },
+    {
+      "kind": "code-span",
+      "value": "scale: \"css\""
+    },
+    {
+      "kind": "code-span",
+      "value": "reducedMotion: \"reduce\""
+    },
+    {
+      "kind": "code-span",
+      "value": "deviceScaleFactor: 1"
+    },
+    {
+      "kind": "code-span",
+      "value": "use"
+    },
+    {
+      "kind": "code-span",
+      "value": "document.fonts.ready"
+    },
+    {
+      "kind": "code-span",
+      "value": "e2e/__screens__"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "createFakeCompass"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Decisions (Matt-ruled)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "--mode fixture"
+    },
+    {
+      "kind": "code-span",
+      "value": "import.meta.env.MODE"
+    },
+    {
+      "kind": "code-span",
+      "value": "--mode"
+    },
+    {
+      "kind": "code-span",
+      "value": "VITE_*"
+    },
+    {
+      "kind": "code-span",
+      "value": "index.tsx:46-49"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-fake.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "visual-smoke.spec.ts:14-63"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "STUB_ISSUES"
+    },
+    {
+      "kind": "code-span",
+      "value": "forgeState: \"merged\""
+    },
+    {
+      "kind": "code-span",
+      "value": "stub-data.ts:1143"
+    },
+    {
+      "kind": "code-span",
+      "value": "forgeState: \"merged\""
+    },
+    {
+      "kind": "code-span",
+      "value": ":1131-1135"
+    },
+    {
+      "kind": "code-span",
+      "value": ":1186"
+    },
+    {
+      "kind": "code-span",
+      "value": "issues()"
+    },
+    {
+      "kind": "code-span",
+      "value": "STUB_ISSUES"
+    },
+    {
+      "kind": "code-span",
+      "value": "STUB_ISSUES"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "initialComms: STUB_COMMS_STATE"
+    },
+    {
+      "kind": "code-span",
+      "value": "test-router.tsx:43-46"
+    },
+    {
+      "kind": "code-span",
+      "value": "EMPTY_COMMS_STATE"
+    },
+    {
+      "kind": "code-span",
+      "value": "onCommsError"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "animations: \"disabled\""
+    },
+    {
+      "kind": "code-span",
+      "value": "reducedMotion: \"reduce\""
+    },
+    {
+      "kind": "code-span",
+      "value": "vite --mode fixture"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite build --mode fixture"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "playwright.config.ts:29-31"
+    },
+    {
+      "kind": "code-span",
+      "value": "toHaveScreenshot"
+    },
+    {
+      "kind": "code-span",
+      "value": "maxDiffPixelRatio"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Ledger assessment"
+    },
+    {
+      "kind": "code-span",
+      "value": "DECISIONS.md"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

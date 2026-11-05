@@ -1,0 +1,114 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/dl-claim/README.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/meissa-0010.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 @rigelbuild/dl-claim"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Usage"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[sh]\nbun packages/dl-claim/index.ts --config ./ledger.config.json --ref RIG-1234 --lane feature/decision\nbun packages/dl-claim/index.ts --config ./ledger.config.json --ref none --lane feature/decision --count 3 --surface alpha"
+    },
+    {
+      "kind": "code-span",
+      "value": "<owner>:<branch>"
+    },
+    {
+      "kind": "code-span",
+      "value": "--rebind"
+    },
+    {
+      "kind": "code-span",
+      "value": "--release"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[sh]\nbun packages/dl-claim/index.ts --config ./ledger.config.json --rebind --from old/head --lane new/head --ids DL-377,DL-378\nbun packages/dl-claim/index.ts --config ./ledger.config.json --release --lane old/head --ids DL-377"
+    },
+    {
+      "kind": "code-span",
+      "value": "DL_CLAIM_TOKEN"
+    },
+    {
+      "kind": "code-span",
+      "value": "DL_CLAIM_TOKEN_FILE"
+    },
+    {
+      "kind": "code-span",
+      "value": "--ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "RIG-n"
+    },
+    {
+      "kind": "code-span",
+      "value": "none"
+    },
+    {
+      "kind": "code-span",
+      "value": "--lane"
+    },
+    {
+      "kind": "code-span",
+      "value": "--count"
+    },
+    {
+      "kind": "code-span",
+      "value": "--surface"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Credentials"
+    },
+    {
+      "kind": "code-span",
+      "value": "DL_CLAIM_TOKEN"
+    },
+    {
+      "kind": "code-span",
+      "value": "DL_CLAIM_TOKEN_FILE"
+    },
+    {
+      "kind": "code-span",
+      "value": "counter.url"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Exit codes"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "0"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "1"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "2"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

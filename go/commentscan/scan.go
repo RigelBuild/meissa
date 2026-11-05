@@ -565,6 +565,12 @@ var errUnknownLanguage = errors.New("no scanner for language")
 
 // ScanText scans one complete source document and returns one code residue per line.
 func ScanText(lang LanguageID, text string) (Residues, error) {
+	if lang == LanguageTSX {
+		return ScanJSX(text), nil
+	}
+	if lang == LanguageAstro {
+		return ScanAstro(text), nil
+	}
 	config := langByID()[lang]
 	if config == nil {
 		return Residues{}, fmt.Errorf("%w: %s", errUnknownLanguage, lang)
@@ -573,8 +579,14 @@ func ScanText(lang LanguageID, text string) (Residues, error) {
 	return Residues{Residues: scan.residues, Ambiguous: scan.underflow || scan.unclosed || scan.malformed}, nil
 }
 
-// ResidueScannerFor selects a scanner by file extension. Parser-backed formats are not routed here.
+// ResidueScannerFor selects a scanner by file extension.
 func ResidueScannerFor(ext string) (func(text string) Residues, bool) {
+	switch ext {
+	case ".tsx", ".jsx":
+		return ScanJSX, true
+	case ".astro":
+		return ScanAstro, true
+	}
 	config := langByExt()[ext]
 	if config == nil {
 		return nil, false

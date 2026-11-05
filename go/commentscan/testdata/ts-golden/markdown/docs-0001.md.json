@@ -1,0 +1,1386 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "docs/designs/compass/agent/compass-agent-error-abort-surfacing/design.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0001.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Pre-stream error/abort content surfacing (mapper)"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass.v1"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": "DECISIONS.md"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Problem / Intent"
+    },
+    {
+      "kind": "code-span",
+      "value": "message_update"
+    },
+    {
+      "kind": "code-span",
+      "value": "AssistantMessageEvent"
+    },
+    {
+      "kind": "code-span",
+      "value": "type: \"error\""
+    },
+    {
+      "kind": "code-span",
+      "value": "inner.error.errorMessage"
+    },
+    {
+      "kind": "code-span",
+      "value": "reason: \"error\""
+    },
+    {
+      "kind": "code-span",
+      "value": "ERRORED"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent/src/mapping.ts:309-311"
+    },
+    {
+      "kind": "code-span",
+      "value": "reason: \"aborted\""
+    },
+    {
+      "kind": "code-span",
+      "value": "UnmappedEvent"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"abort-surfacing staged\""
+    },
+    {
+      "kind": "code-span",
+      "value": "mapping.ts:312-319"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Global Constraints"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass.v1.SessionEvent.event"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/compass.proto:448"
+    },
+    {
+      "kind": "code-span",
+      "value": "event"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionEvent"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentSessionState"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "abort ≠ crash"
+    },
+    {
+      "kind": "code-span",
+      "value": "reason: \"aborted\""
+    },
+    {
+      "kind": "code-span",
+      "value": "ERRORED"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/specs/product/compass.md:390-398"
+    },
+    {
+      "kind": "code-span",
+      "value": "mapping.ts:298-308"
+    },
+    {
+      "kind": "code-span",
+      "value": "ERRORED"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "mapping.ts:23-26"
+    },
+    {
+      "kind": "code-span",
+      "value": "Message"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionFrame.typed_event"
+    },
+    {
+      "kind": "code-span",
+      "value": "Message"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "session"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent/src/transport/frame-sink.ts:269-272"
+    },
+    {
+      "kind": "code-span",
+      "value": "state"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionInjection"
+    },
+    {
+      "kind": "code-span",
+      "value": "spine.enqueuePriority"
+    },
+    {
+      "kind": "code-span",
+      "value": "state"
+    },
+    {
+      "kind": "code-span",
+      "value": "spine.enqueueTrace"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionInjection"
+    },
+    {
+      "kind": "code-span",
+      "value": "frame-sink.ts:99-110"
+    },
+    {
+      "kind": "code-span",
+      "value": "isInjection"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ERRORED"
+    },
+    {
+      "kind": "code-span",
+      "value": "UnmappedEvent"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent/package.json"
+    },
+    {
+      "kind": "code-span",
+      "value": ", which "
+    },
+    {
+      "kind": "code-span",
+      "value": " resolves to "
+    },
+    {
+      "kind": "code-span",
+      "value": "AssistantMessageEvent"
+    },
+    {
+      "kind": "code-span",
+      "value": "16.5.2"
+    },
+    {
+      "kind": "code-span",
+      "value": "^16.4.8"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Approach"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionEvent"
+    },
+    {
+      "kind": "code-span",
+      "value": "10"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionErrorKind"
+    },
+    {
+      "kind": "code-span",
+      "value": "ERROR"
+    },
+    {
+      "kind": "code-span",
+      "value": "ABORTED"
+    },
+    {
+      "kind": "code-span",
+      "value": "message"
+    },
+    {
+      "kind": "code-span",
+      "value": "status"
+    },
+    {
+      "kind": "code-span",
+      "value": "case \"error\":"
+    },
+    {
+      "kind": "code-span",
+      "value": "#sessionEvent"
+    },
+    {
+      "kind": "code-span",
+      "value": "event_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "at_unix_ms"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 The inner event (pi-ai, pinned)"
+    },
+    {
+      "kind": "code-span",
+      "value": "message_update"
+    },
+    {
+      "kind": "code-span",
+      "value": "AssistantMessageEvent"
+    },
+    {
+      "kind": "code-span",
+      "value": "@oh-my-pi/pi-ai/src/types.ts:905-910"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\n| {\n      type: \"error\";\n      contentIndex?: undefined;\n      reason: Extract<StopReason, \"aborted\" | \"error\">;\n      error: AssistantMessage;\n  };"
+    },
+    {
+      "kind": "code-span",
+      "value": "inner.error"
+    },
+    {
+      "kind": "code-span",
+      "value": "AssistantMessage"
+    },
+    {
+      "kind": "code-span",
+      "value": "types.ts:707-747"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorMessage?: string"
+    },
+    {
+      "kind": "code-span",
+      "value": "types.ts:727"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorStatus?: number"
+    },
+    {
+      "kind": "code-span",
+      "value": "types.ts:731"
+    },
+    {
+      "kind": "code-span",
+      "value": "inner"
+    },
+    {
+      "kind": "code-span",
+      "value": "switch (inner.type)"
+    },
+    {
+      "kind": "code-span",
+      "value": "inner.error.errorMessage"
+    },
+    {
+      "kind": "code-span",
+      "value": "inner.error.errorStatus"
+    },
+    {
+      "kind": "code-span",
+      "value": "inner.reason"
+    },
+    {
+      "kind": "code-span",
+      "value": "any"
+    },
+    {
+      "kind": "code-span",
+      "value": "args"
+    },
+    {
+      "kind": "code-span",
+      "value": "result"
+    },
+    {
+      "kind": "code-span",
+      "value": "isRecord"
+    },
+    {
+      "kind": "code-span",
+      "value": "rule://ts-no-inline-cast-access"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 The new payload (proto)"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/compass.proto"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[proto]\n// A turn-ending failure surfaced as session-trace content: an inner/provider\n// stream error, or a deliberate abort (steer/user cancel). `kind` discriminates\n// the two — an abort is NOT a crash and does NOT ride the ERRORED lifecycle\n// state. `message` is the human-readable failure text (AssistantMessage\n// errorMessage); `status` is the provider HTTP status when one was surfaced.\nmessage SessionError {\n  SessionErrorKind kind = 1;\n  string message = 2;\n  optional int32 status = 3;\n}\n\n// The class of a SessionError. ERROR pairs with the ERRORED lifecycle\n// transition (an unexpected inner/provider failure); ABORTED is a deliberate\n// cancel and carries no lifecycle transition.\nenum SessionErrorKind {\n  SESSION_ERROR_KIND_UNSPECIFIED = 0;\n  SESSION_ERROR_KIND_ERROR = 1;\n  SESSION_ERROR_KIND_ABORTED = 2;\n}"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass.proto:454-462"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[proto]\n    SessionError session_error = 10;"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 The emit rule (mapper)"
+    },
+    {
+      "kind": "code-span",
+      "value": "case \"error\":"
+    },
+    {
+      "kind": "code-span",
+      "value": "mapping.ts:297-320"
+    },
+    {
+      "kind": "code-span",
+      "value": "#sessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "#sessionEvent"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "reason === \"error\""
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionError(kind = ERROR)"
+    },
+    {
+      "kind": "code-span",
+      "value": "#sessionState(AgentSessionState.ERRORED)"
+    },
+    {
+      "kind": "code-span",
+      "value": "ERRORED"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/board/projection.go:148-151"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/presence/presence.go:175-188"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/delivery/settle.go:75-82"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "reason === \"aborted\""
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionError(kind = ABORTED)"
+    },
+    {
+      "kind": "code-span",
+      "value": "UnmappedEvent"
+    },
+    {
+      "kind": "code-span",
+      "value": "#sessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "inner.error.errorMessage ?? \"\""
+    },
+    {
+      "kind": "code-span",
+      "value": "message"
+    },
+    {
+      "kind": "code-span",
+      "value": "status"
+    },
+    {
+      "kind": "code-span",
+      "value": "inner.error.errorStatus !== undefined"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Frame-sink routing (never-drop the content)"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "frame-sink.ts:269-272"
+    },
+    {
+      "kind": "code-span",
+      "value": "reason = aborted"
+    },
+    {
+      "kind": "code-span",
+      "value": "reason = error"
+    },
+    {
+      "kind": "code-span",
+      "value": "ERRORED"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionInjection"
+    },
+    {
+      "kind": "code-span",
+      "value": "frame-sink.ts:99-110"
+    },
+    {
+      "kind": "code-span",
+      "value": "isSessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "frame-sink.ts:269"
+    },
+    {
+      "kind": "code-span",
+      "value": "isLifecycle(frame) || isInjection(frame) || isSessionError(frame)"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Alternatives considered"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionNotice"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass.proto:513-516"
+    },
+    {
+      "kind": "code-span",
+      "value": "kind"
+    },
+    {
+      "kind": "code-span",
+      "value": "status"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionAbort"
+    },
+    {
+      "kind": "code-span",
+      "value": "message"
+    },
+    {
+      "kind": "code-span",
+      "value": "status"
+    },
+    {
+      "kind": "code-span",
+      "value": "kind"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "AssistantMessage.content[]"
+    },
+    {
+      "kind": "code-span",
+      "value": "text_delta"
+    },
+    {
+      "kind": "code-span",
+      "value": "thinking_delta"
+    },
+    {
+      "kind": "code-span",
+      "value": "mapping.ts:277-296"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorMessage"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Plan"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionErrorKind"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T1 — proto append + regen"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass.v1.SessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionErrorKind"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionEvent.session_error = 10"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/compass.proto"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionErrorKind"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionNotice"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass.proto:511-516"
+    },
+    {
+      "kind": "code-span",
+      "value": "session_error = 10"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass.proto:454-462"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon run proto:gen"
+    },
+    {
+      "kind": "code-span",
+      "value": "buf generate"
+    },
+    {
+      "kind": "code-span",
+      "value": "buf generate --template buf.gen.agent-ts.yaml --include-imports"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/gen/compass/v1/compass.pb.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-client/src/gen/compass/v1/compass_pb.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent/src/gen/compass/v1/compass_pb.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "--include-imports"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon run proto:drift"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionErrorKind"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T2 — mapper error/abort arms + frame-sink routing"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionErrorSchema"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionErrorKind"
+    },
+    {
+      "kind": "code-span",
+      "value": "./compassv1"
+    },
+    {
+      "kind": "code-span",
+      "value": "inner.error.errorMessage"
+    },
+    {
+      "kind": "code-span",
+      "value": "inner.error.errorStatus"
+    },
+    {
+      "kind": "code-span",
+      "value": "inner.reason"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "EventMapper.#sessionError(kind, error)"
+    },
+    {
+      "kind": "code-span",
+      "value": "case \"error\":"
+    },
+    {
+      "kind": "code-span",
+      "value": "EventMapper.#onMessageUpdate"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent/src/mapping.ts:297-320"
+    },
+    {
+      "kind": "code-span",
+      "value": "isSessionError(frame)"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent/src/transport/frame-sink.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "isInjection"
+    },
+    {
+      "kind": "code-span",
+      "value": ":99-110"
+    },
+    {
+      "kind": "code-span",
+      "value": ":269"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "#sessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "message: errorMessage ?? \"\""
+    },
+    {
+      "kind": "code-span",
+      "value": "status"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorStatus !== undefined"
+    },
+    {
+      "kind": "code-span",
+      "value": "#sessionEvent"
+    },
+    {
+      "kind": "code-span",
+      "value": "mapping.ts:239-247"
+    },
+    {
+      "kind": "code-span",
+      "value": "[content, ERRORED]"
+    },
+    {
+      "kind": "code-span",
+      "value": "error"
+    },
+    {
+      "kind": "code-span",
+      "value": "[content]"
+    },
+    {
+      "kind": "code-span",
+      "value": "aborted"
+    },
+    {
+      "kind": "code-span",
+      "value": "UnmappedEvent"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "isSessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "frame.kind === \"session\""
+    },
+    {
+      "kind": "code-span",
+      "value": "frame.value.typedEvent?.event.case === \"sessionError\""
+    },
+    {
+      "kind": "code-span",
+      "value": "frame-sink.ts:269"
+    },
+    {
+      "kind": "code-span",
+      "value": "isLifecycle(frame) || isInjection(frame) || isSessionError(frame)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "bunx tsc --noEmit"
+    },
+    {
+      "kind": "code-span",
+      "value": "bunx biome check"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T3 — mapper unit tests"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "mapping.test.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "upd()"
+    },
+    {
+      "kind": "code-span",
+      "value": "typedEvents()"
+    },
+    {
+      "kind": "code-span",
+      "value": "soleTyped()"
+    },
+    {
+      "kind": "code-span",
+      "value": "FIXED_NOW"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionErrorKind"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionError"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": " ("
+    },
+    {
+      "kind": "code-span",
+      "value": "reason \"error\""
+    },
+    {
+      "kind": "code-span",
+      "value": "soleSessionState(...)"
+    },
+    {
+      "kind": "code-span",
+      "value": "reason \"aborted\""
+    },
+    {
+      "kind": "code-span",
+      "value": "frame.kind === \"unmapped\""
+    },
+    {
+      "kind": "code-span",
+      "value": "sessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": ":359-363"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "message_update"
+    },
+    {
+      "kind": "code-span",
+      "value": "sessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "kind === SESSION_ERROR_KIND_ERROR"
+    },
+    {
+      "kind": "code-span",
+      "value": "message"
+    },
+    {
+      "kind": "code-span",
+      "value": "ERRORED"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "message_update"
+    },
+    {
+      "kind": "code-span",
+      "value": "sessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "kind === SESSION_ERROR_KIND_ABORTED"
+    },
+    {
+      "kind": "code-span",
+      "value": "UnmappedEvent"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "status"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorStatus"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "bun test src/mapping.test.ts"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T4 — frame-sink routing test"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent/src/transport/frame-sink.test.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "isInjection"
+    },
+    {
+      "kind": "code-span",
+      "value": "frame-sink.test.ts:697-736"
+    },
+    {
+      "kind": "code-span",
+      "value": "sessionInjection"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "sessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "kind"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "isSessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "frame-sink.ts:269"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "bun test src/transport/frame-sink.test.ts"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T5 — ledger delta"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/designs/DECISIONS.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "DL-317"
+    },
+    {
+      "kind": "code-span",
+      "value": "DL-303"
+    },
+    {
+      "kind": "code-span",
+      "value": "DL-310"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionInjection"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass.v1.SessionEvent"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionErrorKind"
+    },
+    {
+      "kind": "code-span",
+      "value": "message"
+    },
+    {
+      "kind": "code-span",
+      "value": "status"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionNotice"
+    },
+    {
+      "kind": "code-span",
+      "value": "Message"
+    },
+    {
+      "kind": "code-span",
+      "value": "Active (Matt, 2026-09-02)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "reason=error"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionError(ERROR)"
+    },
+    {
+      "kind": "code-span",
+      "value": "ERRORED"
+    },
+    {
+      "kind": "code-span",
+      "value": "ERRORED"
+    },
+    {
+      "kind": "code-span",
+      "value": "reason=aborted"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionError(ABORTED)"
+    },
+    {
+      "kind": "code-span",
+      "value": "UnmappedEvent"
+    },
+    {
+      "kind": "code-span",
+      "value": "Active (Matt, 2026-09-02)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "isSessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "frame-sink.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionInjection"
+    },
+    {
+      "kind": "code-span",
+      "value": "Active (Matt, 2026-09-02)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Ledger-impact:"
+    },
+    {
+      "kind": "code-span",
+      "value": "none"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "tools/design-ledger-gate"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Tasks"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionErrorKind"
+    },
+    {
+      "kind": "code-span",
+      "value": "session_error = 10"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass.proto"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon run proto:gen"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "case \"error\":"
+    },
+    {
+      "kind": "code-span",
+      "value": "#sessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "mapping.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "isSessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "frame-sink.ts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "mapping.test.ts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "sessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "frame-sink.test.ts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "DECISIONS.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "Ledger-impact:"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Open Questions"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "reason = aborted"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "AssistantMessage.errorId"
+    },
+    {
+      "kind": "code-span",
+      "value": "types.ts:733"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionError"
+    },
+    {
+      "kind": "code-span",
+      "value": "error/flags.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "types.ts:732"
+    },
+    {
+      "kind": "code-span",
+      "value": "utils/error-id.ts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "AssistantMessage.stopDetails"
+    },
+    {
+      "kind": "code-span",
+      "value": "types.ts:726"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

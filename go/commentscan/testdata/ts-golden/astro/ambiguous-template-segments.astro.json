@@ -1,0 +1,12 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/astro.ts",
+  "corpus": "go/commentscan/testdata/corpus/astro/ambiguous-template-segments.astro",
+  "scan": {
+    "residues": [
+      "<p>x</p>",
+      "<!-- unfinished"
+    ],
+    "ambiguous": true
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "docs/designs/compass/decisions/infra/DL-298.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0021.md",
+  "fingerprint": [
+    {
+      "kind": "front-matter",
+      "value": "id: DL-298\ndecision: \"One whole-product release lane driven by release-please (`release-type: simple`, root `version.txt` source of truth): a standing Release PR batches conventional commits under pre-1.0 damping (`feat:`→MINOR, `fix:`→PATCH, breaking→MINOR while 0.x); merging it (Matt's act) cuts `vX.Y.Z` + CHANGELOG, builds the 4-binary asset set stamped from `version.txt`, and mints the `:vX.Y.Z` image — superseding the release-bundling record's Fork 3 two-lane split, Fork 4 `v*`-controls, OQ-3 binary-only trigger, and OQ-7's manual-now/automation-at-GA staging (its other clauses stay Active)\"\nstatus: \"Active (Matt, 2026-08-25)\"\nrecord: ../../infra/release/compass-unified-release-lane/design.md"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

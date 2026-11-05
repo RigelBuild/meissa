@@ -1,0 +1,14 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "docs/designs/compass/decisions/agent/DL-167.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0011.md",
+  "fingerprint": [
+    {
+      "kind": "front-matter",
+      "value": "id: DL-167\ndecision: \"`AgentSessionStatus` gains `agent_account_id`, populated at every construction site (board projection, SubscribeEvents push synthesis, Runner-side Status) — a join onto the live hub binding Server-side and new Runner-local account carriage (AgentSpec→handle→liveSession), with the terminal STOPPED status resolving its account before `unbindSession`; makes the UI reconcile full-fleet within the binding's live scope and is the prerequisite of the reject-on-live scan\"\nstatus: \"Superseded by DL-253 (Matt, 2026-08-25)\"\nrecord: ../../agent/compass-spawn-control/design.md#dl-167-prior-decision--agent_account_id-on-agentsessionstatus"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

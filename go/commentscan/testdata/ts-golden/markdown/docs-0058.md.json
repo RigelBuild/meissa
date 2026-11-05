@@ -1,0 +1,3034 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "docs/designs/compass/observability/compass-go-trace-hops/design.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0058.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Design: traceparent on every Go outbound hop (RIG-5321)"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/compass/blob/main/docs/designs/observability/compass-go-trace-logs/design.md"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Problem / Intent"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Approach"
+    },
+    {
+      "kind": "table-header",
+      "value": "| Hop class | Carrier | Existing use |"
+    },
+    {
+      "kind": "table-delimiter",
+      "value": "| --- | --- | --- |"
+    },
+    {
+      "kind": "code-span",
+      "value": "*otelconnect.Interceptor"
+    },
+    {
+      "kind": "code-span",
+      "value": "connect.WithInterceptors"
+    },
+    {
+      "kind": "code-span",
+      "value": "runner.Dial"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/runner.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelhttp.NewTransport"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx.HTTPTransport"
+    },
+    {
+      "kind": "code-span",
+      "value": "tracedIngress"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelhttp.NewHandler"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgx.QueryTracer"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgx.BatchTracer"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest.SQLCQueryCounter"
+    },
+    {
+      "kind": "code-span",
+      "value": "traceparent"
+    },
+    {
+      "kind": "code-span",
+      "value": "Fabric.Publish"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/fabric/event_fabric.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "events.Stamped.Traceparent"
+    },
+    {
+      "kind": "code-span",
+      "value": "Bus.PublishCtx"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/events/events.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "traceparent"
+    },
+    {
+      "kind": "code-span",
+      "value": "heldEntry.traceparent"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/delivery/dispatch.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx.ContextWithTraceparent(otelx.WithoutSpan(loopCtx), tp)"
+    },
+    {
+      "kind": "code-span",
+      "value": "trace.WithNewRoot()"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/compass/blob/main/docs/designs/observability/compass-server-runner-otel/design.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithTrustRemote"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "PublishEvents"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Hop census"
+    },
+    {
+      "kind": "code-span",
+      "value": "8e36acc8"
+    },
+    {
+      "kind": "code-span",
+      "value": "runner.Dial"
+    },
+    {
+      "kind": "code-span",
+      "value": "Fabric.Publish"
+    },
+    {
+      "kind": "code-span",
+      "value": "RelayCommsCall"
+    },
+    {
+      "kind": "code-span",
+      "value": "TriggerTraceparent"
+    },
+    {
+      "kind": "table-header",
+      "value": "| # | Hop | Binary | Today | Task |"
+    },
+    {
+      "kind": "table-delimiter",
+      "value": "| --- | --- | --- | --- | --- |"
+    },
+    {
+      "kind": "code-span",
+      "value": "microvm.GuestClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runtime/microvm/dial.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "return compassv1internalconnect.NewGuestControlClient(httpClient, \"http://guest\")"
+    },
+    {
+      "kind": "code-span",
+      "value": "forgeHTTPClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/serve.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "http.DefaultTransport"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge.NewLinear"
+    },
+    {
+      "kind": "code-span",
+      "value": "serve.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "&http.Client{Timeout: 30 * time.Second}"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge.NewTrunk"
+    },
+    {
+      "kind": "code-span",
+      "value": "fc.TrunkHTTP"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildLinearResponder"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildLinearTokenSource"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server"
+    },
+    {
+      "kind": "code-span",
+      "value": "&http.Client{Timeout: linearAPITimeout}"
+    },
+    {
+      "kind": "code-span",
+      "value": "&http.Client{Timeout: 30 * time.Second}"
+    },
+    {
+      "kind": "code-span",
+      "value": "auth.NewRunnerVerifier"
+    },
+    {
+      "kind": "code-span",
+      "value": "auth.NewRunnerVerifier(clusters, tenant, nil, time.Now)"
+    },
+    {
+      "kind": "code-span",
+      "value": "http.DefaultClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.NewS3ObjectStore"
+    },
+    {
+      "kind": "code-span",
+      "value": "minio.New(cfg.Endpoint, &minio.Options{Creds, Secure, Region})"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.poolConfig"
+    },
+    {
+      "kind": "code-span",
+      "value": "ConnConfig.Tracer"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenTraced"
+    },
+    {
+      "kind": "code-span",
+      "value": "Fabric.publishDLQ"
+    },
+    {
+      "kind": "code-span",
+      "value": "dlqHeaderSubject"
+    },
+    {
+      "kind": "code-span",
+      "value": "dlqHeaderReason"
+    },
+    {
+      "kind": "code-span",
+      "value": "Bus.Publish"
+    },
+    {
+      "kind": "code-span",
+      "value": "PublishCtx"
+    },
+    {
+      "kind": "code-span",
+      "value": "linearagent.TailComms"
+    },
+    {
+      "kind": "code-span",
+      "value": "presence.Publisher.Run"
+    },
+    {
+      "kind": "code-span",
+      "value": "event.Payload"
+    },
+    {
+      "kind": "code-span",
+      "value": "Stamped.Traceparent"
+    },
+    {
+      "kind": "code-span",
+      "value": "OnSessionLifecycle"
+    },
+    {
+      "kind": "code-span",
+      "value": "OnSessionPromoted"
+    },
+    {
+      "kind": "code-span",
+      "value": "hubEdge{kind, account, sessionID, state}"
+    },
+    {
+      "kind": "table-header",
+      "value": "| Input row or hop | Why |"
+    },
+    {
+      "kind": "table-delimiter",
+      "value": "| --- | --- |"
+    },
+    {
+      "kind": "code-span",
+      "value": "Fabric.SendCommand"
+    },
+    {
+      "kind": "code-span",
+      "value": "Fabric.PublishBindingChange"
+    },
+    {
+      "kind": "code-span",
+      "value": "SendCommand"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionsResponse"
+    },
+    {
+      "kind": "code-span",
+      "value": "sinks.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "commsToResponse"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/subscribe.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "mapping.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "toResponse"
+    },
+    {
+      "kind": "code-span",
+      "value": "SubscribeAgentSession"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/service.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "materializeGuest"
+    },
+    {
+      "kind": "code-span",
+      "value": "bridge"
+    },
+    {
+      "kind": "code-span",
+      "value": "NewTLSTarget"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgx.ConnectConfig"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/stack/adapters/dbprobe.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "TRACEPARENT"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/store"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/secrets"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.Open"
+    },
+    {
+      "kind": "code-span",
+      "value": "minio.New"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Placement: keep carriers out of the CLI and the app"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/otel/otelsetup"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx"
+    },
+    {
+      "kind": "code-span",
+      "value": "CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags='-s -w'"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runner"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runtime/microvm"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/store"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/secrets"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runtime/microvm"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/stack"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/embedded"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/store"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/secrets"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "[]connect.ClientOption"
+    },
+    {
+      "kind": "code-span",
+      "value": "MicroVMConfig"
+    },
+    {
+      "kind": "code-span",
+      "value": "main"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "otel"
+    },
+    {
+      "kind": "code-span",
+      "value": "semconv"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/store"
+    },
+    {
+      "kind": "code-span",
+      "value": "go.opentelemetry.io/otel"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "S3Config"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx.HTTPTransport"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Off by default"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelconnect.NewInterceptor"
+    },
+    {
+      "kind": "code-span",
+      "value": "tracerProvider.setDelegate"
+    },
+    {
+      "kind": "code-span",
+      "value": "go.opentelemetry.io/otel"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/global/trace.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "setupOtel"
+    },
+    {
+      "kind": "code-span",
+      "value": "main"
+    },
+    {
+      "kind": "code-span",
+      "value": "runner.Dial"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelhttp"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx.ContextWithTraceparent"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Cost and sampling"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "scopedDBTX"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ExecStream"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelconnect.WithoutTraceEvents()"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelhttp"
+    },
+    {
+      "kind": "code-span",
+      "value": "url.full"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ParentBased(AlwaysSample)"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Alternatives considered"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "github.com/exaring/otelpgx"
+    },
+    {
+      "kind": "code-span",
+      "value": "github.com/XSAM/otelsql"
+    },
+    {
+      "kind": "code-span",
+      "value": "uptrace"
+    },
+    {
+      "kind": "code-span",
+      "value": "database/sql"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelhttp"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx.ClientInterceptors"
+    },
+    {
+      "kind": "code-span",
+      "value": "HandlerInterceptors"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://opentelemetry.io/docs/specs/otel/context/env-carriers/"
+    },
+    {
+      "kind": "code-span",
+      "value": "TRACEPARENT"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithTrustRemote"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Global Constraints"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx.WithoutSpan"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelhttp"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionsResponse.traceparent"
+    },
+    {
+      "kind": "code-span",
+      "value": "GuestStream.ctx"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx."
+    },
+    {
+      "kind": "code-span",
+      "value": "github.com/RigelBuild/compass/go/internal/otel"
+    },
+    {
+      "kind": "code-span",
+      "value": "otel"
+    },
+    {
+      "kind": "code-span",
+      "value": "otel."
+    },
+    {
+      "kind": "code-span",
+      "value": "go.opentelemetry.io/otel"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelconnect.NewInterceptor"
+    },
+    {
+      "kind": "code-span",
+      "value": "runner.Dial"
+    },
+    {
+      "kind": "code-span",
+      "value": "HTTPTransport"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelhttp"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "url.full"
+    },
+    {
+      "kind": "code-span",
+      "value": "REDACTED"
+    },
+    {
+      "kind": "code-span",
+      "value": "db.system"
+    },
+    {
+      "kind": "code-span",
+      "value": "db.operation.name"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "context.Background()"
+    },
+    {
+      "kind": "code-span",
+      "value": "context.TODO()"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon run compass-proto:gen"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "//nolint:forbidigo // <reason>"
+    },
+    {
+      "kind": "code-span",
+      "value": "require-explanation"
+    },
+    {
+      "kind": "code-span",
+      "value": "require-specific"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Plan"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 H1 — Guest control client spans (runner → guestd)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "microvm.GuestClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "opts ...connect.ClientOption"
+    },
+    {
+      "kind": "code-span",
+      "value": "NewGuestControlClient"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "runtime.MicroVMConfig"
+    },
+    {
+      "kind": "code-span",
+      "value": "GuestClientOptions []connect.ClientOption"
+    },
+    {
+      "kind": "code-span",
+      "value": "installSeamDefaults"
+    },
+    {
+      "kind": "code-span",
+      "value": "m.newGuestClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "m.config.GuestClientOptions"
+    },
+    {
+      "kind": "code-span",
+      "value": "GuestExec"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "VM.Health"
+    },
+    {
+      "kind": "code-span",
+      "value": "GuestClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "healthPollInterval"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "main"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelconnect.NewInterceptor(otelconnect.WithoutTraceEvents())"
+    },
+    {
+      "kind": "code-span",
+      "value": "selectEngine"
+    },
+    {
+      "kind": "code-span",
+      "value": "connect.WithInterceptors(ic)"
+    },
+    {
+      "kind": "code-span",
+      "value": "selectEngine"
+    },
+    {
+      "kind": "code-span",
+      "value": "BackendConfig.MicroVM"
+    },
+    {
+      "kind": "code-span",
+      "value": "runner.Dial"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ExecStream"
+    },
+    {
+      "kind": "code-span",
+      "value": "GuestStream.ctx"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "connectrpc.com/otelconnect"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "microvm"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n  // GuestClient dials the guest control plane over hybrid vsock. opts are\n  // passed to the generated client; the runner wiring supplies the\n  // otelconnect interceptor.\n  func GuestClient(vsockSocket string, port uint32, opts ...connect.ClientOption) compassv1internalconnect.GuestControlClient"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "runtime"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n  type MicroVMConfig struct {\n  \t// … existing fields …\n  \t// GuestClientOptions go to every guest control client except Health.\n  \tGuestClientOptions []connect.ClientOption\n  }"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "main"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n  func (f backendFlags) selectEngine(guestOpts ...connect.ClientOption) (runtime.WorkloadRuntime, error)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "microvm"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestGuestClientPassesOptions"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestGuestClient_HealthRoundTrip"
+    },
+    {
+      "kind": "code-span",
+      "value": "fakeMuxer"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelconnect.WithTracerProvider"
+    },
+    {
+      "kind": "code-span",
+      "value": "GuestClient"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "runtime"
+    },
+    {
+      "kind": "code-span",
+      "value": "NewMicroVMRuntime"
+    },
+    {
+      "kind": "code-span",
+      "value": "GuestClientOptions"
+    },
+    {
+      "kind": "code-span",
+      "value": "m.newGuestClient"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ExecStream"
+    },
+    {
+      "kind": "code-span",
+      "value": "Kill"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 H2 — `otelx.HTTPTransport` on every server HTTP egress"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/otel/http_transport.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "HTTPTransport"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelhttp.NewTransport(redactURL{base}, …)"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelhttp.WithPropagators(propagation.NewCompositeTextMapPropagator())"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "url.full"
+    },
+    {
+      "kind": "code-span",
+      "value": "redactURL.RoundTrip"
+    },
+    {
+      "kind": "code-span",
+      "value": "url.full"
+    },
+    {
+      "kind": "code-span",
+      "value": "REDACTED"
+    },
+    {
+      "kind": "code-span",
+      "value": "trace.SpanFromContext(r.Context())"
+    },
+    {
+      "kind": "code-span",
+      "value": "since"
+    },
+    {
+      "kind": "code-span",
+      "value": "state"
+    },
+    {
+      "kind": "code-span",
+      "value": "per_page"
+    },
+    {
+      "kind": "code-span",
+      "value": "page"
+    },
+    {
+      "kind": "code-span",
+      "value": "service"
+    },
+    {
+      "kind": "code-span",
+      "value": "scope"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "server"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "forgeHTTPClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "hc.Transport = otelx.HTTPTransport(hc.Transport)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "tracedHTTPClient(timeout)"
+    },
+    {
+      "kind": "code-span",
+      "value": "&http.Client{Timeout: linearAPITimeout}"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildLinearResponder"
+    },
+    {
+      "kind": "code-span",
+      "value": "&http.Client{Timeout: 30 * time.Second}"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildLinearTokenSource"
+    },
+    {
+      "kind": "code-span",
+      "value": "LinearConfig.Client"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge.NewLinear"
+    },
+    {
+      "kind": "code-span",
+      "value": "fc.TrunkHTTP"
+    },
+    {
+      "kind": "code-span",
+      "value": "mergeQueueProviders"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "cfg.S3"
+    },
+    {
+      "kind": "code-span",
+      "value": "WrapTransport: otelx.HTTPTransport"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.NewS3ObjectStore"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "NewRunnerVerifier"
+    },
+    {
+      "kind": "code-span",
+      "value": "clusterHTTPClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "hc.Transport = otelx.HTTPTransport(hc.Transport)"
+    },
+    {
+      "kind": "code-span",
+      "value": "clusterHTTPClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "*http.Transport"
+    },
+    {
+      "kind": "code-span",
+      "value": "caFile"
+    },
+    {
+      "kind": "code-span",
+      "value": "hc.Transport.(*http.Transport)"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/auth"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "S3Config"
+    },
+    {
+      "kind": "code-span",
+      "value": "WrapTransport"
+    },
+    {
+      "kind": "code-span",
+      "value": "NewS3ObjectStore"
+    },
+    {
+      "kind": "code-span",
+      "value": "minio.DefaultTransport(cfg.UseTLS)"
+    },
+    {
+      "kind": "code-span",
+      "value": "WrapTransport"
+    },
+    {
+      "kind": "code-span",
+      "value": "minio.Options.Transport"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelhttp"
+    },
+    {
+      "kind": "code-span",
+      "value": "go.opentelemetry.io/otel/propagation"
+    },
+    {
+      "kind": "code-span",
+      "value": "go.opentelemetry.io/otel/semconv/v1.26.0"
+    },
+    {
+      "kind": "code-span",
+      "value": "URLFull"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "otel"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx."
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n  // HTTPTransport wraps base (nil means http.DefaultTransport) in an otelhttp\n  // client span. It redacts query values in url.full and injects no header.\n  func HTTPTransport(base http.RoundTripper) http.RoundTripper"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "server"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n  // tracedHTTPClient is an http.Client with timeout and an HTTPTransport.\n  func tracedHTTPClient(timeout time.Duration) *http.Client"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "store"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n  type S3Config struct {\n  \t// … existing fields …\n  \t// WrapTransport, when set, wraps minio's default transport.\n  \tWrapTransport func(http.RoundTripper) http.RoundTripper\n  }"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "otel"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestHTTPTransportRecordsRedactedSpan"
+    },
+    {
+      "kind": "code-span",
+      "value": "httptest"
+    },
+    {
+      "kind": "code-span",
+      "value": "t.Cleanup"
+    },
+    {
+      "kind": "code-span",
+      "value": "installInMemoryTracer"
+    },
+    {
+      "kind": "code-span",
+      "value": "/v?token=s3cret&page=2"
+    },
+    {
+      "kind": "code-span",
+      "value": "url.full"
+    },
+    {
+      "kind": "code-span",
+      "value": "?page=REDACTED&token=REDACTED"
+    },
+    {
+      "kind": "code-span",
+      "value": "traceparent"
+    },
+    {
+      "kind": "code-span",
+      "value": "HTTPTransport"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "otel"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "server"
+    },
+    {
+      "kind": "code-span",
+      "value": "forgeHTTPClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "httptest.NewTLSServer"
+    },
+    {
+      "kind": "code-span",
+      "value": "tracedHTTPClient"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "auth"
+    },
+    {
+      "kind": "code-span",
+      "value": "NewRunnerVerifier"
+    },
+    {
+      "kind": "code-span",
+      "value": "httptest"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "store"
+    },
+    {
+      "kind": "code-span",
+      "value": "NewS3ObjectStore"
+    },
+    {
+      "kind": "code-span",
+      "value": "WrapTransport"
+    },
+    {
+      "kind": "code-span",
+      "value": "httptest"
+    },
+    {
+      "kind": "code-span",
+      "value": "traceparent"
+    },
+    {
+      "kind": "code-span",
+      "value": "net/http"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 H3 — Postgres spans from a pgx tracer"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/trace.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "spanTracer"
+    },
+    {
+      "kind": "code-span",
+      "value": "poolConfig"
+    },
+    {
+      "kind": "code-span",
+      "value": "cfg.ConnConfig.Tracer = spanTracer{tracer: otel.Tracer(instrumentationScope)}"
+    },
+    {
+      "kind": "code-span",
+      "value": "Open"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "sqlcHeader"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/pgtest/query_counter.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest.SQLCQueryCounter"
+    },
+    {
+      "kind": "code-span",
+      "value": "strings.CutPrefix"
+    },
+    {
+      "kind": "code-span",
+      "value": "strings.Cut"
+    },
+    {
+      "kind": "code-span",
+      "value": "postgres"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SendBatch"
+    },
+    {
+      "kind": "code-span",
+      "value": "TraceBatchStartData.Batch.QueuedQueries"
+    },
+    {
+      "kind": "code-span",
+      "value": "postgres.batch"
+    },
+    {
+      "kind": "code-span",
+      "value": "SET LOCAL ROLE"
+    },
+    {
+      "kind": "code-span",
+      "value": "set_config"
+    },
+    {
+      "kind": "code-span",
+      "value": "TraceBatchQuery"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "semconv.DBSystemPostgreSQL"
+    },
+    {
+      "kind": "code-span",
+      "value": "semconv.DBOperationName(name)"
+    },
+    {
+      "kind": "code-span",
+      "value": "codes.Error"
+    },
+    {
+      "kind": "code-span",
+      "value": "*pgconn.PgError"
+    },
+    {
+      "kind": "code-span",
+      "value": "errors.AsType"
+    },
+    {
+      "kind": "code-span",
+      "value": "error"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenTraced"
+    },
+    {
+      "kind": "code-span",
+      "value": "cfg.ConnConfig.Tracer = multitracer.New(cfg.ConnConfig.Tracer, tracer)"
+    },
+    {
+      "kind": "code-span",
+      "value": "multitracer.New"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "CopyFrom"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/store"
+    },
+    {
+      "kind": "code-span",
+      "value": "CopyFromTracer"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "github.com/jackc/pgx/v5"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgx.QueryTracer"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgx.BatchTracer"
+    },
+    {
+      "kind": "code-span",
+      "value": "multitracer.New"
+    },
+    {
+      "kind": "code-span",
+      "value": "otel"
+    },
+    {
+      "kind": "code-span",
+      "value": "semconv"
+    },
+    {
+      "kind": "code-span",
+      "value": "codes"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "store"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n  // spanTracer records one client span per query or batch whose ctx already\n  // holds a valid span. It never starts a root.\n  type spanTracer struct{ tracer trace.Tracer }\n\n  func (t spanTracer) TraceQueryStart(ctx context.Context, c *pgx.Conn, d pgx.TraceQueryStartData) context.Context\n  func (t spanTracer) TraceQueryEnd(ctx context.Context, c *pgx.Conn, d pgx.TraceQueryEndData)\n  func (t spanTracer) TraceBatchStart(ctx context.Context, c *pgx.Conn, d pgx.TraceBatchStartData) context.Context\n  func (t spanTracer) TraceBatchQuery(ctx context.Context, c *pgx.Conn, d pgx.TraceBatchQueryData)\n  func (t spanTracer) TraceBatchEnd(ctx context.Context, c *pgx.Conn, d pgx.TraceBatchEndData)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "spanTracer"
+    },
+    {
+      "kind": "code-span",
+      "value": "*pgconn.PgError"
+    },
+    {
+      "kind": "code-span",
+      "value": "spanTracer"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go test -tags pgtest -race"
+    },
+    {
+      "kind": "code-span",
+      "value": "Open"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenTraced"
+    },
+    {
+      "kind": "code-span",
+      "value": "SQLCQueryCounter"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 H4 — The fabric DLQ keeps the traceparent"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "publishDLQ"
+    },
+    {
+      "kind": "code-span",
+      "value": "traceparent string"
+    },
+    {
+      "kind": "code-span",
+      "value": "dlq.Header.Set(traceparentHeader, tp)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "park"
+    },
+    {
+      "kind": "code-span",
+      "value": "traceparent(msg.Headers())"
+    },
+    {
+      "kind": "code-span",
+      "value": "parkOnMaxDeliveries"
+    },
+    {
+      "kind": "code-span",
+      "value": "traceparent(raw.Header)"
+    },
+    {
+      "kind": "code-span",
+      "value": "jetstream.RawStreamMsg"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx.Traceparent(ctx)"
+    },
+    {
+      "kind": "code-span",
+      "value": "f.retryOrPark(ctx, msg, err)"
+    },
+    {
+      "kind": "code-span",
+      "value": "deliveryCtx"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/fabric/SUBJECTS.md"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "fabric"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n  func (f *Fabric) publishDLQ(ctx context.Context, subject string, data []byte, traceparent string, cause error) error"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestCallbackErrorParksOnDLQ"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestAlwaysSlowCallbackExhaustsMaxDeliver"
+    },
+    {
+      "kind": "code-span",
+      "value": "traceparent"
+    },
+    {
+      "kind": "code-span",
+      "value": "Fabric.Publish"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 H5 — The in-process bus takes ctx on every publish"
+    },
+    {
+      "kind": "code-span",
+      "value": "Bus.Publish"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx.Traceparent(ctx)"
+    },
+    {
+      "kind": "code-span",
+      "value": "PublishCtx"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/events/events.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "Publish(ctx, payload)"
+    },
+    {
+      "kind": "code-span",
+      "value": "PublishCtx"
+    },
+    {
+      "kind": "code-span",
+      "value": "publishMessagePosted"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/mapping.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "publishAccountChanged"
+    },
+    {
+      "kind": "code-span",
+      "value": "publishChannelGroupChanged"
+    },
+    {
+      "kind": "code-span",
+      "value": "publishChannelChanged"
+    },
+    {
+      "kind": "code-span",
+      "value": "publishAgentWorkspaceChanged"
+    },
+    {
+      "kind": "code-span",
+      "value": "publishMessageUpdated"
+    },
+    {
+      "kind": "code-span",
+      "value": "publishTopicUpserted"
+    },
+    {
+      "kind": "code-span",
+      "value": "RespondToAsk"
+    },
+    {
+      "kind": "code-span",
+      "value": "c.publishMessageUpdated(askMsg)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "UpdatePinnedBoard"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/comms.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/board/issue_projection.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "republishPrsLocked"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "runnerhub.LifecycleSink.PublishSessionStatus"
+    },
+    {
+      "kind": "code-span",
+      "value": "board.Projection.PublishSessionStatus"
+    },
+    {
+      "kind": "code-span",
+      "value": "deliverSession"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "runnerhub.presenceSource.PublishActivity"
+    },
+    {
+      "kind": "code-span",
+      "value": "Hub.PublishActivity"
+    },
+    {
+      "kind": "code-span",
+      "value": "presence.Publisher.PublishActivity"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "presence.Publisher.publishIfChanged"
+    },
+    {
+      "kind": "code-span",
+      "value": "server.publishReady"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "t.Context()"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "events"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n  // Publish stamps the next seq, a timestamp, and ctx's traceparent (empty\n  // with no active span), then fans out to live subscribers.\n  func (b *Bus[P]) Publish(ctx context.Context, payload P) uint64"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "runnerhub"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n  type LifecycleSink interface {\n  \tPublishSessionStatus(ctx context.Context, status *compassv1.AgentSessionStatus)\n  }\n  // presenceSource.PublishActivity and Hub.PublishActivity:\n  PublishActivity(ctx context.Context, agentAccountID store.AccountID, activity string)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/events"
+    },
+    {
+      "kind": "code-span",
+      "value": "PublishCtx"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms"
+    },
+    {
+      "kind": "code-span",
+      "value": "RespondToAsk"
+    },
+    {
+      "kind": "code-span",
+      "value": "MessageUpdated"
+    },
+    {
+      "kind": "code-span",
+      "value": "Traceparent"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 H6 — Bus tails and presence edges restore the trace"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "linearagent.TailComms"
+    },
+    {
+      "kind": "code-span",
+      "value": "d.OnCommsEvent"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx.ContextWithTraceparent(otelx.WithoutSpan(ctx), event.Traceparent)"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateActivity"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "presence.Publisher.Run"
+    },
+    {
+      "kind": "code-span",
+      "value": "handleEvent"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "OnSessionLifecycle"
+    },
+    {
+      "kind": "code-span",
+      "value": "OnSessionPromoted"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx.Traceparent(ctx)"
+    },
+    {
+      "kind": "code-span",
+      "value": "hubEdge.traceparent"
+    },
+    {
+      "kind": "code-span",
+      "value": "PresenceSink"
+    },
+    {
+      "kind": "code-span",
+      "value": "drainEdges"
+    },
+    {
+      "kind": "code-span",
+      "value": "applyLifecycle"
+    },
+    {
+      "kind": "code-span",
+      "value": "applyPromoted"
+    },
+    {
+      "kind": "code-span",
+      "value": "deliverSession"
+    },
+    {
+      "kind": "code-span",
+      "value": "enroll"
+    },
+    {
+      "kind": "code-span",
+      "value": "promoteSession"
+    },
+    {
+      "kind": "code-span",
+      "value": "releaseSession"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "enroll"
+    },
+    {
+      "kind": "code-span",
+      "value": "Enroll"
+    },
+    {
+      "kind": "code-span",
+      "value": "promoteSession"
+    },
+    {
+      "kind": "code-span",
+      "value": "releaseSession"
+    },
+    {
+      "kind": "code-span",
+      "value": "unbindSession"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "commandRouter.complete"
+    },
+    {
+      "kind": "code-span",
+      "value": "onSessionUnknown"
+    },
+    {
+      "kind": "code-span",
+      "value": "NOT_FOUND"
+    },
+    {
+      "kind": "code-span",
+      "value": "Handler.Sessions"
+    },
+    {
+      "kind": "code-span",
+      "value": "dropLostSessionDetached"
+    },
+    {
+      "kind": "code-span",
+      "value": "deliverRefusals"
+    },
+    {
+      "kind": "code-span",
+      "value": "{sessionID, traceparent}"
+    },
+    {
+      "kind": "code-span",
+      "value": "onSessionUnknown"
+    },
+    {
+      "kind": "code-span",
+      "value": "dropLostSessionDetached"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "deliverSession"
+    },
+    {
+      "kind": "code-span",
+      "value": "dropLostSession"
+    },
+    {
+      "kind": "code-span",
+      "value": "deliverSession"
+    },
+    {
+      "kind": "code-span",
+      "value": "PublishEvents"
+    },
+    {
+      "kind": "code-span",
+      "value": "PublishEventsRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionFrame"
+    },
+    {
+      "kind": "code-span",
+      "value": "agentHost.markErrored"
+    },
+    {
+      "kind": "code-span",
+      "value": "PublishSessionState"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/host.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx.ContextWithTraceparent"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx.WithoutSpan"
+    },
+    {
+      "kind": "code-span",
+      "value": "events.Stamped.Traceparent"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "runnerhub"
+    },
+    {
+      "kind": "code-span",
+      "value": "PresenceSink"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n  OnSessionLifecycle(ctx context.Context, account store.AccountID, sessionID string, state compassv1.AgentSessionState)\n  OnSessionPromoted(ctx context.Context, account store.AccountID, sessionID string)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "presence"
+    },
+    {
+      "kind": "code-span",
+      "value": "hubEdge"
+    },
+    {
+      "kind": "code-span",
+      "value": "traceparent string"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "runnerhub"
+    },
+    {
+      "kind": "code-span",
+      "value": "deliverRefusals"
+    },
+    {
+      "kind": "code-span",
+      "value": "{sessionID, traceparent string}"
+    },
+    {
+      "kind": "code-span",
+      "value": "send1"
+    },
+    {
+      "kind": "code-span",
+      "value": "cmd.GetTraceparent()"
+    },
+    {
+      "kind": "code-span",
+      "value": "setSessionUnknown"
+    },
+    {
+      "kind": "code-span",
+      "value": "func(sessionID, traceparent string)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "linearagent"
+    },
+    {
+      "kind": "code-span",
+      "value": "TailComms"
+    },
+    {
+      "kind": "code-span",
+      "value": "Client"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateActivity"
+    },
+    {
+      "kind": "code-span",
+      "value": "MessagePosted"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "presence"
+    },
+    {
+      "kind": "code-span",
+      "value": "PresenceReads"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentHasOpenAsk"
+    },
+    {
+      "kind": "code-span",
+      "value": "OnSessionLifecycle"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "runnerhub"
+    },
+    {
+      "kind": "code-span",
+      "value": "Hub"
+    },
+    {
+      "kind": "code-span",
+      "value": "PresenceSink"
+    },
+    {
+      "kind": "code-span",
+      "value": "Enroll"
+    },
+    {
+      "kind": "code-span",
+      "value": "PublishEvents"
+    },
+    {
+      "kind": "code-span",
+      "value": "NOT_FOUND"
+    },
+    {
+      "kind": "code-span",
+      "value": "DISCONNECTED"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 H7 — Gate: no new uncarried egress"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "^http\\.DefaultClient$"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx.HTTPTransport"
+    },
+    {
+      "kind": "code-span",
+      "value": "^http\\.Client$"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "httpClientFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "runner.Dial"
+    },
+    {
+      "kind": "code-span",
+      "value": "auth.NewRunnerVerifier"
+    },
+    {
+      "kind": "code-span",
+      "value": "clusterHTTPClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "linearagent"
+    },
+    {
+      "kind": "code-span",
+      "value": "tracedHTTPClient"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestEgressCensus"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/otel/egress_census_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": ".go"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/parser"
+    },
+    {
+      "kind": "code-span",
+      "value": "New…Client"
+    },
+    {
+      "kind": "code-span",
+      "value": "…connect"
+    },
+    {
+      "kind": "code-span",
+      "value": "http.Client"
+    },
+    {
+      "kind": "code-span",
+      "value": "minio.New"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgxpool.NewWithConfig"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgx.Connect"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgx.ConnectConfig"
+    },
+    {
+      "kind": "code-span",
+      "value": "nats.Connect"
+    },
+    {
+      "kind": "code-span",
+      "value": "traced"
+    },
+    {
+      "kind": "code-span",
+      "value": "noProvider"
+    },
+    {
+      "kind": "code-span",
+      "value": "testHelper"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/.golangci.yml"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n  // package otel, test only\n  type egressClass int // traced, noProvider, testHelper\n  var egressSites map[string]struct{ class egressClass; count int } // key: \"<file>:<func>:<callee>\"\n  func TestEgressCensus(t *testing.T)"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-go:lint"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-go:test"
+    },
+    {
+      "kind": "code-span",
+      "value": "DefaultClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "http.DefaultClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "http.Client"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 H8 — Per-frame traceparent on `PublishEvents`"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "PublishEventsRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/runner.proto"
+    },
+    {
+      "kind": "code-span",
+      "value": "string traceparent = 5"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "g.baseCtx"
+    },
+    {
+      "kind": "code-span",
+      "value": "sendLocked"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "sendSharedState"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx.Traceparent(ctx)"
+    },
+    {
+      "kind": "code-span",
+      "value": "forwardState"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "context.WithoutCancel"
+    },
+    {
+      "kind": "code-span",
+      "value": "forward"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx.Traceparent(p.ctx)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx.Traceparent(p.ctx)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "RunnerEvent"
+    },
+    {
+      "kind": "code-span",
+      "value": "Traceparent string"
+    },
+    {
+      "kind": "code-span",
+      "value": "Handler.PublishEvents"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Hub.Deliver"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx.ContextWithTraceparent(otelx.WithoutSpan(ctx), ev.Traceparent)"
+    },
+    {
+      "kind": "code-span",
+      "value": "deliverSession"
+    },
+    {
+      "kind": "code-span",
+      "value": "deliverSession"
+    },
+    {
+      "kind": "code-span",
+      "value": "dropLostSession"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "PublishEventsRequest.traceparent = 5"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "runnerhub"
+    },
+    {
+      "kind": "code-span",
+      "value": "RunnerEvent"
+    },
+    {
+      "kind": "code-span",
+      "value": "Traceparent string"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "gateway"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/gateway"
+    },
+    {
+      "kind": "code-span",
+      "value": " and "
+    },
+    {
+      "kind": "code-span",
+      "value": ". "
+    },
+    {
+      "kind": "code-span",
+      "value": " and "
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "runnerhub"
+    },
+    {
+      "kind": "code-span",
+      "value": "PublishEvents"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "runner"
+    },
+    {
+      "kind": "code-span",
+      "value": "ERRORED"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Tasks"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx.HTTPTransport"
+    },
+    {
+      "kind": "code-span",
+      "value": "url.full"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.spanTracer"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenTraced"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "traceparent"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Bus.Publish(ctx, …)"
+    },
+    {
+      "kind": "code-span",
+      "value": "PublishCtx"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "http.DefaultClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestEgressCensus"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "PublishEventsRequest.traceparent"
+    },
+    {
+      "kind": "code-span",
+      "value": "deliverSession"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Open Questions"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "HTTPTransport"
+    },
+    {
+      "kind": "code-span",
+      "value": "traceparent"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "Publish(ctx, …)"
+    },
+    {
+      "kind": "code-span",
+      "value": "Publish"
+    },
+    {
+      "kind": "code-span",
+      "value": "PublishCtx"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "PublishCtx"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelconnect.WithPropagator(propagation.TraceContext{})"
+    },
+    {
+      "kind": "code-span",
+      "value": "serveHandshake"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "TraceHandler"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:4."
+    },
+    {
+      "kind": "code-span",
+      "value": "TRACEPARENT"
+    },
+    {
+      "kind": "code-span",
+      "value": "TRACEPARENT"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent/src/trace-bridge.ts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:5."
+    },
+    {
+      "kind": "code-span",
+      "value": "SubscribeComms"
+    },
+    {
+      "kind": "code-span",
+      "value": "SubscribeEvents"
+    },
+    {
+      "kind": "code-span",
+      "value": "SubscribeAgentSession"
+    },
+    {
+      "kind": "code-span",
+      "value": "traceResponseInterceptor"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionInjection.traceparent"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:6."
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "noProvider"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ExecuteContext"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:7."
+    },
+    {
+      "kind": "code-span",
+      "value": "otelx"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:8."
+    },
+    {
+      "kind": "code-span",
+      "value": "SendCommand"
+    },
+    {
+      "kind": "code-span",
+      "value": "PublishBindingChange"
+    },
+    {
+      "kind": "code-span",
+      "value": "SendCommand"
+    },
+    {
+      "kind": "code-span",
+      "value": "PublishBindingChange"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:9."
+    },
+    {
+      "kind": "code-span",
+      "value": "http.DefaultClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestEgressCensus"
+    },
+    {
+      "kind": "code-span",
+      "value": "Publish(ctx, …)"
+    },
+    {
+      "kind": "code-span",
+      "value": "traced"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:10."
+    },
+    {
+      "kind": "code-span",
+      "value": "PublishEvents"
+    },
+    {
+      "kind": "code-span",
+      "value": "traceparent"
+    },
+    {
+      "kind": "code-span",
+      "value": "PublishEventsRequest"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Errata"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 E1 — 2026-10-17 (RIG-5508)"
+    },
+    {
+      "kind": "code-span",
+      "value": "microvm.GuestClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "opts ...connect.ClientOption"
+    },
+    {
+      "kind": "code-span",
+      "value": "ClientOption"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithoutTraceEvents()"
+    },
+    {
+      "kind": "code-span",
+      "value": "ClientOption"
+    },
+    {
+      "kind": "code-span",
+      "value": "connect.NewClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "...connect.ClientInterceptor"
+    },
+    {
+      "kind": "code-span",
+      "value": "interceptors ...connect.ClientInterceptor"
+    },
+    {
+      "kind": "code-span",
+      "value": "GuestClientInterceptors []connect.ClientInterceptor"
+    },
+    {
+      "kind": "code-span",
+      "value": "selectEngine(guestInterceptors ...connect.ClientInterceptor)"
+    },
+    {
+      "kind": "code-span",
+      "value": "otelconnect.NewClientInterceptor()"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithoutTraceEvents"
+    },
+    {
+      "kind": "code-span",
+      "value": "ExecStream"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

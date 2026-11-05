@@ -1,0 +1,62 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/dl-list/README.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/meissa-0012.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 @rigelbuild/dl-list"
+    },
+    {
+      "kind": "code-span",
+      "value": "designsRoot"
+    },
+    {
+      "kind": "code-span",
+      "value": "surfaceDepth"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Usage"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[sh]\ndl-list [--config design-ledger.config.json] [--surface S] [--area A] [--status active|superseded|retired] [--grep TEXT] [--glob GLOB]"
+    },
+    {
+      "kind": "code-span",
+      "value": "--config"
+    },
+    {
+      "kind": "code-span",
+      "value": "design-ledger.config.json"
+    },
+    {
+      "kind": "code-span",
+      "value": "designsRoot/*/decisions/*/DL-*.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "designsRoot/decisions/*/DL-*.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "--glob"
+    },
+    {
+      "kind": "code-span",
+      "value": "--grep"
+    },
+    {
+      "kind": "code-span",
+      "value": "1"
+    },
+    {
+      "kind": "code-span",
+      "value": "2"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

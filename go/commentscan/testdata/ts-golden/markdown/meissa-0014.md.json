@@ -1,0 +1,86 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/dl-reconcile/README.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/meissa-0014.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 @rigelbuild/dl-reconcile"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Usage"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[sh]\nbun packages/dl-reconcile/index.ts --config ./ledger.config.json\nbun packages/dl-reconcile/index.ts --config ./ledger.config.json --check\nbun packages/dl-reconcile/index.ts --config ./ledger.config.json --stale-exit"
+    },
+    {
+      "kind": "code-span",
+      "value": "--check"
+    },
+    {
+      "kind": "code-span",
+      "value": "--stale-exit"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Credentials"
+    },
+    {
+      "kind": "code-span",
+      "value": "DL_CLAIM_TOKEN"
+    },
+    {
+      "kind": "code-span",
+      "value": "DL_CLAIM_TOKEN_FILE"
+    },
+    {
+      "kind": "code-span",
+      "value": "counter.url"
+    },
+    {
+      "kind": "code-span",
+      "value": "GATE_ROOT"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Exit codes"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "0"
+    },
+    {
+      "kind": "code-span",
+      "value": "--stale-exit"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "1"
+    },
+    {
+      "kind": "code-span",
+      "value": "--stale-exit"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "2"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

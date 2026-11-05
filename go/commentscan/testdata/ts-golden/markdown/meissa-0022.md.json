@@ -1,0 +1,18 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/tsconfig/README.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/meissa-0022.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 @rigelbuild/tsconfig"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[json]\n{\"extends\": \"@rigelbuild/tsconfig/base.json\"}"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

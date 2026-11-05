@@ -1,0 +1,12 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/jsx.ts",
+  "corpus": "go/commentscan/testdata/corpus/jsx/short-comment-width.tsx",
+  "scan": {
+    "residues": [
+      "const n = f( 1);",
+      ""
+    ],
+    "ambiguous": false
+  }
+}

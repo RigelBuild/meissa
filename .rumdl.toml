@@ -1,5 +1,9 @@
 extends = "$RUMDL_BASE_CONFIG"
 
+# Scanner corpus inputs are byte-exact test data, not docs.
+[global]
+exclude = ["go/commentscan/testdata/**"]
+
 # release-please regenerates each package CHANGELOG.md, overwriting any hand-fix.
 # Its template emits double blank lines (MD012) and copies commit subjects verbatim (MD050).
 [per-file-ignores]

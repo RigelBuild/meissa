@@ -1,0 +1,146 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "README.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/meissa-0001.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 meissa"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Exports"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages.<system>.rumdl"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages.<system>.biome"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages.<system>.rumdl-base-config"
+    },
+    {
+      "kind": "code-span",
+      "value": "rumdl/base.toml"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenvModules.default"
+    },
+    {
+      "kind": "code-span",
+      "value": "RUMDL_BASE_CONFIG"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenvModules.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "meissa.go.toolchain"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[nix]\n{ inputs, pkgs, ... }:\n{\n  imports = [ inputs.meissa.devenvModules.go ];\n  meissa.go.toolchain = pkgs.go;\n}"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.nix"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[nix]\n{ inputs, ... }:\n{\n  imports = [ inputs.meissa.devenvModules.default ];\n}"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[yaml]\ninputs:\n  meissa:\n    url: github:RigelBuild/meissa"
+    },
+    {
+      "kind": "code-span",
+      "value": ".rumdl.toml"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[toml]\nextends = \"$RUMDL_BASE_CONFIG\""
+    },
+    {
+      "kind": "code-span",
+      "value": "[MD0nn]"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/compass/blob/main/.rumdl.toml"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Renovate preset"
+    },
+    {
+      "kind": "code-span",
+      "value": "github>RigelBuild/meissa//tools/renovate/preset.json5"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Packages"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/"
+    },
+    {
+      "kind": "code-span",
+      "value": "@rigelbuild/<tool>"
+    },
+    {
+      "kind": "code-span",
+      "value": "@rigelbuild/tsconfig"
+    },
+    {
+      "kind": "code-span",
+      "value": "@rigelbuild/biome-config"
+    },
+    {
+      "kind": "code-span",
+      "value": "ref-gate"
+    },
+    {
+      "kind": "code-span",
+      "value": "ref-gate.config.json"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Releases"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Local development"
+    },
+    {
+      "kind": "code-span",
+      "value": "direnv allow ."
+    },
+    {
+      "kind": "code-span",
+      "value": "direnv exec . rumdl check ."
+    },
+    {
+      "kind": "code-span",
+      "value": "direnv exec . bun test"
+    },
+    {
+      "kind": "code-span",
+      "value": "nix flake check"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon run :ci"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

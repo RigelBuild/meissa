@@ -1,0 +1,34 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/tsconfig/CHANGELOG.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/meissa-0021.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Changelog"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 1.0.0 (2026-10-15)"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Features"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:*"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/issues/18"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/commit/e2fd5a708eed10ca8ef201541b8953c04eea74d6"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

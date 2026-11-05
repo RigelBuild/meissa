@@ -1,0 +1,14 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "docs/designs/compass/decisions/ui/DL-195.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0045.md",
+  "fingerprint": [
+    {
+      "kind": "front-matter",
+      "value": "id: DL-195\ndecision: \"`Agent.role`/`model`/`cwd` are optional view-model fields with no server source: a live agent renders without them (the role pip is render-gated on a present, non-worker role — never derived from tree position, since \\\"has children\\\" is not \\\"supervisor\\\"), and `terminals` is `[]` for live agents until a terminal stream exists\"\nstatus: \"Active (Matt, 2026-08-16)\"\nrecord: ../../ui/compass-live-roster/design.md#resolved-decisions"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "docs/designs/compass/decisions/meta/DL-174.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0027.md",
+  "fingerprint": [
+    {
+      "kind": "front-matter",
+      "value": "id: DL-174\ndecision: \"Compass test coverage is a differential-oracle pyramid: every seam carries a hermetic in-memory reference in the default gate plus a `pgtest` suite proving the real Postgres backend obeys the same contract; Postgres is the one live dependency the strategy gates on (D1)\"\nstatus: \"Active (Matt, 2026-08-07)\"\nrecord: ../../meta/compass-test-strategy/design.md#decisions"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

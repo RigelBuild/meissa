@@ -1,0 +1,90 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/renovate-preflight/CHANGELOG.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/meissa-0019.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Changelog"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 [1.1.1](https://github.com/RigelBuild/meissa/compare/renovate-preflight@v1.1.0...renovate-preflight@v1.1.1) (2026-10-17)"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Bug Fixes"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:*"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/issues/31"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/commit/a06f0f0d4604417fdd74c6949fdb7db9f227185e"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 [1.1.0](https://github.com/RigelBuild/meissa/compare/renovate-preflight@v1.0.0...renovate-preflight@v1.1.0) (2026-10-15)"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Features"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:*"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/issues/18"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/commit/e2fd5a708eed10ca8ef201541b8953c04eea74d6"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Bug Fixes"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:*"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/issues/22"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/commit/e42afb4cb0968d32d8eed062477bf50644df5e4d"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 1.0.0 (2026-10-10)"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Features"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:*"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/issues/10"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/commit/82970384a3620948a13c3dcd02db7fdce5afd794"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

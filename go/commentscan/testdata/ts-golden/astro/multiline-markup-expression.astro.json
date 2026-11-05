@@ -1,0 +1,20 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/astro.ts",
+  "corpus": "go/commentscan/testdata/corpus/astro/multiline-markup-expression.astro",
+  "scan": {
+    "residues": [
+      "---",
+      "const items = [];",
+      "---",
+      "<ul>",
+      "  {items.map((item) => (",
+      "    <a href={item.url}>see http://x//y for details</a>",
+      "  ))}",
+      "</ul>",
+      "<p>after</p>",
+      ""
+    ],
+    "ambiguous": false
+  }
+}

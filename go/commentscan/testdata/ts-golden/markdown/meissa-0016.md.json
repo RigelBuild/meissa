@@ -1,0 +1,90 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/length-gate/README.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/meissa-0016.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 @rigelbuild/length-gate"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 CLI"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[sh]\nlength-gate --config length-gate.json [--all] [--skip-class <name>]..."
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[json]\n{\n  \"extensions\": [\".ts\"],\n  \"exclude\": [\"vendor/**\"],\n  \"docs\": [\n    {\n      \"name\": \"spec\",\n      \"include\": [\"docs/specs/**/*.md\"],\n      \"exclude\": [],\n      \"target\": 1500,\n      \"markerAllowed\": false\n    }\n  ]\n}"
+    },
+    {
+      "kind": "code-span",
+      "value": "GATE_ROOT"
+    },
+    {
+      "kind": "code-span",
+      "value": "LENGTH_GATE_EVENT=pull_request"
+    },
+    {
+      "kind": "code-span",
+      "value": "LENGTH_GATE_BASE"
+    },
+    {
+      "kind": "code-span",
+      "value": "LENGTH_GATE_FETCH"
+    },
+    {
+      "kind": "code-span",
+      "value": "LENGTH_GATE_MERGE=1"
+    },
+    {
+      "kind": "code-span",
+      "value": "LENGTH_GATE_HEAD"
+    },
+    {
+      "kind": "code-span",
+      "value": "HEAD"
+    },
+    {
+      "kind": "code-span",
+      "value": "LENGTH_GATE_MERGE=1"
+    },
+    {
+      "kind": "code-span",
+      "value": "--all"
+    },
+    {
+      "kind": "code-span",
+      "value": "--skip-class"
+    },
+    {
+      "kind": "code-span",
+      "value": "--all"
+    },
+    {
+      "kind": "code-span",
+      "value": "0"
+    },
+    {
+      "kind": "code-span",
+      "value": "1"
+    },
+    {
+      "kind": "code-span",
+      "value": "2"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 API"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\nimport { judgeFile, proseWords } from \"@rigelbuild/length-gate\";\n\njudgeFile(config, fileDiff, { before, after });\nproseWords(markdown, true);"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

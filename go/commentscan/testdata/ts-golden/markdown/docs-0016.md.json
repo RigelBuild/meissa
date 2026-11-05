@@ -1,0 +1,14 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "docs/designs/compass/decisions/agent/DL-428.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0016.md",
+  "fingerprint": [
+    {
+      "kind": "front-matter",
+      "value": "id: DL-428\ndecision: \"Server mechanism for DL-426: recompute SHA-256 and reject a mismatch, return early on this session's own index row, else PUT then insert into `agent_session_blobs` (session_id, sha256, size_bytes; new migration); reads are keyed by (session, hash) and need that session's row; `PutSessionBlob` never probes object existence; no object store is `CodeFailedPrecondition`\"\nstatus: \"Active (Matt, 2026-10-06)\"\nrecord: ../../agent/compass-agent-session-blobs/design.md#d3-server-verify-put-then-index"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

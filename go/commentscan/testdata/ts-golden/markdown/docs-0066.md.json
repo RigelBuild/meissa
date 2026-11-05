@@ -1,0 +1,1490 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "docs/designs/compass/ui/compass-dev-boot-gate/design.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0066.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Compass UI dev-boot smoke gate (RIG-1536)"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Problem / Intent"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite dev"
+    },
+    {
+      "kind": "code-span",
+      "value": "render()"
+    },
+    {
+      "kind": "code-span",
+      "value": "main"
+    },
+    {
+      "kind": "code-span",
+      "value": "dev-smoke"
+    },
+    {
+      "kind": "code-span",
+      "value": "main"
+    },
+    {
+      "kind": "code-span",
+      "value": "ba12d920"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/moon.yml:59-60"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[yaml]\n  ci:\n    deps: ['typecheck', 'build', 'test', 'stylelint']"
+    },
+    {
+      "kind": "code-span",
+      "value": "dev"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon.yml:11-14"
+    },
+    {
+      "kind": "code-span",
+      "value": "command: 'bunx vite'"
+    },
+    {
+      "kind": "code-span",
+      "value": "ci"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite build"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite dev"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite-plugin-solid"
+    },
+    {
+      "kind": "code-span",
+      "value": "development"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite.config.ts:32-35"
+    },
+    {
+      "kind": "code-span",
+      "value": "DEV_PROD_CONDITION"
+    },
+    {
+      "kind": "code-span",
+      "value": "development"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite build"
+    },
+    {
+      "kind": "code-span",
+      "value": "build"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon.yml:43"
+    },
+    {
+      "kind": "code-span",
+      "value": "bun test --conditions browser src/"
+    },
+    {
+      "kind": "code-span",
+      "value": "src/preview-build.test.ts:1-2"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite build"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "main"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite.config.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "test"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon.yml:50"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon.yml:47-49"
+    },
+    {
+      "kind": "code-span",
+      "value": "test"
+    },
+    {
+      "kind": "code-span",
+      "value": "test"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite.config.ts:44-49"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\noptimizeDeps: {\n    include: [\n        \"solid-markdown > remark-parse > mdast-util-from-markdown > micromark > debug\",\n        \"solid-markdown > remark-parse > unified > extend\",\n    ],\n},"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite.config.ts:40-43"
+    },
+    {
+      "kind": "code-span",
+      "value": "main"
+    },
+    {
+      "kind": "code-span",
+      "value": "main"
+    },
+    {
+      "kind": "code-span",
+      "value": ".github/workflows/ci.yml"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon ci :ci"
+    },
+    {
+      "kind": "code-span",
+      "value": "ci.yml:230-231"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon run :ci"
+    },
+    {
+      "kind": "code-span",
+      "value": "ci.yml:240-241"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite.config.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "test"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon.yml:50"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Approach"
+    },
+    {
+      "kind": "code-span",
+      "value": "dev-smoke"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-ui:ci"
+    },
+    {
+      "kind": "code-span",
+      "value": "cache: false"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": ".bridge"
+    },
+    {
+      "kind": "code-span",
+      "value": "pageerror"
+    },
+    {
+      "kind": "code-span",
+      "value": ".bridge"
+    },
+    {
+      "kind": "code-span",
+      "value": "pageerror"
+    },
+    {
+      "kind": "code-span",
+      "value": ".bridge"
+    },
+    {
+      "kind": "code-span",
+      "value": "#root"
+    },
+    {
+      "kind": "code-span",
+      "value": "renderBootError"
+    },
+    {
+      "kind": "code-span",
+      "value": "#root"
+    },
+    {
+      "kind": "code-span",
+      "value": "index.tsx:52-58"
+    },
+    {
+      "kind": "code-span",
+      "value": "boot.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "#root"
+    },
+    {
+      "kind": "code-span",
+      "value": ".bridge"
+    },
+    {
+      "kind": "code-span",
+      "value": "#root"
+    },
+    {
+      "kind": "code-span",
+      "value": ".bridge"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "playwright.config.ts"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\n  command: `bunx vite --port ${devPort} --strictPort --mode fixture`,"
+    },
+    {
+      "kind": "code-span",
+      "value": "development"
+    },
+    {
+      "kind": "code-span",
+      "value": "e2e/visual-smoke.spec.ts:5-8"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite dev"
+    },
+    {
+      "kind": "code-span",
+      "value": "index.tsx:9"
+    },
+    {
+      "kind": "code-span",
+      "value": "), "
+    },
+    {
+      "kind": "code-span",
+      "value": "App"
+    },
+    {
+      "kind": "code-span",
+      "value": "AppRoutes"
+    },
+    {
+      "kind": "code-span",
+      "value": "routes.tsx:14-20"
+    },
+    {
+      "kind": "code-span",
+      "value": "lazy()"
+    },
+    {
+      "kind": "code-span",
+      "value": "index.tsx:49-51"
+    },
+    {
+      "kind": "code-span",
+      "value": "development"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "@playwright/test"
+    },
+    {
+      "kind": "code-span",
+      "value": "1.62.1"
+    },
+    {
+      "kind": "code-span",
+      "value": "package.json:31"
+    },
+    {
+      "kind": "code-span",
+      "value": "playwright.config.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "e2e/visual-smoke.spec.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "puppeteer-core"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "dev-smoke"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/moon.yml"
+    },
+    {
+      "kind": "code-span",
+      "value": "inputs"
+    },
+    {
+      "kind": "code-span",
+      "value": "cache: false"
+    },
+    {
+      "kind": "code-span",
+      "value": "ci.deps"
+    },
+    {
+      "kind": "code-span",
+      "value": "inputs"
+    },
+    {
+      "kind": "code-span",
+      "value": "inputs"
+    },
+    {
+      "kind": "code-span",
+      "value": "**/*"
+    },
+    {
+      "kind": "code-span",
+      "value": "/bun.lock"
+    },
+    {
+      "kind": "code-span",
+      "value": "'/bun.lock'"
+    },
+    {
+      "kind": "code-span",
+      "value": "typecheck"
+    },
+    {
+      "kind": "code-span",
+      "value": "build"
+    },
+    {
+      "kind": "code-span",
+      "value": "test"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon.yml:18,22,50"
+    },
+    {
+      "kind": "code-span",
+      "value": "dev-smoke"
+    },
+    {
+      "kind": "code-span",
+      "value": "build"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon.yml:22"
+    },
+    {
+      "kind": "code-span",
+      "value": "'e2e/dev-boot.spec.ts'"
+    },
+    {
+      "kind": "code-span",
+      "value": "'playwright.config.ts'"
+    },
+    {
+      "kind": "code-span",
+      "value": "cache: false"
+    },
+    {
+      "kind": "code-span",
+      "value": "node_modules"
+    },
+    {
+      "kind": "code-span",
+      "value": "optimizeDeps"
+    },
+    {
+      "kind": "code-span",
+      "value": "ci"
+    },
+    {
+      "kind": "code-span",
+      "value": "cache: false"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon.yml:61-62"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "grep"
+    },
+    {
+      "kind": "code-span",
+      "value": ".github/workflows/ci.yml"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.nix"
+    },
+    {
+      "kind": "code-span",
+      "value": "tools/toolchain/"
+    },
+    {
+      "kind": "code-span",
+      "value": "playwright.config.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "/etc/profiles/per-user/mattw/bin/chromium"
+    },
+    {
+      "kind": "code-span",
+      "value": "PLAYWRIGHT_CHROMIUM_PATH"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.nix"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages"
+    },
+    {
+      "kind": "code-span",
+      "value": "parity.ts --print-nix-attrs"
+    },
+    {
+      "kind": "code-span",
+      "value": "gate-tools.nix"
+    },
+    {
+      "kind": "code-span",
+      "value": "gate-tools.nix:5-8"
+    },
+    {
+      "kind": "code-span",
+      "value": "PLAYWRIGHT_CHROMIUM_PATH"
+    },
+    {
+      "kind": "code-span",
+      "value": "optimizeDeps.include"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite.config.ts:44-49"
+    },
+    {
+      "kind": "code-span",
+      "value": "main"
+    },
+    {
+      "kind": "code-span",
+      "value": "src/design-citations.test.ts:12-13"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Alternatives considered"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Guard shape"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "playwright.config.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "strictPort"
+    },
+    {
+      "kind": "code-span",
+      "value": "reuseExistingServer: false"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "/src/index.tsx"
+    },
+    {
+      "kind": "code-span",
+      "value": "/@fs"
+    },
+    {
+      "kind": "code-span",
+      "value": "__vite__cjsImport"
+    },
+    {
+      "kind": "code-span",
+      "value": "/@fs"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "debug"
+    },
+    {
+      "kind": "code-span",
+      "value": "extend"
+    },
+    {
+      "kind": "code-span",
+      "value": "routes.tsx:17"
+    },
+    {
+      "kind": "code-span",
+      "value": "ChannelView"
+    },
+    {
+      "kind": "code-span",
+      "value": "ChannelView.tsx:30"
+    },
+    {
+      "kind": "code-span",
+      "value": "MarkdownText"
+    },
+    {
+      "kind": "code-span",
+      "value": "MarkdownText.tsx:18"
+    },
+    {
+      "kind": "code-span",
+      "value": "solid-markdown"
+    },
+    {
+      "kind": "code-span",
+      "value": "import()"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/markdown/highlighter.ts:38-56"
+    },
+    {
+      "kind": "code-span",
+      "value": "lazy()"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Automation tooling"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "@playwright/test"
+    },
+    {
+      "kind": "code-span",
+      "value": "1.62.1"
+    },
+    {
+      "kind": "code-span",
+      "value": "package.json:31"
+    },
+    {
+      "kind": "code-span",
+      "value": "test:visual"
+    },
+    {
+      "kind": "code-span",
+      "value": "package.json:8"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "puppeteer-core"
+    },
+    {
+      "kind": "code-span",
+      "value": "puppeteer-core"
+    },
+    {
+      "kind": "code-span",
+      "value": "puppeteer-core"
+    },
+    {
+      "kind": "code-span",
+      "value": "package.json"
+    },
+    {
+      "kind": "code-span",
+      "value": "package.json:27-43"
+    },
+    {
+      "kind": "code-span",
+      "value": "PUPPETEER_EXECUTABLE_PATH"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Do nothing / inputs-only repair"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite.config.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "test"
+    },
+    {
+      "kind": "code-span",
+      "value": "main"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon.yml:50"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Global Constraints"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "@playwright/test"
+    },
+    {
+      "kind": "code-span",
+      "value": "1.62.1"
+    },
+    {
+      "kind": "code-span",
+      "value": "package.json:31"
+    },
+    {
+      "kind": "code-span",
+      "value": "puppeteer-core"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "launchOptions.executablePath"
+    },
+    {
+      "kind": "code-span",
+      "value": "playwright.config.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "PLAYWRIGHT_CHROMIUM_PATH"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.nix"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages"
+    },
+    {
+      "kind": "code-span",
+      "value": "gate-tools.nix"
+    },
+    {
+      "kind": "code-span",
+      "value": "setup-*"
+    },
+    {
+      "kind": "code-span",
+      "value": "playwright.config.ts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "dev-smoke"
+    },
+    {
+      "kind": "code-span",
+      "value": "inputs"
+    },
+    {
+      "kind": "code-span",
+      "value": "cache: false"
+    },
+    {
+      "kind": "code-span",
+      "value": "inputs"
+    },
+    {
+      "kind": "code-span",
+      "value": "inputs"
+    },
+    {
+      "kind": "code-span",
+      "value": "**/*"
+    },
+    {
+      "kind": "code-span",
+      "value": "/bun.lock"
+    },
+    {
+      "kind": "code-span",
+      "value": "cache: false"
+    },
+    {
+      "kind": "code-span",
+      "value": "node_modules"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite.config.ts:40-43"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "bunx vite --port <ephemeral> --strictPort --mode fixture"
+    },
+    {
+      "kind": "code-span",
+      "value": "playwright.config.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "VITE_COMPASS_BASE_URL"
+    },
+    {
+      "kind": "code-span",
+      "value": ".env.development:46-48"
+    },
+    {
+      "kind": "code-span",
+      "value": "process.env"
+    },
+    {
+      "kind": "code-span",
+      "value": "--strictPort"
+    },
+    {
+      "kind": "code-span",
+      "value": "VITE_COMPASS_CALLER_ID"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "bun test"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon.yml:37-42"
+    },
+    {
+      "kind": "code-span",
+      "value": "test"
+    },
+    {
+      "kind": "code-span",
+      "value": "src/"
+    },
+    {
+      "kind": "code-span",
+      "value": "@playwright/test"
+    },
+    {
+      "kind": "code-span",
+      "value": "bun test"
+    },
+    {
+      "kind": "code-span",
+      "value": "e2e/"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Plan"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T1 — the `dev-boot` Playwright spec"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/e2e/dev-boot.spec.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "/#/"
+    },
+    {
+      "kind": "code-span",
+      "value": "baseURL"
+    },
+    {
+      "kind": "code-span",
+      "value": "playwright.config.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "http://localhost:${devPort}"
+    },
+    {
+      "kind": "code-span",
+      "value": "webServer"
+    },
+    {
+      "kind": "code-span",
+      "value": "pageerror"
+    },
+    {
+      "kind": "code-span",
+      "value": "page.on(\"pageerror\", …)"
+    },
+    {
+      "kind": "code-span",
+      "value": "page.goto"
+    },
+    {
+      "kind": "code-span",
+      "value": ".bridge"
+    },
+    {
+      "kind": "code-span",
+      "value": "e2e/visual-smoke.spec.ts:22"
+    },
+    {
+      "kind": "code-span",
+      "value": "#root"
+    },
+    {
+      "kind": "code-span",
+      "value": "pageerror"
+    },
+    {
+      "kind": "code-span",
+      "value": "pageerror"
+    },
+    {
+      "kind": "code-span",
+      "value": ".bridge"
+    },
+    {
+      "kind": "code-span",
+      "value": ".bridge"
+    },
+    {
+      "kind": "code-span",
+      "value": "pageerror"
+    },
+    {
+      "kind": "code-span",
+      "value": "pageerror"
+    },
+    {
+      "kind": "code-span",
+      "value": "finally"
+    },
+    {
+      "kind": "code-span",
+      "value": ".bridge"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Interfaces:"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/playwright.config.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "baseURL"
+    },
+    {
+      "kind": "code-span",
+      "value": "webServer"
+    },
+    {
+      "kind": "code-span",
+      "value": "use.launchOptions.executablePath"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/e2e/dev-boot.spec.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "page.on(\"pageerror\", (e: Error) => …)"
+    },
+    {
+      "kind": "code-span",
+      "value": "page.locator(\"#root\")"
+    },
+    {
+      "kind": "code-span",
+      "value": "page.locator(\".bridge\")"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "bunx playwright test e2e/dev-boot.spec.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T2 — the `dev-smoke` moon task + `ci` wiring"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/moon.yml"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[yaml]\ndev-smoke:\n  command: 'bunx playwright test e2e/dev-boot.spec.ts'\n  deps: ['install']\n  inputs: ['src/**/*', 'index.html', 'tsconfig.json', 'package.json', 'vite.config.ts', 'e2e/dev-boot.spec.ts', 'playwright.config.ts', '/bun.lock', '/packages/compass-client/src/**/*', '/packages/compass-client/package.json']\n  options:\n    cache: false"
+    },
+    {
+      "kind": "code-span",
+      "value": "ci.deps"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon.yml:59-60"
+    },
+    {
+      "kind": "code-span",
+      "value": "['typecheck', 'build', 'test', 'stylelint', 'dev-smoke']"
+    },
+    {
+      "kind": "code-span",
+      "value": "inputs"
+    },
+    {
+      "kind": "code-span",
+      "value": "inputs"
+    },
+    {
+      "kind": "code-span",
+      "value": "**/*"
+    },
+    {
+      "kind": "code-span",
+      "value": "/bun.lock"
+    },
+    {
+      "kind": "code-span",
+      "value": "bun.lock"
+    },
+    {
+      "kind": "code-span",
+      "value": "optimizeDeps"
+    },
+    {
+      "kind": "code-span",
+      "value": "build"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon.yml:22"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Interfaces:"
+    },
+    {
+      "kind": "code-span",
+      "value": "dev-smoke"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-ui:dev-smoke"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-ui:ci"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon run compass-ui:dev-smoke"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon ci :ci"
+    },
+    {
+      "kind": "code-span",
+      "value": "/bun.lock"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-ui:dev-smoke"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon run"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon ci"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T3 — CI Chromium provisioning"
+    },
+    {
+      "kind": "code-span",
+      "value": "chromium"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.nix"
+    },
+    {
+      "kind": "code-span",
+      "value": ":40"
+    },
+    {
+      "kind": "code-span",
+      "value": "gate-tools.nix:5-8"
+    },
+    {
+      "kind": "code-span",
+      "value": "PLAYWRIGHT_CHROMIUM_PATH"
+    },
+    {
+      "kind": "code-span",
+      "value": "GITHUB_ENV"
+    },
+    {
+      "kind": "code-span",
+      "value": "$GITHUB_PATH"
+    },
+    {
+      "kind": "code-span",
+      "value": "echo \"PLAYWRIGHT_CHROMIUM_PATH=$(command -v chromium)\" >> \"$GITHUB_ENV\""
+    },
+    {
+      "kind": "code-span",
+      "value": "ci.yml:197-212"
+    },
+    {
+      "kind": "code-span",
+      "value": "echo \"PLAYWRIGHT_CHROMIUM_PATH=$out/bin/chromium\" >> \"$GITHUB_ENV\""
+    },
+    {
+      "kind": "code-span",
+      "value": "$(command -v chromium)"
+    },
+    {
+      "kind": "code-span",
+      "value": "$out/bin"
+    },
+    {
+      "kind": "code-span",
+      "value": "playwright.config.ts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Interfaces:"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.nix"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages"
+    },
+    {
+      "kind": "code-span",
+      "value": ".github/workflows/ci.yml"
+    },
+    {
+      "kind": "code-span",
+      "value": "PLAYWRIGHT_CHROMIUM_PATH"
+    },
+    {
+      "kind": "code-span",
+      "value": "playwright.config.ts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-ui:dev-smoke"
+    },
+    {
+      "kind": "code-span",
+      "value": "bun tools/toolchain/parity.ts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "executablePath"
+    },
+    {
+      "kind": "code-span",
+      "value": "playwright.config.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "launchOptions"
+    },
+    {
+      "kind": "code-span",
+      "value": "args"
+    },
+    {
+      "kind": "code-span",
+      "value": "--no-sandbox"
+    },
+    {
+      "kind": "code-span",
+      "value": "launchOptions.args"
+    },
+    {
+      "kind": "code-span",
+      "value": "chromiumSandbox: false"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "chromium"
+    },
+    {
+      "kind": "code-span",
+      "value": "env"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.nix"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.nix:141-145"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T4 — red→green proof"
+    },
+    {
+      "kind": "code-span",
+      "value": "optimizeDeps.include"
+    },
+    {
+      "kind": "code-span",
+      "value": "vite.config.ts:44-49"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon run compass-ui:dev-smoke"
+    },
+    {
+      "kind": "code-span",
+      "value": "debug"
+    },
+    {
+      "kind": "code-span",
+      "value": "extend"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Interfaces:"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "main"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Tasks"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/e2e/dev-boot.spec.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": ".bridge"
+    },
+    {
+      "kind": "code-span",
+      "value": "pageerror"
+    },
+    {
+      "kind": "code-span",
+      "value": "#root"
+    },
+    {
+      "kind": "code-span",
+      "value": "bunx playwright test e2e/dev-boot.spec.ts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/moon.yml"
+    },
+    {
+      "kind": "code-span",
+      "value": "dev-smoke"
+    },
+    {
+      "kind": "code-span",
+      "value": "inputs"
+    },
+    {
+      "kind": "code-span",
+      "value": "cache: false"
+    },
+    {
+      "kind": "code-span",
+      "value": "ci.deps"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon run compass-ui:dev-smoke"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon ci :ci"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "chromium"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.nix"
+    },
+    {
+      "kind": "code-span",
+      "value": "PLAYWRIGHT_CHROMIUM_PATH"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-ui:dev-smoke"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Resolved decisions"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "highlighter.ts:38-56"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "puppeteer-core"
+    },
+    {
+      "kind": "code-span",
+      "value": "@playwright/test"
+    },
+    {
+      "kind": "code-span",
+      "value": "playwright.config.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "puppeteer-core"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "dev-smoke"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-ui:ci"
+    },
+    {
+      "kind": "code-span",
+      "value": "ci.yml:107-109"
+    },
+    {
+      "kind": "code-span",
+      "value": "dev-smoke"
+    },
+    {
+      "kind": "code-span",
+      "value": "inputs"
+    },
+    {
+      "kind": "code-span",
+      "value": "build"
+    },
+    {
+      "kind": "code-span",
+      "value": "playwright.config.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "bun.lock"
+    },
+    {
+      "kind": "code-span",
+      "value": "ci.yml:31-36"
+    },
+    {
+      "kind": "code-span",
+      "value": "chromium"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

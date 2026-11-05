@@ -1,0 +1,34 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/README.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/meissa-0006.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 @rigelbuild/comment-scan"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 API"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\nimport { commentBlocks, scanText } from \"@rigelbuild/comment-scan\";\n\ncommentBlocks(\"// note\\nconst value = 1;\", \".ts\");\nscanText(\"ts\", \"const value = 1; // note\");"
+    },
+    {
+      "kind": "code-span",
+      "value": "commentBlocks"
+    },
+    {
+      "kind": "code-span",
+      "value": "null"
+    },
+    {
+      "kind": "code-span",
+      "value": "scanText"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

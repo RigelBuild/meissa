@@ -1,0 +1,11 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/astro.ts",
+  "corpus": "go/commentscan/testdata/corpus/astro/markup-prose-brace.astro",
+  "scan": {
+    "residues": [
+      "<p>Use '{' to open <b>a block</b>.</p>"
+    ],
+    "ambiguous": true
+  }
+}

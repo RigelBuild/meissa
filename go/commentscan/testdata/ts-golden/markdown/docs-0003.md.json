@@ -1,0 +1,330 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "docs/designs/compass/agent/compass-forks-reversal/oq-resolutions.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0003.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Compass forks reversal — Open-Question resolutions (RIG-2336)"
+    },
+    {
+      "kind": "link-target",
+      "value": "./design.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "9d48f9a9"
+    },
+    {
+      "kind": "code-span",
+      "value": "skill://design"
+    },
+    {
+      "kind": "code-span",
+      "value": "skill://design"
+    },
+    {
+      "kind": "code-span",
+      "value": "## Open Questions"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Decision 1 — oh-my-pi: consume a Rigel-tagged npm release (supersedes OQ1)"
+    },
+    {
+      "kind": "code-span",
+      "value": "github:"
+    },
+    {
+      "kind": "code-span",
+      "value": "npm"
+    },
+    {
+      "kind": "code-span",
+      "value": "github:RigelBuild/oh-my-pi"
+    },
+    {
+      "kind": "code-span",
+      "value": "design.md:437-490"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/gen_credential_keys.go:42"
+    },
+    {
+      "kind": "code-span",
+      "value": "schemaRelPath"
+    },
+    {
+      "kind": "code-span",
+      "value": "settings-schema.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent/package.json:19"
+    },
+    {
+      "kind": "code-span",
+      "value": "@oh-my-pi/pi-coding-agent"
+    },
+    {
+      "kind": "code-span",
+      "value": "forks/oh-my-pi/..."
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "gen_credential_keys.go:74"
+    },
+    {
+      "kind": "code-span",
+      "value": "credential_keys_gen.go:3"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_config.go:656-659"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_config_test.go:505-518"
+    },
+    {
+      "kind": "code-span",
+      "value": "forks/oh-my-pi/..."
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestCredentialKeysMatchSchema"
+    },
+    {
+      "kind": "code-span",
+      "value": "want"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_config_test.go:508-516"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "forks/oh-my-pi/"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon.yml"
+    },
+    {
+      "kind": "code-span",
+      "value": "oh-my-pi-fork"
+    },
+    {
+      "kind": "code-span",
+      "value": ".moon/workspace.yml:86-89"
+    },
+    {
+      "kind": "code-span",
+      "value": ".moon/workspace.yml:80-83"
+    },
+    {
+      "kind": "code-span",
+      "value": "VENDORING A NEW FORK"
+    },
+    {
+      "kind": "code-span",
+      "value": ":70-83"
+    },
+    {
+      "kind": "code-span",
+      "value": "design.md:500-503"
+    },
+    {
+      "kind": "code-span",
+      "value": ":86-88"
+    },
+    {
+      "kind": "code-span",
+      "value": "oh-my-pi-fork: 'forks/oh-my-pi'"
+    },
+    {
+      "kind": "code-span",
+      "value": ":89"
+    },
+    {
+      "kind": "code-span",
+      "value": ":86-89"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Decision 2 — raw `nix run` sites: install the fork tools, pinned (supersedes OQ2)"
+    },
+    {
+      "kind": "code-span",
+      "value": "nix run"
+    },
+    {
+      "kind": "code-span",
+      "value": "github:RigelBuild/<fork>"
+    },
+    {
+      "kind": "code-span",
+      "value": "nix run"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.lock"
+    },
+    {
+      "kind": "code-span",
+      "value": "skopeo-nix2container"
+    },
+    {
+      "kind": "code-span",
+      "value": "github:RigelBuild/<fork>"
+    },
+    {
+      "kind": "code-span",
+      "value": "nix run path:..."
+    },
+    {
+      "kind": "code-span",
+      "value": "github:.../<rev>"
+    },
+    {
+      "kind": "code-span",
+      "value": "nix run"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv container build"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent-image/devenv.yaml"
+    },
+    {
+      "kind": "code-span",
+      "value": "design.md:348-386"
+    },
+    {
+      "kind": "code-span",
+      "value": "design.md:388-435"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "nix run"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent-image/publish.sh:32,50-51"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent-image/moon.yml:44"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.nix:476"
+    },
+    {
+      "kind": "code-span",
+      "value": ".github/workflows/ci.yml:812"
+    },
+    {
+      "kind": "code-span",
+      "value": ".github/workflows/publish-agent-image.yml:139,160"
+    },
+    {
+      "kind": "code-span",
+      "value": "tools/agent-image-env-gate/index.ts:100,118"
+    },
+    {
+      "kind": "code-span",
+      "value": "github:RigelBuild/{devenv,nix2container}"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent-image/devenv.lock"
+    },
+    {
+      "kind": "code-span",
+      "value": "path:..."
+    },
+    {
+      "kind": "code-span",
+      "value": "/<rev>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent-image/devenv.lock"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.yaml"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.lock"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Not changed"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "RigelBuild/nix2container"
+    },
+    {
+      "kind": "code-span",
+      "value": "main"
+    },
+    {
+      "kind": "code-span",
+      "value": "8f4a6fd7"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

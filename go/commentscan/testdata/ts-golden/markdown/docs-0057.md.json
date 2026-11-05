@@ -1,0 +1,1482 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "docs/designs/compass/infra/runtime/compass-runner-gateway-error-sentinels/design.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0057.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Design: Runner gateway/operator-fault error sentinels"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Problem / Intent"
+    },
+    {
+      "kind": "code-span",
+      "value": "Internal"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorResult"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/dispatch.go:455-462"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n> func errorResult(id string, err error) *compassv1internal.SessionsRequest {\n>   code := compassv1internal.RunnerErrorCode_RUNNER_ERROR_CODE_INTERNAL\n>   switch {\n>   case errors.Is(err, errAlreadyRunning):\n>     code = compassv1internal.RunnerErrorCode_RUNNER_ERROR_CODE_ALREADY_RUNNING\n>   case errors.Is(err, errSessionUnknown):\n>     code = compassv1internal.RunnerErrorCode_RUNNER_ERROR_CODE_NOT_FOUND\n>   }"
+    },
+    {
+      "kind": "code-span",
+      "value": "runnerErrorToConnect"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runnerhub/commands.go:206-215"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeInternal"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n> switch e.GetCode() {\n> case compassv1internal.RunnerErrorCode_RUNNER_ERROR_CODE_ALREADY_RUNNING:\n>   code = connect.CodeAlreadyExists\n> case compassv1internal.RunnerErrorCode_RUNNER_ERROR_CODE_NOT_FOUND:\n>   code = connect.CodeNotFound\n> default:\n>   code = connect.CodeInternal\n> }"
+    },
+    {
+      "kind": "code-span",
+      "value": "fmt.Errorf"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/gateway/socket.go:140-141"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n> if len(path) > sunPathMax {\n>   return nil, fmt.Errorf(\"agent socket path %q is %d bytes, over the %d-byte AF_UNIX limit: shorten the Runner's --runtime-dir or the agent account id\", path, len(path), sunPathMax)\n> }"
+    },
+    {
+      "kind": "code-span",
+      "value": "RunnerError.message"
+    },
+    {
+      "kind": "code-span",
+      "value": "commands.go:216"
+    },
+    {
+      "kind": "code-span",
+      "value": "fmt.Errorf(\"runner: %s\", e.GetMessage())"
+    },
+    {
+      "kind": "code-span",
+      "value": "Internal"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Global Constraints"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/gen/compass/v1/"
+    },
+    {
+      "kind": "code-span",
+      "value": "runner.pb.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/gen/compass/v1/runner.pb.go:69"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "runner.proto"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/runner.proto:16-18"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass.v1"
+    },
+    {
+      "kind": "code-span",
+      "value": "buf lint"
+    },
+    {
+      "kind": "code-span",
+      "value": "buf breaking"
+    },
+    {
+      "kind": "code-span",
+      "value": "RunnerErrorCode"
+    },
+    {
+      "kind": "code-span",
+      "value": "runner.proto:5-8"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": " added for RIG-1569 ("
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go test -race"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runnerhub/"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Approach"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 (1) Proto: one new `RunnerErrorCode` value (tag 5)"
+    },
+    {
+      "kind": "code-span",
+      "value": "enum RunnerErrorCode"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/runner.proto:408-423"
+    },
+    {
+      "kind": "code-span",
+      "value": "RUNNER_ERROR_CODE_FAILED_PRECONDITION = 5"
+    },
+    {
+      "kind": "code-span",
+      "value": "FailedPrecondition"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ProvisionAgentWorkspaceRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "--runtime-dir"
+    },
+    {
+      "kind": "code-span",
+      "value": "socket.go:119-122"
+    },
+    {
+      "kind": "code-span",
+      "value": "InvalidArgument"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "FailedPrecondition"
+    },
+    {
+      "kind": "code-span",
+      "value": "--runtime-dir"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "errNotAgentAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeFailedPrecondition"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeInvalidArgument"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/agent_caller.go:71-79"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeFailedPrecondition"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runnerhub/handler.go:52-56"
+    },
+    {
+      "kind": "code-span",
+      "value": ":253-254"
+    },
+    {
+      "kind": "code-span",
+      "value": ":288-292"
+    },
+    {
+      "kind": "code-span",
+      "value": ":324-326"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ErrFailedPrecondition"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeFailedPrecondition"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/context.go:52"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "OPERATOR_FAULT"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 (2) Server: `runnerErrorToConnect` arm (compass-server lane, cross-lane)"
+    },
+    {
+      "kind": "code-span",
+      "value": "case"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runnerhub/commands.go:208"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestRunnerErrorToConnectCodeMapping"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runnerhub/commands_test.go:25-35"
+    },
+    {
+      "kind": "code-span",
+      "value": "{name, code, want connect.Code}"
+    },
+    {
+      "kind": "code-span",
+      "value": "commands_test.go:42-43"
+    },
+    {
+      "kind": "code-span",
+      "value": "relay"
+    },
+    {
+      "kind": "code-span",
+      "value": "RunnerError"
+    },
+    {
+      "kind": "code-span",
+      "value": "commands.go:199-201"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeInternal"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 (3) Runner: an operator-fault sentinel + `errorResult` arm"
+    },
+    {
+      "kind": "code-span",
+      "value": "gateway"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/gateway/socket.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "runner"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "runner"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go:69-73"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n// package gateway\n// ErrOperatorConfig marks a failure whose remedy is an operator knob\n// (runtime-dir length, socket-dir permissions/ownership) rather than a\n// Compass bug. errorResult (runner/dispatch.go) maps it to\n// RUNNER_ERROR_CODE_FAILED_PRECONDITION instead of INTERNAL.\nvar ErrOperatorConfig = errors.New(\"operator-fault runner configuration\")"
+    },
+    {
+      "kind": "code-span",
+      "value": "fmt.Errorf(\"...: %w\", ErrOperatorConfig)"
+    },
+    {
+      "kind": "code-span",
+      "value": "err.Error()"
+    },
+    {
+      "kind": "code-span",
+      "value": "RunnerError.message"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/dispatch.go:465-467"
+    },
+    {
+      "kind": "code-span",
+      "value": "Message: err.Error()"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runnerhub/commands.go:216"
+    },
+    {
+      "kind": "code-span",
+      "value": "fmt.Errorf(\"runner: %s\", e.GetMessage())"
+    },
+    {
+      "kind": "code-span",
+      "value": "strings.Contains"
+    },
+    {
+      "kind": "code-span",
+      "value": "socket_test.go:449-458"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorResult"
+    },
+    {
+      "kind": "code-span",
+      "value": "serveSocket"
+    },
+    {
+      "kind": "code-span",
+      "value": "%w"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/host.go:829-831"
+    },
+    {
+      "kind": "code-span",
+      "value": "), "
+    },
+    {
+      "kind": "code-span",
+      "value": "listenAgentSocket"
+    },
+    {
+      "kind": "code-span",
+      "value": "gateway.go:277-281"
+    },
+    {
+      "kind": "code-span",
+      "value": "serveSocket"
+    },
+    {
+      "kind": "code-span",
+      "value": "host.go:172-175"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorResult(id, err)"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go:380-383"
+    },
+    {
+      "kind": "code-span",
+      "value": "runner"
+    },
+    {
+      "kind": "code-span",
+      "value": "gateway"
+    },
+    {
+      "kind": "code-span",
+      "value": "host.go:828"
+    },
+    {
+      "kind": "code-span",
+      "value": "gateway.Serve"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorResult"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\ncase errors.Is(err, gateway.ErrOperatorConfig):\n  code = compassv1internal.RunnerErrorCode_RUNNER_ERROR_CODE_FAILED_PRECONDITION"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrOperatorConfig"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "socket.go:140-141"
+    },
+    {
+      "kind": "code-span",
+      "value": "--runtime-dir"
+    },
+    {
+      "kind": "code-span",
+      "value": "validateRuntimeDir"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/run.go:59-78"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "socket.go:145-147"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "socket.go:150-152"
+    },
+    {
+      "kind": "code-span",
+      "value": "socket.go:148-149"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "reclaimStaleSocket"
+    },
+    {
+      "kind": "code-span",
+      "value": "socket.go:197-198"
+    },
+    {
+      "kind": "code-span",
+      "value": "socket.go:204-205"
+    },
+    {
+      "kind": "code-span",
+      "value": "socket.go:185-186"
+    },
+    {
+      "kind": "code-span",
+      "value": "Lstat"
+    },
+    {
+      "kind": "code-span",
+      "value": "socket.go:192-194"
+    },
+    {
+      "kind": "code-span",
+      "value": "socket.go:200-203"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ensureRoot"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/config_materialize.go:205-210"
+    },
+    {
+      "kind": "code-span",
+      "value": "fmt.Errorf(\"ensuring config root %q: %w\", ...)"
+    },
+    {
+      "kind": "code-span",
+      "value": "configMaterializerFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "<RuntimeDir>/containers/<name>/config"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/host.go:804-812"
+    },
+    {
+      "kind": "code-span",
+      "value": "%w"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorResult"
+    },
+    {
+      "kind": "code-span",
+      "value": "Materialize"
+    },
+    {
+      "kind": "code-span",
+      "value": "fmt.Errorf(\"materializing agent config: %w\", err)"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/host.go:184-190"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorResult(id, err)"
+    },
+    {
+      "kind": "code-span",
+      "value": "runner"
+    },
+    {
+      "kind": "code-span",
+      "value": "gateway"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/host.go:828"
+    },
+    {
+      "kind": "code-span",
+      "value": "gateway.Serve"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrOperatorConfig"
+    },
+    {
+      "kind": "code-span",
+      "value": "config_materialize.go:401"
+    },
+    {
+      "kind": "code-span",
+      "value": ":407"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "socket.go:159-161"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "socket.go:165-167"
+    },
+    {
+      "kind": "code-span",
+      "value": "execute"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorResult(id, err)"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go:363,377,382,390,398,407,416,449"
+    },
+    {
+      "kind": "code-span",
+      "value": "RunnerError.message"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go:78"
+    },
+    {
+      "kind": "code-span",
+      "value": "log *slog.Logger"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go:442"
+    },
+    {
+      "kind": "code-span",
+      "value": "agentHost"
+    },
+    {
+      "kind": "code-span",
+      "value": "h.log"
+    },
+    {
+      "kind": "code-span",
+      "value": "host.go:273,344,852"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorResult"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\nfunc (d *dispatcher) errorResult(ctx context.Context, id string, err error) *compassv1internal.SessionsRequest {\n  // classify code as today, then log at a level chosen by class:\n  //   context.Canceled / context.DeadlineExceeded -> skip (or Debug)\n  //   INTERNAL                                     -> Error\n  //   classified operator/client-fault codes       -> Warn\n  // build and return the result frame\n}"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrorContext"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorResult(id, ctx.Err())"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go:376-377"
+    },
+    {
+      "kind": "code-span",
+      "value": "errSessionUnknown"
+    },
+    {
+      "kind": "code-span",
+      "value": "errAlreadyRunning"
+    },
+    {
+      "kind": "code-span",
+      "value": "context.Canceled"
+    },
+    {
+      "kind": "code-span",
+      "value": "context.DeadlineExceeded"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "execute"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Plan"
+    },
+    {
+      "kind": "code-span",
+      "value": "RunnerErrorCode_RUNNER_ERROR_CODE_FAILED_PRECONDITION"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T1 — proto: add the enum value (compass-runner lane; prerequisite)"
+    },
+    {
+      "kind": "code-span",
+      "value": "enum RunnerErrorCode"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/runner.proto:408-423"
+    },
+    {
+      "kind": "code-span",
+      "value": "runner.proto:418-422"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[proto]\n  // A command failed on an operator-fault condition in the Runner's\n  // deployment (a socket path over the AF_UNIX limit, socket-dir\n  // permissions/ownership, an occupied socket path) -> Connect\n  // FailedPrecondition. Distinguished from INTERNAL so an admin sees a\n  // fix-the-deployment signal rather than a Compass bug.\n  RUNNER_ERROR_CODE_FAILED_PRECONDITION = 5;"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/gen/compass/v1/runner.pb.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "runner.pb.go:72-88"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": " in "
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "buf lint"
+    },
+    {
+      "kind": "code-span",
+      "value": "buf breaking"
+    },
+    {
+      "kind": "code-span",
+      "value": "runner.proto:16-18"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeFailedPrecondition"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/host.go:340-343"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/config_materialize.go:150-153"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeFailedPrecondition"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T2 — server: mapping arm + test row (compass-server lane; CROSS-LANE)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runnerhub/commands.go:208-215"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runnerhub/commands_test.go:30-35"
+    },
+    {
+      "kind": "code-span",
+      "value": "{\"failed precondition\", ...FAILED_PRECONDITION, connect.CodeFailedPrecondition}"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestRunnerErrorToConnectCodeMapping"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "runnerErrorToConnect(e *compassv1internal.RunnerError) error"
+    },
+    {
+      "kind": "code-span",
+      "value": "commands.go:206"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "default"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeInternal"
+    },
+    {
+      "kind": "code-span",
+      "value": "commands.go:213-214"
+    },
+    {
+      "kind": "code-span",
+      "value": "go test -race ./internal/runnerhub/..."
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T3 — runner: sentinel, wrapping, `errorResult` arm, logging (compass-runner lane)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "var ErrOperatorConfig = errors.New(...)"
+    },
+    {
+      "kind": "code-span",
+      "value": "gateway"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/gateway/socket.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "sunPathMax"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "%w"
+    },
+    {
+      "kind": "code-span",
+      "value": "socket.go:140-141"
+    },
+    {
+      "kind": "code-span",
+      "value": ":145-147"
+    },
+    {
+      "kind": "code-span",
+      "value": ":150-152"
+    },
+    {
+      "kind": "code-span",
+      "value": ":197-198"
+    },
+    {
+      "kind": "code-span",
+      "value": ":204-205"
+    },
+    {
+      "kind": "code-span",
+      "value": "config_materialize.go:205-210"
+    },
+    {
+      "kind": "code-span",
+      "value": "ensureRoot"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go:465-467"
+    },
+    {
+      "kind": "code-span",
+      "value": "Message: err.Error()"
+    },
+    {
+      "kind": "code-span",
+      "value": "commands.go:216"
+    },
+    {
+      "kind": "code-span",
+      "value": ":159-161"
+    },
+    {
+      "kind": "code-span",
+      "value": ":165-167"
+    },
+    {
+      "kind": "code-span",
+      "value": ":192-194"
+    },
+    {
+      "kind": "code-span",
+      "value": ":200-203"
+    },
+    {
+      "kind": "code-span",
+      "value": "config_materialize.go:401,407"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "errors.Is(err, gateway.ErrOperatorConfig)"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorResult"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go:455-462"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorResult"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go:363-449"
+    },
+    {
+      "kind": "code-span",
+      "value": "d.errorResult(ctx, id, err)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:4."
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go:69-70"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "gateway.ErrOperatorConfig error"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorResult"
+    },
+    {
+      "kind": "code-span",
+      "value": "func (d *dispatcher) errorResult(ctx context.Context, id string, err error) *compassv1internal.SessionsRequest"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionHost"
+    },
+    {
+      "kind": "code-span",
+      "value": "Provision"
+    },
+    {
+      "kind": "code-span",
+      "value": "fmt.Errorf(\"serving agent socket for container %q: %w\", name, gateway.ErrOperatorConfig)"
+    },
+    {
+      "kind": "code-span",
+      "value": "RUNNER_ERROR_CODE_FAILED_PRECONDITION"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorResult"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "socket_test.go:435-455"
+    },
+    {
+      "kind": "code-span",
+      "value": "errors.Is(err, ErrOperatorConfig)"
+    },
+    {
+      "kind": "code-span",
+      "value": "socket.go:159-161"
+    },
+    {
+      "kind": "code-span",
+      "value": ":165-167"
+    },
+    {
+      "kind": "code-span",
+      "value": ":192-194"
+    },
+    {
+      "kind": "code-span",
+      "value": ":200-203"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "slog.Handler"
+    },
+    {
+      "kind": "code-span",
+      "value": "ctx.Err()"
+    },
+    {
+      "kind": "code-span",
+      "value": "ctx.Done"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go:376-377"
+    },
+    {
+      "kind": "code-span",
+      "value": "d.log"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go test -race ./internal/runner/..."
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T4 — end-to-end assertion (either lane, after T2+T3)"
+    },
+    {
+      "kind": "code-span",
+      "value": "connect.CodeFailedPrecondition"
+    },
+    {
+      "kind": "code-span",
+      "value": "deliveryarm_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runnerhub/deliveryarm_test.go:414-416"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "connect.CodeOf(err) == connect.CodeFailedPrecondition"
+    },
+    {
+      "kind": "code-span",
+      "value": "ctx.Err()"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Ledger scope — this record is not ledgered"
+    },
+    {
+      "kind": "code-span",
+      "value": "DL-<n>"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/designs/product/DECISIONS.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "design-ledger-gate"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/designs/product/**"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/designs/product/"
+    },
+    {
+      "kind": "code-span",
+      "value": ".."
+    },
+    {
+      "kind": "code-span",
+      "value": "tools/design-ledger-gate/index.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/designs/platform/"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-runner-concurrent-dispatch"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-runner-arbitrary-uid"
+    },
+    {
+      "kind": "code-span",
+      "value": "Ledger-impact:"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Tasks"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "RUNNER_ERROR_CODE_FAILED_PRECONDITION = 5"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/runner.proto"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "runnerErrorToConnect"
+    },
+    {
+      "kind": "code-span",
+      "value": "connect.CodeFailedPrecondition"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestRunnerErrorToConnectCodeMapping"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "gateway.ErrOperatorConfig"
+    },
+    {
+      "kind": "code-span",
+      "value": "socket.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "config_materialize.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "ensureRoot"
+    },
+    {
+      "kind": "code-span",
+      "value": "errors.Is"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorResult"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorResult"
+    },
+    {
+      "kind": "code-span",
+      "value": "-race"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeFailedPrecondition"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Open Questions"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "RUNNER_ERROR_CODE_INVALID_ARGUMENT"
+    },
+    {
+      "kind": "code-span",
+      "value": "InvalidArgument"
+    },
+    {
+      "kind": "code-span",
+      "value": "RUNNER_ERROR_CODE_FAILED_PRECONDITION"
+    },
+    {
+      "kind": "code-span",
+      "value": "FailedPrecondition"
+    },
+    {
+      "kind": "code-span",
+      "value": "--runtime-dir"
+    },
+    {
+      "kind": "code-span",
+      "value": "socket.go:119-122"
+    },
+    {
+      "kind": "code-span",
+      "value": "errNotAgentAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeFailedPrecondition"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeInvalidArgument"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/agent_caller.go:71-79"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeFailedPrecondition"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runnerhub/handler.go:52-56"
+    },
+    {
+      "kind": "code-span",
+      "value": ":253-254"
+    },
+    {
+      "kind": "code-span",
+      "value": ":288-292"
+    },
+    {
+      "kind": "code-span",
+      "value": ":324-326"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ErrFailedPrecondition"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeFailedPrecondition"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/context.go:52"
+    },
+    {
+      "kind": "code-span",
+      "value": "RESOURCE_EXHAUSTED = 4"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runnerhub/router.go:50-54"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeUnavailable"
+    },
+    {
+      "kind": "code-span",
+      "value": "OPERATOR_FAULT"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go:363-449"
+    },
+    {
+      "kind": "code-span",
+      "value": "log *slog.Logger"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go:78"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrorContext"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorResult(id, ctx.Err())"
+    },
+    {
+      "kind": "code-span",
+      "value": "ctx.Done"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go:376-377"
+    },
+    {
+      "kind": "code-span",
+      "value": "context.Canceled"
+    },
+    {
+      "kind": "code-span",
+      "value": "context.DeadlineExceeded"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "errSessionUnknown"
+    },
+    {
+      "kind": "code-span",
+      "value": "errAlreadyRunning"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "execute"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "reclaimStaleSocket"
+    },
+    {
+      "kind": "code-span",
+      "value": "socket.go:197-198"
+    },
+    {
+      "kind": "code-span",
+      "value": ":204-205"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ensureRoot"
+    },
+    {
+      "kind": "code-span",
+      "value": "ensureRoot"
+    },
+    {
+      "kind": "code-span",
+      "value": "<RuntimeDir>/containers/<name>/config"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/config_materialize.go:205-210"
+    },
+    {
+      "kind": "code-span",
+      "value": "configMaterializerFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/host.go:804-812"
+    },
+    {
+      "kind": "code-span",
+      "value": "%w"
+    },
+    {
+      "kind": "code-span",
+      "value": "errorResult"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/host.go:184-190"
+    },
+    {
+      "kind": "code-span",
+      "value": "). The sentinel is importable there (package "
+    },
+    {
+      "kind": "code-span",
+      "value": "gateway"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/host.go:828"
+    },
+    {
+      "kind": "code-span",
+      "value": "config_materialize.go:401,407"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

@@ -61,13 +61,25 @@ export async function publishAll(paths: string[], deps: Deps): Promise<void> {
 	}
 }
 
+export async function publishReleased(
+	paths: string[],
+	deps: Deps,
+): Promise<void> {
+	const npmPaths = paths.filter((path) => path.startsWith("packages/"));
+	if (npmPaths.length === 0) {
+		deps.log("skip: no npm package released");
+		return;
+	}
+	await publishAll(npmPaths, deps);
+}
+
 if (import.meta.main) {
 	const root = process.env.GITHUB_WORKSPACE ?? process.cwd();
 	const paths =
 		process.env.PUBLISH_ALL === "true"
 			? allPackages(root)
 			: parsePaths(process.env.PATHS_RELEASED);
-	await publishAll(paths, {
+	await publishReleased(paths, {
 		read: (path) =>
 			JSON.parse(readFileSync(join(root, path, "package.json"), "utf8")),
 		fetch: (url) => fetch(url),

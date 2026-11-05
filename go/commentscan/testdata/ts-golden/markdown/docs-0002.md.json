@@ -1,0 +1,4458 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "docs/designs/compass/agent/compass-agent-status-record/design.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0002.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Compass agent status board"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Problem / Intent"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass_roster"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass_tree"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Approach"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 D1 Two tables: one board row and N task rows per agent"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_activity"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/migrations/0001_init.sql"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_boards"
+    },
+    {
+      "kind": "code-span",
+      "value": "focus_task_key"
+    },
+    {
+      "kind": "code-span",
+      "value": "halt_kind"
+    },
+    {
+      "kind": "code-span",
+      "value": "halt_ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "halt_reason"
+    },
+    {
+      "kind": "code-span",
+      "value": "written_turn"
+    },
+    {
+      "kind": "code-span",
+      "value": "written_at_unix_ms"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_board_tasks"
+    },
+    {
+      "kind": "code-span",
+      "value": ", with "
+    },
+    {
+      "kind": "code-span",
+      "value": ", "
+    },
+    {
+      "kind": "code-span",
+      "value": ", "
+    },
+    {
+      "kind": "code-span",
+      "value": ", "
+    },
+    {
+      "kind": "code-span",
+      "value": ", "
+    },
+    {
+      "kind": "code-span",
+      "value": "waiting JSONB"
+    },
+    {
+      "kind": "code-span",
+      "value": "subagents JSONB"
+    },
+    {
+      "kind": "code-span",
+      "value": "position"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.SearchIssues"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/issues.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "@@"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_activity"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass_set_status"
+    },
+    {
+      "kind": "code-span",
+      "value": "invalid_argument"
+    },
+    {
+      "kind": "code-span",
+      "value": "what"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 D2 One patch-shaped write arm, callable at any time"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsCallRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "update_board = 13"
+    },
+    {
+      "kind": "code-span",
+      "value": "list_topics = 12"
+    },
+    {
+      "kind": "code-span",
+      "value": "open_dm = 11"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "upsert_tasks"
+    },
+    {
+      "kind": "code-span",
+      "value": "BoardTaskPatch"
+    },
+    {
+      "kind": "code-span",
+      "value": "key"
+    },
+    {
+      "kind": "code-span",
+      "value": "optional"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"\""
+    },
+    {
+      "kind": "code-span",
+      "value": "refs"
+    },
+    {
+      "kind": "code-span",
+      "value": "waiting"
+    },
+    {
+      "kind": "code-span",
+      "value": "upsert_subagents"
+    },
+    {
+      "kind": "code-span",
+      "value": "id"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "title"
+    },
+    {
+      "kind": "code-span",
+      "value": "state"
+    },
+    {
+      "kind": "code-span",
+      "value": "ACTIVE"
+    },
+    {
+      "kind": "code-span",
+      "value": "BOARD_TASK_STATE_UNSPECIFIED"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "remove_task_keys"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "focus_task_key"
+    },
+    {
+      "kind": "code-span",
+      "value": "optional"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"\""
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "halt"
+    },
+    {
+      "kind": "code-span",
+      "value": "clear_halt"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "turn_sequence"
+    },
+    {
+      "kind": "code-span",
+      "value": "TurnSequence.current()"
+    },
+    {
+      "kind": "code-span",
+      "value": "written_turn"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "automatic"
+    },
+    {
+      "kind": "code-span",
+      "value": "written_turn"
+    },
+    {
+      "kind": "code-span",
+      "value": "written_at_unix_ms"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentBoardChanged"
+    },
+    {
+      "kind": "code-span",
+      "value": "^[A-Z][A-Z0-9]{1,9}-[0-9]+$"
+    },
+    {
+      "kind": "code-span",
+      "value": "RIG-12"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner/repo#N"
+    },
+    {
+      "kind": "code-span",
+      "value": "#N"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner/repo"
+    },
+    {
+      "kind": "code-span",
+      "value": "ForgeCoord.Normalized"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/pull_requests.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "ref"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 D3 Derived state comes from stored rows, never a live forge read"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner/repo#N"
+    },
+    {
+      "kind": "code-span",
+      "value": "pull_requests"
+    },
+    {
+      "kind": "code-span",
+      "value": "issues"
+    },
+    {
+      "kind": "code-span",
+      "value": "UNSPECIFIED"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "KEY-N"
+    },
+    {
+      "kind": "code-span",
+      "value": "linear.app"
+    },
+    {
+      "kind": "code-span",
+      "value": "KEY"
+    },
+    {
+      "kind": "code-span",
+      "value": "issues"
+    },
+    {
+      "kind": "code-span",
+      "value": "issue_state"
+    },
+    {
+      "kind": "code-span",
+      "value": "tracker_status"
+    },
+    {
+      "kind": "code-span",
+      "value": "UNSPECIFIED"
+    },
+    {
+      "kind": "code-span",
+      "value": "pull_requests"
+    },
+    {
+      "kind": "code-span",
+      "value": "pr"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass.v1.PullRequest"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "gate"
+    },
+    {
+      "kind": "code-span",
+      "value": "MERGED"
+    },
+    {
+      "kind": "code-span",
+      "value": "CLOSED"
+    },
+    {
+      "kind": "code-span",
+      "value": "QUEUED"
+    },
+    {
+      "kind": "code-span",
+      "value": "QUEUE_FAILED"
+    },
+    {
+      "kind": "code-span",
+      "value": "QUEUE_REMOVED"
+    },
+    {
+      "kind": "code-span",
+      "value": "DRAFT"
+    },
+    {
+      "kind": "code-span",
+      "value": "CONFLICTS"
+    },
+    {
+      "kind": "code-span",
+      "value": "mergeable_state"
+    },
+    {
+      "kind": "code-span",
+      "value": "dirty"
+    },
+    {
+      "kind": "code-span",
+      "value": "CHECKS_FAILED"
+    },
+    {
+      "kind": "code-span",
+      "value": "CHECKS_PENDING"
+    },
+    {
+      "kind": "code-span",
+      "value": "CHANGES_REQUESTED"
+    },
+    {
+      "kind": "code-span",
+      "value": "AWAITING_REVIEW"
+    },
+    {
+      "kind": "code-span",
+      "value": "AWAITING_ENQUEUE"
+    },
+    {
+      "kind": "code-span",
+      "value": "commit_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "head_sha"
+    },
+    {
+      "kind": "code-span",
+      "value": "commit_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "stale_approval"
+    },
+    {
+      "kind": "code-span",
+      "value": "required"
+    },
+    {
+      "kind": "code-span",
+      "value": "ChecksSummary.state"
+    },
+    {
+      "kind": "code-span",
+      "value": "AWAITING_REVIEW"
+    },
+    {
+      "kind": "code-span",
+      "value": "AWAITING_ENQUEUE"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "B.base_ref == A.head_ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "stack_position"
+    },
+    {
+      "kind": "code-span",
+      "value": "stack_tip_ref"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "owned"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_authored_artifacts"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_handle"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "observed_at_unix_ms"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_updated_at"
+    },
+    {
+      "kind": "code-span",
+      "value": "untracked_refs"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListOpenAuthoredRefs"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_authored_artifacts"
+    },
+    {
+      "kind": "code-span",
+      "value": "pull_requests"
+    },
+    {
+      "kind": "code-span",
+      "value": "issues"
+    },
+    {
+      "kind": "code-span",
+      "value": "GitHub.GetPullRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "forgeService.recordPullRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/forge.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "BoardReconciler"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_repo_subscriptions"
+    },
+    {
+      "kind": "code-span",
+      "value": "observed_at_unix_ms"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 D4 Freshness: runtime writes, a mid-turn nudge, and a turn-end re-prompt"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "task:subagent:lifecycle"
+    },
+    {
+      "kind": "code-span",
+      "value": "TASK_SUBAGENT_LIFECYCLE_CHANNEL"
+    },
+    {
+      "kind": "code-span",
+      "value": "{id, agent, description, status}"
+    },
+    {
+      "kind": "code-span",
+      "value": "subagentEventBus"
+    },
+    {
+      "kind": "code-span",
+      "value": "main"
+    },
+    {
+      "kind": "code-span",
+      "value": "EventBus"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateAgentSessionOptions.subagentEventBus"
+    },
+    {
+      "kind": "code-span",
+      "value": "automatic"
+    },
+    {
+      "kind": "code-span",
+      "value": "upsert_subagents"
+    },
+    {
+      "kind": "code-span",
+      "value": "subagents"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "tool_execution_end"
+    },
+    {
+      "kind": "code-span",
+      "value": "session.agent.steer"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_end"
+    },
+    {
+      "kind": "code-span",
+      "value": "#flushTurnEnd"
+    },
+    {
+      "kind": "code-span",
+      "value": "BoardFreshness"
+    },
+    {
+      "kind": "code-span",
+      "value": "automatic"
+    },
+    {
+      "kind": "code-span",
+      "value": "update_board"
+    },
+    {
+      "kind": "code-span",
+      "value": "stale"
+    },
+    {
+      "kind": "code-span",
+      "value": "written_at_unix_ms"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 D5 Asks on the board"
+    },
+    {
+      "kind": "code-span",
+      "value": "messages"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentHasOpenAsk"
+    },
+    {
+      "kind": "code-span",
+      "value": "queries/presence_reads.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "ChannelVisibleTo"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/channels.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListChannels"
+    },
+    {
+      "kind": "code-span",
+      "value": "BoardAsk"
+    },
+    {
+      "kind": "code-span",
+      "value": "ask_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "message_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "channel_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "header"
+    },
+    {
+      "kind": "code-span",
+      "value": "answered"
+    },
+    {
+      "kind": "code-span",
+      "value": "ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "Ask"
+    },
+    {
+      "kind": "code-span",
+      "value": "ref = 4"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.Ask"
+    },
+    {
+      "kind": "code-span",
+      "value": "Ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "storedAsk"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/blocks.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "askFromWire"
+    },
+    {
+      "kind": "code-span",
+      "value": "AnswerAsk"
+    },
+    {
+      "kind": "code-span",
+      "value": "Ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "AskAnswerBlock"
+    },
+    {
+      "kind": "code-span",
+      "value": "ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms_post_ask"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 D6 User-controlled ask mirroring, one comment per ask"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_mirror_settings"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_repo_subscriptions"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListForgeMirrorSettings"
+    },
+    {
+      "kind": "code-span",
+      "value": "SetForgeMirrorSetting"
+    },
+    {
+      "kind": "code-span",
+      "value": "CompassService"
+    },
+    {
+      "kind": "code-span",
+      "value": "UserRoleAdmin"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.AppendMessage"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_mirrors"
+    },
+    {
+      "kind": "code-span",
+      "value": "ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "ref"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsService.MirrorToForge"
+    },
+    {
+      "kind": "code-span",
+      "value": "ask.ref"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "mirrorAllowed"
+    },
+    {
+      "kind": "code-span",
+      "value": "requireForgeScope"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge.StampOwner"
+    },
+    {
+      "kind": "code-span",
+      "value": "@handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge.StripOwner"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "AnswerAsk"
+    },
+    {
+      "kind": "code-span",
+      "value": "body_rev"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge.Provider"
+    },
+    {
+      "kind": "code-span",
+      "value": "EditComment"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "done"
+    },
+    {
+      "kind": "code-span",
+      "value": "failed"
+    },
+    {
+      "kind": "code-span",
+      "value": "failed"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "commentCreate"
+    },
+    {
+      "kind": "code-span",
+      "value": "id"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommentCreateInput"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "--public-url"
+    },
+    {
+      "kind": "code-span",
+      "value": "$COMPASS_PUBLIC_URL"
+    },
+    {
+      "kind": "code-span",
+      "value": "ServeConfig.PublicURL"
+    },
+    {
+      "kind": "code-span",
+      "value": "topicLinkFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "deepLinkFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/deeplink.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "/#/channel/{id}/topic/{id}"
+    },
+    {
+      "kind": "code-span",
+      "value": "TopicView"
+    },
+    {
+      "kind": "code-span",
+      "value": "VITE_COMPASS_BASE_URL"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 D7 Read surfaces: roster summary, a board query, and one event"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "RosterEntry"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentBoardSummary board = 8"
+    },
+    {
+      "kind": "code-span",
+      "value": "primary_ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "waiting.on = OPERATOR"
+    },
+    {
+      "kind": "code-span",
+      "value": "written_at_unix_ms"
+    },
+    {
+      "kind": "code-span",
+      "value": "stale"
+    },
+    {
+      "kind": "code-span",
+      "value": "(*Comms).roster"
+    },
+    {
+      "kind": "code-span",
+      "value": "ActivityFor"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass_roster"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass_tree"
+    },
+    {
+      "kind": "code-span",
+      "value": ", with "
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsCallRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "boards = 14"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsService.ListAgentBoards"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentBoard"
+    },
+    {
+      "kind": "code-span",
+      "value": "refs"
+    },
+    {
+      "kind": "code-span",
+      "value": "untracked_refs"
+    },
+    {
+      "kind": "code-span",
+      "value": "asks"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SubscribeCommsResponse"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentBoardChanged agent_board_changed = 19"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListAgentBoards"
+    },
+    {
+      "kind": "code-span",
+      "value": "(*Comms).boardVisible"
+    },
+    {
+      "kind": "code-span",
+      "value": "RosterAsAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/roster.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "subscribe.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentBoardChanged"
+    },
+    {
+      "kind": "code-span",
+      "value": "SharesVisibleChannel"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass_boards"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms_list_messages"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent/src/comms.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "<board {fence} agent=\"…\">"
+    },
+    {
+      "kind": "code-span",
+      "value": "</board {fence}>"
+    },
+    {
+      "kind": "code-span",
+      "value": "attr(…, fence)"
+    },
+    {
+      "kind": "code-span",
+      "value": "flat()"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 D8 Search and filter across boards"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListAgentBoardsRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "query"
+    },
+    {
+      "kind": "code-span",
+      "value": "ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "refs"
+    },
+    {
+      "kind": "code-span",
+      "value": "primary_ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "waiting_on"
+    },
+    {
+      "kind": "code-span",
+      "value": "state"
+    },
+    {
+      "kind": "code-span",
+      "value": "halt"
+    },
+    {
+      "kind": "code-span",
+      "value": "limit"
+    },
+    {
+      "kind": "code-span",
+      "value": "matched_task_keys"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass_boards"
+    },
+    {
+      "kind": "code-span",
+      "value": "tasks"
+    },
+    {
+      "kind": "code-span",
+      "value": "createStoreDestinationProviders"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/keyboard/destinations.ts"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 D9 UI: a board panel on the agent, badges in the sidebar"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentBoard"
+    },
+    {
+      "kind": "code-span",
+      "value": "av-header"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/components/AgentView.tsx"
+    },
+    {
+      "kind": "code-span",
+      "value": "2/3"
+    },
+    {
+      "kind": "code-span",
+      "value": "operator"
+    },
+    {
+      "kind": "code-span",
+      "value": "@handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "external"
+    },
+    {
+      "kind": "code-span",
+      "value": "blocks"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentLeaf"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "RightSidebar.tsx"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass_boards"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentBoardChanged"
+    },
+    {
+      "kind": "code-span",
+      "value": "boards"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListAgentBoards"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentBoardChanged"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 D10 Mirror tool and auto-linking"
+    },
+    {
+      "kind": "code-span",
+      "value": "ForgeCallRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "mirror_messages = 16"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge"
+    },
+    {
+      "kind": "code-span",
+      "value": "client_request_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "pr_comment = 6"
+    },
+    {
+      "kind": "code-span",
+      "value": "issue_comment = 3"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_mirror_messages"
+    },
+    {
+      "kind": "code-span",
+      "value": "ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "message_ids"
+    },
+    {
+      "kind": "code-span",
+      "value": "topic_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListMessages"
+    },
+    {
+      "kind": "code-span",
+      "value": "mirrorAllowed"
+    },
+    {
+      "kind": "code-span",
+      "value": "pull_requests"
+    },
+    {
+      "kind": "code-span",
+      "value": "bodyLimit"
+    },
+    {
+      "kind": "code-span",
+      "value": "source_key"
+    },
+    {
+      "kind": "code-span",
+      "value": "client_request_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "forgeService.dedup"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_mirrors"
+    },
+    {
+      "kind": "code-span",
+      "value": "(tenant_id, agent_account_id, client_request_id)"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommentRef"
+    },
+    {
+      "kind": "code-span",
+      "value": "unavailable"
+    },
+    {
+      "kind": "code-span",
+      "value": "broker.idempotencyKey(toolCallId)"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent/src/forge.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "mirror.Render"
+    },
+    {
+      "kind": "code-span",
+      "value": "@author"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/refs"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/refs/testdata/refs.json"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/refs"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "remarkRefLinks"
+    },
+    {
+      "kind": "code-span",
+      "value": "text"
+    },
+    {
+      "kind": "code-span",
+      "value": "MarkdownText"
+    },
+    {
+      "kind": "code-span",
+      "value": "remarkGfm"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "RefText"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "CompassService.GetRefLinkRules"
+    },
+    {
+      "kind": "code-span",
+      "value": "https://{host}/{owner}/{repo}/issues/{number}"
+    },
+    {
+      "kind": "code-span",
+      "value": "urlKey"
+    },
+    {
+      "kind": "code-span",
+      "value": "organization { urlKey }"
+    },
+    {
+      "kind": "code-span",
+      "value": "KEY-N"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "openExternal"
+    },
+    {
+      "kind": "code-span",
+      "value": "noreferrer noopener"
+    },
+    {
+      "kind": "code-span",
+      "value": "MarkdownText"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 D11 Linear issues are board rows"
+    },
+    {
+      "kind": "code-span",
+      "value": "issues"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildBoardIngestLane"
+    },
+    {
+      "kind": "code-span",
+      "value": "issues"
+    },
+    {
+      "kind": "code-span",
+      "value": "fanoutSink"
+    },
+    {
+      "kind": "code-span",
+      "value": "BoardReconciler"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_repo_subscriptions"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/designs/server/compass-tracker-config/design.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "tracker.ResolveLinearStatus"
+    },
+    {
+      "kind": "code-span",
+      "value": "boardService.SetIssueState"
+    },
+    {
+      "kind": "code-span",
+      "value": "TransitionSource{Kind: SourceTracker}"
+    },
+    {
+      "kind": "code-span",
+      "value": "ok=false"
+    },
+    {
+      "kind": "code-span",
+      "value": "issues"
+    },
+    {
+      "kind": "code-span",
+      "value": "tracker_state_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "tracker_state_type"
+    },
+    {
+      "kind": "code-span",
+      "value": "tracker_status"
+    },
+    {
+      "kind": "code-span",
+      "value": "TrackerRef.status"
+    },
+    {
+      "kind": "code-span",
+      "value": "TrackerRef"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetIssueConditional"
+    },
+    {
+      "kind": "code-span",
+      "value": "CompassIssueFields"
+    },
+    {
+      "kind": "code-span",
+      "value": "state { id name type }"
+    },
+    {
+      "kind": "code-span",
+      "value": "tracker"
+    },
+    {
+      "kind": "code-span",
+      "value": ", "
+    },
+    {
+      "kind": "code-span",
+      "value": " "
+    },
+    {
+      "kind": "code-span",
+      "value": "), and "
+    },
+    {
+      "kind": "code-span",
+      "value": " in "
+    },
+    {
+      "kind": "code-span",
+      "value": "tracker.id"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_board_watches"
+    },
+    {
+      "kind": "code-span",
+      "value": "PrimeTarget"
+    },
+    {
+      "kind": "code-span",
+      "value": "WatchPrimer"
+    },
+    {
+      "kind": "code-span",
+      "value": "WatchScope"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_artifact_cursors"
+    },
+    {
+      "kind": "code-span",
+      "value": "KEY-N"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 D12 Merge-queue state through a provider interface"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/forge"
+    },
+    {
+      "kind": "code-span",
+      "value": "MergeQueue"
+    },
+    {
+      "kind": "code-span",
+      "value": "getSubmittedPullRequests"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_repo_subscriptions"
+    },
+    {
+      "kind": "code-span",
+      "value": "merge_queue"
+    },
+    {
+      "kind": "code-span",
+      "value": "merge_queue_branch"
+    },
+    {
+      "kind": "code-span",
+      "value": "targetBranch"
+    },
+    {
+      "kind": "code-span",
+      "value": "base_ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "PullRequestHydrator.Hydrate"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetPullRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "PullRequest.merge_queue"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 D13 PR and review fields for derivation"
+    },
+    {
+      "kind": "code-span",
+      "value": "PullRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "head_sha"
+    },
+    {
+      "kind": "code-span",
+      "value": "mergeable_state"
+    },
+    {
+      "kind": "code-span",
+      "value": "dirty"
+    },
+    {
+      "kind": "code-span",
+      "value": "blocked"
+    },
+    {
+      "kind": "code-span",
+      "value": "merge_queue"
+    },
+    {
+      "kind": "code-span",
+      "value": "Review"
+    },
+    {
+      "kind": "code-span",
+      "value": "commit_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "ghPullDetail"
+    },
+    {
+      "kind": "code-span",
+      "value": "Head.SHA"
+    },
+    {
+      "kind": "code-span",
+      "value": "toPullRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "ghReviewRow"
+    },
+    {
+      "kind": "code-span",
+      "value": "commit_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "TrackerRef"
+    },
+    {
+      "kind": "code-span",
+      "value": "state_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "state_type"
+    },
+    {
+      "kind": "code-span",
+      "value": "base_ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "draft"
+    },
+    {
+      "kind": "code-span",
+      "value": "required"
+    },
+    {
+      "kind": "code-span",
+      "value": "pr"
+    },
+    {
+      "kind": "code-span",
+      "value": "DiscardUnknown"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Alternatives considered"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "pull_requests"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_authored_artifacts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Global Constraints"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsCallRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsCallResult"
+    },
+    {
+      "kind": "code-span",
+      "value": "update_board = 13"
+    },
+    {
+      "kind": "code-span",
+      "value": "boards = 14"
+    },
+    {
+      "kind": "code-span",
+      "value": "list_topics = 12"
+    },
+    {
+      "kind": "code-span",
+      "value": "ForgeCallRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "mirror_messages = 16"
+    },
+    {
+      "kind": "code-span",
+      "value": "issue_comment = 3"
+    },
+    {
+      "kind": "code-span",
+      "value": "pr_comment = 6"
+    },
+    {
+      "kind": "code-span",
+      "value": "RosterEntry.board = 8"
+    },
+    {
+      "kind": "code-span",
+      "value": "Ask.ref = 4"
+    },
+    {
+      "kind": "code-span",
+      "value": "SubscribeCommsResponse.agent_board_changed = 19"
+    },
+    {
+      "kind": "code-span",
+      "value": "PullRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "head_sha = 16"
+    },
+    {
+      "kind": "code-span",
+      "value": "mergeable_state = 17"
+    },
+    {
+      "kind": "code-span",
+      "value": "merge_queue = 18"
+    },
+    {
+      "kind": "code-span",
+      "value": "Review.commit_id = 5"
+    },
+    {
+      "kind": "code-span",
+      "value": "TrackerRef"
+    },
+    {
+      "kind": "code-span",
+      "value": "state_id = 5"
+    },
+    {
+      "kind": "code-span",
+      "value": "state_type = 6"
+    },
+    {
+      "kind": "code-span",
+      "value": "BoardRef"
+    },
+    {
+      "kind": "code-span",
+      "value": "merge_queue_state = 14"
+    },
+    {
+      "kind": "code-span",
+      "value": "stale_approval = 15"
+    },
+    {
+      "kind": "code-span",
+      "value": "tracker_status = 16"
+    },
+    {
+      "kind": "code-span",
+      "value": "BoardAsk"
+    },
+    {
+      "kind": "code-span",
+      "value": "mirror_state = 8"
+    },
+    {
+      "kind": "code-span",
+      "value": "mirror_url = 9"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "state"
+    },
+    {
+      "kind": "code-span",
+      "value": "ACTIVE"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_authored_artifacts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListAgentBoards"
+    },
+    {
+      "kind": "code-span",
+      "value": "boards"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "^[A-Z][A-Z0-9]{1,9}-[0-9]+$"
+    },
+    {
+      "kind": "code-span",
+      "value": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+#[0-9]+$"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/refs/testdata/refs.json"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListAgentBoards.limit"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "requireForgeScope"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "boardVisible"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "flat()"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass_boards"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "0001_init.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_boards"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_board_tasks"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_mirrors"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_mirror_settings"
+    },
+    {
+      "kind": "code-span",
+      "value": "tenant_tables"
+    },
+    {
+      "kind": "code-span",
+      "value": "set_updated_at"
+    },
+    {
+      "kind": "code-span",
+      "value": "tenantOwned"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestRLSCatalogEnabledAndForced"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.WithTenant"
+    },
+    {
+      "kind": "code-span",
+      "value": "context.WithoutCancel"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "@oh-my-pi/*"
+    },
+    {
+      "kind": "code-span",
+      "value": "^18.0.11"
+    },
+    {
+      "kind": "code-span",
+      "value": "subagentEventBus"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "tracker.ResolveLinearStatus"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ServeConfig.PublicURL"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Plan"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T1 proto: board, ask ref, PR and tracker fields (lane proto, RIG-5059)"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[proto]\n// comms.proto\nenum BoardTaskState { BOARD_TASK_STATE_UNSPECIFIED = 0; BOARD_TASK_STATE_ACTIVE = 1;\n  BOARD_TASK_STATE_BLOCKED = 2; BOARD_TASK_STATE_WAITING = 3;\n  BOARD_TASK_STATE_PARKED = 4; BOARD_TASK_STATE_DONE = 5; }\nenum BoardHaltKind { BOARD_HALT_KIND_UNSPECIFIED = 0; BOARD_HALT_KIND_DONE = 1;\n  BOARD_HALT_KIND_BLOCKED = 2; BOARD_HALT_KIND_AWAITING_USER = 3; }\nenum BoardWaitingOn { BOARD_WAITING_ON_UNSPECIFIED = 0; BOARD_WAITING_ON_OPERATOR = 1;\n  BOARD_WAITING_ON_AGENT = 2; BOARD_WAITING_ON_EXTERNAL = 3; }\nenum BoardRefKind { BOARD_REF_KIND_UNSPECIFIED = 0; BOARD_REF_KIND_ISSUE = 1;\n  BOARD_REF_KIND_PULL_REQUEST = 2; }\nenum BoardPrGate { BOARD_PR_GATE_UNSPECIFIED = 0; BOARD_PR_GATE_DRAFT = 1;\n  BOARD_PR_GATE_CHECKS_PENDING = 2; BOARD_PR_GATE_CHECKS_FAILED = 3;\n  BOARD_PR_GATE_CHANGES_REQUESTED = 4; BOARD_PR_GATE_AWAITING_REVIEW = 5;\n  BOARD_PR_GATE_AWAITING_ENQUEUE = 6; BOARD_PR_GATE_MERGED = 7; BOARD_PR_GATE_CLOSED = 8;\n  BOARD_PR_GATE_QUEUED = 9; BOARD_PR_GATE_QUEUE_FAILED = 10;\n  BOARD_PR_GATE_QUEUE_REMOVED = 11; BOARD_PR_GATE_CONFLICTS = 12; }\n\nmessage BoardWaiting { BoardWaitingOn on = 1; string agent_handle = 2; string what = 3;\n  string ref = 4; repeated string blocks = 5; }\nmessage BoardSubagent { string id = 1; string agent = 2; string description = 3;\n  string status = 4; int64 started_at_unix_ms = 5; int64 ended_at_unix_ms = 6; }\nmessage BoardTask { string key = 1; string title = 2; string primary_ref = 3;\n  repeated string refs = 4; BoardTaskState state = 5; string note = 6;\n  repeated BoardWaiting waiting = 7; repeated BoardSubagent subagents = 8;\n  int64 written_at_unix_ms = 9; }\n// Write shape: presence-aware. Unset keeps; set replaces; a present list op with\n// no values clears.\nmessage BoardRefsOp { repeated string values = 1; }\nmessage BoardWaitingOp { repeated BoardWaiting values = 1; }\nmessage BoardTaskPatch { string key = 1; optional string title = 2;\n  optional string primary_ref = 3; optional BoardTaskState state = 4;\n  optional string note = 5; BoardRefsOp refs = 6; BoardWaitingOp waiting = 7;\n  repeated BoardSubagent upsert_subagents = 8; }\nmessage BoardHalt { BoardHaltKind kind = 1; string ref = 2; string reason = 3; }\nmessage BoardRef { string ref = 1; BoardRefKind kind = 2; string title = 3; string url = 4;\n  string forge_state = 5; IssueState issue_state = 6; bool draft = 7;\n  string checks_state = 8; BoardPrGate gate = 9; string stack_tip_ref = 10;\n  uint32 stack_position = 11; bool owned = 12; int64 observed_at_unix_ms = 13;\n  string merge_queue_state = 14; bool stale_approval = 15; string tracker_status = 16; }\nmessage BoardAsk { string ask_id = 1; string message_id = 2; string channel_id = 3;\n  string ref = 4; string header = 5; bool answered = 6; int64 posted_at_unix_ms = 7; }\n  // T13 adds mirror_state = 8, mirror_url = 9\nmessage AgentBoard { string agent_account_id = 1; string handle = 2;\n  string focus_task_key = 3; BoardHalt halt = 4; repeated BoardTask tasks = 5;\n  repeated BoardRef refs = 6; repeated string untracked_refs = 7;\n  repeated BoardAsk asks = 8; uint64 written_turn = 9; int64 written_at_unix_ms = 10;\n  bool stale = 11; repeated string matched_task_keys = 12; }\nmessage AgentBoardSummary { string focus = 1; uint32 task_count = 2;\n  uint32 waiting_on_operator = 3; BoardHalt halt = 4; int64 written_at_unix_ms = 5;\n  bool stale = 6; }\nmessage UpdateAgentBoardRequest { repeated BoardTaskPatch upsert_tasks = 1;\n  repeated string remove_task_keys = 2; optional string focus_task_key = 3;\n  BoardHalt halt = 4; bool clear_halt = 5; uint64 turn_sequence = 6; bool automatic = 7; }\nmessage UpdateAgentBoardResponse { AgentBoard board = 1; }\nmessage ListAgentBoardsRequest { repeated string agent_handles = 1; string query = 2;\n  string ref = 3; BoardWaitingOn waiting_on = 4; BoardTaskState state = 5;\n  BoardHaltKind halt = 6; uint32 limit = 7; }\nmessage ListAgentBoardsResponse { repeated AgentBoard boards = 1; }\nmessage AgentBoardChanged { string agent_account_id = 1; AgentBoard board = 2; } // board.asks empty\n\n// RosterEntry: AgentBoardSummary board = 8;\n// Ask: string ref = 4;\n// SubscribeCommsResponse.payload: AgentBoardChanged agent_board_changed = 19;\n// CommsService: rpc ListAgentBoards(ListAgentBoardsRequest) returns (ListAgentBoardsResponse);\n\n// compass.proto\n// PullRequest: string head_sha = 16; string mergeable_state = 17; MergeQueueEntry merge_queue = 18;\n// Review: string commit_id = 5;\n// TrackerRef: string state_id = 5; string state_type = 6;\nmessage MergeQueueEntry { string provider = 1;\n  string state = 2; // \"queued\" | \"testing\" | \"failed\" | \"removed\" | \"merged\"\n  google.protobuf.Timestamp changed_at = 3; }\n\n// agent_gateway.proto\n// CommsCallRequest.call: UpdateAgentBoardRequest update_board = 13; ListAgentBoardsRequest boards = 14;\n// CommsCallResult.result: UpdateAgentBoardResponse update_board = 13; ListAgentBoardsResponse boards = 14;"
+    },
+    {
+      "kind": "code-span",
+      "value": "Issue"
+    },
+    {
+      "kind": "code-span",
+      "value": "tracker"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon run compass-proto:gen"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon run compass-proto:ci"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T2 store: tables, queries, methods (lane compass-server, RIG-5059)"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[sql]\nCREATE TABLE agent_boards (\n    agent_account_id   TEXT PRIMARY KEY REFERENCES agent_accounts (account_id) ON DELETE RESTRICT,\n    focus_task_key     TEXT     NOT NULL DEFAULT '',\n    halt_kind          SMALLINT NOT NULL DEFAULT 0 CHECK (halt_kind BETWEEN 0 AND 3),\n    halt_ref           TEXT     NOT NULL DEFAULT '',\n    halt_reason        TEXT     NOT NULL DEFAULT '',\n    written_turn       BIGINT   NOT NULL DEFAULT 0,\n    written_at_unix_ms BIGINT   NOT NULL,\n    created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),\n    updated_at         TIMESTAMPTZ NOT NULL DEFAULT now(),\n    tenant_id          TEXT     NOT NULL DEFAULT current_setting('compass.tenant_id', TRUE)\n);\n\nCREATE TABLE agent_board_tasks (\n    agent_account_id   TEXT     NOT NULL REFERENCES agent_boards (agent_account_id) ON DELETE CASCADE,\n    task_key           TEXT     NOT NULL CHECK (task_key <> ''),\n    title              TEXT     NOT NULL,\n    primary_ref        TEXT     NOT NULL DEFAULT '',\n    refs               TEXT[]   NOT NULL DEFAULT '{}',\n    state              SMALLINT NOT NULL DEFAULT 1 CHECK (state BETWEEN 1 AND 5),  -- 1 = ACTIVE\n    note               TEXT     NOT NULL DEFAULT '',\n    waiting            JSONB    NOT NULL DEFAULT '[]',\n    subagents          JSONB    NOT NULL DEFAULT '[]',\n    position           INT      NOT NULL,\n    written_at_unix_ms BIGINT   NOT NULL,\n    created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),\n    updated_at         TIMESTAMPTZ NOT NULL DEFAULT now(),\n    tenant_id          TEXT     NOT NULL DEFAULT current_setting('compass.tenant_id', TRUE),\n    PRIMARY KEY (agent_account_id, task_key)\n);"
+    },
+    {
+      "kind": "code-span",
+      "value": "queries/agent_boards.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "UpsertAgentBoard"
+    },
+    {
+      "kind": "code-span",
+      "value": "UpsertAgentBoardTask"
+    },
+    {
+      "kind": "code-span",
+      "value": "DeleteAgentBoardTasks"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetAgentBoards"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetAgentBoardTasks"
+    },
+    {
+      "kind": "code-span",
+      "value": "ANY($1::text[])"
+    },
+    {
+      "kind": "code-span",
+      "value": "position"
+    },
+    {
+      "kind": "code-span",
+      "value": "SearchAgentBoardTasks"
+    },
+    {
+      "kind": "code-span",
+      "value": ", "
+    },
+    {
+      "kind": "code-span",
+      "value": "ListAsksByAuthor"
+    },
+    {
+      "kind": "code-span",
+      "value": "ChannelVisibleTo"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListOpenAuthoredRefs"
+    },
+    {
+      "kind": "code-span",
+      "value": "PullRequestsByCoords"
+    },
+    {
+      "kind": "code-span",
+      "value": "IssuesByCoords"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n// go/internal/store\ntype BoardTaskPatch struct {\n    Key string\n    Title, PrimaryRef, Note *string // nil = keep\n    State *int16                    // nil = keep; nil on a new key stores 1 (ACTIVE)\n    Refs *[]string                  // nil = keep; non-nil empty = clear\n    Waiting *[]byte                 // JSONB array; nil = keep\n    UpsertSubagents []byte          // JSONB array merged by id\n}\ntype BoardPatch struct {\n    Upsert []BoardTaskPatch; Remove []string; Focus *string\n    Halt *BoardHalt; ClearHalt bool; Turn uint64; Automatic bool; NowUnixMs int64\n}\ntype BoardHalt struct{ Kind int16; Ref, Reason string }\ntype BoardRow struct { Agent AccountID; Focus string; Halt BoardHalt; WrittenTurn uint64; WrittenAtUnixMs int64; Tasks []BoardTaskRow }\ntype BoardTaskRow struct { Key, Title, PrimaryRef, Note string; Refs []string; State int16; Waiting, Subagents []byte; WrittenAtUnixMs int64 }\ntype BoardTaskFilter struct { Agents []AccountID; Query, Ref string; WaitingOn, State, Halt int16; Limit int }\ntype AskRow struct { AskID, MessageID, ChannelID, Ref, Header string; Answered bool; PostedAtUnixMs int64 }\ntype AuthoredRef struct { Coord ForgeCoord; Kind ForgeArtifactKind }\n\n// Ask gains: Ref string. storedAsk gains: Ref string `json:\"ref,omitempty\"`.\n\nfunc (s *Store) ApplyBoardPatch(ctx context.Context, agent AccountID, p BoardPatch) (BoardRow, error)\nfunc (s *Store) AgentBoards(ctx context.Context, agents []AccountID) (map[AccountID]BoardRow, error)\nfunc (s *Store) SearchAgentBoards(ctx context.Context, f BoardTaskFilter) (map[AccountID][]string, error) // agent -> matched task keys\nfunc (s *Store) AsksByAuthor(ctx context.Context, viewer, author AccountID, answeredSince time.Time, limit int) ([]AskRow, error)\nfunc (s *Store) OpenAuthoredRefs(ctx context.Context, agent AccountID) ([]AuthoredRef, error)\nfunc (s *Store) PullRequestsByCoords(ctx context.Context, coords []ForgeCoord) ([]PullRequestRow, error)\nfunc (s *Store) IssuesByCoords(ctx context.Context, coords []ForgeCoord) ([]Issue, error)"
+    },
+    {
+      "kind": "code-span",
+      "value": "ApplyBoardPatch"
+    },
+    {
+      "kind": "code-span",
+      "value": "ACTIVE"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Refs"
+    },
+    {
+      "kind": "code-span",
+      "value": "ACTIVE"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrInvalidArgument"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "written_turn"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SearchAgentBoards"
+    },
+    {
+      "kind": "code-span",
+      "value": "waiting_on"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenAuthoredRefs"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "AsksByAuthor"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T3 refs and derivation (lane compass-server, RIG-5059)"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/refs"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/refs/testdata/refs.json"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n// go/internal/refs\ntype Kind int // KindTracker, KindForge\ntype Ref struct { Kind Kind; Key string; Owner, Repo string; Number uint64 }\nfunc Parse(s string) (Ref, error) // canonical: forge owner/repo lowercased\nfunc (r Ref) String() string\nfunc Scan(text string) []Span\ntype Span struct { Start, End int; Ref Ref }\n\n// go/internal/board\ntype RefResolver interface {\n    PullRequestsByCoords(ctx context.Context, coords []store.ForgeCoord) ([]store.PullRequestRow, error)\n    IssuesByCoords(ctx context.Context, coords []store.ForgeCoord) ([]store.Issue, error)\n    OpenAuthoredRefs(ctx context.Context, agent store.AccountID) ([]store.AuthoredRef, error)\n}\ntype Forges struct { GitHubHost string; LinearHost string; LinearTeams map[string]bool }\nfunc DeriveRefs(ctx context.Context, r RefResolver, f Forges, agent store.AccountID, refs []string) (derived []*compassv1.BoardRef, untracked []string, err error)\nfunc PrGate(pr *compassv1.PullRequest) compassv1.BoardPrGate\nfunc StackOf(open []*compassv1.PullRequest) map[string]Stack // key \"owner/repo#N\"\ntype Stack struct { Position uint32; Tip string }"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Parse"
+    },
+    {
+      "kind": "code-span",
+      "value": "Scan"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "PrGate"
+    },
+    {
+      "kind": "code-span",
+      "value": "commit_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "AWAITING_REVIEW"
+    },
+    {
+      "kind": "code-span",
+      "value": "stale_approval"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "StackOf"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "untracked"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "UNSPECIFIED"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T4 board write and read paths (lane compass-server, RIG-5059)"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n// go/internal/comms\nfunc (c *Comms) UpdateBoardAsAccount(ctx context.Context, caller store.AccountID, req *compassv1.UpdateAgentBoardRequest) (*compassv1.UpdateAgentBoardResponse, error)\nfunc (c *Comms) ListBoardsAsAccount(ctx context.Context, caller store.AccountID, req *compassv1.ListAgentBoardsRequest) (*compassv1.ListAgentBoardsResponse, error)\nfunc (c *Comms) ListAgentBoards(ctx context.Context, req *connect.Request[compassv1.ListAgentBoardsRequest]) (*connect.Response[compassv1.ListAgentBoardsResponse], error)\nfunc (c *Comms) boardVisible(ctx context.Context, viewer, agent store.AccountID) (bool, error)\n\n// go/internal/runnerhub\nfunc (h *Hub) PublishBoard(ctx context.Context, agent store.AccountID, board *compassv1.AgentBoard)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "UpdateBoardAsAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "state"
+    },
+    {
+      "kind": "code-span",
+      "value": "ACTIVE"
+    },
+    {
+      "kind": "code-span",
+      "value": "DONE"
+    },
+    {
+      "kind": "code-span",
+      "value": "UNSPECIFIED"
+    },
+    {
+      "kind": "code-span",
+      "value": "invalid_argument"
+    },
+    {
+      "kind": "code-span",
+      "value": "BoardTaskPatch"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.BoardTaskPatch"
+    },
+    {
+      "kind": "code-span",
+      "value": "refs.Parse"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "(*Comms).roster"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentBoardSummary"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Hub.RelayCommsCall"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runnerhub/relay_comms.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "update_board"
+    },
+    {
+      "kind": "code-span",
+      "value": "boards"
+    },
+    {
+      "kind": "code-span",
+      "value": "relay_arm_coverage_test.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms/subscribe.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentBoardChanged"
+    },
+    {
+      "kind": "code-span",
+      "value": "boardVisible"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"\""
+    },
+    {
+      "kind": "code-span",
+      "value": "refs"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "UNSPECIFIED"
+    },
+    {
+      "kind": "code-span",
+      "value": "state"
+    },
+    {
+      "kind": "code-span",
+      "value": "invalid_argument"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "update_board"
+    },
+    {
+      "kind": "code-span",
+      "value": "permission_denied"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "AWAITING_REVIEW"
+    },
+    {
+      "kind": "code-span",
+      "value": "AWAITING_ENQUEUE"
+    },
+    {
+      "kind": "code-span",
+      "value": "OPERATOR"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "stale"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T5 asks on the board (lane compass-server, RIG-5059)"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n// go/internal/store: Ask gains Ref string; storedAsk gains Ref string `json:\"ref,omitempty\"`.\n// go/internal/comms: askFromWire validates and canonicalizes Ask.ref with refs.Parse."
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "askFromWire"
+    },
+    {
+      "kind": "code-span",
+      "value": "Ask.ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.Ask.Ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "storedAsk"
+    },
+    {
+      "kind": "code-span",
+      "value": "AnswerAsk"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListBoardsAsAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "asks"
+    },
+    {
+      "kind": "code-span",
+      "value": "AsksByAuthor(viewer = caller, …)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListMessages"
+    },
+    {
+      "kind": "code-span",
+      "value": "RespondToAsk"
+    },
+    {
+      "kind": "code-span",
+      "value": "ref"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "invalid_argument"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T6 mirror tool: arm and agent tool (lane compass-comms, RIG-5061)"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_mirrors"
+    },
+    {
+      "kind": "code-span",
+      "value": "mirrorAllowed"
+    },
+    {
+      "kind": "code-span",
+      "value": "mirror.Render"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[proto]\n// agent_gateway.proto\n// ForgeCallRequest.call: MirrorMessagesRequest mirror_messages = 16;\nmessage MirrorMessagesRequest { string ref = 1; repeated string message_ids = 2;\n  string topic_id = 3; string channel_id = 4; string note = 5; }\n// ForgeCallRequest.client_request_id comment: honored on the create arms and mirror_messages."
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n// go/server\nfunc (s *forgeService) mirrorMessages(ctx context.Context, caller store.AccountID, sessionID string, call *compassv1internal.ForgeCallRequest, req *compassv1internal.MirrorMessagesRequest) *compassv1internal.ForgeCallResult"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\n// packages/compass-agent/src/forge.ts, tool forge_mirror_messages\n{ ref: string; message_ids?: string[]; topic_id?: string; channel?: string; note?: string }\n// sends clientRequestId: broker.idempotencyKey(toolCallId), as the create arms do"
+    },
+    {
+      "kind": "code-span",
+      "value": "mirrorMessages"
+    },
+    {
+      "kind": "code-span",
+      "value": "pr_comment"
+    },
+    {
+      "kind": "code-span",
+      "value": "issue_comment"
+    },
+    {
+      "kind": "code-span",
+      "value": "ClaimForgeMirror"
+    },
+    {
+      "kind": "code-span",
+      "value": "ForgeCallRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/forge.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "mirror_messages"
+    },
+    {
+      "kind": "code-span",
+      "value": "ForgeCallResult"
+    },
+    {
+      "kind": "code-span",
+      "value": "issue_comment"
+    },
+    {
+      "kind": "code-span",
+      "value": "pr_comment"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon run compass-proto:gen"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "invalid_argument"
+    },
+    {
+      "kind": "code-span",
+      "value": "not_found"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "client_request_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommentRef"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T7 agent: board tools, freshness, subagent sync (lane compass-agent, RIG-5059)"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\n// packages/compass-agent/src/board.ts\nexport class BoardFreshness {\n\tseed(writtenTurn: bigint, writtenAtMs: number): void;\n\tnoteWrite(turn: bigint, atMs: number): void;\n\twroteThisTurn(turn: bigint): boolean;\n\tageMs(nowMs: number): number | undefined;\n}\nexport function createBoardTools(\n\tbroker: CommsBroker,\n\tturnSequence: TurnSequence,\n\tfreshness: BoardFreshness,\n): AgentTool[]; // compass_update_board, compass_boards\nexport function attachSubagentBoardSync(\n\tsubagentBus: EventBus,\n\tbroker: CommsBroker,\n\tturnSequence: TurnSequence,\n): () => void; // \"task:subagent:lifecycle\", 5 s coalescing\n\n// compass_update_board parameters. An omitted field is left unchanged;\n// a given value replaces; [] clears a list; \"\" clears a string.\n// state is optional; a new task without one is \"active\".\n{ tasks?: Array<{ key: string; title?: string; primary_ref?: string; refs?: string[];\n    state?: \"active\" | \"blocked\" | \"waiting\" | \"parked\" | \"done\"; note?: string;\n    waiting?: Array<{ on: \"operator\" | \"agent\" | \"external\"; agent?: string;\n      what: string; ref?: string; blocks?: string[] }> }>;\n  remove?: string[]; focus?: string;\n  halt?: { kind: \"done\" | \"blocked\" | \"awaiting-user\"; ref?: string; reason: string } | null }\n\n// compass_boards parameters\n{ agents?: string[]; query?: string; ref?: string;\n  waiting_on?: \"operator\" | \"agent\" | \"external\";\n  state?: \"active\" | \"blocked\" | \"waiting\" | \"parked\" | \"done\";\n  halt?: \"done\" | \"blocked\" | \"awaiting-user\"; limit?: number }"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "BoardTaskPatch"
+    },
+    {
+      "kind": "code-span",
+      "value": "refs"
+    },
+    {
+      "kind": "code-span",
+      "value": "waiting"
+    },
+    {
+      "kind": "code-span",
+      "value": "[]"
+    },
+    {
+      "kind": "code-span",
+      "value": "halt: null"
+    },
+    {
+      "kind": "code-span",
+      "value": "clear_halt"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "cli.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "new EventBus()"
+    },
+    {
+      "kind": "code-span",
+      "value": "@oh-my-pi/pi-coding-agent/utils/event-bus"
+    },
+    {
+      "kind": "code-span",
+      "value": "subagentEventBus"
+    },
+    {
+      "kind": "code-span",
+      "value": "createAgentSession"
+    },
+    {
+      "kind": "code-span",
+      "value": "nativeTools"
+    },
+    {
+      "kind": "code-span",
+      "value": "attachSubagentBoardSync"
+    },
+    {
+      "kind": "code-span",
+      "value": "BoardFreshness"
+    },
+    {
+      "kind": "code-span",
+      "value": "automatic"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "CompassAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "boardFreshness"
+    },
+    {
+      "kind": "code-span",
+      "value": "tool_execution_end"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_end"
+    },
+    {
+      "kind": "code-span",
+      "value": "#boardReprompt"
+    },
+    {
+      "kind": "code-span",
+      "value": "#flushTurnEnd"
+    },
+    {
+      "kind": "code-span",
+      "value": "#boardReprompt"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "subagent-tool-split.test.ts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "note"
+    },
+    {
+      "kind": "code-span",
+      "value": "note"
+    },
+    {
+      "kind": "code-span",
+      "value": "refs: []"
+    },
+    {
+      "kind": "code-span",
+      "value": "state"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "started"
+    },
+    {
+      "kind": "code-span",
+      "value": "completed"
+    },
+    {
+      "kind": "code-span",
+      "value": "subagentEventBus"
+    },
+    {
+      "kind": "code-span",
+      "value": "automatic"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T8 agent: roster render, board render, ask ref (lane compass-agent, RIG-5059)"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\n// comms.ts\nfunction boardSummary(entry: RosterEntry): string; // appended by rosterRow\nfunction renderBoards(boards: AgentBoard[]): string; // used by compass_boards\n// comms_post_ask: new optional parameter ref?: string"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "rosterRow"
+    },
+    {
+      "kind": "code-span",
+      "value": "renderAgentTree"
+    },
+    {
+      "kind": "code-span",
+      "value": "boardSummary"
+    },
+    {
+      "kind": "code-span",
+      "value": "flat()"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "renderBoards"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms_list_messages"
+    },
+    {
+      "kind": "code-span",
+      "value": "crypto.randomUUID().slice(0, 8)"
+    },
+    {
+      "kind": "code-span",
+      "value": "<board {fence} agent=\"…\">"
+    },
+    {
+      "kind": "code-span",
+      "value": "[task {fence}]"
+    },
+    {
+      "kind": "code-span",
+      "value": "[waiting {fence}]"
+    },
+    {
+      "kind": "code-span",
+      "value": "[ask {fence}]"
+    },
+    {
+      "kind": "code-span",
+      "value": "</board {fence}>"
+    },
+    {
+      "kind": "code-span",
+      "value": "attr(…, fence)"
+    },
+    {
+      "kind": "code-span",
+      "value": "flat()"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "</board>"
+    },
+    {
+      "kind": "code-span",
+      "value": "[task]"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms_post_ask"
+    },
+    {
+      "kind": "code-span",
+      "value": "ref"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T9 UI: board panel, sidebar badges, task search (lane ui, RIG-5059)"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\n// apps/ui/src/live/adapt.ts\nexport function adaptAgentBoard(w: WireAgentBoard): AgentBoard;\n// apps/ui/src/components/AgentBoard.tsx\nexport const AgentBoardPanel: Component<{ agentId: string }>;\n// apps/ui/src/keyboard/destinations.ts: provider id \"tasks\", kind \"task\""
+    },
+    {
+      "kind": "code-span",
+      "value": "stub-data.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "Agent"
+    },
+    {
+      "kind": "code-span",
+      "value": "board?: AgentBoardSummary"
+    },
+    {
+      "kind": "code-span",
+      "value": "adaptRosterEntry"
+    },
+    {
+      "kind": "code-span",
+      "value": "agentBoardChanged"
+    },
+    {
+      "kind": "code-span",
+      "value": "joinAgents"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentLeaf"
+    },
+    {
+      "kind": "code-span",
+      "value": "FleetPane"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "agentBoardChanged"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "tasks"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T10 auto-linking: link rules and UI (lane compass-frontend, RIG-5060)"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/refs"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/refs/testdata/refs.json"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[proto]\n// compass.proto, CompassService\nrpc GetRefLinkRules(GetRefLinkRulesRequest) returns (GetRefLinkRulesResponse);\nmessage GetRefLinkRulesRequest {}\nmessage RefLinkRule { string kind = 1; string prefix = 2; string url_template = 3; }\nmessage GetRefLinkRulesResponse { repeated RefLinkRule rules = 1; }"
+    },
+    {
+      "kind": "code-span",
+      "value": "RefLinkRule.kind"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"github\""
+    },
+    {
+      "kind": "code-span",
+      "value": "\"linear\""
+    },
+    {
+      "kind": "code-span",
+      "value": "prefix"
+    },
+    {
+      "kind": "code-span",
+      "value": "url_template"
+    },
+    {
+      "kind": "code-span",
+      "value": "{owner}"
+    },
+    {
+      "kind": "code-span",
+      "value": "{repo}"
+    },
+    {
+      "kind": "code-span",
+      "value": "{key}"
+    },
+    {
+      "kind": "code-span",
+      "value": "{number}"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n// go/server/service.go\nfunc (s *service) GetRefLinkRules(ctx context.Context, req *connect.Request[compassv1.GetRefLinkRulesRequest]) (*connect.Response[compassv1.GetRefLinkRulesResponse], error)\n// go/internal/forge\nfunc (l *Linear) OrganizationURLKey(ctx context.Context) (string, error) // cached after the first success"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\n// apps/ui/src/refs/grammar.ts\nexport interface RefLinkRule { kind: \"github\" | \"linear\"; prefix: string; urlTemplate: string }\nexport function tokenizeRefs(text: string): Array<string | RefToken>;\nexport function refUrl(token: RefToken, rules: readonly RefLinkRule[]): string | undefined;\n// apps/ui/src/refs/remark-ref-links.ts\nexport function remarkRefLinks(rules: () => readonly RefLinkRule[]): Plugin;\n// apps/ui/src/components/RefText.tsx\nexport const RefText: Component<{ text: string }>;"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetRefLinkRules"
+    },
+    {
+      "kind": "code-span",
+      "value": "MarkdownText"
+    },
+    {
+      "kind": "code-span",
+      "value": "remarkRefLinks"
+    },
+    {
+      "kind": "code-span",
+      "value": "RefText"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "tokenizeRefs"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "openExternal"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetRefLinkRules"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T11 prompts and skills (lane config, RIG-5059)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "config/skills/comms-playbook/SKILL.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "manager-coordination-channel"
+    },
+    {
+      "kind": "code-span",
+      "value": "supervisor-channel"
+    },
+    {
+      "kind": "code-span",
+      "value": "[TODO RIG-1723 ...]"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass_update_board"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "config/skills/management-trees/SKILL.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass_boards"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass_tree"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass_roster"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "config/prompts/{supervisor,owner,manager}/SYSTEM.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "#N"
+    },
+    {
+      "kind": "code-span",
+      "value": "KEY-N"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner/repo#N"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "rumdl check"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T12 Linear board ingest (lane compass-server, RIG-5059)"
+    },
+    {
+      "kind": "code-span",
+      "value": "tracker.ResolveLinearStatus"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.CurrentTrackerConfig"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/designs/server/compass-tracker-config/design.md"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[sql]\n-- issues: widen the CHECK and add three columns in the existing block\nforge_provider   SMALLINT NOT NULL CHECK (forge_provider IN (1, 2, 3, 4)),\ntracker_state_id   TEXT     NOT NULL DEFAULT '',  -- last observed Linear workflow-state id\ntracker_state_type TEXT     NOT NULL DEFAULT '',  -- its Linear type, e.g. started\ntracker_status     TEXT     NOT NULL DEFAULT '',  -- its raw name, shown as TrackerRef.status"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n// go/internal/forge\n// Issue gains: StateID, StateName, StateType string (Linear only).\nfunc (l *Linear) ListUpdatedIssues(ctx context.Context, team string, since time.Time, _ string) (ConditionalResult[UpdatedRows], error)\n\n// go/internal/store\n// IssueForgeFields and Issue gain: TrackerStateID, TrackerStateType, TrackerStatus string.\ntype IssueUpsert struct { ID string; Applied bool; PrevTrackerStateID string }\nfunc (s *Store) UpsertIssueForgeFields(ctx context.Context, f IssueForgeFields) (IssueUpsert, error) // was (string, error)\nfunc (s *Store) ListEnabledForgeRepos(ctx context.Context, p ForgeProvider, host string) ([]string, error) // was repo-only\nfunc (s *Store) IsEnabledForgeRepo(ctx context.Context, p ForgeProvider, host, repo string) (bool, error)  // was repo-only\n\n// go/internal/board\nfunc (p *IssueProjection) PublishObservedIssue(ctx context.Context, issue *compassv1.Issue) (store.IssueUpsert, error) // PublishIssueUpdate calls it\n\n// go/server\ntype linearBoardSink struct { brd *board.IssueProjection; st *store.Store; transitions *boardService }\nfunc (s *linearBoardSink) PublishIssueUpdate(ctx context.Context, issue *compassv1.Issue) error\nfunc buildLinearBoardLane(ctx context.Context, cfg ServeConfig, st *store.Store, issueBrd *board.IssueProjection, transitions *boardService, client *forge.Linear, log *slog.Logger) (*boardIngestLane, error)\n// linearWiring gains: board *boardIngestLane (nil when the lane is off)."
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "UpsertIssueForgeFields"
+    },
+    {
+      "kind": "code-span",
+      "value": "tracker_state_id"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "issueFieldsFragment"
+    },
+    {
+      "kind": "code-span",
+      "value": "state { id name type }"
+    },
+    {
+      "kind": "code-span",
+      "value": "toIssue"
+    },
+    {
+      "kind": "code-span",
+      "value": "TranslateIssue"
+    },
+    {
+      "kind": "code-span",
+      "value": "Issue.tracker"
+    },
+    {
+      "kind": "code-span",
+      "value": "{kind: \"linear\", id: \"KEY-N\", status, url, state_id, state_type}"
+    },
+    {
+      "kind": "code-span",
+      "value": "protoToForgeFields"
+    },
+    {
+      "kind": "code-span",
+      "value": "state_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "state_type"
+    },
+    {
+      "kind": "code-span",
+      "value": "status"
+    },
+    {
+      "kind": "code-span",
+      "value": "issueToProto"
+    },
+    {
+      "kind": "code-span",
+      "value": "tracker"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListUpdatedIssues"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "normalizeBoardRepo"
+    },
+    {
+      "kind": "code-span",
+      "value": "ForgeCoord.Normalized"
+    },
+    {
+      "kind": "code-span",
+      "value": "RIG"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_provider = $1 AND forge_host = $2"
+    },
+    {
+      "kind": "code-span",
+      "value": "boardTargetStore"
+    },
+    {
+      "kind": "code-span",
+      "value": "boardReconcileStore"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildLinearBoardLane"
+    },
+    {
+      "kind": "code-span",
+      "value": "--forge-linear-teams"
+    },
+    {
+      "kind": "code-span",
+      "value": "$COMPASS_FORGE_LINEAR_TEAMS"
+    },
+    {
+      "kind": "code-span",
+      "value": "^[A-Z][A-Z0-9]{1,9}$"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_repo_subscriptions"
+    },
+    {
+      "kind": "code-span",
+      "value": "linear.app"
+    },
+    {
+      "kind": "code-span",
+      "value": "reconcileForgeSeed"
+    },
+    {
+      "kind": "code-span",
+      "value": "Ingester"
+    },
+    {
+      "kind": "code-span",
+      "value": "linearBoardSink"
+    },
+    {
+      "kind": "code-span",
+      "value": "BoardWebhookArm"
+    },
+    {
+      "kind": "code-span",
+      "value": "BoardReconciler"
+    },
+    {
+      "kind": "code-span",
+      "value": "Pulls: nil"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildLinearWiring"
+    },
+    {
+      "kind": "code-span",
+      "value": "dataSink"
+    },
+    {
+      "kind": "code-span",
+      "value": "fanoutSink"
+    },
+    {
+      "kind": "code-span",
+      "value": "linearWiring.board"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "boardService"
+    },
+    {
+      "kind": "code-span",
+      "value": "wireHubServiceCycles"
+    },
+    {
+      "kind": "code-span",
+      "value": "*boardService"
+    },
+    {
+      "kind": "code-span",
+      "value": "Serve"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildDoors"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildLinearWiring"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildLinearBoardLane"
+    },
+    {
+      "kind": "code-span",
+      "value": "transitionMu"
+    },
+    {
+      "kind": "code-span",
+      "value": "serveDoors"
+    },
+    {
+      "kind": "code-span",
+      "value": ", set from "
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "startForgeIngestLanes"
+    },
+    {
+      "kind": "code-span",
+      "value": "linearBoard *boardIngestLane"
+    },
+    {
+      "kind": "code-span",
+      "value": "Serve"
+    },
+    {
+      "kind": "code-span",
+      "value": "doors.linearBoard"
+    },
+    {
+      "kind": "code-span",
+      "value": "BoardWebhookArm.Run"
+    },
+    {
+      "kind": "code-span",
+      "value": "BoardReconciler.Run"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "linearBoardSink.PublishIssueUpdate"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "PublishObservedIssue"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "tracker.state_id"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "_, cfg, err := st.CurrentTrackerConfig(ctx)"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithSystemRole"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:4."
+    },
+    {
+      "kind": "code-span",
+      "value": ". "
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:5."
+    },
+    {
+      "kind": "code-span",
+      "value": "DONE"
+    },
+    {
+      "kind": "code-span",
+      "value": "ARCHIVED"
+    },
+    {
+      "kind": "code-span",
+      "value": "transitionMu"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:6."
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SetIssueState"
+    },
+    {
+      "kind": "code-span",
+      "value": "transitionMu"
+    },
+    {
+      "kind": "code-span",
+      "value": "SourceTracker"
+    },
+    {
+      "kind": "code-span",
+      "value": "DONE"
+    },
+    {
+      "kind": "code-span",
+      "value": "ARCHIVED"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "DONE"
+    },
+    {
+      "kind": "code-span",
+      "value": "ARCHIVED"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ok=false"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "tracker.status"
+    },
+    {
+      "kind": "code-span",
+      "value": "tracker.state_type"
+    },
+    {
+      "kind": "code-span",
+      "value": "tracker.id"
+    },
+    {
+      "kind": "code-span",
+      "value": "KEY-N"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Issue"
+    },
+    {
+      "kind": "code-span",
+      "value": "Serve"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T13 ask mirroring: settings, outbox, comment edit (lane compass-comms, RIG-5061)"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[proto]\n// compass.proto, CompassService\nenum ForgeMirrorMode { FORGE_MIRROR_MODE_UNSPECIFIED = 0; FORGE_MIRROR_MODE_OFF = 1;\n  FORGE_MIRROR_MODE_MANUAL = 2; FORGE_MIRROR_MODE_AUTO = 3; }\nmessage ForgeMirrorSetting { ForgeRef forge = 1; string repo = 2; ForgeMirrorMode mode = 3; }\nmessage ListForgeMirrorSettingsRequest {}\nmessage ListForgeMirrorSettingsResponse { repeated ForgeMirrorSetting settings = 1; bool can_edit = 2; }\nmessage SetForgeMirrorSettingRequest { ForgeMirrorSetting setting = 1; }\nmessage SetForgeMirrorSettingResponse { ForgeMirrorSetting setting = 1; }\nrpc ListForgeMirrorSettings(ListForgeMirrorSettingsRequest) returns (ListForgeMirrorSettingsResponse);\nrpc SetForgeMirrorSetting(SetForgeMirrorSettingRequest) returns (SetForgeMirrorSettingResponse);\n\n// comms.proto\nenum BoardMirrorState { BOARD_MIRROR_STATE_UNSPECIFIED = 0; BOARD_MIRROR_STATE_PENDING = 1;\n  BOARD_MIRROR_STATE_DONE = 2; BOARD_MIRROR_STATE_FAILED = 3; }\n// BoardAsk gains: BoardMirrorState mirror_state = 8; string mirror_url = 9;\nmessage MirrorToForgeRequest { string ref = 1; string ask_id = 2; string topic_id = 3;\n  repeated string message_ids = 4; string channel_id = 5; }\nmessage MirrorToForgeResponse { string comment_url = 1; }\n// CommsService: rpc MirrorToForge(MirrorToForgeRequest) returns (MirrorToForgeResponse);"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[sql]\nCREATE TABLE forge_mirror_settings (\n    forge_provider SMALLINT NOT NULL CHECK (forge_provider IN (1, 2, 3, 4)),\n    forge_host     TEXT     NOT NULL,\n    repo           TEXT     NOT NULL CHECK (repo <> ''),\n    mode           SMALLINT NOT NULL CHECK (mode IN (1, 2)),  -- 1 manual, 2 auto; no row = off\n    updated_by     TEXT     NOT NULL REFERENCES user_accounts (account_id) ON DELETE RESTRICT,\n    created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),\n    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),\n    tenant_id      TEXT     NOT NULL DEFAULT current_setting('compass.tenant_id', TRUE),\n    PRIMARY KEY (tenant_id, forge_provider, forge_host, repo)\n);\n\nCREATE TABLE forge_mirrors (\n    id                TEXT     PRIMARY KEY,\n    source            SMALLINT NOT NULL CHECK (source IN (1, 2)),  -- 1 ask, 2 messages or topic\n    ask_id            TEXT     NOT NULL DEFAULT '',\n    source_key        TEXT     NOT NULL DEFAULT '',  -- topic id, or a sorted message-id hash, for source 2\n    actor_account_id  TEXT     NOT NULL REFERENCES accounts (id) ON DELETE RESTRICT,  -- agent or user\n    agent_account_id  TEXT     REFERENCES agent_accounts (account_id) ON DELETE RESTRICT,  -- NULL for a user click\n    client_request_id TEXT,\n    target_ref        TEXT     NOT NULL CHECK (target_ref <> ''),\n    body_rev          SMALLINT NOT NULL DEFAULT 1,  -- 1 ask, 2 ask plus answer\n    posted_rev        SMALLINT NOT NULL DEFAULT 0,\n    state             SMALLINT NOT NULL DEFAULT 1 CHECK (state IN (1, 2, 3)),  -- pending, done, failed\n    attempts          INT      NOT NULL DEFAULT 0,\n    comment_id        BIGINT   NOT NULL DEFAULT 0,\n    comment_key       TEXT     NOT NULL DEFAULT '',  -- forge.Comment.Key: GitHub id or Linear UUID\n    comment_url       TEXT     NOT NULL DEFAULT '',\n    last_error        TEXT     NOT NULL DEFAULT '',\n    first_attempt_at  TIMESTAMPTZ,  -- set by the first POST; bounds the marker search\n    last_attempt_at   TIMESTAMPTZ,  -- the latest POST; a GitHub retry waits 2 minutes past it\n    client_comment_id UUID     NOT NULL DEFAULT gen_random_uuid(),  -- v4; Linear's CommentCreateInput.id\n    recheck_at        TIMESTAMPTZ,  -- GitHub: a done row with an uncertain POST is scanned once more then\n    lease_until       TIMESTAMPTZ,  -- a Drive holds the row until then\n    lease_token       TEXT     NOT NULL DEFAULT '',  -- fences a stale holder\n    created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),\n    updated_at        TIMESTAMPTZ NOT NULL DEFAULT now(),\n    tenant_id         TEXT     NOT NULL DEFAULT current_setting('compass.tenant_id', TRUE)\n);\nCREATE UNIQUE INDEX forge_mirrors_ask_key ON forge_mirrors (tenant_id, ask_id) WHERE ask_id <> '';\nCREATE UNIQUE INDEX forge_mirrors_request_key ON forge_mirrors (tenant_id, agent_account_id, client_request_id)\n    WHERE client_request_id IS NOT NULL;\nCREATE UNIQUE INDEX forge_mirrors_source_key ON forge_mirrors (tenant_id, source_key, target_ref) WHERE source_key <> '';\nCREATE INDEX forge_mirrors_open_idx ON forge_mirrors (agent_account_id) WHERE state <> 2 OR recheck_at IS NOT NULL;"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n// go/internal/store\ntype ForgeMirrorMode int16 // ForgeMirrorOff = 0 (no row), ForgeMirrorManual = 1, ForgeMirrorAuto = 2\ntype ForgeMirrorSetting struct { Provider ForgeProvider; Host, Repo string; Mode ForgeMirrorMode }\ntype ForgeMirrorRow struct { ID string; Source int16; AskID, SourceKey string; Actor, Agent AccountID; ClientRequestID, TargetRef string; BodyRev, PostedRev, State int16; Attempts int; CommentID uint64; CommentKey, CommentURL, LastError string; FirstAttemptAt, LastAttemptAt *time.Time; ClientCommentID string }\nfunc (s *Store) ForgeMirrorMode(ctx context.Context, p ForgeProvider, host, repo string) (ForgeMirrorMode, error)\nfunc (s *Store) ListForgeMirrorSettings(ctx context.Context) ([]ForgeMirrorSetting, error) // every enabled subscription; off when no row\nfunc (s *Store) SetForgeMirrorSetting(ctx context.Context, actor AccountID, set ForgeMirrorSetting) error // off deletes the row\nfunc (s *Store) ClaimForgeMirror(ctx context.Context, m ForgeMirrorRow) (row ForgeMirrorRow, created bool, err error) // a key conflict returns the stored row\n// OpenForgeMirrors returns rows not done, plus done rows whose recheck_at has passed.\nfunc (s *Store) OpenForgeMirrors(ctx context.Context, agent AccountID) ([]ForgeMirrorRow, error)\n// LeaseForgeMirror claims a row for one Drive: UPDATE ... SET lease_until = now() + ttl,\n// lease_token = @token WHERE id = @id AND (state <> 2 OR recheck_at <= now())\n// AND (lease_until IS NULL OR lease_until < now()).\nfunc (s *Store) LeaseForgeMirror(ctx context.Context, id, token string, ttl time.Duration) (row ForgeMirrorRow, ok bool, err error)\n// RenewForgeMirror extends the lease only while lease_token still matches.\nfunc (s *Store) RenewForgeMirror(ctx context.Context, id, token string, ttl time.Duration) (ok bool, err error)\n// MarkForgeMirror writes only when lease_token matches, then clears the lease.\nfunc (s *Store) MarkForgeMirror(ctx context.Context, id, token string, postedRev, state int16, commentID uint64, commentKey, url, errText string) error\n// Ask gains RefCoord *ForgeCoord: set by the comms edge from refs.Parse and the configured forges; not stored.\n// private, in AppendMessage's transaction: one row per ask whose RefCoord is in auto mode\nfunc insertAskMirrors(ctx context.Context, q *db.Queries, msg Message) error\n// private, in AnswerAsk's transaction: body_rev = 2, state = pending\nfunc bumpAskMirror(ctx context.Context, q *db.Queries, askID string) error\n\n// go/internal/forge, Provider gains:\nEditComment(ctx context.Context, repo, commentKey, body string) (Comment, error)\n// DeleteComment removes a duplicate marked comment (GitHub only).\nDeleteComment(ctx context.Context, repo, commentKey string) error\n// CommentOnIssue and CommentOnPullRequest gain an optional clientID; Linear sends it as\n// CommentCreateInput.id (the row's client_comment_id, a UUID v4), GitHub ignores it.\n// ListCommentsSince pages every comment on an issue or PR created at or after\n// since (GitHub `since`; Linear `comments(filter: {createdAt: {gte}})`).\nListCommentsSince(ctx context.Context, repo string, number uint64, since time.Time) ([]Comment, error)\n\n// go/internal/mirror\ntype Link struct { Channel, Topic, URL string } // URL \"\" when no public URL is set\ntype Poster interface { // \"\" key posts, else edits\n    PostMirror(ctx context.Context, actor store.AccountID, need store.ForgeMirrorMode, ref refs.Ref, commentKey, body string) (forge.Comment, error)\n}\nfunc RenderAsk(ask store.Ask, answeredBy string, link Link) string\nfunc Render(msgs []store.Message, authors map[store.AccountID]string, link Link, note string, limit int) string\nfunc Drive(ctx context.Context, st *store.Store, p Poster, rows []store.ForgeMirrorRow)\n\n// go/server\nfunc topicLinkFor(base, channelID, topicID string) string // deeplink.go, beside deepLinkFor\nfunc (s *forgeService) mirrorAllowed(ctx context.Context, actor store.AccountID, need store.ForgeMirrorMode, ref refs.Ref) (resolvedForge, *compassv1internal.ForgeCallError)\nfunc (s *forgeService) PostMirror(ctx context.Context, actor store.AccountID, need store.ForgeMirrorMode, ref refs.Ref, commentKey, body string) (forge.Comment, error)\n\n// go/internal/comms: the MirrorToForge seam, satisfied by forgeService\ntype Mirrorer interface {\n    MirrorAsUser(ctx context.Context, user store.AccountID, req *compassv1.MirrorToForgeRequest) (commentURL string, err error)\n}"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "mirrorAllowed"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveTarget"
+    },
+    {
+      "kind": "code-span",
+      "value": "need"
+    },
+    {
+      "kind": "code-span",
+      "value": "requireForgeScope"
+    },
+    {
+      "kind": "code-span",
+      "value": "failed_precondition"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ClaimForgeMirror"
+    },
+    {
+      "kind": "code-span",
+      "value": "client_request_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "source_key"
+    },
+    {
+      "kind": "code-span",
+      "value": "target_ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "body_rev"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "mirror.Drive"
+    },
+    {
+      "kind": "code-span",
+      "value": "LeaseForgeMirror"
+    },
+    {
+      "kind": "code-span",
+      "value": "MarkForgeMirror"
+    },
+    {
+      "kind": "code-span",
+      "value": "forgeHTTPClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge.NewGitHub"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge.NewLinear"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_mirrors"
+    },
+    {
+      "kind": "code-span",
+      "value": "first_attempt_at TIMESTAMPTZ"
+    },
+    {
+      "kind": "code-span",
+      "value": "mirror.Drive"
+    },
+    {
+      "kind": "code-span",
+      "value": "comment_key"
+    },
+    {
+      "kind": "code-span",
+      "value": "first_attempt_at"
+    },
+    {
+      "kind": "code-span",
+      "value": "last_attempt_at"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListCommentsSince"
+    },
+    {
+      "kind": "code-span",
+      "value": "first_attempt_at"
+    },
+    {
+      "kind": "code-span",
+      "value": "<!-- compass-mirror:<row id> -->"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "done"
+    },
+    {
+      "kind": "code-span",
+      "value": "MarkForgeMirror"
+    },
+    {
+      "kind": "code-span",
+      "value": "recheck_at"
+    },
+    {
+      "kind": "code-span",
+      "value": "recheck_at"
+    },
+    {
+      "kind": "code-span",
+      "value": "recheck_at"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "PostMirror"
+    },
+    {
+      "kind": "code-span",
+      "value": "mirrorAllowed"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveIdentity"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge.StampOwner"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommentOnPullRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "pull_requests"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommentOnIssue"
+    },
+    {
+      "kind": "code-span",
+      "value": "EditComment"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "EditComment"
+    },
+    {
+      "kind": "code-span",
+      "value": "PATCH /repos/{repo}/issues/comments/{id}"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "PostMessage"
+    },
+    {
+      "kind": "code-span",
+      "value": "RespondToAsk"
+    },
+    {
+      "kind": "code-span",
+      "value": "mirror.Drive"
+    },
+    {
+      "kind": "code-span",
+      "value": "context.WithoutCancel(ctx)"
+    },
+    {
+      "kind": "code-span",
+      "value": "UpdateBoardAsAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "Drive"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenForgeMirrors(agent)"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListBoardsAsAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "mirror_state"
+    },
+    {
+      "kind": "code-span",
+      "value": "mirror_url"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "UserRoleAdmin"
+    },
+    {
+      "kind": "code-span",
+      "value": "permission_denied"
+    },
+    {
+      "kind": "code-span",
+      "value": "UNSPECIFIED"
+    },
+    {
+      "kind": "code-span",
+      "value": "invalid_argument"
+    },
+    {
+      "kind": "code-span",
+      "value": "can_edit"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SettingsView"
+    },
+    {
+      "kind": "code-span",
+      "value": "can_edit"
+    },
+    {
+      "kind": "code-span",
+      "value": "ChannelView.tsx"
+    },
+    {
+      "kind": "code-span",
+      "value": "TopicView.tsx"
+    },
+    {
+      "kind": "code-span",
+      "value": "ask.ref"
+    },
+    {
+      "kind": "code-span",
+      "value": "MirrorToForge"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "done"
+    },
+    {
+      "kind": "code-span",
+      "value": "failed"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "client_comment_id"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "recheck_at"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Drive"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "MarkForgeMirror"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "failed"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "failed"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SetForgeMirrorSetting"
+    },
+    {
+      "kind": "code-span",
+      "value": "permission_denied"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "--public-url"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T14 forge: PR and review fields (lane compass-server, RIG-5059)"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n// go/internal/forge\n// PullRequest gains: HeadSHA, MergeableState string. Review gains: CommitID string.\n// ghPullDetail gains: MergeableState string `json:\"mergeable_state\"`.\n// ghReviewRow gains: CommitID string `json:\"commit_id\"`."
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "toPullRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "Head.SHA"
+    },
+    {
+      "kind": "code-span",
+      "value": "mergeable_state"
+    },
+    {
+      "kind": "code-span",
+      "value": "commit_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "TranslatePullRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "translateReviews"
+    },
+    {
+      "kind": "code-span",
+      "value": "head_sha"
+    },
+    {
+      "kind": "code-span",
+      "value": "mergeable_state"
+    },
+    {
+      "kind": "code-span",
+      "value": "commit_id"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "pr"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T15 forge: merge-queue provider and Trunk (lane compass-server, RIG-5059)"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n// go/internal/forge/mergequeue.go\ntype QueueState int // QueueQueued, QueueTesting, QueueFailed, QueueRemoved, QueueMerged\ntype QueueEntry struct { Number uint64; State QueueState; ChangedAt time.Time }\ntype MergeQueue interface {\n    Name() string // \"trunk\"\n    // Entries reads up to 50 PRs of one repo and queue; a PR never submitted is absent.\n    Entries(ctx context.Context, repo, targetBranch string, numbers []uint64) (map[uint64]QueueEntry, error)\n}\n// go/internal/forge/trunk.go\ntype TrunkConfig struct { Token func(ctx context.Context) ([]byte, error); Host string; HTTP *http.Client }\nfunc NewTrunk(cfg TrunkConfig) *Trunk\n\n// go/internal/ingest\ntype QueueConfigs interface { MergeQueueFor(ctx context.Context, repo string) (provider, branch string, err error) }\n// BoardReconcileConfig and NewPullRequestHydrator gain Queues map[string]forge.MergeQueue and QueueConfigs.\nfunc NewMergeQueueSweeper(queues map[string]forge.MergeQueue, cfgs QueueConfigs, st MergeQueueStore, sink MergeQueueSink, every time.Duration) *MergeQueueSweeper\nfunc (s *MergeQueueSweeper) Run(ctx context.Context) error // ticks every `every` until ctx ends\ntype MergeQueueStore interface { OpenPullRequests(ctx context.Context, repo string) ([]uint64, error) }\ntype MergeQueueSink interface { PublishPullRequestMergeQueue(ctx context.Context, coord store.ForgeCoord, e *compassv1.MergeQueueEntry) error }\n\n// go/internal/store: forge_repo_subscriptions gains\n//   merge_queue        TEXT NOT NULL DEFAULT '',  -- provider name; '' = none\n//   merge_queue_branch TEXT NOT NULL DEFAULT ''\nfunc (s *Store) SetPullRequestMergeQueue(ctx context.Context, pr ForgeCoord, entry []byte) (changed bool, err error) // jsonb_set of pr.mergeQueue"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Trunk.Entries"
+    },
+    {
+      "kind": "code-span",
+      "value": "https://api.trunk.io/v1/getSubmittedPullRequests"
+    },
+    {
+      "kind": "code-span",
+      "value": "x-api-token"
+    },
+    {
+      "kind": "code-span",
+      "value": ". States: "
+    },
+    {
+      "kind": "code-span",
+      "value": ", "
+    },
+    {
+      "kind": "code-span",
+      "value": " to queued; "
+    },
+    {
+      "kind": "code-span",
+      "value": "tests_passed"
+    },
+    {
+      "kind": "code-span",
+      "value": "failed"
+    },
+    {
+      "kind": "code-span",
+      "value": "pending_failure"
+    },
+    {
+      "kind": "code-span",
+      "value": "cancelled"
+    },
+    {
+      "kind": "code-span",
+      "value": "merged"
+    },
+    {
+      "kind": "code-span",
+      "value": "isCurrentlySubmittedToQueue"
+    },
+    {
+      "kind": "code-span",
+      "value": "notFound"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "--forge-merge-queues"
+    },
+    {
+      "kind": "code-span",
+      "value": "$COMPASS_FORGE_MERGE_QUEUES"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner/name=trunk:branch"
+    },
+    {
+      "kind": "code-span",
+      "value": "--forge-trunk-token-secret"
+    },
+    {
+      "kind": "code-span",
+      "value": "newDeclaredSecretResolver"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Hydrate"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetPullRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "wire.merge_queue"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Serve"
+    },
+    {
+      "kind": "code-span",
+      "value": "--forge-merge-queues"
+    },
+    {
+      "kind": "code-span",
+      "value": "Run"
+    },
+    {
+      "kind": "code-span",
+      "value": "SetPullRequestMergeQueue"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Serve"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T16 UI: Bridge draft and queued PR lanes (lane ui, RIG-5059)"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\n// apps/ui/src/constants.ts\nexport type PrLifecycle = \"draft\" | \"in_progress\" | \"in_review\" | \"ready\" | \"queued\" | \"merged\";\n// apps/ui/src/board-render.ts\nexport function queueChip(pr: PullRequest): \"failed\" | \"removed\" | undefined;"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "PR_LANES"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "prLifecycle"
+    },
+    {
+      "kind": "code-span",
+      "value": "mergeQueue.state"
+    },
+    {
+      "kind": "code-span",
+      "value": "queueChip"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "adapt.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "headSha"
+    },
+    {
+      "kind": "code-span",
+      "value": "mergeableState"
+    },
+    {
+      "kind": "code-span",
+      "value": "mergeQueue"
+    },
+    {
+      "kind": "code-span",
+      "value": "commitId"
+    },
+    {
+      "kind": "code-span",
+      "value": "board-render.test.ts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Tasks"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Ref"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/refs"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Ask.ref"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetRefLinkRules"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/refs"
+    },
+    {
+      "kind": "code-span",
+      "value": "RefText"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Resolved decisions"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "issues"
+    },
+    {
+      "kind": "code-span",
+      "value": "PrimeTarget"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "#N"
+    },
+    {
+      "kind": "code-span",
+      "value": "KEY-N"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner/repo#N"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

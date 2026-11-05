@@ -1,0 +1,1886 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "docs/designs/compass/infra/ci/compass-test-harness-tiers/design.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0054.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Consolidate the Go test-harness tiers (RIG-2742)"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/designs/infra/ci/"
+    },
+    {
+      "kind": "code-span",
+      "value": "main@origin"
+    },
+    {
+      "kind": "code-span",
+      "value": "0c75fe91"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Problem / Intent"
+    },
+    {
+      "kind": "code-span",
+      "value": "*stack.Stack"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e/fixture.go:1"
+    },
+    {
+      "kind": "code-span",
+      "value": "//go:build podman"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/pgtest/pgtest.go:24"
+    },
+    {
+      "kind": "code-span",
+      "value": "//go:build pgtest"
+    },
+    {
+      "kind": "code-span",
+      "value": "dogfood-e2e"
+    },
+    {
+      "kind": "code-span",
+      "value": "initdb"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e/fixture.go:190-372"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e/main_test.go:29-51"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Ruled context"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "postgres:18"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/stack/postgres_image.go:26"
+    },
+    {
+      "kind": "code-span",
+      "value": "--database-external <DSN>"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/cmd/compass-stack/main.go:153"
+    },
+    {
+      "kind": "code-span",
+      "value": "Config.ExternalDatabase"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/stack/config.go:41-47"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Config.DatabaseDSN"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/stack/config.go:29-31"
+    },
+    {
+      "kind": "code-span",
+      "value": "startPostgres"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/stack/stack.go:309-325"
+    },
+    {
+      "kind": "code-span",
+      "value": "ExternalDatabase"
+    },
+    {
+      "kind": "code-span",
+      "value": "spawnChain"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/stack/stack.go:310-311"
+    },
+    {
+      "kind": "code-span",
+      "value": "217-231"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/stack/stack.go:316-324"
+    },
+    {
+      "kind": "code-span",
+      "value": "stack.go:327-344"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Approach"
+    },
+    {
+      "kind": "code-span",
+      "value": "Config.DatabaseDSN"
+    },
+    {
+      "kind": "code-span",
+      "value": "ExternalDatabase"
+    },
+    {
+      "kind": "code-span",
+      "value": "search_path"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestMain"
+    },
+    {
+      "kind": "code-span",
+      "value": "Fixture"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 (a) One shared postgres-standup + store-wire helper for tiers 1 and 2"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-postgres"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e/fixture.go:235"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/cmd/compass-postgres/main.go:3-18"
+    },
+    {
+      "kind": "code-span",
+      "value": "COMPASS_TEST_DATABASE_DSN"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/pgtest/pgtest.go:99-132"
+    },
+    {
+      "kind": "code-span",
+      "value": "search_path"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest.go:139-171"
+    },
+    {
+      "kind": "code-span",
+      "value": "173-194"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/pgshare"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest || podman"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest.go:20-24"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest"
+    },
+    {
+      "kind": "code-span",
+      "value": "RequireDSN(t)"
+    },
+    {
+      "kind": "code-span",
+      "value": "isolatedSchemaDSN"
+    },
+    {
+      "kind": "code-span",
+      "value": "withSearchPath"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest"
+    },
+    {
+      "kind": "code-span",
+      "value": "podman"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestMain"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e/main_test.go:29-51"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-postgres"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildStackBinaries"
+    },
+    {
+      "kind": "code-span",
+      "value": "main_test.go:40-46"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "hub.SetForgeCaller"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runnerhub/relay_forge.go:58-68"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/serve.go:908"
+    },
+    {
+      "kind": "code-span",
+      "value": "newForgeE2EWire"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/forge_e2e_pgtest_test.go:109-112"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 (b) One shared long-lived stack across e2e legs"
+    },
+    {
+      "kind": "code-span",
+      "value": "NewFixture"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestMain"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildStackBinaries"
+    },
+    {
+      "kind": "code-span",
+      "value": "m.Run()"
+    },
+    {
+      "kind": "code-span",
+      "value": "NewFixture"
+    },
+    {
+      "kind": "code-span",
+      "value": "Fixture"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e/agent_ops.go:22-33"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": ":39"
+    },
+    {
+      "kind": "code-span",
+      "value": "Provision"
+    },
+    {
+      "kind": "code-span",
+      "value": "legtwo_test.go:31"
+    },
+    {
+      "kind": "code-span",
+      "value": "leg2-primitives"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e/fixture.go:336-347"
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture.go:349-369"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e/timeouts.go:39-65"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestMain"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "f.DSN()"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e/seed_settle_test.go:44"
+    },
+    {
+      "kind": "code-span",
+      "value": "stack.Up"
+    },
+    {
+      "kind": "code-span",
+      "value": "spawnChain"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/stack/stack.go:256"
+    },
+    {
+      "kind": "code-span",
+      "value": "search_path"
+    },
+    {
+      "kind": "code-span",
+      "value": "search_path"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.Open"
+    },
+    {
+      "kind": "code-span",
+      "value": "legcomms_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "legthreefour_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithOwnStack()"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestHarnessCore"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e/harness_test.go:27-116"
+    },
+    {
+      "kind": "code-span",
+      "value": "Down"
+    },
+    {
+      "kind": "code-span",
+      "value": "harness_test.go:100-115"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestLegSixTeardownIdempotence"
+    },
+    {
+      "kind": "code-span",
+      "value": "legsix_test.go:72,136"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithSite"
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture.go:131-143"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestLegFivePersistAndResume"
+    },
+    {
+      "kind": "code-span",
+      "value": "legfive_test.go:13-19"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "seed_settle_test.go:42"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithCannedScript"
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture.go:104-115"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithCannedMarkerReply"
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture.go:117-129"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithOwnStack()"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 (c) One embedded-postgres smoke leg; everything else external-DSN"
+    },
+    {
+      "kind": "code-span",
+      "value": "ExternalDatabase: true"
+    },
+    {
+      "kind": "code-span",
+      "value": "initdb"
+    },
+    {
+      "kind": "code-span",
+      "value": "waitPostgres"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/stack/stack.go:425-449"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestEmbeddedPostgresSmoke"
+    },
+    {
+      "kind": "code-span",
+      "value": "ExternalDatabase: false"
+    },
+    {
+      "kind": "code-span",
+      "value": "stack.go:309-325"
+    },
+    {
+      "kind": "code-span",
+      "value": ":327-344"
+    },
+    {
+      "kind": "code-span",
+      "value": "postgres:18"
+    },
+    {
+      "kind": "code-span",
+      "value": "PostgresImage"
+    },
+    {
+      "kind": "code-span",
+      "value": "startPostgres"
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture.go:237-266"
+    },
+    {
+      "kind": "code-span",
+      "value": "PostgresImage"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/cmd/compass-stack/container_postgres_podman_test.go:51-55"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 (d) One canonical fixture builder — extend `Fixture`, no fourth harness"
+    },
+    {
+      "kind": "code-span",
+      "value": "fixtureOption"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e/fixture.go:83-86"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "NewFixture(ctx, t)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithOwnStack()"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithSite"
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture.go:131-143"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithEmbeddedPostgres()"
+    },
+    {
+      "kind": "code-span",
+      "value": "startPostgres"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest.RequireDSN(t)"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.Open"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgshare"
+    },
+    {
+      "kind": "code-span",
+      "value": "RequireDSN"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/*_pgtest_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest.RequireDSN"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgshare.StartSuitePostgresMain"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Consumers / boundary"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server"
+    },
+    {
+      "kind": "code-span",
+      "value": "//go:build pgtest && unix"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/forge_e2e_pgtest_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest.RequireDSN"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.Open"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest.RequireDSN(t)"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/pgshare"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest.RequireDSN"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgshare.AcquireDSN"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgshare.IsolatedSchemaDSN"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgshare.StartSuitePostgresMain"
+    },
+    {
+      "kind": "code-span",
+      "value": "Config.DatabaseDSN"
+    },
+    {
+      "kind": "code-span",
+      "value": "mountForgeForTest"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Alternatives considered"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 testcontainers-go wholesale — REJECTED"
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture.go:391-398"
+    },
+    {
+      "kind": "code-span",
+      "value": "config.go:100-114"
+    },
+    {
+      "kind": "code-span",
+      "value": "stack.Up"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Collapsing the three tiers into one — REJECTED"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Per-leg `search_path` schemas THROUGH the shared server — DEFERRED"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-managed"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/designs/infra/runtime/compass-managed-multitenancy/design.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "tenant_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "search_path"
+    },
+    {
+      "kind": "code-span",
+      "value": "search_path"
+    },
+    {
+      "kind": "code-span",
+      "value": "stack.go:256"
+    },
+    {
+      "kind": "code-span",
+      "value": "tenant_id"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Own-STACK legs over the suite postgres (not embedded) — DEFERRED"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestHarnessCore"
+    },
+    {
+      "kind": "code-span",
+      "value": "Up"
+    },
+    {
+      "kind": "code-span",
+      "value": "ExternalDatabase: true"
+    },
+    {
+      "kind": "code-span",
+      "value": "IsolatedSchemaDSN"
+    },
+    {
+      "kind": "code-span",
+      "value": "initdb"
+    },
+    {
+      "kind": "code-span",
+      "value": "initdb"
+    },
+    {
+      "kind": "code-span",
+      "value": "legsix"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithSite"
+    },
+    {
+      "kind": "code-span",
+      "value": "Up"
+    },
+    {
+      "kind": "code-span",
+      "value": "legsix_test.go:56-59"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Global Constraints"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go 1.25.0"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/go.mod"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "//go:build podman"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e/fixture.go:1"
+    },
+    {
+      "kind": "code-span",
+      "value": "main_test.go:1"
+    },
+    {
+      "kind": "code-span",
+      "value": "cannedmodel_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest.go:24"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest || podman"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgshare"
+    },
+    {
+      "kind": "code-span",
+      "value": "e2e"
+    },
+    {
+      "kind": "code-span",
+      "value": "cannedmodel.go:7"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgshare"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "time.Sleep"
+    },
+    {
+      "kind": "code-span",
+      "value": "rule://go-no-sleep-in-test"
+    },
+    {
+      "kind": "code-span",
+      "value": "waitPostgres"
+    },
+    {
+      "kind": "code-span",
+      "value": "stack.go:425-449"
+    },
+    {
+      "kind": "code-span",
+      "value": "waitRunnerEnrolled"
+    },
+    {
+      "kind": "code-span",
+      "value": "waitSeedSettled"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e/timeouts.go:27-65"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "freePorts"
+    },
+    {
+      "kind": "code-span",
+      "value": ":0"
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture.go:460-483"
+    },
+    {
+      "kind": "code-span",
+      "value": "Config.Validate"
+    },
+    {
+      "kind": "code-span",
+      "value": ":0"
+    },
+    {
+      "kind": "code-span",
+      "value": "config.go:119-128"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestMain"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e/teardown.go:11-32"
+    },
+    {
+      "kind": "code-span",
+      "value": "rule://process-safety"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest.pgImage"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest.go:50"
+    },
+    {
+      "kind": "code-span",
+      "value": "stack.DefaultPostgresImage"
+    },
+    {
+      "kind": "code-span",
+      "value": "postgres_image.go:26"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "t.Parallel()"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "stack.Up"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Plan"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T1 — `pgshare`: shared database-acquisition + schema-isolation package"
+    },
+    {
+      "kind": "code-span",
+      "value": "isolatedSchemaDSN"
+    },
+    {
+      "kind": "code-span",
+      "value": "withSearchPath"
+    },
+    {
+      "kind": "code-span",
+      "value": "schemaSeq"
+    },
+    {
+      "kind": "code-span",
+      "value": "decideDSNSource"
+    },
+    {
+      "kind": "code-span",
+      "value": "startContainer"
+    },
+    {
+      "kind": "code-span",
+      "value": "waitReady"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/pgtest/pgtest.go:81-298"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/pgshare"
+    },
+    {
+      "kind": "code-span",
+      "value": "//go:build (pgtest || podman) && unix"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgshare"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "func AcquireDSN(t *testing.T) string"
+    },
+    {
+      "kind": "code-span",
+      "value": "RequireDSN"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "func IsolatedSchemaDSN(t *testing.T, dsn string) string"
+    },
+    {
+      "kind": "code-span",
+      "value": "options=-c search_path=…"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest.go:139-194"
+    },
+    {
+      "kind": "code-span",
+      "value": "options"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "func StartSuitePostgres(tb testing.TB, stateDir, sockDir string, port int) (dsn string, stop func())"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-postgres"
+    },
+    {
+      "kind": "code-span",
+      "value": "--state-dir"
+    },
+    {
+      "kind": "code-span",
+      "value": "--database <dsn>"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/cmd/compass-postgres/main.go:7"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest.waitReady"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest.go:279-298"
+    },
+    {
+      "kind": "code-span",
+      "value": "testing.TB"
+    },
+    {
+      "kind": "code-span",
+      "value": "StartSuitePostgresMain(stateDir, sockDir string, port int) (string, func(), error)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-postgres"
+    },
+    {
+      "kind": "code-span",
+      "value": "cmd/compass-postgres/main.go:7"
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture.go:232-235"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "-tags pgtest"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T2 — shared e2e stack lifecycle in TestMain"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e/main_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestMain"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildStackBinaries"
+    },
+    {
+      "kind": "code-span",
+      "value": "main_test.go:34-46"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgshare.StartSuitePostgresMain"
+    },
+    {
+      "kind": "code-span",
+      "value": "stack.Up"
+    },
+    {
+      "kind": "code-span",
+      "value": "ExternalDatabase: true"
+    },
+    {
+      "kind": "code-span",
+      "value": "DatabaseDSN"
+    },
+    {
+      "kind": "code-span",
+      "value": "waitRunnerEnrolled"
+    },
+    {
+      "kind": "code-span",
+      "value": "waitSeedSettled"
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture.go:336-369"
+    },
+    {
+      "kind": "code-span",
+      "value": "testing.TB"
+    },
+    {
+      "kind": "code-span",
+      "value": "m.Run()"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "e2e"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "type sharedStack struct { stack *stack.Stack; dsn, serverURL, caPath, adminToken, runtimeDir string; stub *cannedModelServer }"
+    },
+    {
+      "kind": "code-span",
+      "value": "NewFixture"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "func upSharedStack(binPATHReady bool) (*sharedStack, func(), error)"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildStackBinaries"
+    },
+    {
+      "kind": "code-span",
+      "value": "main_test.go:53-59"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "stack.Up(ctx, cfg, deps)"
+    },
+    {
+      "kind": "code-span",
+      "value": "Stack.Down"
+    },
+    {
+      "kind": "code-span",
+      "value": "stack.go:84-123"
+    },
+    {
+      "kind": "code-span",
+      "value": ":173-196"
+    },
+    {
+      "kind": "code-span",
+      "value": "Config.ExternalDatabase"
+    },
+    {
+      "kind": "code-span",
+      "value": "DatabaseDSN"
+    },
+    {
+      "kind": "code-span",
+      "value": "config.go:29-47"
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture.go:279-288"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go test -tags podman ./e2e/ -run TestHarnessCore"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T3 — migrate legs onto the shared stack; `WithOwnStack` opt-out"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithOwnStack()"
+    },
+    {
+      "kind": "code-span",
+      "value": "fixtureOption"
+    },
+    {
+      "kind": "code-span",
+      "value": "NewFixture"
+    },
+    {
+      "kind": "code-span",
+      "value": "newAuthedClients"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithSite"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithEmbeddedPostgres"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestHarnessCore"
+    },
+    {
+      "kind": "code-span",
+      "value": "seed_settle_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithOwnStack()"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithCannedModel"
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture.go:268-277"
+    },
+    {
+      "kind": "code-span",
+      "value": "stub.LoadScript(t, script, markers)"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithCannedMarkerReply"
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture.go:117-129"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "cannedmodel.go:132-136"
+    },
+    {
+      "kind": "code-span",
+      "value": "AwaitControlDispatch"
+    },
+    {
+      "kind": "code-span",
+      "value": "AwaitTurnSettled"
+    },
+    {
+      "kind": "code-span",
+      "value": "legthreefour_test.go:85-86,:362-366"
+    },
+    {
+      "kind": "code-span",
+      "value": "LoadScript"
+    },
+    {
+      "kind": "code-span",
+      "value": "cannedmodel.go:169-184"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "AwaitTurnSettled"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithOwnStack"
+    },
+    {
+      "kind": "code-span",
+      "value": "-count>1"
+    },
+    {
+      "kind": "code-span",
+      "value": "./e2e/"
+    },
+    {
+      "kind": "code-span",
+      "value": "legsix_test.go:139-141"
+    },
+    {
+      "kind": "code-span",
+      "value": "already_exists"
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "-count>1"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "func WithOwnStack() fixtureOption"
+    },
+    {
+      "kind": "code-span",
+      "value": "func (s *cannedModelServer) LoadScript(t *testing.T, script []CannedTurn, markers []cannedMarker)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "newAuthedClients(caPath, serverURL, adminToken)"
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture.go:318"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "Provision"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_ops.go:22,39"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go test -tags podman -race ./e2e/..."
+    },
+    {
+      "kind": "code-span",
+      "value": "sharedFixture(t)"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e/shared_fixture.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "NewFixture"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithOwnStack()"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestMain"
+    },
+    {
+      "kind": "code-span",
+      "value": "registerSharedFixtureOption"
+    },
+    {
+      "kind": "code-span",
+      "value": "LoadScript"
+    },
+    {
+      "kind": "code-span",
+      "value": "-count>1"
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "NewFixture"
+    },
+    {
+      "kind": "code-span",
+      "value": "sharedFixture"
+    },
+    {
+      "kind": "code-span",
+      "value": "NewFixture"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T4 — the embedded-postgres smoke leg"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e/embedded_postgres_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "//go:build podman"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestEmbeddedPostgresSmoke"
+    },
+    {
+      "kind": "code-span",
+      "value": "NewFixture(ctx, t, WithEmbeddedPostgres())"
+    },
+    {
+      "kind": "code-span",
+      "value": "ExternalDatabase: false"
+    },
+    {
+      "kind": "code-span",
+      "value": "PostgresImage"
+    },
+    {
+      "kind": "code-span",
+      "value": "stack.go:316-324"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetServerInfo"
+    },
+    {
+      "kind": "code-span",
+      "value": "Down"
+    },
+    {
+      "kind": "code-span",
+      "value": "harness_test.go:100-115"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "func WithEmbeddedPostgres() fixtureOption"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "startPostgres"
+    },
+    {
+      "kind": "code-span",
+      "value": "stack.go:309-325"
+    },
+    {
+      "kind": "code-span",
+      "value": "Stack.Health"
+    },
+    {
+      "kind": "code-span",
+      "value": "Down"
+    },
+    {
+      "kind": "code-span",
+      "value": "stack.go:183-211"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go test -tags podman -run TestEmbeddedPostgresSmoke ./e2e/"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T5 — converge forge injection on the shared builder knob"
+    },
+    {
+      "kind": "code-span",
+      "value": "newForgeE2EWire"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/forge_e2e_pgtest_test.go:84-115"
+    },
+    {
+      "kind": "code-span",
+      "value": "hub.SetForgeCaller"
+    },
+    {
+      "kind": "code-span",
+      "value": "runnerhub/relay_forge.go:64-68"
+    },
+    {
+      "kind": "code-span",
+      "value": "server/serve.go:908"
+    },
+    {
+      "kind": "code-span",
+      "value": "newForgeService"
+    },
+    {
+      "kind": "code-span",
+      "value": "server"
+    },
+    {
+      "kind": "code-span",
+      "value": "server/forge.go:165"
+    },
+    {
+      "kind": "code-span",
+      "value": "server"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "server"
+    },
+    {
+      "kind": "code-span",
+      "value": "func mountForgeForTest(t *testing.T, hub *runnerhub.Hub, st *store.Store, brd *board.IssueProjection, reg *forgeProviderRegistry)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Hub.SetForgeCaller(ForgeCaller)"
+    },
+    {
+      "kind": "code-span",
+      "value": "relay_forge.go:64"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go test -tags pgtest ./server/ -run ForgeE2E"
+    },
+    {
+      "kind": "code-span",
+      "value": "newForgeE2EWire"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/forge_e2e_pgtest_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "hub.SetForgeCaller(newForgeService(...))"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_e2e_pgtest_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge_subscribe_e2e_pgtest_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "mountForgeForTest"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T6 — document the tier pyramid"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/eng/testing-tiers.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithOwnStack"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e/fixture.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/architecture/testing-tiers.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "sharedFixture"
+    },
+    {
+      "kind": "code-span",
+      "value": "NewFixture"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithOwnStack"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithSite"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithEmbeddedPostgres"
+    },
+    {
+      "kind": "code-span",
+      "value": "-count>1"
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e"
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Tasks"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/pgshare"
+    },
+    {
+      "kind": "code-span",
+      "value": "StartSuitePostgres"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestMain"
+    },
+    {
+      "kind": "code-span",
+      "value": "ExternalDatabase: true"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithOwnStack()"
+    },
+    {
+      "kind": "code-span",
+      "value": "LoadScript"
+    },
+    {
+      "kind": "code-span",
+      "value": "sharedFixture"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestEmbeddedPostgresSmoke"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithEmbeddedPostgres()"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "mountForgeForTest"
+    },
+    {
+      "kind": "code-span",
+      "value": "newForgeE2EWire"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/architecture/testing-tiers.md"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Open Questions (1–2 RULED by Matt at freeze; 3–4 deferred)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "stack.go:256"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_ops.go:22"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture.go:104-115"
+    },
+    {
+      "kind": "code-span",
+      "value": "LoadScript"
+    },
+    {
+      "kind": "code-span",
+      "value": "cannedmodel.go:169-184"
+    },
+    {
+      "kind": "code-span",
+      "value": "AwaitControlDispatch"
+    },
+    {
+      "kind": "code-span",
+      "value": "AwaitTurnSettled"
+    },
+    {
+      "kind": "code-span",
+      "value": "legthreefour_test.go:85-86,:362-366"
+    },
+    {
+      "kind": "code-span",
+      "value": "AwaitTurnSettled"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:4."
+    },
+    {
+      "kind": "code-span",
+      "value": "pgtest.go:48-50"
+    },
+    {
+      "kind": "code-span",
+      "value": "freePorts"
+    },
+    {
+      "kind": "code-span",
+      "value": "fixture.go:460-483"
+    },
+    {
+      "kind": "code-span",
+      "value": "timeouts.go:44-65"
+    },
+    {
+      "kind": "code-span",
+      "value": "m.Run()"
+    },
+    {
+      "kind": "code-span",
+      "value": "main_test.go:48-50"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

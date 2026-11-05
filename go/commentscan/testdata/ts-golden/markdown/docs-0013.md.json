@@ -1,0 +1,14 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "docs/designs/compass/decisions/agent/DL-286.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0013.md",
+  "fingerprint": [
+    {
+      "kind": "front-matter",
+      "value": "id: DL-286\ndecision: \"Worker tasks are in-process OMP subagents in the Manager's container — no Compass handle, account, or channel; SDK-native idle/park/revive lifecycle addressed by registry id over OMP-internal IRC; EPHEMERAL across Manager relaunch (completed results survive in the resumed transcript; in-flight work is lost). Compass comms tools are Manager-only; subagents get OMP-internal IRC only\"\nstatus: \"Active (Matt, 2026-08-29)\"\nrecord: ../../agent/compass-per-agent-overrides/design.md#in-process-subagent-topology-workers-are-omp-subagents"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

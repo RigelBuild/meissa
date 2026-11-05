@@ -1,0 +1,1590 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "docs/designs/compass/infra/ci/compass-agent-image-publish/design.md",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0053.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Publish the compass-agent image to GHCR"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-agent"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": "RigelBuild/compass"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent-image/*"
+    },
+    {
+      "kind": "code-span",
+      "value": ".github/workflows/*"
+    },
+    {
+      "kind": "code-span",
+      "value": "forks/*"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/cmd/*"
+    },
+    {
+      "kind": "code-span",
+      "value": "ci.yml"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.nix"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent/*"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/architecture/*"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": "b3fc25311"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/designs/ui/*"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": ".github/workflows/publish-agent-image.yml"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "link-target",
+      "value": "../../release/compass-unified-release-lane/design.md"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": "publish.sh"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": "publish-image"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": "publish-agent-image.yml"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": "publish-image"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": ":git-<sha>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": ":latest"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": "GITHUB_TOKEN"
+    },
+    {
+      "kind": "code-span",
+      "value": "REGISTRY_AUTH_FILE"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": "linux/amd64"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": ":git-<sha>"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Problem / Intent"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-agent"
+    },
+    {
+      "kind": "code-span",
+      "value": "dogfood:agent-image"
+    },
+    {
+      "kind": "code-span",
+      "value": "containers-storage:compass-agent:latest"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/designs/ui/compass-native-app/design.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-stack"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Approach"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Decision: the name/tag contract (confirmed with compass-native)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ghcr.io/rigelbuild/compass-agent"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": ":git-<short-sha>"
+    },
+    {
+      "kind": "code-span",
+      "value": "git rev-parse --short=12 HEAD"
+    },
+    {
+      "kind": "code-span",
+      "value": "--image"
+    },
+    {
+      "kind": "code-span",
+      "value": "$COMPASS_AGENT_IMAGE"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/cmd/compass-runner/main.go:44-45"
+    },
+    {
+      "kind": "code-span",
+      "value": ":111-114"
+    },
+    {
+      "kind": "code-span",
+      "value": ":git-<sha>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": ":latest"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": ":v1.2.3"
+    },
+    {
+      "kind": "code-span",
+      "value": ":git-<sha>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Decision: platform contract — `linux/amd64` single-arch (dogfood milestone)"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/designs/ui/compass-native-app/design.md"
+    },
+    {
+      "kind": "code-span",
+      "value": ":522-524"
+    },
+    {
+      "kind": "code-span",
+      "value": ":246-248"
+    },
+    {
+      "kind": "code-span",
+      "value": ":346-349"
+    },
+    {
+      "kind": "code-span",
+      "value": ":486"
+    },
+    {
+      "kind": "code-span",
+      "value": "linux/amd64"
+    },
+    {
+      "kind": "code-span",
+      "value": "skopeo copy"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "aarch64"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent-image/entrypoint.nix:96-116"
+    },
+    {
+      "kind": "code-span",
+      "value": "manifest create"
+    },
+    {
+      "kind": "code-span",
+      "value": "push"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Decision: build+push mechanism — build the nix2container spec once, push each tag with the fork's skopeo"
+    },
+    {
+      "kind": "code-span",
+      "value": "nix:"
+    },
+    {
+      "kind": "code-span",
+      "value": "forks/devenv/src/modules/containers.nix:307"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[text]\n${nix2container.skopeo-nix2container}/bin/skopeo --insecure-policy copy \"nix:$container\" \"$dest\""
+    },
+    {
+      "kind": "code-span",
+      "value": "dest=\"${registry}${cfg.name}:${cfg.version}\""
+    },
+    {
+      "kind": "code-span",
+      "value": "containers.nix:295"
+    },
+    {
+      "kind": "code-span",
+      "value": "cfg.version"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"latest\""
+    },
+    {
+      "kind": "code-span",
+      "value": "containers.nix:324-328"
+    },
+    {
+      "kind": "code-span",
+      "value": " exposes only "
+    },
+    {
+      "kind": "code-span",
+      "value": " and "
+    },
+    {
+      "kind": "code-span",
+      "value": "forks/devenv/devenv/src/cli.rs:1104-1113"
+    },
+    {
+      "kind": "code-span",
+      "value": ":latest"
+    },
+    {
+      "kind": "code-span",
+      "value": ":git-<sha>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": ", cwd "
+    },
+    {
+      "kind": "code-span",
+      "value": ". "
+    },
+    {
+      "kind": "code-span",
+      "value": "forks/devenv/devenv/src/main.rs:910-912"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommandResult::Print"
+    },
+    {
+      "kind": "code-span",
+      "value": "print!"
+    },
+    {
+      "kind": "code-span",
+      "value": "main.rs:830-832"
+    },
+    {
+      "kind": "code-span",
+      "value": "container copy"
+    },
+    {
+      "kind": "code-span",
+      "value": "container_build"
+    },
+    {
+      "kind": "code-span",
+      "value": "forks/devenv/devenv/src/devenv/container.rs:55"
+    },
+    {
+      "kind": "code-span",
+      "value": "containers-storage:"
+    },
+    {
+      "kind": "code-span",
+      "value": "^/nix/store/"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "forks/nix2container/flake.nix:31"
+    },
+    {
+      "kind": "code-span",
+      "value": "skopeo-nix2container"
+    },
+    {
+      "kind": "code-span",
+      "value": "default.nix:22"
+    },
+    {
+      "kind": "code-span",
+      "value": "pkgs.skopeo"
+    },
+    {
+      "kind": "code-span",
+      "value": "nix:"
+    },
+    {
+      "kind": "code-span",
+      "value": "copyToRegistry"
+    },
+    {
+      "kind": "code-span",
+      "value": "default.nix:78-81"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[text]\n   skopeo --insecure-policy copy nix:$SPEC docker://ghcr.io/rigelbuild/compass-agent:git-<sha>\n   skopeo --insecure-policy copy nix:$SPEC docker://ghcr.io/rigelbuild/compass-agent:latest"
+    },
+    {
+      "kind": "code-span",
+      "value": ":latest"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv container copy agent --registry docker://ghcr.io/rigelbuild/"
+    },
+    {
+      "kind": "code-span",
+      "value": ":latest"
+    },
+    {
+      "kind": "code-span",
+      "value": "cfg.version"
+    },
+    {
+      "kind": "code-span",
+      "value": ":latest"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "copyToRegistry"
+    },
+    {
+      "kind": "code-span",
+      "value": "derivation"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal = true"
+    },
+    {
+      "kind": "code-span",
+      "value": "containers.nix:523-527"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "podman push"
+    },
+    {
+      "kind": "code-span",
+      "value": "containers-storage:"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Decision: CI placement — a separate least-privilege workflow, a principled exception to ONE-JOB"
+    },
+    {
+      "kind": "code-span",
+      "value": ".github/workflows/publish-agent-image.yml"
+    },
+    {
+      "kind": "code-span",
+      "value": "CI"
+    },
+    {
+      "kind": "code-span",
+      "value": ".github/workflows/ci.yml:4-23"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent-image/"
+    },
+    {
+      "kind": "code-span",
+      "value": ".moon/workspace.yml"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages: write"
+    },
+    {
+      "kind": "code-span",
+      "value": "contents: read"
+    },
+    {
+      "kind": "code-span",
+      "value": "ci.yml:76-77"
+    },
+    {
+      "kind": "code-span",
+      "value": "ci.yml"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages: write"
+    },
+    {
+      "kind": "code-span",
+      "value": "contents: read"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages: write"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ci.yml"
+    },
+    {
+      "kind": "code-span",
+      "value": "on:"
+    },
+    {
+      "kind": "code-span",
+      "value": "ci.yml"
+    },
+    {
+      "kind": "code-span",
+      "value": "dorny/paths-filter"
+    },
+    {
+      "kind": "code-span",
+      "value": "on.push.paths"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ci.yml:74-76"
+    },
+    {
+      "kind": "code-span",
+      "value": "cancel-in-progress: true"
+    },
+    {
+      "kind": "code-span",
+      "value": "cancel-in-progress: false"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ci.yml:93-95"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.nix:355-363"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent-image/"
+    },
+    {
+      "kind": "code-span",
+      "value": ".prototools"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent-image/toolchain.nix:50-56"
+    },
+    {
+      "kind": "code-span",
+      "value": "entrypoint.nix:116"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-agent-image"
+    },
+    {
+      "kind": "code-span",
+      "value": "push: branches: [main]"
+    },
+    {
+      "kind": "code-span",
+      "value": "paths:"
+    },
+    {
+      "kind": "code-span",
+      "value": "workflow_dispatch"
+    },
+    {
+      "kind": "code-span",
+      "value": "CI"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Decision: publish only when the image closure changes, with a manual backstop"
+    },
+    {
+      "kind": "code-span",
+      "value": "paths:"
+    },
+    {
+      "kind": "code-span",
+      "value": "push"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[text]\nagent-image/**\npackages/compass-agent/**\nforks/devenv/**\nforks/nix2container/**\npackage.json\nbun.lock\n.github/workflows/publish-agent-image.yml"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent-image/entrypoint.nix"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent"
+    },
+    {
+      "kind": "code-span",
+      "value": "bun.lock"
+    },
+    {
+      "kind": "code-span",
+      "value": "(builtins.fromJSON (readFile ../package.json)).workspaces.packages"
+    },
+    {
+      "kind": "code-span",
+      "value": "readDir"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/*"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/*"
+    },
+    {
+      "kind": "code-span",
+      "value": "tools/*"
+    },
+    {
+      "kind": "code-span",
+      "value": "entrypoint.nix:48-65"
+    },
+    {
+      "kind": "code-span",
+      "value": ":140-148"
+    },
+    {
+      "kind": "code-span",
+      "value": "forks/devenv"
+    },
+    {
+      "kind": "code-span",
+      "value": ".prototools"
+    },
+    {
+      "kind": "code-span",
+      "value": "toolchain.nix:50-56"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": ":git-<sha>"
+    },
+    {
+      "kind": "code-span",
+      "value": "workflow_dispatch"
+    },
+    {
+      "kind": "code-span",
+      "value": "ci.yml"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Decision: push auth — the workflow's own `GITHUB_TOKEN`"
+    },
+    {
+      "kind": "code-span",
+      "value": "skopeo login ghcr.io -u ${{ github.actor }} --password-stdin"
+    },
+    {
+      "kind": "code-span",
+      "value": "secrets.GITHUB_TOKEN"
+    },
+    {
+      "kind": "code-span",
+      "value": "permissions: packages: write"
+    },
+    {
+      "kind": "code-span",
+      "value": "nix run"
+    },
+    {
+      "kind": "code-span",
+      "value": " and the later "
+    },
+    {
+      "kind": "code-span",
+      "value": " run as separate "
+    },
+    {
+      "kind": "code-span",
+      "value": "$XDG_RUNTIME_DIR/containers/auth.json"
+    },
+    {
+      "kind": "code-span",
+      "value": "REGISTRY_AUTH_FILE"
+    },
+    {
+      "kind": "code-span",
+      "value": "$RUNNER_TEMP/ghcr-auth.json"
+    },
+    {
+      "kind": "code-span",
+      "value": "publish.sh"
+    },
+    {
+      "kind": "code-span",
+      "value": "--authfile \"$REGISTRY_AUTH_FILE\""
+    },
+    {
+      "kind": "code-span",
+      "value": "GITHUB_TOKEN"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-agent"
+    },
+    {
+      "kind": "code-span",
+      "value": "GITHUB_TOKEN"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Decision: package visibility — public (Matt's ruling)"
+    },
+    {
+      "kind": "code-span",
+      "value": "bun build"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent-image/devenv.nix:50-53"
+    },
+    {
+      "kind": "code-span",
+      "value": "podman pull"
+    },
+    {
+      "kind": "code-span",
+      "value": "skopeo inspect"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Note: pull-side auth (compass-native's card, recorded for the dependency)"
+    },
+    {
+      "kind": "code-span",
+      "value": "linux/amd64"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-stack"
+    },
+    {
+      "kind": "code-span",
+      "value": "podman pull"
+    },
+    {
+      "kind": "code-span",
+      "value": "0600"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Global Constraints"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs(platform): …"
+    },
+    {
+      "kind": "code-span",
+      "value": "Co-authored-by: Matt Wilkinson <matt@rigel.build>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "AGENTS.md"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "up"
+    },
+    {
+      "kind": "code-span",
+      "value": "workflow_dispatch"
+    },
+    {
+      "kind": "code-span",
+      "value": "dogfood:agent-image"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.nix:360-363"
+    },
+    {
+      "kind": "code-span",
+      "value": "after"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": ":git-<sha>"
+    },
+    {
+      "kind": "code-span",
+      "value": "container_build agent"
+    },
+    {
+      "kind": "code-span",
+      "value": "forks/devenv/devenv/src/devenv/container.rs:55"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": ":git-<sha>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ci.yml:4-23"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Plan"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T1 — Publish script"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent-image/publish.sh"
+    },
+    {
+      "kind": "code-span",
+      "value": "skopeo login"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "nix run path:../forks/devenv#devenv -- container build agent"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent-image/"
+    },
+    {
+      "kind": "code-span",
+      "value": "dogfood:agent-image"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.nix:364-369"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "nix run path:../forks/nix2container#skopeo-nix2container --"
+    },
+    {
+      "kind": "code-span",
+      "value": "forks/nix2container/flake.nix:31"
+    },
+    {
+      "kind": "code-span",
+      "value": "pkgs.skopeo"
+    },
+    {
+      "kind": "code-span",
+      "value": "meta.mainProgram"
+    },
+    {
+      "kind": "code-span",
+      "value": "overrideAttrs"
+    },
+    {
+      "kind": "code-span",
+      "value": "default.nix:22"
+    },
+    {
+      "kind": "code-span",
+      "value": "nix run"
+    },
+    {
+      "kind": "code-span",
+      "value": "bin/skopeo"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "git-<sha>"
+    },
+    {
+      "kind": "code-span",
+      "value": "latest"
+    },
+    {
+      "kind": "code-span",
+      "value": "git-*"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "raw-html",
+      "value": "<tag>"
+    },
+    {
+      "kind": "code-span",
+      "value": ". Plain "
+    },
+    {
+      "kind": "code-span",
+      "value": ".Digest"
+    },
+    {
+      "kind": "code-span",
+      "value": "--raw"
+    },
+    {
+      "kind": "code-span",
+      "value": ".config.digest"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetConfigDigest"
+    },
+    {
+      "kind": "code-span",
+      "value": "forks/nix2container/nix/image.go:40-47"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "manifest unknown"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "skopeo inspect --raw nix:$SPEC | jq -r .config.digest"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "raw-html",
+      "value": "<tag>"
+    },
+    {
+      "kind": "code-span",
+      "value": " ("
+    },
+    {
+      "kind": "code-span",
+      "value": "containers.nix:307"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "--authfile \"$REGISTRY_AUTH_FILE\""
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "skopeo inspect --raw nix:$SPEC"
+    },
+    {
+      "kind": "code-span",
+      "value": "nix:"
+    },
+    {
+      "kind": "code-span",
+      "value": "forks/nix2container/default.nix"
+    },
+    {
+      "kind": "code-span",
+      "value": "github.com/nlewo/container-libs"
+    },
+    {
+      "kind": "code-span",
+      "value": "nix:"
+    },
+    {
+      "kind": "code-span",
+      "value": "skopeo copy"
+    },
+    {
+      "kind": "code-span",
+      "value": "containers.nix:307"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent-image/"
+    },
+    {
+      "kind": "code-span",
+      "value": "forks/devenv"
+    },
+    {
+      "kind": "code-span",
+      "value": "forks/nix2container"
+    },
+    {
+      "kind": "code-span",
+      "value": "skopeo login ghcr.io"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "docker://ghcr.io/rigelbuild/compass-agent:git-<sha12>"
+    },
+    {
+      "kind": "code-span",
+      "value": "docker://ghcr.io/rigelbuild/compass-agent:latest"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "./publish.sh [tag …]"
+    },
+    {
+      "kind": "code-span",
+      "value": "./publish.sh git-<sha> v<semver> latest"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T2 — Publish workflow"
+    },
+    {
+      "kind": "code-span",
+      "value": ".github/workflows/publish-agent-image.yml"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "on: push: branches: [main]"
+    },
+    {
+      "kind": "code-span",
+      "value": "paths:"
+    },
+    {
+      "kind": "code-span",
+      "value": "workflow_dispatch"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "workflow_dispatch"
+    },
+    {
+      "kind": "code-span",
+      "value": "workflow_dispatch"
+    },
+    {
+      "kind": "code-span",
+      "value": "if: github.ref == 'refs/heads/main'"
+    },
+    {
+      "kind": "code-span",
+      "value": ":git-<sha>"
+    },
+    {
+      "kind": "code-span",
+      "value": ":latest"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "permissions: contents: read, packages: write"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "concurrency: group: publish-agent-image, cancel-in-progress: false"
+    },
+    {
+      "kind": "code-span",
+      "value": ":latest"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "cachix/install-nix-action"
+    },
+    {
+      "kind": "code-span",
+      "value": "extra_nix_config"
+    },
+    {
+      "kind": "code-span",
+      "value": "ci.yml:227-245"
+    },
+    {
+      "kind": "code-span",
+      "value": "accept-flake-config"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent-image/publish.sh"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "timeout-minutes: 90"
+    },
+    {
+      "kind": "code-span",
+      "value": "ci.yml:93-95"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent-image/publish.sh"
+    },
+    {
+      "kind": "code-span",
+      "value": "secrets.GITHUB_TOKEN"
+    },
+    {
+      "kind": "code-span",
+      "value": "github.actor"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "pull_request"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T3 — Verification"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "--authfile \"$REGISTRY_AUTH_FILE\""
+    },
+    {
+      "kind": "code-span",
+      "value": "skopeo inspect docker://…:git-<sha12>"
+    },
+    {
+      "kind": "code-span",
+      "value": ".Architecture"
+    },
+    {
+      "kind": "code-span",
+      "value": ".Os"
+    },
+    {
+      "kind": "code-span",
+      "value": "linux/amd64"
+    },
+    {
+      "kind": "code-span",
+      "value": ":latest"
+    },
+    {
+      "kind": "code-span",
+      "value": ":git-<sha12>"
+    },
+    {
+      "kind": "code-span",
+      "value": "skopeo inspect"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "podman pull ghcr.io/rigelbuild/compass-agent:git-<sha12>"
+    },
+    {
+      "kind": "raw-html",
+      "value": "<sha12>"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/cmd/compass-runner/main.go:44-45,111-114"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "build-and-ci.md"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T4 — Doc fold"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/architecture/build-and-ci.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "build-and-ci.md"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/architecture/build-and-ci.md"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Tasks"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent-image/publish.sh"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": ".github/workflows/publish-agent-image.yml"
+    },
+    {
+      "kind": "code-span",
+      "value": "workflow_dispatch"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages: write"
+    },
+    {
+      "kind": "code-span",
+      "value": "GITHUB_TOKEN"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "skopeo inspect"
+    },
+    {
+      "kind": "code-span",
+      "value": "podman pull"
+    },
+    {
+      "kind": "code-span",
+      "value": "--image"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "linux/amd64"
+    },
+    {
+      "kind": "code-span",
+      "value": ".Architecture"
+    },
+    {
+      "kind": "code-span",
+      "value": ".Os"
+    },
+    {
+      "kind": "code-span",
+      "value": "aarch64"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/architecture/build-and-ci.md"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-agent-image"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent-image/moon.yml"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Open Questions"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-*"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/architecture/build-and-ci.md"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": ":v<semver>"
+    },
+    {
+      "kind": "code-span",
+      "value": ":git-<sha>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": ":git-<sha>"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

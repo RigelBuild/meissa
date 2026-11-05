@@ -1,0 +1,19 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/astro.ts",
+  "corpus": "go/commentscan/testdata/corpus/astro/expression-template-tail.astro",
+  "scan": {
+    "residues": [
+      "<p>",
+      "\t{url ? (",
+      "\t\t<a href={url}>{label}</a>",
+      "\t) : (",
+      "\t\tlabel",
+      "\t)}, or email // not a comment",
+      "\t<a href=\"mailto:x\">x</a>.",
+      "</p>",
+      ""
+    ],
+    "ambiguous": false
+  }
+}
