@@ -1,5 +1,5 @@
-// Package commentscan parses unified Git diffs for comment scanning.
 // SPDX-License-Identifier: MIT OR Apache-2.0
+
 package commentscan
 
 import (
