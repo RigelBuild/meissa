@@ -394,6 +394,21 @@ func TestDecodeGitGrepOutput(t *testing.T) {
 			want:  "café 😀",
 		},
 		{
+			name:  "preserves valid multibyte characters after malformed bytes",
+			input: []byte("\xffcafé 😀"),
+			want:  "\uFFFDcafé 😀",
+		},
+		{
+			name:  "preserves embedded BOM after malformed bytes",
+			input: []byte("\xff\uFEFFtext"),
+			want:  "\uFFFD\uFEFFtext",
+		},
+		{
+			name:  "strips only the first BOM on malformed input",
+			input: []byte("\uFEFF\uFEFF\xff"),
+			want:  "\uFEFF\uFFFD",
+		},
+		{
 			name:  "adjacent invalid bytes each get a replacement",
 			input: []byte{0xff, 0xfe},
 			want:  "\uFFFD\uFFFD",
