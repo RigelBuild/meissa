@@ -3,6 +3,7 @@
 projects:
   globs:
     - 'packages/*/moon.yml'
+    - 'go/moon.yml'
   sources:
     root: '.'
 
