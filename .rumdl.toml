@@ -8,3 +8,4 @@ exclude = ["go/commentscan/testdata/**"]
 # Its template emits double blank lines (MD012) and copies commit subjects verbatim (MD050).
 [per-file-ignores]
 "packages/*/CHANGELOG.md" = ["MD012", "MD050"]
+"go/CHANGELOG.md" = ["MD004", "MD012", "MD050"]
