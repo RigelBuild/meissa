@@ -20,6 +20,7 @@ import (
 	"strings"
 	"time"
 	"unicode/utf16"
+	"unicode/utf8"
 
 	"github.com/dlclark/regexp2/v2"
 	"github.com/samber/mo"
@@ -617,6 +618,81 @@ func rootPath(ctx context.Context, configured string) (string, error) {
 	return strings.TrimSpace(string(output)), nil
 }
 
+// decodeGitGrepOutput applies WHATWG UTF-8 decoding to git grep's byte output.
+func decodeGitGrepOutput(output []byte) string {
+	if bytes.HasPrefix(output, []byte{0xef, 0xbb, 0xbf}) {
+		output = output[3:]
+	}
+	if utf8.Valid(output) {
+		return string(output)
+	}
+
+	var decoded strings.Builder
+	decoded.Grow(len(output))
+	for index := 0; index < len(output); {
+		first := output[index]
+		if first < utf8.RuneSelf {
+			decoded.WriteByte(first)
+			index++
+			continue
+		}
+
+		var continuationCount int
+		switch {
+		case first >= 0xc2 && first <= 0xdf:
+			continuationCount = 1
+		case first >= 0xe0 && first <= 0xef:
+			continuationCount = 2
+		case first >= 0xf0 && first <= 0xf4:
+			continuationCount = 3
+		default:
+			decoded.WriteRune(utf8.RuneError)
+			index++
+			continue
+		}
+
+		invalid := false
+		for consumed := range continuationCount {
+			continuationIndex := index + 1 + consumed
+			if continuationIndex == len(output) {
+				decoded.WriteRune(utf8.RuneError)
+				index = len(output)
+				invalid = true
+				break
+			}
+
+			continuation := output[continuationIndex]
+			validContinuation := continuation >= 0x80 && continuation <= 0xbf
+			if consumed == 0 {
+				switch first {
+				case 0xe0:
+					validContinuation = continuation >= 0xa0 && continuation <= 0xbf
+				case 0xed:
+					validContinuation = continuation >= 0x80 && continuation <= 0x9f
+				case 0xf0:
+					validContinuation = continuation >= 0x90 && continuation <= 0xbf
+				case 0xf4:
+					validContinuation = continuation >= 0x80 && continuation <= 0x8f
+				}
+			}
+			if !validContinuation {
+				decoded.WriteRune(utf8.RuneError)
+				index += 1 + consumed
+				invalid = true
+				break
+			}
+		}
+		if invalid {
+			continue
+		}
+
+		end := index + 1 + continuationCount
+		decoded.Write(output[index:end])
+		index = end
+	}
+	return decoded.String()
+}
+
 // GitGrep runs the POSIX ERE prefilter over every tracked file as text.
 func GitGrep(ctx context.Context, root string, prefilter Prefilter) ([]string, error) {
 	topCommand := exec.CommandContext(ctx, "git", "rev-parse", "--show-toplevel")
@@ -656,7 +732,7 @@ func GitGrep(ctx context.Context, root string, prefilter Prefilter) ([]string, e
 			strings.TrimSpace(stderr.String()),
 		) //nolint:err113 // Public error text.
 	}
-	hits, err := ParseGitGrepOutput(string(output))
+	hits, err := ParseGitGrepOutput(decodeGitGrepOutput(output))
 	if err != nil {
 		return nil, err
 	}

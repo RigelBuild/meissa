@@ -377,6 +377,83 @@ func createTrackedRepository(t *testing.T, files map[string]string) string {
 	return repository
 }
 
+func TestDecodeGitGrepOutput(t *testing.T) {
+	tests := []struct {
+		name  string
+		input []byte
+		want  string
+	}{
+		{
+			name:  "isolated invalid byte",
+			input: []byte{0xff},
+			want:  "\uFFFD",
+		},
+		{
+			name:  "preserves valid multibyte characters",
+			input: []byte("café 😀"),
+			want:  "café 😀",
+		},
+		{
+			name:  "adjacent invalid bytes each get a replacement",
+			input: []byte{0xff, 0xfe},
+			want:  "\uFFFD\uFFFD",
+		},
+		{
+			name:  "invalid continuation reprocesses the following bytes",
+			input: []byte{0xe2, 0x28, 0xa1},
+			want:  "\uFFFD(\uFFFD",
+		},
+		{
+			name:  "truncated three-byte sequence",
+			input: []byte{0xe2, 0x82},
+			want:  "\uFFFD",
+		},
+		{
+			name:  "truncated four-byte sequence",
+			input: []byte{0xf0, 0x9f, 0x92},
+			want:  "\uFFFD",
+		},
+		{
+			name:  "invalid two-byte leading value",
+			input: []byte{0xc0, 0x80},
+			want:  "\uFFFD\uFFFD",
+		},
+		{
+			name:  "overlong sequence",
+			input: []byte{0xe0, 0x80, 0x80},
+			want:  "\uFFFD\uFFFD\uFFFD",
+		},
+		{
+			name:  "encoded surrogate",
+			input: []byte{0xed, 0xa0, 0x80},
+			want:  "\uFFFD\uFFFD\uFFFD",
+		},
+		{
+			name:  "code point above Unicode maximum",
+			input: []byte{0xf4, 0x90, 0x80, 0x80},
+			want:  "\uFFFD\uFFFD\uFFFD\uFFFD",
+		},
+		{
+			name:  "truncated sequence before invalid continuation",
+			input: []byte{0xe2, 0x82, 0x28},
+			want:  "\uFFFD(",
+		},
+		{
+			name:  "leading byte order mark is omitted",
+			input: []byte{0xef, 0xbb, 0xbf, 'a'},
+			want:  "a",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := decodeGitGrepOutput(test.input); got != test.want {
+				t.Fatalf("decodeGitGrepOutput(% x) = %q; want %q", test.input, got, test.want)
+			}
+		})
+	}
+}
+
 func TestGitGrep(t *testing.T) {
 	t.Run("passes the POSIX ERE and case option to git grep", func(t *testing.T) {
 		repository := createTrackedRepository(t, map[string]string{"fixture.txt": "Acme reference\nclean\n"})
@@ -429,6 +506,26 @@ func TestGitGrep(t *testing.T) {
 		want := []string{"other.txt", "sub\ngate.json"}
 		if !reflect.DeepEqual(files, want) {
 			t.Fatalf("files = %#v; want %#v", files, want)
+		}
+	})
+	t.Run("replaces invalid UTF-8 from tracked content", func(t *testing.T) {
+		repository := createTrackedRepository(t, map[string]string{
+			"fixture.txt": "prefix \xff\xe2\x82 end\n",
+		})
+		got, err := GitGrep(t.Context(), repository, Prefilter{ERE: "prefix", IgnoreCase: false})
+		want := []string{"fixture.txt\x001\x00prefix \uFFFD\uFFFD end"}
+		if err != nil || !reflect.DeepEqual(got, want) {
+			t.Fatalf("GitGrep = %#v, %v; want %#v", got, err, want)
+		}
+	})
+	t.Run("replaces invalid UTF-8 in tracked paths", func(t *testing.T) {
+		repository := createTrackedRepository(t, map[string]string{
+			"fixture\xff.txt": "prefix\n",
+		})
+		got, err := GitGrep(t.Context(), repository, Prefilter{ERE: "prefix", IgnoreCase: false})
+		want := []string{"fixture\uFFFD.txt\x001\x00prefix"}
+		if err != nil || !reflect.DeepEqual(got, want) {
+			t.Fatalf("GitGrep = %#v, %v; want %#v", got, err, want)
 		}
 	})
 
@@ -515,6 +612,28 @@ func TestMainEndToEnd(t *testing.T) {
 		code, stdout, stderr := run()
 		if code != 0 || stdout != "ref-gate: clean\n" || stderr != "" {
 			t.Fatalf("clean run = %d, stdout %q, stderr %q", code, stdout, stderr)
+		}
+		if err := os.WriteFile(fixture, []byte("reference \xff to acme\n"), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		git("add", "fixture.txt")
+		code, _, stderr = run()
+		if code != 1 || stderr != "fixture.txt:1: reference \uFFFD to acme\n" {
+			t.Fatalf("malformed content run = %d, %q", code, stderr)
+		}
+
+		if err := os.WriteFile(fixture, []byte("clean content\n"), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		git("add", "fixture.txt")
+		invalidPath := filepath.Join(repository, "fixture\xff.txt")
+		if err := os.WriteFile(invalidPath, []byte("reference to acme\n"), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		git("add", "fixture\xff.txt")
+		code, _, stderr = run()
+		if code != 1 || stderr != "fixture\uFFFD.txt:1: reference to acme\n" {
+			t.Fatalf("malformed filename run = %d, %q", code, stderr)
 		}
 	})
 }
