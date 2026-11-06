@@ -5,7 +5,59 @@ package jstext
 import (
 	"strings"
 	"unicode"
+	"unicode/utf8"
 )
+
+// IsSpace reports whether r is ECMAScript whitespace.
+func IsSpace(r rune) bool {
+	if r >= '\t' && r <= '\r' || r == ' ' || r == '\u00a0' || r == '\ufeff' || r == '\u2028' || r == '\u2029' {
+		return true
+	}
+	return unicode.Is(unicode.Zs, r)
+}
+
+// Fields splits s around runs of ECMAScript whitespace.
+func Fields(s string) []string {
+	fields := make([]string, 0)
+	start := -1
+	for i, r := range s {
+		if IsSpace(r) {
+			if start >= 0 {
+				fields = append(fields, s[start:i])
+				start = -1
+			}
+			continue
+		}
+		if start < 0 {
+			start = i
+		}
+	}
+	if start >= 0 {
+		fields = append(fields, s[start:])
+	}
+	return fields
+}
+
+// Trim removes ECMAScript whitespace from both ends of s.
+func Trim(s string) string {
+	start := 0
+	for start < len(s) {
+		r, size := utf8.DecodeRuneInString(s[start:])
+		if !IsSpace(r) {
+			break
+		}
+		start += size
+	}
+	end := len(s)
+	for end > start {
+		r, size := utf8.DecodeLastRuneInString(s[:end])
+		if !IsSpace(r) {
+			break
+		}
+		end -= size
+	}
+	return s[start:end]
+}
 
 // ToLower applies JavaScript toLowerCase semantics for Go's differing mappings.
 func ToLower(text string) string {
