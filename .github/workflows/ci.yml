@@ -38,9 +38,12 @@ jobs:
           echo "RUMDL_BIN=$rumdl/bin/rumdl" >> "$GITHUB_ENV"
 
       # The dev shell's runtimes and Go analysis tools use the same nixpkgs pin as local runs.
-      - name: Put Go, Bun, Node.js, and moon on PATH
+      - name: Put Go tools, Bun, Node.js, and moon on PATH
         run: |
-          mapfile -t outputs < <(nix build --no-link --print-out-paths --inputs-from . .#go-dev nixpkgs#bun nixpkgs#nodejs nixpkgs#moon)
+          mapfile -t outputs < <(
+            nix build --no-link --print-out-paths --inputs-from . \
+              .#go-dev .#tools nixpkgs#bun nixpkgs#nodejs nixpkgs#moon
+          )
           for output in "${outputs[@]}"; do
             echo "$output/bin" >> "$GITHUB_PATH"
           done
