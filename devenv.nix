@@ -6,6 +6,6 @@ in
 {
   imports = [ flake.devenvModules.default flake.devenvModules.go ];
   meissa.go.toolchain = pkgs.go_1_27;
-  packages = [ pkgs.go_1_27 pkgs.bun pkgs.nodejs pkgs.moon ];
+  packages = [ pkgs.go_1_27 pkgs.bun pkgs.nodejs pkgs.moon packages.tools ];
   env.RUMDL_BIN = "${packages.rumdl}/bin/rumdl";
 }

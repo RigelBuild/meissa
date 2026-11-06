@@ -89,17 +89,6 @@
         "typescript": "6.0.3",
       },
     },
-    "packages/ref-gate": {
-      "name": "@rigelbuild/ref-gate",
-      "version": "1.0.1",
-      "bin": {
-        "ref-gate": "index.ts",
-      },
-      "devDependencies": {
-        "@types/bun": "1.4.4",
-        "typescript": "6.0.3",
-      },
-    },
     "packages/renovate-preflight": {
       "name": "@rigelbuild/renovate-preflight",
       "version": "1.1.1",
@@ -128,10 +117,6 @@
     "@rigelbuild/dl-list": ["@rigelbuild/dl-list@workspace:packages/dl-list"],
 
     "@rigelbuild/dl-reconcile": ["@rigelbuild/dl-reconcile@workspace:packages/dl-reconcile"],
-
-    "@rigelbuild/length-gate": ["@rigelbuild/length-gate@workspace:packages/length-gate"],
-
-    "@rigelbuild/ref-gate": ["@rigelbuild/ref-gate@workspace:packages/ref-gate"],
 
     "@rigelbuild/renovate-preflight": ["@rigelbuild/renovate-preflight@workspace:packages/renovate-preflight"],
 

@@ -53,6 +53,8 @@ Packages under `packages/` are published to npm as `@rigelbuild/<tool>` and vers
 
 Meissa is public: never name or cite a private repository. `ref-gate` enforces this with `ref-gate.config.json`.
 
+The Go `ref-gate` rejects the JavaScript-supported `v` regular-expression flag.
+
 ## Releases
 
 Release Please opens one release pull request covering every changed package. When it merges, the release workflow publishes each released package to npm with provenance through trusted publishing. A new package needs one manual first publish before its trusted publisher can be attached.

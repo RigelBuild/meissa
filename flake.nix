@@ -28,6 +28,9 @@
             name = "meissa-go-dev";
             paths = [ pkgs.go_1_27 ] ++ builtins.attrValues goAnalysis;
           };
+          tools = import ./go/package.nix {
+            inherit (pkgs) buildGo127Module lib;
+          };
           "rumdl-base-config" = import ./rumdl-base-config.nix { inherit pkgs; };
         };
       moduleCheck = system:
@@ -89,6 +92,13 @@
       lib.goAnalysis = { pkgs, goToolchain }: import ./tools/toolchain/go-analysis.nix { inherit pkgs goToolchain; };
       checks = forAllSystems (system: {
         devenv-module = moduleCheck system;
+        tools = let
+          pkgs = nixpkgs.legacyPackages.${system};
+          package = self.packages.${system}.tools;
+        in pkgs.runCommand "meissa-tools-check" { } ''
+          test -x "${package}/bin/ref-gate"
+          touch "$out"
+        '';
       } // (if system == "x86_64-linux" then {
         go-analysis = goAnalysisCheck system;
       } else { }));
