@@ -1,0 +1,14 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0042.md",
+  "fingerprint": [
+    {
+      "kind": "front-matter",
+      "value": "id: DL-044\ndecision: \"The Tauri desktop shell is a thin webview→daemon shell over a swappable transport seam; the daemon spawns detached and outlives the shell\"\nstatus: \"Superseded by DL-106 (Matt, 2026-08-02)\"\nrecord: ../../ui/compass-tauri-shell.md#approach"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

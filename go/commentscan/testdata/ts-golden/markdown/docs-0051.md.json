@@ -1,0 +1,14 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0051.md",
+  "fingerprint": [
+    {
+      "kind": "front-matter",
+      "value": "id: DL-416\ndecision: \"A subscribed TREE-channel agent that is reparented out and later moves back replays every message since its kept D2 cursor, including those posted while it was away: tree moves stay write-free (no cursor re-seed, no override-row delete), matching EXPLICIT remove/re-add\"\nstatus: \"Active (Matt, 2026-10-06)\"\nrecord: ../../ui/compass-channels-in-agent-tree/design.md#open-questions"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

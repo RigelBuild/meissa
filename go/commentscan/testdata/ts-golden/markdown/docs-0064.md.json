@@ -1,0 +1,4098 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0064.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Owner peering: cross-user agent-comms authorization"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Problem"
+    },
+    {
+      "kind": "code-span",
+      "value": "not_found"
+    },
+    {
+      "kind": "code-span",
+      "value": "Comms.OpenDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/comms.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "lifecycleService.DespawnAsAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/lifecycle.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "Comms.CreateAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_peers"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Approach"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 What exists today"
+    },
+    {
+      "kind": "code-span",
+      "value": "not_found"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Comms.OpenDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/comms.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveAgentAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/resolve.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "peer.Agent.OwnerUserID"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ResolveOwner(caller)"
+    },
+    {
+      "kind": "code-span",
+      "value": "notFoundHandle(store.ErrNotFound, peer_handle)"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenDMAsAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/agent_caller.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "lifecycleService.autoOpenSpawnDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/lifecycle.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateChannel"
+    },
+    {
+      "kind": "code-span",
+      "value": "UpdateChannelMembers"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveHandles"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.AccountsByHandles"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.visibleAgentHandleID"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/accounts.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetVisibleAgentHandleID"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/queries/accounts.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "ag.owner_user_id = $1"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "lifecycleService.DespawnAsAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/lifecycle.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "errPeerNotFound"
+    },
+    {
+      "kind": "code-span",
+      "value": "Comms.CreateAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "Comms.ReparentAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/comms.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "not_found"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.ReparentAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "SpawnAsAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.AgentOwner(caller)"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.AgentByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.UserByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.AccountsByHandles"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/accounts.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "alice/x"
+    },
+    {
+      "kind": "code-span",
+      "value": "alice"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 The edge: `user_peers`, two directed approvals"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_peers(user_id, peer_user_id, tenant_id, created_at)"
+    },
+    {
+      "kind": "code-span",
+      "value": "(user_id, peer_user_id)"
+    },
+    {
+      "kind": "code-span",
+      "value": "CHECK (user_id <> peer_user_id)"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "peer_user_id"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ON CONFLICT DO NOTHING"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "PENDING_OUTGOING"
+    },
+    {
+      "kind": "code-span",
+      "value": "PENDING_INCOMING"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "PENDING_INCOMING"
+    },
+    {
+      "kind": "code-span",
+      "value": "PENDING_INCOMING"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListPeers"
+    },
+    {
+      "kind": "code-span",
+      "value": "decision"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_accounts.account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_peers"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 What a peering grants: reach, never listing, never lifecycle"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/queries/accounts.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListVisibleAccounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "AccountVisibleTo"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetVisibleGlobalHandleID"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetVisibleAgentHandleID"
+    },
+    {
+      "kind": "code-span",
+      "value": "roster"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/roster.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.ListAccounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.AccountsByHandles"
+    },
+    {
+      "kind": "code-span",
+      "value": "visibleAgentHandleID"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/accounts.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner_user_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "COALESCE(agent_accounts.owner_user_id, viewer)"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.ResolveOwner"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListAccounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "OwnerUserId"
+    },
+    {
+      "kind": "code-span",
+      "value": "HomeChannelId"
+    },
+    {
+      "kind": "code-span",
+      "value": "ParentAgentId"
+    },
+    {
+      "kind": "code-span",
+      "value": "accountToWire"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/mapping.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveVisibleAgentHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/resolve.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.AccountVisibleTo"
+    },
+    {
+      "kind": "code-span",
+      "value": "PresenceFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "ActivityFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "visibleToActor"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/subscribe.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "AccountVisibleTo"
+    },
+    {
+      "kind": "code-span",
+      "value": "AccountChanged"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListAccounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "ag.owner_user_id = $1"
+    },
+    {
+      "kind": "code-span",
+      "value": "ag.owner_user_id = COALESCE((SELECT owner_user_id FROM agent_accounts WHERE account_id = $1), $1)"
+    },
+    {
+      "kind": "code-span",
+      "value": "bob/y"
+    },
+    {
+      "kind": "code-span",
+      "value": "alice/z"
+    },
+    {
+      "kind": "code-span",
+      "value": "mentionRE"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/delivery/consumer.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "/"
+    },
+    {
+      "kind": "code-span",
+      "value": "@bob/x"
+    },
+    {
+      "kind": "code-span",
+      "value": "@bob"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveMentioned"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/delivery/dispatch.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "DeliveryReads.AgentByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "memberSet"
+    },
+    {
+      "kind": "code-span",
+      "value": "@owner/agent"
+    },
+    {
+      "kind": "code-span",
+      "value": "Run"
+    },
+    {
+      "kind": "code-span",
+      "value": "consumer.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.UserByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "bob"
+    },
+    {
+      "kind": "code-span",
+      "value": "MENTION_RE"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/comms.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "byHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/components/TopicView.tsx"
+    },
+    {
+      "kind": "code-span",
+      "value": "b/x"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms_open_dm"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms_dm"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.OwnersPeered"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "member_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "add_member_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "subscribe_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "subscribed=true"
+    },
+    {
+      "kind": "code-span",
+      "value": "addOrUpdateMember"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/channels.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "expandOwnerMembership"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "requireChannelMember"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/authz.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "@owner/agent"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "wake"
+    },
+    {
+      "kind": "code-span",
+      "value": "fanOut"
+    },
+    {
+      "kind": "code-span",
+      "value": "routeMentionsFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/delivery/dispatch.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.AgentOwner(caller)"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Reach: one gate at delivery"
+    },
+    {
+      "kind": "code-span",
+      "value": "scanMissedMentions"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/delivery/scan.go"
+    },
+    {
+      "kind": "table-header",
+      "value": "| Path | Read (`go/internal/store/queries/`) | Author |"
+    },
+    {
+      "kind": "table-delimiter",
+      "value": "| --- | --- | --- |"
+    },
+    {
+      "kind": "code-span",
+      "value": "fanOut"
+    },
+    {
+      "kind": "code-span",
+      "value": "SubscribedAgents"
+    },
+    {
+      "kind": "code-span",
+      "value": "delivery_reads.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "$2"
+    },
+    {
+      "kind": "code-span",
+      "value": "routeMentionsFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveMentioned"
+    },
+    {
+      "kind": "code-span",
+      "value": "ChannelAgentMembers"
+    },
+    {
+      "kind": "code-span",
+      "value": "delivery_reads.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "$2"
+    },
+    {
+      "kind": "code-span",
+      "value": "sweepSession"
+    },
+    {
+      "kind": "code-span",
+      "value": "settle.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "UndeliveredMessages"
+    },
+    {
+      "kind": "code-span",
+      "value": "delivery_cursors.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "m.author_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "sweepOwedMentions"
+    },
+    {
+      "kind": "code-span",
+      "value": "settle.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "OwedMentions"
+    },
+    {
+      "kind": "code-span",
+      "value": "delivery_cursors.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "m.author_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "aa"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_accounts"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[sql]\n-- reach: the author may reach agent aa\n(   aa.owner_user_id = COALESCE((SELECT owner_user_id FROM agent_accounts WHERE account_id = <author>), <author>)\n OR EXISTS (SELECT 1 FROM system_accounts sy WHERE sy.account_id = <author>)\n OR EXISTS (SELECT 1 FROM user_peers p_out\n            JOIN user_peers p_in ON p_in.user_id = p_out.peer_user_id AND p_in.peer_user_id = p_out.user_id\n            WHERE p_out.user_id = COALESCE((SELECT owner_user_id FROM agent_accounts WHERE account_id = <author>), <author>)\n              AND p_out.peer_user_id = aa.owner_user_id)\n)"
+    },
+    {
+      "kind": "code-span",
+      "value": "ResolveOwner"
+    },
+    {
+      "kind": "code-span",
+      "value": "$2"
+    },
+    {
+      "kind": "code-span",
+      "value": "m.author_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "delivery_reads.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "delivery_cursors.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_peers"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_accounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_peers"
+    },
+    {
+      "kind": "code-span",
+      "value": "AckDelivery"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/delivery_cursors.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "SelfAuthoredSeqsAbove"
+    },
+    {
+      "kind": "code-span",
+      "value": "above_seqs"
+    },
+    {
+      "kind": "code-span",
+      "value": "SelfAuthoredSeqsAbove"
+    },
+    {
+      "kind": "code-span",
+      "value": "SkippableSeqsAbove"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListMessages"
+    },
+    {
+      "kind": "code-span",
+      "value": "SubscribeComms"
+    },
+    {
+      "kind": "code-span",
+      "value": "sweepPins"
+    },
+    {
+      "kind": "code-span",
+      "value": "settle.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "routeAskAnswerFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass peer approve"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Revoke: nothing to unwind"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "ChannelChanged"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Cross-owner DM name and home"
+    },
+    {
+      "kind": "code-span",
+      "value": "dm:<lo>:<hi>"
+    },
+    {
+      "kind": "code-span",
+      "value": "__dm__"
+    },
+    {
+      "kind": "code-span",
+      "value": "dmChannelName"
+    },
+    {
+      "kind": "code-span",
+      "value": "openDMTx"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/dm.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "UpsertDMChannelTx"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/dm.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "(group, name)"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetDMChannelByName"
+    },
+    {
+      "kind": "code-span",
+      "value": "verifyReconcileDMTx"
+    },
+    {
+      "kind": "code-span",
+      "value": "alice"
+    },
+    {
+      "kind": "code-span",
+      "value": "x"
+    },
+    {
+      "kind": "code-span",
+      "value": "bob"
+    },
+    {
+      "kind": "code-span",
+      "value": "xdm:<idLo>:<idHi>"
+    },
+    {
+      "kind": "code-span",
+      "value": "newID"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/ids.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "xdm:"
+    },
+    {
+      "kind": "code-span",
+      "value": "dm:"
+    },
+    {
+      "kind": "code-span",
+      "value": "handleRE"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/handle.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "dm:"
+    },
+    {
+      "kind": "code-span",
+      "value": "verifyReconcileDMTx"
+    },
+    {
+      "kind": "code-span",
+      "value": "xdm:"
+    },
+    {
+      "kind": "code-span",
+      "value": "LeftSidebar.tsx"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "openDMTx"
+    },
+    {
+      "kind": "code-span",
+      "value": "LockOwnerDMTx(host)"
+    },
+    {
+      "kind": "code-span",
+      "value": "EnsureOwnerDMGroupTx(host)"
+    },
+    {
+      "kind": "code-span",
+      "value": "UpsertDMChannelTx"
+    },
+    {
+      "kind": "code-span",
+      "value": "expandOwnerMembership"
+    },
+    {
+      "kind": "code-span",
+      "value": "ChannelsByNameForViewer"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/queries/channels.sql"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Error contract: no peering is `not_found`"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeNotFound"
+    },
+    {
+      "kind": "code-span",
+      "value": "notFoundHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/resolve.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "edgeError"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/context.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListPeers"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestOpenDMCrossOwnerIsIndistinguishableNotFound"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/dm_open_pgtest_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestCommsTenantVisibilityTransport"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e/legcomms_tenant_test.go"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Peering RPCs and the operator CLI"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsService"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms"
+    },
+    {
+      "kind": "code-span",
+      "value": "authenticatedOpen"
+    },
+    {
+      "kind": "code-span",
+      "value": "classifyProcedure"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/auth/admin_gate.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "classify_exhaustive_test.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ApprovePeer(ApprovePeerRequest{peer_handle})"
+    },
+    {
+      "kind": "code-span",
+      "value": "ApprovePeerResponse{Peering}"
+    },
+    {
+      "kind": "code-span",
+      "value": "peer_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.UserByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "not_found"
+    },
+    {
+      "kind": "code-span",
+      "value": "invalid_argument"
+    },
+    {
+      "kind": "code-span",
+      "value": "u.account_id IS NOT NULL"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokePeer(RevokePeerRequest{peer_handle})"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokePeerResponse{deleted}"
+    },
+    {
+      "kind": "code-span",
+      "value": "deleted"
+    },
+    {
+      "kind": "code-span",
+      "value": "no approval for <handle>"
+    },
+    {
+      "kind": "code-span",
+      "value": "deleted"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListPeers(ListPeersRequest{})"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListPeersResponse{repeated Peering}"
+    },
+    {
+      "kind": "code-span",
+      "value": "state"
+    },
+    {
+      "kind": "code-span",
+      "value": "Peering{user_account_id, handle, state}"
+    },
+    {
+      "kind": "code-span",
+      "value": "PeeringState"
+    },
+    {
+      "kind": "code-span",
+      "value": "PENDING_OUTGOING"
+    },
+    {
+      "kind": "code-span",
+      "value": "PENDING_INCOMING"
+    },
+    {
+      "kind": "code-span",
+      "value": "APPROVED"
+    },
+    {
+      "kind": "code-span",
+      "value": "Account.IsAgent()"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.GetAccount(actor)"
+    },
+    {
+      "kind": "code-span",
+      "value": "permission_denied"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentGateway"
+    },
+    {
+      "kind": "code-span",
+      "value": "decodeEvent"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/live/stream.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass peer approve <handle>"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass peer revoke <handle>"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass peer list"
+    },
+    {
+      "kind": "code-span",
+      "value": "dialCommsClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/cmd/compass/client.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "message post"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveToken"
+    },
+    {
+      "kind": "code-span",
+      "value": "$COMPASS_ADMIN_TOKEN"
+    },
+    {
+      "kind": "code-span",
+      "value": "--token-file"
+    },
+    {
+      "kind": "code-span",
+      "value": "BearerInterceptor"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/auth/interceptor.go"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Tenancy"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_peers"
+    },
+    {
+      "kind": "code-span",
+      "value": "tenant_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "tenant_isolation"
+    },
+    {
+      "kind": "code-span",
+      "value": "0001_init.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "tenant_tables"
+    },
+    {
+      "kind": "code-span",
+      "value": "ApprovePeer"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.UserByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "SET LOCAL ROLE compass_app"
+    },
+    {
+      "kind": "code-span",
+      "value": "scopedDBTX"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/tenant_tx.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "REFERENCES user_accounts (account_id)"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.ApprovePeer"
+    },
+    {
+      "kind": "code-span",
+      "value": "(user_id, tenant_id)"
+    },
+    {
+      "kind": "code-span",
+      "value": "(peer_user_id, tenant_id)"
+    },
+    {
+      "kind": "code-span",
+      "value": "UNIQUE (account_id, tenant_id)"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_accounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrInvalidArgument"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_peers"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Alternatives considered"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 One symmetric row with a canonical pair and a state column"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_peers(user_lo, user_hi, state, requested_by)"
+    },
+    {
+      "kind": "code-span",
+      "value": "state IN (pending, approved)"
+    },
+    {
+      "kind": "code-span",
+      "value": "INSERT ... ON CONFLICT DO NOTHING"
+    },
+    {
+      "kind": "code-span",
+      "value": "DELETE"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 An invite token"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 A gate in every handler instead of the resolver predicate"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveHandles"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.OwnersPeered"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Drop the co-member disjunct for cross-owner targets in the resolver pair"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Gate in the Go dispatcher only"
+    },
+    {
+      "kind": "code-span",
+      "value": "fanOut"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveMentioned"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/delivery/dispatch.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "UndeliveredMessages"
+    },
+    {
+      "kind": "code-span",
+      "value": "OwedMentions"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Widen all four predicate copies (enumerate and address)"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListAccounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "accountToWire"
+    },
+    {
+      "kind": "code-span",
+      "value": "roster"
+    },
+    {
+      "kind": "code-span",
+      "value": "PresenceFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "ActivityFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "visibleToActor"
+    },
+    {
+      "kind": "code-span",
+      "value": "AccountChanged"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Owner-handle DM name for the cross-owner case"
+    },
+    {
+      "kind": "code-span",
+      "value": "dm:<ownerLo>/<agentLo>:<ownerHi>/<agentHi>"
+    },
+    {
+      "kind": "code-span",
+      "value": "verifyReconcileDMTx"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Cascade on revoke: unsubscribe or remove"
+    },
+    {
+      "kind": "code-span",
+      "value": "subscribed = FALSE"
+    },
+    {
+      "kind": "code-span",
+      "value": "SubscribedAgents"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/queries/delivery_reads.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "mandatory_subscription"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 A `PeeringChanged` stream event"
+    },
+    {
+      "kind": "code-span",
+      "value": "decodeEvent"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Distinct `permission_denied` for an unpeered target"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListPeers"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Peering managed through the agent gateway"
+    },
+    {
+      "kind": "code-span",
+      "value": "approve_peer"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsCallRequest"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Global Constraints"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_accounts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeNotFound"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SpawnAsAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "DespawnAsAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "ReparentAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.ReparentAgent"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "0001_init.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_peers"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_accounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "NNNN_user_peers.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "tenant_isolation"
+    },
+    {
+      "kind": "code-span",
+      "value": "tenant_tables"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/queries/accounts.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListVisibleAccounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "AccountVisibleTo"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetVisibleGlobalHandleID"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetVisibleAgentHandleID"
+    },
+    {
+      "kind": "code-span",
+      "value": "WHERE ("
+    },
+    {
+      "kind": "code-span",
+      "value": ")"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SubscribedAgents"
+    },
+    {
+      "kind": "code-span",
+      "value": "ChannelAgentMembers"
+    },
+    {
+      "kind": "code-span",
+      "value": "UndeliveredMessages"
+    },
+    {
+      "kind": "code-span",
+      "value": "OwedMentions"
+    },
+    {
+      "kind": "code-span",
+      "value": "SkippableSeqsAbove"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "dm:<lo>:<hi>"
+    },
+    {
+      "kind": "code-span",
+      "value": "xdm:<idLo>:<idHi>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokePeer"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_peers"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsService"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto"
+    },
+    {
+      "kind": "code-span",
+      "value": "SubscribeCommsResponse"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon run compass-proto:gen"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-proto:lint"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-proto:drift"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-proto:gen-fence"
+    },
+    {
+      "kind": "code-span",
+      "value": "classifyProcedure"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "actorFromContext"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "bun test"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Plan"
+    },
+    {
+      "kind": "code-span",
+      "value": "[compass-server]"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListPeers"
+    },
+    {
+      "kind": "code-span",
+      "value": "ApprovePeer"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T1 — the edge: schema, store, RPCs, door, CLI"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/migrations/NNNN_user_peers.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "UNIQUE (account_id, tenant_id)"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_accounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "ALTER TABLE"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_accounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "UNIQUE (account_id, owner_user_id)"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[sql]\nCREATE TABLE user_peers (\n    user_id      TEXT NOT NULL,\n    peer_user_id TEXT NOT NULL,\n    tenant_id    TEXT NOT NULL DEFAULT current_setting('compass.tenant_id', TRUE),\n    created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),\n    PRIMARY KEY (user_id, peer_user_id),\n    CHECK (user_id <> peer_user_id),\n    FOREIGN KEY (user_id, tenant_id)      REFERENCES user_accounts (account_id, tenant_id) ON DELETE RESTRICT,\n    FOREIGN KEY (peer_user_id, tenant_id) REFERENCES user_accounts (account_id, tenant_id) ON DELETE RESTRICT\n);\nCREATE INDEX user_peers_peer_idx ON user_peers (peer_user_id);"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_peers"
+    },
+    {
+      "kind": "code-span",
+      "value": "tenant_isolation"
+    },
+    {
+      "kind": "code-span",
+      "value": "tenant_tables"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass_app"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass_system"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_peers"
+    },
+    {
+      "kind": "code-span",
+      "value": "updated_at"
+    },
+    {
+      "kind": "code-span",
+      "value": "updated_at_tables"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/queries/user_peers.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "InsertUserPeer :execrows"
+    },
+    {
+      "kind": "code-span",
+      "value": "INSERT ... ON CONFLICT DO NOTHING"
+    },
+    {
+      "kind": "code-span",
+      "value": "DeleteUserPeer :execrows"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListUserPeerings :many"
+    },
+    {
+      "kind": "code-span",
+      "value": "FULL OUTER JOIN"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "peer_id, handle, outgoing bool, incoming bool"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/user_peers.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "ApprovePeer"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokePeer"
+    },
+    {
+      "kind": "code-span",
+      "value": "user == peer"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrInvalidArgument"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrInvalidArgument"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/comms.proto"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsService"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[proto]\n// Approve a user as a peer of the caller (a user account). A peering is\n// live only when both users have approved each other; until then this is\n// a pending request. Idempotent. peer_handle is a bare user handle;\n// unknown, agent, or system handles are NOT_FOUND, self is INVALID_ARGUMENT,\n// an agent caller is PERMISSION_DENIED.\nrpc ApprovePeer(ApprovePeerRequest) returns (ApprovePeerResponse);\n// Withdraw the caller's approval of a user. Idempotent; deleted reports\n// whether an approval existed. Changes no channel, member, or message.\nrpc RevokePeer(RevokePeerRequest) returns (RevokePeerResponse);\n// List the caller's peerings: every user with an approval in either direction.\nrpc ListPeers(ListPeersRequest) returns (ListPeersResponse);"
+    },
+    {
+      "kind": "code-span",
+      "value": "ApprovePeerRequest{string peer_handle = 1}"
+    },
+    {
+      "kind": "code-span",
+      "value": "ApprovePeerResponse{Peering peering = 1}"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokePeerRequest{string peer_handle = 1}"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokePeerResponse{bool deleted = 1}"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListPeersRequest{}"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListPeersResponse{repeated Peering peerings = 1}"
+    },
+    {
+      "kind": "code-span",
+      "value": "Peering{string user_account_id = 1; string handle = 2; PeeringState state = 3}"
+    },
+    {
+      "kind": "code-span",
+      "value": "enum PeeringState{PEERING_STATE_UNSPECIFIED = 0; PEERING_STATE_PENDING_OUTGOING = 1; PEERING_STATE_PENDING_INCOMING = 2; PEERING_STATE_APPROVED = 3}"
+    },
+    {
+      "kind": "code-span",
+      "value": "SubscribeCommsResponse"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon run compass-proto:gen"
+    },
+    {
+      "kind": "code-span",
+      "value": "classifyProcedure"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/auth/admin_gate.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsServiceApprovePeerProcedure"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsServiceRevokePeerProcedure"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsServiceListPeersProcedure"
+    },
+    {
+      "kind": "code-span",
+      "value": "authenticatedOpen"
+    },
+    {
+      "kind": "code-span",
+      "value": "admin_gate_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "wantAdmin=false, wantOK=true"
+    },
+    {
+      "kind": "code-span",
+      "value": "classify_exhaustive_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/peering.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "ApprovePeer"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokePeer"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListPeers"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.GetAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodePermissionDenied"
+    },
+    {
+      "kind": "code-span",
+      "value": "acc.User != nil"
+    },
+    {
+      "kind": "code-span",
+      "value": "ApprovePeer"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokePeer"
+    },
+    {
+      "kind": "code-span",
+      "value": "peer_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.UserByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "Account.System != nil"
+    },
+    {
+      "kind": "code-span",
+      "value": "Account.User == nil"
+    },
+    {
+      "kind": "code-span",
+      "value": "notFoundHandle(store.ErrNotFound, peer_handle)"
+    },
+    {
+      "kind": "code-span",
+      "value": "peer.ID == actor"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeInvalidArgument"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListPeers"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.ListPeerings"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/cmd/compass/peer.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "newPeerCmd()"
+    },
+    {
+      "kind": "code-span",
+      "value": "newRootCmd"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/cmd/compass/main.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "newMessageCmd"
+    },
+    {
+      "kind": "code-span",
+      "value": "approve <handle>"
+    },
+    {
+      "kind": "code-span",
+      "value": "revoke <handle>"
+    },
+    {
+      "kind": "code-span",
+      "value": "cobra.ExactArgs(1)"
+    },
+    {
+      "kind": "code-span",
+      "value": "list"
+    },
+    {
+      "kind": "code-span",
+      "value": "cobra.NoArgs"
+    },
+    {
+      "kind": "code-span",
+      "value": "dialCommsClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "approve"
+    },
+    {
+      "kind": "code-span",
+      "value": "list"
+    },
+    {
+      "kind": "code-span",
+      "value": "<handle>\\t<state>"
+    },
+    {
+      "kind": "code-span",
+      "value": "revoke"
+    },
+    {
+      "kind": "code-span",
+      "value": "revoked <handle>"
+    },
+    {
+      "kind": "code-span",
+      "value": "deleted"
+    },
+    {
+      "kind": "code-span",
+      "value": "no approval for <handle>"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveToken"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "func (s *Store) ApprovePeer(ctx context.Context, user, peer AccountID) (inserted bool, err error)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "func (s *Store) RevokePeer(ctx context.Context, user, peer AccountID) (deleted bool, err error)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "func (s *Store) ListPeerings(ctx context.Context, user AccountID) ([]Peering, error)"
+    },
+    {
+      "kind": "code-span",
+      "value": "type Peering struct { PeerID AccountID; Handle string; State PeeringState }"
+    },
+    {
+      "kind": "code-span",
+      "value": "type PeeringState int"
+    },
+    {
+      "kind": "code-span",
+      "value": "PeeringPendingOutgoing"
+    },
+    {
+      "kind": "code-span",
+      "value": "PeeringPendingIncoming"
+    },
+    {
+      "kind": "code-span",
+      "value": "PeeringApproved"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "func (c *Comms) ApprovePeer(ctx context.Context, req *connect.Request[compassv1.ApprovePeerRequest]) (*connect.Response[compassv1.ApprovePeerResponse], error)"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokePeer"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListPeers"
+    },
+    {
+      "kind": "code-span",
+      "value": "func peeringToWire(p store.Peering) *compassv1.Peering"
+    },
+    {
+      "kind": "code-span",
+      "value": "mapping.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "func newPeerCmd() *cobra.Command"
+    },
+    {
+      "kind": "code-span",
+      "value": "func runPeerApprove(ctx context.Context, client compassv1connect.CommsServiceClient, handle string, out io.Writer) error"
+    },
+    {
+      "kind": "code-span",
+      "value": "runPeerRevoke"
+    },
+    {
+      "kind": "code-span",
+      "value": "func runPeerList(ctx context.Context, client compassv1connect.CommsServiceClient, out io.Writer) error"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_peers_pgtest_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store"
+    },
+    {
+      "kind": "code-span",
+      "value": "inserted=false"
+    },
+    {
+      "kind": "code-span",
+      "value": "PENDING_OUTGOING"
+    },
+    {
+      "kind": "code-span",
+      "value": "PENDING_INCOMING"
+    },
+    {
+      "kind": "code-span",
+      "value": "APPROVED"
+    },
+    {
+      "kind": "code-span",
+      "value": "PENDING_INCOMING"
+    },
+    {
+      "kind": "code-span",
+      "value": "deleted=true"
+    },
+    {
+      "kind": "code-span",
+      "value": "deleted=false"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrInvalidArgument"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrInvalidArgument"
+    },
+    {
+      "kind": "code-span",
+      "value": "UPDATE account_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestHandleRenameInPlaceBothTiers"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles_pgtest_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "a"
+    },
+    {
+      "kind": "code-span",
+      "value": "matt"
+    },
+    {
+      "kind": "code-span",
+      "value": "matt"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateUser"
+    },
+    {
+      "kind": "code-span",
+      "value": "matt"
+    },
+    {
+      "kind": "code-span",
+      "value": "a"
+    },
+    {
+      "kind": "code-span",
+      "value": "oldMatt"
+    },
+    {
+      "kind": "code-span",
+      "value": "a"
+    },
+    {
+      "kind": "code-span",
+      "value": "newMatt"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.ApprovePeer(userA, userFromTenantB)"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrInvalidArgument"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestCrossTenantWriteLandsUnderWriterTenant"
+    },
+    {
+      "kind": "code-span",
+      "value": "rls_pgtest_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "seedTenant"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithTenant"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "peering_pgtest_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodePermissionDenied"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeInvalidArgument"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeNotFound"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListPeers"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateUser"
+    },
+    {
+      "kind": "code-span",
+      "value": "deleted=false"
+    },
+    {
+      "kind": "code-span",
+      "value": "APPROVED"
+    },
+    {
+      "kind": "code-span",
+      "value": "admin_gate_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "peer_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "fakeComms"
+    },
+    {
+      "kind": "code-span",
+      "value": "startFakeCommsServer"
+    },
+    {
+      "kind": "code-span",
+      "value": "message_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "no approval for <handle>"
+    },
+    {
+      "kind": "code-span",
+      "value": "deleted=false"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestNoTokenFlag"
+    },
+    {
+      "kind": "code-span",
+      "value": "cli_test.go"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T2 — the reach gate in the delivery reads"
+    },
+    {
+      "kind": "code-span",
+      "value": "SubscribedAgents"
+    },
+    {
+      "kind": "code-span",
+      "value": "ChannelAgentMembers"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/queries/delivery_reads.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "$2"
+    },
+    {
+      "kind": "code-span",
+      "value": "UndeliveredMessages"
+    },
+    {
+      "kind": "code-span",
+      "value": "OwedMentions"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/queries/delivery_cursors.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "m.author_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "OwedMentions"
+    },
+    {
+      "kind": "code-span",
+      "value": "JOIN agent_accounts aa ON aa.account_id = om.agent_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "SelfAuthoredSeqsAbove"
+    },
+    {
+      "kind": "code-span",
+      "value": "SkippableSeqsAbove"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_accounts aa ON aa.account_id = $3"
+    },
+    {
+      "kind": "code-span",
+      "value": "$2"
+    },
+    {
+      "kind": "code-span",
+      "value": "aa"
+    },
+    {
+      "kind": "code-span",
+      "value": "AckDelivery"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/delivery_cursors.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "CountOwedMentions"
+    },
+    {
+      "kind": "code-span",
+      "value": "author := mustUser(...)"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestUndeliveredMessagesReachesUnsubscribedMandatoryMember"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestSetChannelPolicySeedsCursorsForNewlyMandatory"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestUpdateChannelMembersConcurrentFlipSeedsLateMember"
+    },
+    {
+      "kind": "code-span",
+      "value": "channel_policy_pgtest_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "ApprovePeer"
+    },
+    {
+      "kind": "code-span",
+      "value": "store"
+    },
+    {
+      "kind": "code-span",
+      "value": "delivery"
+    },
+    {
+      "kind": "code-span",
+      "value": "delivery_reads.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "DeliveryReads"
+    },
+    {
+      "kind": "code-span",
+      "value": "SubscribedAgents"
+    },
+    {
+      "kind": "code-span",
+      "value": "ChannelAgentMembers"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/delivery/consumer.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveMentioned"
+    },
+    {
+      "kind": "code-span",
+      "value": "fanOut"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/delivery/dispatch.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "UndeliveredMessages"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store"
+    },
+    {
+      "kind": "code-span",
+      "value": "fakeReads"
+    },
+    {
+      "kind": "code-span",
+      "value": "helpers_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "mention_test.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "DeliveryReads"
+    },
+    {
+      "kind": "code-span",
+      "value": "db.Queries.SkippableSeqsAbove(ctx, SkippableSeqsAboveParams{ChannelID, Seq, AgentAccountID})"
+    },
+    {
+      "kind": "code-span",
+      "value": "SelfAuthoredSeqsAbove"
+    },
+    {
+      "kind": "code-span",
+      "value": "$3"
+    },
+    {
+      "kind": "code-span",
+      "value": "aa"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "sql_parity_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store"
+    },
+    {
+      "kind": "code-span",
+      "value": "delivery_reads.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "delivery_cursors.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "-- reach:"
+    },
+    {
+      "kind": "code-span",
+      "value": ")"
+    },
+    {
+      "kind": "code-span",
+      "value": "$2"
+    },
+    {
+      "kind": "code-span",
+      "value": "m.author_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "<author>"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts.sql"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "reach_pgtest_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store"
+    },
+    {
+      "kind": "code-span",
+      "value": "SubscribedAgents"
+    },
+    {
+      "kind": "code-span",
+      "value": "ChannelAgentMembers"
+    },
+    {
+      "kind": "code-span",
+      "value": "mandatory_subscription"
+    },
+    {
+      "kind": "code-span",
+      "value": "kind=DM"
+    },
+    {
+      "kind": "code-span",
+      "value": "UndeliveredMessages(B_agent)"
+    },
+    {
+      "kind": "code-span",
+      "value": "OwedMentions(B_agent)"
+    },
+    {
+      "kind": "code-span",
+      "value": "AckDelivery"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/delivery"
+    },
+    {
+      "kind": "code-span",
+      "value": "ask_answer_recovery_pgtest_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "@b/x"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T3 — addressing: own-fleet widening, peered resolver, `OpenDM`, DM name"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/queries/accounts.sql"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "ag.owner_user_id = $1"
+    },
+    {
+      "kind": "code-span",
+      "value": "ag.owner_user_id = COALESCE((SELECT owner_user_id FROM agent_accounts WHERE account_id = $1), $1)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "GetVisibleGlobalHandleID"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetVisibleAgentHandleID"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[sql]\nOR EXISTS (\n    SELECT 1\n    FROM user_peers p_out\n    JOIN user_peers p_in\n      ON p_in.user_id = p_out.peer_user_id AND p_in.peer_user_id = p_out.user_id\n    WHERE p_out.user_id = COALESCE((SELECT owner_user_id FROM agent_accounts WHERE account_id = $1), $1)\n      AND p_out.peer_user_id = ag.owner_user_id\n)"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.ListAccounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.AccountVisibleTo"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/accounts.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolve_pgtest_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms"
+    },
+    {
+      "kind": "code-span",
+      "value": "AccountVisibleTo"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_peers.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "OwnersPeered :one"
+    },
+    {
+      "kind": "code-span",
+      "value": "SELECT EXISTS"
+    },
+    {
+      "kind": "code-span",
+      "value": "p_out"
+    },
+    {
+      "kind": "code-span",
+      "value": "p_in"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.OwnersPeered"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_peers.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "Comms.OpenDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/comms.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveAgentAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveHandles"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveAgentAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveAddressableAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/resolve.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ParseQualifiedHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "agentOwnerNamespace"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.VisibleAgentByHandle(ctx, viewer, owner, handle)"
+    },
+    {
+      "kind": "code-span",
+      "value": "visibleAgentHandleID"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "notFoundHandle(store.ErrNotFound, qh.Raw)"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveVisibleAgentHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "AccountVisibleTo"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "peer.Agent.OwnerUserID != owner"
+    },
+    {
+      "kind": "code-span",
+      "value": "callerOwner := Store.ResolveOwner(caller)"
+    },
+    {
+      "kind": "code-span",
+      "value": "peerOwner := peer.Agent.OwnerUserID"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.OwnersPeered(callerOwner, peerOwner)"
+    },
+    {
+      "kind": "code-span",
+      "value": "notFoundHandle(store.ErrNotFound, peer_handle)"
+    },
+    {
+      "kind": "code-span",
+      "value": "dmChannelName(callerAcc.Handle, peer.Handle)"
+    },
+    {
+      "kind": "code-span",
+      "value": "host = callerOwner"
+    },
+    {
+      "kind": "code-span",
+      "value": "crossOwnerDMName(caller, peer.ID)"
+    },
+    {
+      "kind": "code-span",
+      "value": "host = min(callerOwner, peerOwner)"
+    },
+    {
+      "kind": "code-span",
+      "value": "openDMTx(ctx, host, name, members)"
+    },
+    {
+      "kind": "code-span",
+      "value": "callerOwner == caller"
+    },
+    {
+      "kind": "code-span",
+      "value": "expandOwnerMembership"
+    },
+    {
+      "kind": "code-span",
+      "value": "rpc OpenDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenDMRequest.peer_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto"
+    },
+    {
+      "kind": "code-span",
+      "value": "Comms.OpenDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/comms.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenDMAsAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/agent_caller.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "openDmParameters"
+    },
+    {
+      "kind": "code-span",
+      "value": "dmParameters"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent/src/comms.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon run compass-proto:gen"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "func (c *Comms) resolveAddressableAgent(ctx context.Context, caller store.AccountID, handle string) (store.Account, error)"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolve.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "func (s *Store) VisibleAgentByHandle(ctx context.Context, viewer, owner AccountID, handle string) (Account, error)"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/accounts.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrNotFound"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentByHandle"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "func (s *Store) OwnersPeered(ctx context.Context, a, b AccountID) (bool, error)"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_peers_pgtest_test.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "func crossOwnerDMName(a, b store.AccountID) string"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/dm.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"xdm:\" + lo + \":\" + hi"
+    },
+    {
+      "kind": "code-span",
+      "value": "dmChannelName"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Comms.OpenDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenDMAsAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "autoOpenSpawnDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.ListAccounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.AccountVisibleTo"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.AccountsByHandles"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "openDmParameters"
+    },
+    {
+      "kind": "code-span",
+      "value": "dmParameters"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent/src/comms.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "[compass-agent]"
+    },
+    {
+      "kind": "code-span",
+      "value": "bun test"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles_pgtest_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "AccountsByHandles"
+    },
+    {
+      "kind": "code-span",
+      "value": "b/x"
+    },
+    {
+      "kind": "code-span",
+      "value": "AccountsByHandles"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListAccounts(A)"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListAccounts(A_agent)"
+    },
+    {
+      "kind": "code-span",
+      "value": "AccountVisibleTo(A_agent, B_agent)"
+    },
+    {
+      "kind": "code-span",
+      "value": "AccountVisibleTo(A_agent, A_sibling)"
+    },
+    {
+      "kind": "code-span",
+      "value": "roster_pgtest_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "sql_parity_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "WHERE ("
+    },
+    {
+      "kind": "code-span",
+      "value": "-- name:"
+    },
+    {
+      "kind": "code-span",
+      "value": ")"
+    },
+    {
+      "kind": "code-span",
+      "value": "EXISTS (...)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "dm_open_pgtest_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "kind=DM"
+    },
+    {
+      "kind": "code-span",
+      "value": "xdm:<idLo>:<idHi>"
+    },
+    {
+      "kind": "code-span",
+      "value": "__dm__"
+    },
+    {
+      "kind": "code-span",
+      "value": "created=true"
+    },
+    {
+      "kind": "code-span",
+      "value": "dm:<lo>:<hi>"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeNotFound"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestOpenDMCrossOwnerIsIndistinguishableNotFound"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeNotFound"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeNotFound"
+    },
+    {
+      "kind": "code-span",
+      "value": "UPDATE"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateUser"
+    },
+    {
+      "kind": "code-span",
+      "value": "created=true"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T4 — delivery and UI: owner-qualified mentions"
+    },
+    {
+      "kind": "code-span",
+      "value": "mentionRE"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/delivery/consumer.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "(?i)@([a-z0-9][a-z0-9._-]*(?:/[a-z0-9][a-z0-9._-]*)?)"
+    },
+    {
+      "kind": "code-span",
+      "value": "ChannelAgentMembers"
+    },
+    {
+      "kind": "code-span",
+      "value": "delivery_reads.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "ah.account_id = aa.account_id AND ah.owner_user_id = aa.owner_user_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "oh.account_id = aa.owner_user_id AND oh.owner_user_id IS NULL"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveMentioned"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/delivery/dispatch.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ParseQualifiedHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "OwnerUserID"
+    },
+    {
+      "kind": "code-span",
+      "value": "authorOwner"
+    },
+    {
+      "kind": "code-span",
+      "value": "ResolveOwner"
+    },
+    {
+      "kind": "code-span",
+      "value": "Handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "OwnerHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "Handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "DeliveryReads.AgentByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "parseMentions"
+    },
+    {
+      "kind": "code-span",
+      "value": "@host/path"
+    },
+    {
+      "kind": "code-span",
+      "value": "@alice/bob"
+    },
+    {
+      "kind": "code-span",
+      "value": "alice"
+    },
+    {
+      "kind": "code-span",
+      "value": "/"
+    },
+    {
+      "kind": "code-span",
+      "value": "alice/bob"
+    },
+    {
+      "kind": "code-span",
+      "value": "alice"
+    },
+    {
+      "kind": "code-span",
+      "value": "bob"
+    },
+    {
+      "kind": "code-span",
+      "value": "mention_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "[compass-ui]"
+    },
+    {
+      "kind": "code-span",
+      "value": "MENTION_RE"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/comms.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "/segment"
+    },
+    {
+      "kind": "code-span",
+      "value": "byHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "TopicView.tsx"
+    },
+    {
+      "kind": "code-span",
+      "value": "<ownerHandle>/<handle>"
+    },
+    {
+      "kind": "code-span",
+      "value": "byId.get(a.ownerUserId)"
+    },
+    {
+      "kind": "code-span",
+      "value": "mentionRuns"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/markdown/mention-runs.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "rehypeMentionChips"
+    },
+    {
+      "kind": "code-span",
+      "value": "byHandle.has"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ChannelAgentMembers(ctx context.Context, channel store.ChannelID, author store.AccountID) ([]store.ChannelAgentMember, error)"
+    },
+    {
+      "kind": "code-span",
+      "value": "DeliveryReads"
+    },
+    {
+      "kind": "code-span",
+      "value": "*store.Store"
+    },
+    {
+      "kind": "code-span",
+      "value": "type ChannelAgentMember struct { ID AccountID; OwnerUserID AccountID; OwnerHandle, Handle string }"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/types.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "fakeReads.members"
+    },
+    {
+      "kind": "code-span",
+      "value": "helpers_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "fakeReads.handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "mention_test.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "mentionRE"
+    },
+    {
+      "kind": "code-span",
+      "value": "func parseMentions(text string) []string"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveMentioned"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "mention_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "@bob/x"
+    },
+    {
+      "kind": "code-span",
+      "value": "bob/x"
+    },
+    {
+      "kind": "code-span",
+      "value": "@bob/"
+    },
+    {
+      "kind": "code-span",
+      "value": "@/x"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/delivery"
+    },
+    {
+      "kind": "code-span",
+      "value": "bob"
+    },
+    {
+      "kind": "code-span",
+      "value": "x"
+    },
+    {
+      "kind": "code-span",
+      "value": "@bob/x"
+    },
+    {
+      "kind": "code-span",
+      "value": "bob/x"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.test.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "MarkdownText.test.tsx"
+    },
+    {
+      "kind": "code-span",
+      "value": "@bob/x"
+    },
+    {
+      "kind": "code-span",
+      "value": "byHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "unknown"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T5 — e2e: peer, DM, revoke, restore"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestCommsTenantVisibilityTransport"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/e2e/legcomms_tenant_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "NOT_FOUND"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner2/agent2"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner2/agent2"
+    },
+    {
+      "kind": "code-span",
+      "value": "NOT_FOUND"
+    },
+    {
+      "kind": "code-span",
+      "value": "NOT_FOUND"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner2/agent2"
+    },
+    {
+      "kind": "code-span",
+      "value": "@owner2/agent2"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner2/agent2"
+    },
+    {
+      "kind": "code-span",
+      "value": "NOT_FOUND"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsServiceClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "ApprovePeer"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokePeer"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListPeers"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "PostMessage"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListMessages"
+    },
+    {
+      "kind": "code-span",
+      "value": "UpdateChannelMembers"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "podmanUsable"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Tasks"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_peers"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_accounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "NNNN_user_peers.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "queries/user_peers.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.ApprovePeer"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokePeer"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListPeerings"
+    },
+    {
+      "kind": "code-span",
+      "value": "ApprovePeer"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokePeer{deleted}"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListPeers"
+    },
+    {
+      "kind": "code-span",
+      "value": "Peering"
+    },
+    {
+      "kind": "code-span",
+      "value": "PeeringState"
+    },
+    {
+      "kind": "code-span",
+      "value": "classifyProcedure"
+    },
+    {
+      "kind": "code-span",
+      "value": "admin_gate_test"
+    },
+    {
+      "kind": "code-span",
+      "value": "peering.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass peer approve|revoke|list"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SubscribedAgents"
+    },
+    {
+      "kind": "code-span",
+      "value": "ChannelAgentMembers"
+    },
+    {
+      "kind": "code-span",
+      "value": "UndeliveredMessages"
+    },
+    {
+      "kind": "code-span",
+      "value": "OwedMentions"
+    },
+    {
+      "kind": "code-span",
+      "value": "SkippableSeqsAbove"
+    },
+    {
+      "kind": "code-span",
+      "value": "AckDelivery"
+    },
+    {
+      "kind": "code-span",
+      "value": "sql_parity_test.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.OwnersPeered"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.VisibleAgentByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveAddressableAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "Comms.OpenDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "OwnersPeered"
+    },
+    {
+      "kind": "code-span",
+      "value": "xdm:"
+    },
+    {
+      "kind": "code-span",
+      "value": "bun test"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "mentionRE"
+    },
+    {
+      "kind": "code-span",
+      "value": "ChannelAgentMembers"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveMentioned"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "DeliveryReads"
+    },
+    {
+      "kind": "code-span",
+      "value": "MENTION_RE"
+    },
+    {
+      "kind": "code-span",
+      "value": "byHandle"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "NOT_FOUND"
+    },
+    {
+      "kind": "code-span",
+      "value": "NOT_FOUND"
+    },
+    {
+      "kind": "code-span",
+      "value": "NOT_FOUND"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Open Questions"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 OQ-1 (load-bearing) — Edge shape, and whether a recipient can decline"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "ListPeers"
+    },
+    {
+      "kind": "code-span",
+      "value": "FULL OUTER JOIN"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "(lo, hi)"
+    },
+    {
+      "kind": "code-span",
+      "value": "state"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "PENDING_INCOMING"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "ListPeers"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "user_peers.decision IN (approve, block)"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_peer_blocks"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "declined"
+    },
+    {
+      "kind": "code-span",
+      "value": "blocked"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_accounts.account_id"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 OQ-2 (load-bearing) — What a peering grants"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_accounts.role"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "user_peers.scope"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "GetVisibleGlobalHandleID"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetVisibleAgentHandleID"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListVisibleAccounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "AccountVisibleTo"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListAccounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "AccountChanged"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListAccounts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "accountToWire"
+    },
+    {
+      "kind": "code-span",
+      "value": "AccountChanged"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "UpdateChannelMembers"
+    },
+    {
+      "kind": "code-span",
+      "value": "expandOwnerMembership"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "wake"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 OQ-3 (load-bearing) — Error a caller sees with no edge"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "not_found"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListPeers"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenDM"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "permission_denied"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "not_found"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 OQ-4 (load-bearing) — Cross-owner DM key shape"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetDMChannelByName"
+    },
+    {
+      "kind": "code-span",
+      "value": "UpsertDMChannelTx"
+    },
+    {
+      "kind": "code-span",
+      "value": "verifyReconcileDMTx"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "xdm:<idLo>:<idHi>"
+    },
+    {
+      "kind": "code-span",
+      "value": "xdm:"
+    },
+    {
+      "kind": "code-span",
+      "value": "dm:"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "xdm:<ownerIdLo>/<agentLo>:<ownerIdHi>/<agentHi>"
+    },
+    {
+      "kind": "code-span",
+      "value": "dm:<lo>:<hi>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "(lo_id, hi_id)"
+    },
+    {
+      "kind": "code-span",
+      "value": "channels"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 OQ-5 (load-bearing) — Revoke semantics for existing channels"
+    },
+    {
+      "kind": "code-span",
+      "value": "SubscribedAgents"
+    },
+    {
+      "kind": "code-span",
+      "value": "ChannelAgentMembers"
+    },
+    {
+      "kind": "code-span",
+      "value": "UndeliveredMessages"
+    },
+    {
+      "kind": "code-span",
+      "value": "OwedMentions"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.OwnersPeered"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.RevokePeer"
+    },
+    {
+      "kind": "code-span",
+      "value": "subscribed = FALSE"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "removeMember"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:4."
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokePeerResponse"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 OQ-6 (non-load-bearing, deferred) — Peering UI and stream event"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListPeers"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass peer"
+    },
+    {
+      "kind": "code-span",
+      "value": "PeeringChanged"
+    },
+    {
+      "kind": "code-span",
+      "value": "SubscribeCommsResponse"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Ledger delta"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/designs/DECISIONS.md"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "user_peers(user_id, peer_user_id)"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "decision"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "AccountChanged"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.OwnersPeered"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "Superseded by DL-393"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "not_found"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenDM"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListPeers"
+    },
+    {
+      "kind": "code-span",
+      "value": "not_found"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "xdm:<idLo>:<idHi>"
+    },
+    {
+      "kind": "code-span",
+      "value": "dm:"
+    },
+    {
+      "kind": "code-span",
+      "value": "__dm__"
+    },
+    {
+      "kind": "code-span",
+      "value": "dm:<lo>:<hi>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SubscribedAgents"
+    },
+    {
+      "kind": "code-span",
+      "value": "ChannelAgentMembers"
+    },
+    {
+      "kind": "code-span",
+      "value": "UndeliveredMessages"
+    },
+    {
+      "kind": "code-span",
+      "value": "OwedMentions"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListMessages"
+    },
+    {
+      "kind": "code-span",
+      "value": "SubscribeComms"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

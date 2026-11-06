@@ -1,0 +1,2374 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0067.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Design: Leader/Mnemonic Keyboard Chords, Focus-Context-Gated (RIG-2484)"
+    },
+    {
+      "kind": "code-span",
+      "value": "main"
+    },
+    {
+      "kind": "code-span",
+      "value": "?"
+    },
+    {
+      "kind": "code-span",
+      "value": "?"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/keyboard/shortcuts-model.ts:44-78"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Problem / Intent"
+    },
+    {
+      "kind": "code-span",
+      "value": "DEFAULT_KEYMAP"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/keyboard/keymap.ts:100-155"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+*"
+    },
+    {
+      "kind": "code-span",
+      "value": "F6"
+    },
+    {
+      "kind": "code-span",
+      "value": "?"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:109"
+    },
+    {
+      "kind": "code-span",
+      "value": "{ chord: \"Mod+B\", commandId: cmd(\"view.bridge\") }"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:102"
+    },
+    {
+      "kind": "code-span",
+      "value": "KeyboardEvent"
+    },
+    {
+      "kind": "code-span",
+      "value": "eventToChord"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/keyboard/dispatch.ts:36-53"
+    },
+    {
+      "kind": "code-span",
+      "value": "installKeymap"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:110-168"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+\\"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+Shift+\\"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:116-117"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+1..3"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:112-114"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+*"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Global Constraints"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/package.json:25"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"solid-js\": \"^1.9.13\""
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "package.json:15"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"@biomejs/biome\": \"2.5.4\""
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "noun.verbCamel"
+    },
+    {
+      "kind": "code-span",
+      "value": "board.*"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:24-26"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod"
+    },
+    {
+      "kind": "code-span",
+      "value": "Cmd"
+    },
+    {
+      "kind": "code-span",
+      "value": "Ctrl"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod"
+    },
+    {
+      "kind": "code-span",
+      "value": "Ctrl"
+    },
+    {
+      "kind": "code-span",
+      "value": "Cmd"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "App.tsx:54-60"
+    },
+    {
+      "kind": "code-span",
+      "value": "onCleanup"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "when"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:124-167"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:86-89"
+    },
+    {
+      "kind": "code-span",
+      "value": "when"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveChordAria"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:47-48"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:57-63"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutForAria"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:70-76"
+    },
+    {
+      "kind": "code-span",
+      "value": "aria-keyshortcuts"
+    },
+    {
+      "kind": "code-span",
+      "value": "App.tsx:88"
+    },
+    {
+      "kind": "code-span",
+      "value": "LeftSidebar.tsx:453,469,487,500"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"Space\""
+    },
+    {
+      "kind": "code-span",
+      "value": "Bridge.tsx:525"
+    },
+    {
+      "kind": "code-span",
+      "value": "aria-keyshortcuts"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutForAria"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "cd apps/ui && bun test --conditions browser <file>"
+    },
+    {
+      "kind": "code-span",
+      "value": "KeyboardEvent"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/keyboard/dispatch.test.ts:9-12"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/package.json:15"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Approach"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 A1 — The collision guard is ALREADY BUILT: focus gating via the editable-target guard"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\n> // Editable-target guard: a modifier-less chord (arrows, Enter, Space,\n> // Home/End, and bare Shift combos) never fires while focus is in a text\n> // field — the composer keeps its local keys. Mod/Ctrl/Alt chords are\n> // global and are NOT guarded.\n> const hasCommandModifier = event.metaKey || event.ctrlKey || event.altKey;\n> if (!hasCommandModifier && isEditableTarget(event.target)) return;"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/keyboard/dispatch.ts:117-122"
+    },
+    {
+      "kind": "code-span",
+      "value": "isEditableTarget"
+    },
+    {
+      "kind": "code-span",
+      "value": "HTMLInputElement"
+    },
+    {
+      "kind": "code-span",
+      "value": "HTMLTextAreaElement"
+    },
+    {
+      "kind": "code-span",
+      "value": "isContentEditable"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:66-72"
+    },
+    {
+      "kind": "code-span",
+      "value": "isEditableTarget"
+    },
+    {
+      "kind": "code-span",
+      "value": "<select>"
+    },
+    {
+      "kind": "code-span",
+      "value": "SettingsView.tsx:166"
+    },
+    {
+      "kind": "code-span",
+      "value": "settings-select"
+    },
+    {
+      "kind": "code-span",
+      "value": "combobox"
+    },
+    {
+      "kind": "code-span",
+      "value": "listbox"
+    },
+    {
+      "kind": "code-span",
+      "value": "menu"
+    },
+    {
+      "kind": "code-span",
+      "value": "<select>"
+    },
+    {
+      "kind": "code-span",
+      "value": "preventDefault"
+    },
+    {
+      "kind": "code-span",
+      "value": "g"
+    },
+    {
+      "kind": "code-span",
+      "value": "<select>"
+    },
+    {
+      "kind": "code-span",
+      "value": "<select>"
+    },
+    {
+      "kind": "code-span",
+      "value": "F6 → zone.cycle"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:115"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 A2 — Sequence authoring: space-separated segments in `KeymapEntry.chord`"
+    },
+    {
+      "kind": "code-span",
+      "value": "chord"
+    },
+    {
+      "kind": "code-span",
+      "value": "{ chord: \"G B\", commandId: cmd(\"view.bridge\") }"
+    },
+    {
+      "kind": "code-span",
+      "value": "KeymapEntry"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "KeymapEntry"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:91-95"
+    },
+    {
+      "kind": "code-span",
+      "value": "chord"
+    },
+    {
+      "kind": "code-span",
+      "value": "commandId"
+    },
+    {
+      "kind": "code-span",
+      "value": "when?"
+    },
+    {
+      "kind": "code-span",
+      "value": "DEFAULT_KEYMAP.filter"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:112-114"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildShortcutGroups"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcuts-model.ts:53-70"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutForAria"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:57-76"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveChord"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:37-38"
+    },
+    {
+      "kind": "code-span",
+      "value": "replaceAll(MOD, …)"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"Mod+G B\""
+    },
+    {
+      "kind": "code-span",
+      "value": "\"Cmd+G B\""
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"Space\""
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:45"
+    },
+    {
+      "kind": "code-span",
+      "value": "), so a raw "
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "G"
+    },
+    {
+      "kind": "code-span",
+      "value": "DEFAULT_KEYMAP"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:1-10"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 A3 — The leader runtime: pending state inside the ONE keydown handler"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:110-168"
+    },
+    {
+      "kind": "code-span",
+      "value": "installKeymap"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\ntype PendingLeader = { leader: string; timer: number } | null;"
+    },
+    {
+      "kind": "code-span",
+      "value": "g"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"G\""
+    },
+    {
+      "kind": "code-span",
+      "value": "DEFAULT_KEYMAP"
+    },
+    {
+      "kind": "code-span",
+      "value": "matching.length === 0"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:115"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "eventToChord"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:36-53"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:121-122"
+    },
+    {
+      "kind": "code-span",
+      "value": "g"
+    },
+    {
+      "kind": "code-span",
+      "value": "isEditableTarget"
+    },
+    {
+      "kind": "code-span",
+      "value": "<select>"
+    },
+    {
+      "kind": "code-span",
+      "value": "combobox"
+    },
+    {
+      "kind": "code-span",
+      "value": "listbox"
+    },
+    {
+      "kind": "code-span",
+      "value": "menu"
+    },
+    {
+      "kind": "code-span",
+      "value": "matching.length === 0"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:115"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "event.key"
+    },
+    {
+      "kind": "code-span",
+      "value": "Shift"
+    },
+    {
+      "kind": "code-span",
+      "value": "Control"
+    },
+    {
+      "kind": "code-span",
+      "value": "Alt"
+    },
+    {
+      "kind": "code-span",
+      "value": "Meta"
+    },
+    {
+      "kind": "code-span",
+      "value": "Escape"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"<leader> <key>\""
+    },
+    {
+      "kind": "code-span",
+      "value": "<key>"
+    },
+    {
+      "kind": "code-span",
+      "value": "eventToChord"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"Shift+B\""
+    },
+    {
+      "kind": "code-span",
+      "value": "\"G Shift+B\""
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:124-167"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:86-89"
+    },
+    {
+      "kind": "code-span",
+      "value": "g g"
+    },
+    {
+      "kind": "code-span",
+      "value": "g"
+    },
+    {
+      "kind": "code-span",
+      "value": "ArrowDown"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:4."
+    },
+    {
+      "kind": "code-span",
+      "value": "pending = { leader: chord, timer: setTimeout(disarm, LEADER_TIMEOUT_MS) }"
+    },
+    {
+      "kind": "code-span",
+      "value": "event.preventDefault()"
+    },
+    {
+      "kind": "code-span",
+      "value": "event.stopPropagation()"
+    },
+    {
+      "kind": "code-span",
+      "value": "event.repeat"
+    },
+    {
+      "kind": "code-span",
+      "value": "g"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:5."
+    },
+    {
+      "kind": "code-span",
+      "value": "matching.length === 0"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:115"
+    },
+    {
+      "kind": "code-span",
+      "value": ":124-167"
+    },
+    {
+      "kind": "code-span",
+      "value": "setTimeout"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:171"
+    },
+    {
+      "kind": "code-span",
+      "value": "App.tsx:54-60"
+    },
+    {
+      "kind": "code-span",
+      "value": "onCleanup"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 A4 — Bare-letter and sequence allocation (wave 1)"
+    },
+    {
+      "kind": "code-span",
+      "value": "G <letter>"
+    },
+    {
+      "kind": "table-header",
+      "value": "| Chord | Command | Registration (verified) | Existing modifier row? |"
+    },
+    {
+      "kind": "table-delimiter",
+      "value": "| --- | --- | --- | --- |"
+    },
+    {
+      "kind": "code-span",
+      "value": "G B"
+    },
+    {
+      "kind": "code-span",
+      "value": "view.bridge"
+    },
+    {
+      "kind": "code-span",
+      "value": "spine.ts:79-86"
+    },
+    {
+      "kind": "code-span",
+      "value": "showBridge"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ts:1923"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+B"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:102"
+    },
+    {
+      "kind": "code-span",
+      "value": "G L"
+    },
+    {
+      "kind": "code-span",
+      "value": "view.backlog"
+    },
+    {
+      "kind": "code-span",
+      "value": "spine.ts:111-118"
+    },
+    {
+      "kind": "code-span",
+      "value": "showBacklog"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ts:1927"
+    },
+    {
+      "kind": "code-span",
+      "value": "G D"
+    },
+    {
+      "kind": "code-span",
+      "value": "view.done"
+    },
+    {
+      "kind": "code-span",
+      "value": "spine.ts:119-126"
+    },
+    {
+      "kind": "code-span",
+      "value": "showDone"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ts:1931"
+    },
+    {
+      "kind": "code-span",
+      "value": "G S"
+    },
+    {
+      "kind": "code-span",
+      "value": "view.settings"
+    },
+    {
+      "kind": "code-span",
+      "value": "spine.ts:103-110"
+    },
+    {
+      "kind": "code-span",
+      "value": "showSettings"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ts:1935"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+,"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:104"
+    },
+    {
+      "kind": "code-span",
+      "value": "keyboard-e2e.test.tsx:106-118"
+    },
+    {
+      "kind": "code-span",
+      "value": "createKeyboardSpine"
+    },
+    {
+      "kind": "code-span",
+      "value": "showBridge"
+    },
+    {
+      "kind": "code-span",
+      "value": "toggleShortcuts"
+    },
+    {
+      "kind": "code-span",
+      "value": "showBacklog"
+    },
+    {
+      "kind": "code-span",
+      "value": "showDone"
+    },
+    {
+      "kind": "code-span",
+      "value": "showSettings"
+    },
+    {
+      "kind": "code-span",
+      "value": "togglePalette"
+    },
+    {
+      "kind": "code-span",
+      "value": "spine.ts:70-77"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ts:1973-1980"
+    },
+    {
+      "kind": "code-span",
+      "value": "view.*"
+    },
+    {
+      "kind": "code-span",
+      "value": "G *"
+    },
+    {
+      "kind": "code-span",
+      "value": "DEFAULT_KEYMAP"
+    },
+    {
+      "kind": "code-span",
+      "value": "view.backlog"
+    },
+    {
+      "kind": "code-span",
+      "value": "view.done"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutForAria"
+    },
+    {
+      "kind": "code-span",
+      "value": "view.agentWorkspace"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+Shift+A"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:103"
+    },
+    {
+      "kind": "code-span",
+      "value": "G A"
+    },
+    {
+      "kind": "code-span",
+      "value": "view.agentWorkspace"
+    },
+    {
+      "kind": "code-span",
+      "value": "spine.ts:79-126"
+    },
+    {
+      "kind": "code-span",
+      "value": "G A"
+    },
+    {
+      "kind": "code-span",
+      "value": "Shift+Enter"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:121-140"
+    },
+    {
+      "kind": "code-span",
+      "value": "board.openAssignedAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "board.openCardCrossLink"
+    },
+    {
+      "kind": "code-span",
+      "value": "a"
+    },
+    {
+      "kind": "code-span",
+      "value": "s"
+    },
+    {
+      "kind": "code-span",
+      "value": "p"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:124-137"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 A5 — Display and `aria-keyshortcuts` for sequences"
+    },
+    {
+      "kind": "code-span",
+      "value": "aria-keyshortcuts"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"G B\""
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutForAria"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:70-76"
+    },
+    {
+      "kind": "code-span",
+      "value": "DEFAULT_KEYMAP"
+    },
+    {
+      "kind": "code-span",
+      "value": "LeftSidebar.tsx:469"
+    },
+    {
+      "kind": "code-span",
+      "value": "aria-keyshortcuts"
+    },
+    {
+      "kind": "code-span",
+      "value": "view.backlog"
+    },
+    {
+      "kind": "code-span",
+      "value": "LeftSidebar.tsx:435"
+    },
+    {
+      "kind": "code-span",
+      "value": "G L → view.backlog"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutForAria(\"view.backlog\")"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"G L\""
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutForAria"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:70-76"
+    },
+    {
+      "kind": "code-span",
+      "value": "chordSegments(entry.chord).length > 1"
+    },
+    {
+      "kind": "code-span",
+      "value": "undefined"
+    },
+    {
+      "kind": "code-span",
+      "value": "LeftSidebar.tsx:435"
+    },
+    {
+      "kind": "code-span",
+      "value": "view.bridge"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+B"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:102"
+    },
+    {
+      "kind": "code-span",
+      "value": "view.settings"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+,"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:104"
+    },
+    {
+      "kind": "code-span",
+      "value": "undefined"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:57-63"
+    },
+    {
+      "kind": "code-span",
+      "value": "formatChordForDisplay"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"G then L\""
+    },
+    {
+      "kind": "code-span",
+      "value": "title"
+    },
+    {
+      "kind": "code-span",
+      "value": "LeftSidebar.tsx:471-472,488"
+    },
+    {
+      "kind": "code-span",
+      "value": "Backlog (${chord})"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"Backlog (G then L)\""
+    },
+    {
+      "kind": "code-span",
+      "value": "Palette.tsx:118"
+    },
+    {
+      "kind": "code-span",
+      "value": "ShortcutChip"
+    },
+    {
+      "kind": "code-span",
+      "value": "formatChordForDisplay"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveChord"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcuts-model.ts:57"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveChord"
+    },
+    {
+      "kind": "code-span",
+      "value": "formatChordForDisplay"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"G then B\""
+    },
+    {
+      "kind": "code-span",
+      "value": "\"G B\""
+    },
+    {
+      "kind": "code-span",
+      "value": "formatChordForDisplay"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"G B\""
+    },
+    {
+      "kind": "code-span",
+      "value": "ShortcutChip"
+    },
+    {
+      "kind": "code-span",
+      "value": "ShortcutChip.tsx:17"
+    },
+    {
+      "kind": "code-span",
+      "value": "chord"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"+\""
+    },
+    {
+      "kind": "code-span",
+      "value": "<kbd>"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"G then B\""
+    },
+    {
+      "kind": "code-span",
+      "value": "\"+\""
+    },
+    {
+      "kind": "code-span",
+      "value": "<kbd>"
+    },
+    {
+      "kind": "code-span",
+      "value": "aria-keyshortcuts"
+    },
+    {
+      "kind": "code-span",
+      "value": "Bridge.tsx:525"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"Space\""
+    },
+    {
+      "kind": "heading",
+      "value": "H3 A6 — Coexistence with today's `Mod+*` bindings: additive, no removals"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+*"
+    },
+    {
+      "kind": "code-span",
+      "value": "DEFAULT_KEYMAP.filter"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:112-114"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcuts-model.ts:53-70"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+*"
+    },
+    {
+      "kind": "code-span",
+      "value": "hasCommandModifier"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:121"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+B"
+    },
+    {
+      "kind": "code-span",
+      "value": "G B"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Alternatives considered"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+\\"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+Shift+\\"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:116-117"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+1..3"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:112-114"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+Shift+Alt+*"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:121-122"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "App.tsx:54-60"
+    },
+    {
+      "kind": "code-span",
+      "value": "installKeymap"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:4."
+    },
+    {
+      "kind": "code-span",
+      "value": "KeymapEntry.sequence?: string[]"
+    },
+    {
+      "kind": "code-span",
+      "value": "chord"
+    },
+    {
+      "kind": "code-span",
+      "value": "filter"
+    },
+    {
+      "kind": "code-span",
+      "value": "chord"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:112-114"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcuts-model.ts:53-70"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveChord"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutForAria"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"Space\""
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:45"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:5."
+    },
+    {
+      "kind": "code-span",
+      "value": "chordForAria"
+    },
+    {
+      "kind": "code-span",
+      "value": "chordForDisplay"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutForAria"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutForAria"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:57-76"
+    },
+    {
+      "kind": "code-span",
+      "value": "aria-keyshortcuts"
+    },
+    {
+      "kind": "code-span",
+      "value": "App.tsx"
+    },
+    {
+      "kind": "code-span",
+      "value": "LeftSidebar.tsx"
+    },
+    {
+      "kind": "code-span",
+      "value": "Palette.tsx"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutForAria"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "formatChordForDisplay"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:6."
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:117-122"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Plan"
+    },
+    {
+      "kind": "code-span",
+      "value": "rule://red-green-testing"
+    },
+    {
+      "kind": "code-span",
+      "value": "DEFAULT_KEYMAP"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutForAria"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.test.ts:51"
+    },
+    {
+      "kind": "code-span",
+      "value": "LeftSidebar.tsx:469"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T1 — Sequence grammar + pure helpers in `keymap.ts` (no table or helper change)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/keyboard/keymap.ts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "export function chordSegments(chord: string): string[]"
+    },
+    {
+      "kind": "code-span",
+      "value": "[chord]"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "export function leaderPrefixes(keymap, platform): ReadonlySet<string>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "export function formatChordForDisplay(chord, platform): string"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveChord"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"Cmd+B\""
+    },
+    {
+      "kind": "code-span",
+      "value": "\" then \""
+    },
+    {
+      "kind": "code-span",
+      "value": "\"G then B\""
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "KeymapEntry"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:78-90"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Interfaces:"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\n  // keymap.ts (new exports; KeymapEntry unchanged)\n  export function chordSegments(chord: string): string[];\n  export function leaderPrefixes(\n    keymap: readonly KeymapEntry[],\n    platform: Platform,\n  ): ReadonlySet<string>;\n  export function formatChordForDisplay(chord: string, platform: Platform): string;"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.test.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "chordSegments(\"G B\") → [\"G\",\"B\"]"
+    },
+    {
+      "kind": "code-span",
+      "value": "chordSegments(\"Mod+B\") → [\"Mod+B\"]"
+    },
+    {
+      "kind": "code-span",
+      "value": "leaderPrefixes(fixture, \"other\")"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"G\""
+    },
+    {
+      "kind": "code-span",
+      "value": "formatChordForDisplay(\"G B\",\"mac\") → \"G then B\""
+    },
+    {
+      "kind": "code-span",
+      "value": "formatChordForDisplay(\"Mod+B\",\"mac\") → \"Cmd+B\""
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T2 — Sequence rows + display/aria hardening (landed together)"
+    },
+    {
+      "kind": "code-span",
+      "value": "aria-keyshortcuts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "DEFAULT_KEYMAP"
+    },
+    {
+      "kind": "code-span",
+      "value": "// Go-to sequences (RIG-2484)"
+    },
+    {
+      "kind": "code-span",
+      "value": ", "
+    },
+    {
+      "kind": "code-span",
+      "value": ", "
+    },
+    {
+      "kind": "code-span",
+      "value": ", "
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+B"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:102-104"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutForAria"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:70-76"
+    },
+    {
+      "kind": "code-span",
+      "value": "chordSegments(entry.chord).length > 1"
+    },
+    {
+      "kind": "code-span",
+      "value": "undefined"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:57-63"
+    },
+    {
+      "kind": "code-span",
+      "value": "formatChordForDisplay"
+    },
+    {
+      "kind": "code-span",
+      "value": "view.backlog"
+    },
+    {
+      "kind": "code-span",
+      "value": "view.done"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"G then L\""
+    },
+    {
+      "kind": "code-span",
+      "value": "\"G then D\""
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "formatChordForDisplay"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcuts-model.ts:57"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"G then B\""
+    },
+    {
+      "kind": "code-span",
+      "value": "\"G B\""
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Interfaces:"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutForAria"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.test.ts:33"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutFor(\"view.backlog\")"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"G then L\""
+    },
+    {
+      "kind": "code-span",
+      "value": "undefined"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.test.ts:51"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutForAria(\"view.backlog\")"
+    },
+    {
+      "kind": "code-span",
+      "value": "undefined"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutFor(\"view.bridge\",\"other\") → \"Ctrl+B\""
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutForAria(\"view.bridge\",\"other\") → \"Control+B\""
+    },
+    {
+      "kind": "code-span",
+      "value": "DEFAULT_KEYMAP"
+    },
+    {
+      "kind": "code-span",
+      "value": "Palette.test.tsx:238-251"
+    },
+    {
+      "kind": "code-span",
+      "value": "LeftSidebar"
+    },
+    {
+      "kind": "code-span",
+      "value": "aria-keyshortcuts"
+    },
+    {
+      "kind": "code-span",
+      "value": "title"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"Backlog (G then L)\""
+    },
+    {
+      "kind": "code-span",
+      "value": "\"Done (G then D)\""
+    },
+    {
+      "kind": "code-span",
+      "value": "aria-keyshortcuts=\"Control+B\""
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ShortcutsOverlay.test.tsx:66"
+    },
+    {
+      "kind": "code-span",
+      "value": "G B"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"bridge\""
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+B"
+    },
+    {
+      "kind": "code-span",
+      "value": "G B"
+    },
+    {
+      "kind": "code-span",
+      "value": "DEFAULT_KEYMAP"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcuts-model.ts:80-93"
+    },
+    {
+      "kind": "code-span",
+      "value": "expect(rows.length).toBe(1)"
+    },
+    {
+      "kind": "code-span",
+      "value": "toBe(2)"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"G then B\""
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T3 — Leader runtime in the dispatcher"
+    },
+    {
+      "kind": "code-span",
+      "value": "installKeymap"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:103-172"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "isEditableTarget"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:66-72"
+    },
+    {
+      "kind": "code-span",
+      "value": "HTMLSelectElement"
+    },
+    {
+      "kind": "code-span",
+      "value": "combobox"
+    },
+    {
+      "kind": "code-span",
+      "value": "listbox"
+    },
+    {
+      "kind": "code-span",
+      "value": "menu"
+    },
+    {
+      "kind": "code-span",
+      "value": "preventDefault"
+    },
+    {
+      "kind": "code-span",
+      "value": "<select>"
+    },
+    {
+      "kind": "code-span",
+      "value": "SettingsView.tsx:166"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:117-122"
+    },
+    {
+      "kind": "code-span",
+      "value": "matching.length === 0"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:115"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "!event.repeat"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:124-167"
+    },
+    {
+      "kind": "code-span",
+      "value": "LEADER_TIMEOUT_MS = 1000"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:171"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Interfaces:"
+    },
+    {
+      "kind": "code-span",
+      "value": "setTimeout"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\n  // dispatch.ts\n  export const LEADER_TIMEOUT_MS: number; // 1000, OQ1\n  export function installKeymap(\n    registry: CommandRegistry,\n    active: () => RovingGroupHandle | null,\n    activeZone?: () => FocusZone | null,\n  ): () => void; // unchanged"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.test.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.test.ts:9-12"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "g"
+    },
+    {
+      "kind": "code-span",
+      "value": "b"
+    },
+    {
+      "kind": "code-span",
+      "value": "G B"
+    },
+    {
+      "kind": "code-span",
+      "value": "g"
+    },
+    {
+      "kind": "code-span",
+      "value": "defaultPrevented"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "g"
+    },
+    {
+      "kind": "code-span",
+      "value": "jest.useFakeTimers()"
+    },
+    {
+      "kind": "code-span",
+      "value": "advanceTimersByTime"
+    },
+    {
+      "kind": "code-span",
+      "value": "LEADER_TIMEOUT_MS"
+    },
+    {
+      "kind": "code-span",
+      "value": "b"
+    },
+    {
+      "kind": "code-span",
+      "value": "setTimeout"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "<input>"
+    },
+    {
+      "kind": "code-span",
+      "value": "g"
+    },
+    {
+      "kind": "code-span",
+      "value": "b"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "<select>"
+    },
+    {
+      "kind": "code-span",
+      "value": "<select>"
+    },
+    {
+      "kind": "code-span",
+      "value": "g"
+    },
+    {
+      "kind": "code-span",
+      "value": "defaultPrevented"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "role=\"listbox\""
+    },
+    {
+      "kind": "code-span",
+      "value": "combobox"
+    },
+    {
+      "kind": "code-span",
+      "value": "g"
+    },
+    {
+      "kind": "code-span",
+      "value": "defaultPrevented"
+    },
+    {
+      "kind": "code-span",
+      "value": "<select>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "g"
+    },
+    {
+      "kind": "code-span",
+      "value": "ArrowDown"
+    },
+    {
+      "kind": "code-span",
+      "value": "list.moveNext"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "g g"
+    },
+    {
+      "kind": "code-span",
+      "value": "b"
+    },
+    {
+      "kind": "code-span",
+      "value": "view.bridge"
+    },
+    {
+      "kind": "code-span",
+      "value": "g"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "g"
+    },
+    {
+      "kind": "code-span",
+      "value": "b"
+    },
+    {
+      "kind": "code-span",
+      "value": "b"
+    },
+    {
+      "kind": "code-span",
+      "value": "b"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Escape"
+    },
+    {
+      "kind": "code-span",
+      "value": "Shift"
+    },
+    {
+      "kind": "code-span",
+      "value": "g"
+    },
+    {
+      "kind": "code-span",
+      "value": "b"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+B"
+    },
+    {
+      "kind": "code-span",
+      "value": "view.bridge"
+    },
+    {
+      "kind": "code-span",
+      "value": "g"
+    },
+    {
+      "kind": "code-span",
+      "value": "repeat: true"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "keyboard-e2e.test.tsx"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+,"
+    },
+    {
+      "kind": "code-span",
+      "value": ":106-118"
+    },
+    {
+      "kind": "code-span",
+      "value": "g"
+    },
+    {
+      "kind": "code-span",
+      "value": "s"
+    },
+    {
+      "kind": "code-span",
+      "value": "g"
+    },
+    {
+      "kind": "code-span",
+      "value": "l"
+    },
+    {
+      "kind": "code-span",
+      "value": "spine.ts:79-126"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T4 — Docs + ledger follow-through (driver-owned ledger flip)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.ts:1-10"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcuts-model.ts:53-70"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Tasks"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "chordSegments"
+    },
+    {
+      "kind": "code-span",
+      "value": "leaderPrefixes"
+    },
+    {
+      "kind": "code-span",
+      "value": "formatChordForDisplay"
+    },
+    {
+      "kind": "code-span",
+      "value": "KeymapEntry"
+    },
+    {
+      "kind": "code-span",
+      "value": "DEFAULT_KEYMAP"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "G *"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutForAria"
+    },
+    {
+      "kind": "code-span",
+      "value": "shortcutFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.test.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "LeftSidebar"
+    },
+    {
+      "kind": "code-span",
+      "value": "ShortcutsOverlay.test.tsx:66"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "installKeymap"
+    },
+    {
+      "kind": "code-span",
+      "value": "<select>"
+    },
+    {
+      "kind": "code-span",
+      "value": "g s"
+    },
+    {
+      "kind": "code-span",
+      "value": "g l"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Open Questions"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "G"
+    },
+    {
+      "kind": "code-span",
+      "value": "G"
+    },
+    {
+      "kind": "code-span",
+      "value": "DEFAULT_KEYMAP"
+    },
+    {
+      "kind": "code-span",
+      "value": "keymap.ts:100-155"
+    },
+    {
+      "kind": "code-span",
+      "value": "timeoutlen"
+    },
+    {
+      "kind": "code-span",
+      "value": "G"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "PendingLeader"
+    },
+    {
+      "kind": "code-span",
+      "value": "b"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "G …"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:4."
+    },
+    {
+      "kind": "code-span",
+      "value": "a"
+    },
+    {
+      "kind": "code-span",
+      "value": "s"
+    },
+    {
+      "kind": "code-span",
+      "value": "p"
+    },
+    {
+      "kind": "code-span",
+      "value": "c"
+    },
+    {
+      "kind": "code-span",
+      "value": "i"
+    },
+    {
+      "kind": "code-span",
+      "value": "/"
+    },
+    {
+      "kind": "code-span",
+      "value": "j"
+    },
+    {
+      "kind": "code-span",
+      "value": "k"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:5."
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+*"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+*"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+B"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mod+,"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

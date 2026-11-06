@@ -1,0 +1,14 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/astro.ts",
+  "corpus": "go/commentscan/testdata/corpus/astro/ambiguous-island-segments.astro",
+  "scan": {
+    "residues": [
+      "<style>",
+      "/* unfinished",
+      "</style>",
+      "<p>after</p>"
+    ],
+    "ambiguous": true
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0005.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Compass design decisions"
+    },
+    {
+      "kind": "code-span",
+      "value": "<area>/DL-NNN.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "<area>"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/designs/"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent"
+    },
+    {
+      "kind": "code-span",
+      "value": "server"
+    },
+    {
+      "kind": "code-span",
+      "value": "ui"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://compass-eng-docs.pages.dev/designs/decisions/"
+    },
+    {
+      "kind": "link-target",
+      "value": "../meta/compass-design-ledger/design.md"
+    },
+    {
+      "kind": "link-target",
+      "value": "../CONTRIBUTING.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "design-ledger-gate"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Conventions"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "DL-<zero-padded int>"
+    },
+    {
+      "kind": "code-span",
+      "value": "bun tools/dl-claim"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Active (<who>, YYYY-MM-DD)"
+    },
+    {
+      "kind": "raw-html",
+      "value": "<who>"
+    },
+    {
+      "kind": "code-span",
+      "value": ", or "
+    },
+    {
+      "kind": "raw-html",
+      "value": "<n>"
+    },
+    {
+      "kind": "raw-html",
+      "value": "<who>"
+    },
+    {
+      "kind": "code-span",
+      "value": ". Use "
+    },
+    {
+      "kind": "raw-html",
+      "value": "<n>"
+    },
+    {
+      "kind": "code-span",
+      "value": " when a later decision replaces this one; use "
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Superseded"
+    },
+    {
+      "kind": "code-span",
+      "value": "Retired"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "#anchor"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[markdown]\n---\nid: DL-NNN\ndecision: \"One-line ruling.\"\nstatus: \"Active (<who>, YYYY-MM-DD)\"\nrecord: ../../<area>/<record>/design.md#anchor\n---"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

@@ -1,0 +1,1946 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0055.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 microVM Runner V2a — Guest Image + Boot Spike"
+    },
+    {
+      "kind": "link-target",
+      "value": "./microvm-runner.md"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Problem / Intent"
+    },
+    {
+      "kind": "code-span",
+      "value": "/nix"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-guestd"
+    },
+    {
+      "kind": "code-span",
+      "value": "MicroVMRuntime"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrMicroVMNotImplemented"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runtime/microvm.go:55"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Approach"
+    },
+    {
+      "kind": "code-span",
+      "value": "guest-image/default.nix:24-27"
+    },
+    {
+      "kind": "code-span",
+      "value": "## Open Questions"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 (a) Rootfs delivery: read-only erofs image on virtio-blk + whole-root tmpfs overlay"
+    },
+    {
+      "kind": "code-span",
+      "value": "guest-image/default.nix:124-160"
+    },
+    {
+      "kind": "code-span",
+      "value": "mkfs.erofs"
+    },
+    {
+      "kind": "code-span",
+      "value": "--disk path=…"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/cloud-hypervisor/cloud-hypervisor/blob/main/docs/device_model.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "switch_root"
+    },
+    {
+      "kind": "code-span",
+      "value": "/etc"
+    },
+    {
+      "kind": "code-span",
+      "value": "/var"
+    },
+    {
+      "kind": "code-span",
+      "value": "/tmp"
+    },
+    {
+      "kind": "code-span",
+      "value": "/nix/store"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "CONFIG_VIRTIO_BLK=m"
+    },
+    {
+      "kind": "code-span",
+      "value": "CONFIG_VIRTIO_PCI=m"
+    },
+    {
+      "kind": "code-span",
+      "value": "CONFIG_VIRTIO_NET=m"
+    },
+    {
+      "kind": "code-span",
+      "value": "CONFIG_VIRTIO_FS=m"
+    },
+    {
+      "kind": "code-span",
+      "value": "CONFIG_VIRTIO_VSOCKETS=m"
+    },
+    {
+      "kind": "code-span",
+      "value": "CONFIG_EROFS_FS=m"
+    },
+    {
+      "kind": "code-span",
+      "value": "CONFIG_OVERLAY_FS=m"
+    },
+    {
+      "kind": "code-span",
+      "value": "=y"
+    },
+    {
+      "kind": "code-span",
+      "value": "pkgs/os-specific/linux/kernel/common-config.nix"
+    },
+    {
+      "kind": "code-span",
+      "value": ".config"
+    },
+    {
+      "kind": "code-span",
+      "value": "=m"
+    },
+    {
+      "kind": "code-span",
+      "value": "=y"
+    },
+    {
+      "kind": "code-span",
+      "value": "=y"
+    },
+    {
+      "kind": "code-span",
+      "value": "guest-image/default.nix:10-17"
+    },
+    {
+      "kind": "code-span",
+      "value": "switch_root"
+    },
+    {
+      "kind": "code-span",
+      "value": "virtio_pci"
+    },
+    {
+      "kind": "code-span",
+      "value": "virtio_blk"
+    },
+    {
+      "kind": "code-span",
+      "value": "erofs"
+    },
+    {
+      "kind": "code-span",
+      "value": "overlay"
+    },
+    {
+      "kind": "code-span",
+      "value": "switch_root"
+    },
+    {
+      "kind": "code-span",
+      "value": "virtio_net"
+    },
+    {
+      "kind": "code-span",
+      "value": "virtiofs"
+    },
+    {
+      "kind": "code-span",
+      "value": "nf_tables"
+    },
+    {
+      "kind": "code-span",
+      "value": "egress.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "nf_conntrack"
+    },
+    {
+      "kind": "code-span",
+      "value": "nft_ct"
+    },
+    {
+      "kind": "code-span",
+      "value": ", "
+    },
+    {
+      "kind": "code-span",
+      "value": "flags interval"
+    },
+    {
+      "kind": "code-span",
+      "value": "egress.go:117-118"
+    },
+    {
+      "kind": "code-span",
+      "value": "/lib/modules/<version>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "mkfs.erofs"
+    },
+    {
+      "kind": "code-span",
+      "value": "-T0"
+    },
+    {
+      "kind": "code-span",
+      "value": "--all-root"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://git.kernel.org/pub/scm/linux/kernel/git/xiang/erofs-utils.git/about/"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-guest-rootfs"
+    },
+    {
+      "kind": "code-span",
+      "value": "let"
+    },
+    {
+      "kind": "code-span",
+      "value": "microvmtest.RootfsEnvVar"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/microvmtest/microvmtest.go:51-54"
+    },
+    {
+      "kind": "code-span",
+      "value": "nix build"
+    },
+    {
+      "kind": "code-span",
+      "value": "guest-image/moon.yml:46"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-guest-initrd"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 (b) Writable `/nix`: the whole-root overlay, not a per-mount split"
+    },
+    {
+      "kind": "code-span",
+      "value": "nix"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent-image/toolchain.nix:11-14"
+    },
+    {
+      "kind": "code-span",
+      "value": "toolchain.nix:47-77"
+    },
+    {
+      "kind": "code-span",
+      "value": "/nix/store"
+    },
+    {
+      "kind": "code-span",
+      "value": "/nix"
+    },
+    {
+      "kind": "code-span",
+      "value": "/etc/resolv.conf"
+    },
+    {
+      "kind": "code-span",
+      "value": "guest-image/default.nix:75-88"
+    },
+    {
+      "kind": "code-span",
+      "value": "nix build"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 (c) Net backend: passt, wired as vhost-user-net"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "pkgs.passt"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.nix:165-186"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "--net"
+    },
+    {
+      "kind": "code-span",
+      "value": "CAP_NET_ADMIN"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/cloud-hypervisor/cloud-hypervisor/blob/main/docs/vhost-user-net-testing.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "--vhost-user"
+    },
+    {
+      "kind": "code-span",
+      "value": "--socket"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://passt.top/builds/latest/web/passt.1.html"
+    },
+    {
+      "kind": "code-span",
+      "value": "--net vhost_user=true,socket=<path>"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/cloud-hypervisor/cloud-hypervisor/blob/main/docs/device_model.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "--memory shared=on"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/cloud-hypervisor/cloud-hypervisor/blob/main/docs/fs.md"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/cloud-hypervisor/cloud-hypervisor/blob/main/docs/memory.md"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "-a"
+    },
+    {
+      "kind": "code-span",
+      "value": "-g"
+    },
+    {
+      "kind": "code-span",
+      "value": "-n"
+    },
+    {
+      "kind": "code-span",
+      "value": "-D"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://passt.top/builds/latest/web/passt.1.html"
+    },
+    {
+      "kind": "code-span",
+      "value": "/etc/resolv.conf"
+    },
+    {
+      "kind": "code-span",
+      "value": "egress.go:112-131"
+    },
+    {
+      "kind": "code-span",
+      "value": "2025_09_19"
+    },
+    {
+      "kind": "code-span",
+      "value": "53.0"
+    },
+    {
+      "kind": "code-span",
+      "value": "1.14.0"
+    },
+    {
+      "kind": "code-span",
+      "value": "--vhost-user"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://patchew.org/Libvirt/20250213181953.922499-1-laine@redhat.com/"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/cloud-hypervisor/cloud-hypervisor/blob/main/docs/vhost-user-net-testing.md"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 (d) `compass-guestd` real init: boot sequence and fail-closed posture"
+    },
+    {
+      "kind": "code-span",
+      "value": "writeCBin"
+    },
+    {
+      "kind": "code-span",
+      "value": "guest-image/default.nix:60-73"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/cmd/compass-guestd"
+    },
+    {
+      "kind": "code-span",
+      "value": "/sbin/init"
+    },
+    {
+      "kind": "code-span",
+      "value": "default.nix:150-152"
+    },
+    {
+      "kind": "code-span",
+      "value": "switch_root"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "/proc"
+    },
+    {
+      "kind": "code-span",
+      "value": "/sys"
+    },
+    {
+      "kind": "code-span",
+      "value": "/dev"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "lo"
+    },
+    {
+      "kind": "code-span",
+      "value": "/etc/resolv.conf"
+    },
+    {
+      "kind": "code-span",
+      "value": "-a"
+    },
+    {
+      "kind": "code-span",
+      "value": "-g"
+    },
+    {
+      "kind": "code-span",
+      "value": "-n"
+    },
+    {
+      "kind": "code-span",
+      "value": "-D"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "mount(2)"
+    },
+    {
+      "kind": "code-span",
+      "value": "workspace"
+    },
+    {
+      "kind": "code-span",
+      "value": "/workspace"
+    },
+    {
+      "kind": "code-span",
+      "value": "virtiofs"
+    },
+    {
+      "kind": "code-span",
+      "value": "guest-image/default.nix:90-113"
+    },
+    {
+      "kind": "code-span",
+      "value": "workspace.mount"
+    },
+    {
+      "kind": "code-span",
+      "value": "workspace"
+    },
+    {
+      "kind": "code-span",
+      "value": "/workspace"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:4."
+    },
+    {
+      "kind": "code-span",
+      "value": "GuestControl"
+    },
+    {
+      "kind": "code-span",
+      "value": "Health"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:5."
+    },
+    {
+      "kind": "code-span",
+      "value": "console=ttyS0"
+    },
+    {
+      "kind": "code-span",
+      "value": "CONFIG_SERIAL_8250_CONSOLE=y"
+    },
+    {
+      "kind": "code-span",
+      "value": "Health"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 (e) The vsock handshake: `GuestControl.Health` over hybrid vsock"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/guest_control.proto"
+    },
+    {
+      "kind": "code-span",
+      "value": "service GuestControl"
+    },
+    {
+      "kind": "code-span",
+      "value": "rpc Health(HealthRequest) returns (HealthResponse)"
+    },
+    {
+      "kind": "code-span",
+      "value": "Exec"
+    },
+    {
+      "kind": "code-span",
+      "value": "ExecStream"
+    },
+    {
+      "kind": "code-span",
+      "value": "Signal"
+    },
+    {
+      "kind": "code-span",
+      "value": "Provision"
+    },
+    {
+      "kind": "code-span",
+      "value": "Health"
+    },
+    {
+      "kind": "code-span",
+      "value": "Health(HealthRequest)"
+    },
+    {
+      "kind": "code-span",
+      "value": "HealthRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "HealthResponse"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass.v1"
+    },
+    {
+      "kind": "code-span",
+      "value": "RPC_REQUEST/RESPONSE_STANDARD_NAME"
+    },
+    {
+      "kind": "code-span",
+      "value": "service GuestControl"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentGateway"
+    },
+    {
+      "kind": "code-span",
+      "value": "SERVICE_SUFFIX"
+    },
+    {
+      "kind": "code-span",
+      "value": "ignore_only"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/guest_control.proto"
+    },
+    {
+      "kind": "code-span",
+      "value": "buf.yaml"
+    },
+    {
+      "kind": "code-span",
+      "value": "buf.yaml:16-36"
+    },
+    {
+      "kind": "code-span",
+      "value": "HealthResponse"
+    },
+    {
+      "kind": "code-span",
+      "value": "guestd_version string"
+    },
+    {
+      "kind": "code-span",
+      "value": "net_provisioned bool"
+    },
+    {
+      "kind": "code-span",
+      "value": "workspace_mounted bool"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/gateway/socket.go:303-306"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "--vsock cid=<cid>,socket=<path>"
+    },
+    {
+      "kind": "code-span",
+      "value": "CONNECT <port>"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/cloud-hypervisor/cloud-hypervisor/blob/main/docs/vsock.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "OK <assigned_port>"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/cloud-hypervisor/cloud-hypervisor/blob/main/docs/device_model.md"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/firecracker-microvm/firecracker/blob/main/docs/vsock.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "DialContext"
+    },
+    {
+      "kind": "code-span",
+      "value": "OK"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 (f) `BootConfig`: the V2b-consumed contract, finalized"
+    },
+    {
+      "kind": "code-span",
+      "value": "VsockCID"
+    },
+    {
+      "kind": "code-span",
+      "value": "VsockPort"
+    },
+    {
+      "kind": "code-span",
+      "value": "CPUs"
+    },
+    {
+      "kind": "code-span",
+      "value": "MemoryMB"
+    },
+    {
+      "kind": "code-span",
+      "value": "int"
+    },
+    {
+      "kind": "code-span",
+      "value": "Initrd"
+    },
+    {
+      "kind": "code-span",
+      "value": "Cmdline"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n// Package go/internal/runtime/microvm.\n\n// NetConfig wires the userspace net backend (D6: passt) to the VMM.\ntype NetConfig struct {\n    // VhostUserSocket is the AF_UNIX path passt serves with --vhost-user\n    // and CH consumes via --net vhost_user=true,socket=….\n    VhostUserSocket string\n    // MAC is the guest interface MAC handed to --net mac=….\n    MAC string\n}\n\n// BootConfig is everything needed to boot one session guest. Produced by the\n// backend (V2b) or the test harness (V2a); consumed by Launch.\ntype BootConfig struct {\n    Kernel      string // bzImage path (compass-guest-kernel/bzImage)\n    Initrd      string // initramfs path (compass-guest-initrd) — new vs the sketch: required because the pinned kernel's virtio drivers are modules ((a))\n    Rootfs      string // erofs image path (compass-guest-rootfs)\n    Cmdline     string // kernel cmdline; Launch appends the vsock-port + console parameters\n    VsockCID    uint32 // guest CID (>= 3)\n    VsockPort   uint32 // guest port guestd listens on\n    VsockSocket string // host AF_UNIX path for --vsock socket=… (the hybrid endpoint the host dials)\n    FSTag       string // virtio-fs tag (\"workspace\")\n    FSSocket    string // virtiofsd --socket-path the VMM attaches via --fs\n    FSSharedDir string // virtiofsd --shared-dir: the host tree exported as FSTag→/workspace (per-session checkout dir in V2b; a throwaway temp dir in the V2a spike)\n    CPUs        int\n    MemoryMB    int    // always launched with shared=on ((c))\n    Net         NetConfig\n}"
+    },
+    {
+      "kind": "code-span",
+      "value": "VsockCID"
+    },
+    {
+      "kind": "code-span",
+      "value": "VsockPort"
+    },
+    {
+      "kind": "code-span",
+      "value": "Initrd"
+    },
+    {
+      "kind": "code-span",
+      "value": "Cmdline"
+    },
+    {
+      "kind": "code-span",
+      "value": "FSSharedDir"
+    },
+    {
+      "kind": "code-span",
+      "value": "VsockSocket"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 (g) The boot-spike harness"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runtime/microvm"
+    },
+    {
+      "kind": "code-span",
+      "value": "MicroVMRuntime"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runtime"
+    },
+    {
+      "kind": "code-span",
+      "value": "Launch(ctx, BootConfig) (*VM, error)"
+    },
+    {
+      "kind": "code-span",
+      "value": "DialGuest"
+    },
+    {
+      "kind": "code-span",
+      "value": "Shutdown"
+    },
+    {
+      "kind": "code-span",
+      "value": "boot_microvm_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "//go:build microvm && unix"
+    },
+    {
+      "kind": "code-span",
+      "value": "microvmtest.Require(t)"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/microvmtest/microvmtest.go:96-117"
+    },
+    {
+      "kind": "code-span",
+      "value": "canary_microvm_test.go:1,55-56"
+    },
+    {
+      "kind": "code-span",
+      "value": "Health"
+    },
+    {
+      "kind": "code-span",
+      "value": "net_provisioned && workspace_mounted"
+    },
+    {
+      "kind": "code-span",
+      "value": "/proc/<pid>/smaps_rollup"
+    },
+    {
+      "kind": "code-span",
+      "value": "VmHWM"
+    },
+    {
+      "kind": "code-span",
+      "value": "--memory shared=on"
+    },
+    {
+      "kind": "code-span",
+      "value": "VmHWM"
+    },
+    {
+      "kind": "code-span",
+      "value": "--serial file=<log>"
+    },
+    {
+      "kind": "code-span",
+      "value": "SysProcAttr.Pdeathsig = SIGTERM"
+    },
+    {
+      "kind": "code-span",
+      "value": "PR_SET_PDEATHSIG"
+    },
+    {
+      "kind": "code-span",
+      "value": "runtime.LockOSThread"
+    },
+    {
+      "kind": "code-span",
+      "value": "Shutdown"
+    },
+    {
+      "kind": "code-span",
+      "value": "t.Cleanup"
+    },
+    {
+      "kind": "code-span",
+      "value": "microvmtest"
+    },
+    {
+      "kind": "code-span",
+      "value": "COMPASS_TEST_GUEST_INITRD"
+    },
+    {
+      "kind": "code-span",
+      "value": "passt"
+    },
+    {
+      "kind": "code-span",
+      "value": "microvmtest.go:43-62,133-141"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Alternatives considered"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Rootfs format (vs (a) erofs + overlay)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "virtio_blk"
+    },
+    {
+      "kind": "code-span",
+      "value": "ext4"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent-image/toolchain.nix:127-157"
+    },
+    {
+      "kind": "code-span",
+      "value": "MemoryMB"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "--fs"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "CONFIG_SQUASHFS=m"
+    },
+    {
+      "kind": "code-span",
+      "value": "CONFIG_EROFS_FS=m"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://docs.kernel.org/filesystems/erofs.html"
+    },
+    {
+      "kind": "code-span",
+      "value": "erofs-utils"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Writable-/nix mechanism (vs (b) whole-root overlay)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "/nix/store"
+    },
+    {
+      "kind": "code-span",
+      "value": "/etc"
+    },
+    {
+      "kind": "code-span",
+      "value": "/var"
+    },
+    {
+      "kind": "code-span",
+      "value": "$HOME"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "/nix"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Net backend (vs (c) passt)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.nix:165-186"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://passt.top/passt/about/"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "--net"
+    },
+    {
+      "kind": "code-span",
+      "value": "CAP_NET_ADMIN"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/cloud-hypervisor/cloud-hypervisor/blob/main/docs/vhost-user-net-testing.md"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Handshake shape (vs (e) Connect/h2c `Health`)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Global Constraints"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.nix:182-186"
+    },
+    {
+      "kind": "code-span",
+      "value": "CONNECT <port>"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/cloud-hypervisor/cloud-hypervisor/blob/main/docs/vsock.md"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "guest-image/"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-guest-kernel"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-guest-rootfs"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-guestd"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-guest-initrd"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "guest-image/default.nix"
+    },
+    {
+      "kind": "code-span",
+      "value": "guest-image/default.nix:29-36"
+    },
+    {
+      "kind": "code-span",
+      "value": "guest-image/moon.yml:60-70"
+    },
+    {
+      "kind": "code-span",
+      "value": "pkgs"
+    },
+    {
+      "kind": "code-span",
+      "value": "inputs"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "guest-image/default.nix:14-17"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "kvm"
+    },
+    {
+      "kind": "code-span",
+      "value": "/dev/kvm"
+    },
+    {
+      "kind": "code-span",
+      "value": "CAP_NET_ADMIN"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "//go:build microvm && unix"
+    },
+    {
+      "kind": "code-span",
+      "value": "microvmtest.Require(t)"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/microvmtest/microvmtest.go:96-117"
+    },
+    {
+      "kind": "code-span",
+      "value": "COMPASS_REQUIRE_MICROVM=1"
+    },
+    {
+      "kind": "code-span",
+      "value": "microvmtest.go:35-41"
+    },
+    {
+      "kind": "code-span",
+      "value": "kvm"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "nft"
+    },
+    {
+      "kind": "code-span",
+      "value": "getent"
+    },
+    {
+      "kind": "code-span",
+      "value": "awk"
+    },
+    {
+      "kind": "code-span",
+      "value": "/etc/resolv.conf"
+    },
+    {
+      "kind": "code-span",
+      "value": "guest-image/default.nix:141-156"
+    },
+    {
+      "kind": "code-span",
+      "value": "egress.go:76-77"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "MicroVMRuntime"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrMicroVMNotImplemented"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runtime/microvm.go:48-55"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runtime/microvm"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/guestd"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/cmd/compass-guestd"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Plan"
+    },
+    {
+      "kind": "code-span",
+      "value": "buf generate"
+    },
+    {
+      "kind": "code-span",
+      "value": "Health"
+    },
+    {
+      "kind": "code-span",
+      "value": "compassv1connect.GuestControlHandler"
+    },
+    {
+      "kind": "code-span",
+      "value": "DialGuest"
+    },
+    {
+      "kind": "code-span",
+      "value": "GuestClient"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T1 — image packing: erofs rootfs + module initramfs"
+    },
+    {
+      "kind": "code-span",
+      "value": "guest-image/default.nix"
+    },
+    {
+      "kind": "code-span",
+      "value": "let"
+    },
+    {
+      "kind": "code-span",
+      "value": "rootfsTree"
+    },
+    {
+      "kind": "code-span",
+      "value": "workspace.mount"
+    },
+    {
+      "kind": "code-span",
+      "value": "build"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-guest-initrd"
+    },
+    {
+      "kind": "code-span",
+      "value": ".github/workflows/ci.yml"
+    },
+    {
+      "kind": "code-span",
+      "value": "nix build … compass-guest-kernel compass-guest-rootfs"
+    },
+    {
+      "kind": "code-span",
+      "value": "COMPASS_TEST_GUEST_KERNEL"
+    },
+    {
+      "kind": "code-span",
+      "value": "COMPASS_TEST_GUEST_ROOTFS"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-guest-initrd"
+    },
+    {
+      "kind": "code-span",
+      "value": "COMPASS_TEST_GUEST_INITRD"
+    },
+    {
+      "kind": "code-span",
+      "value": "$GITHUB_ENV"
+    },
+    {
+      "kind": "code-span",
+      "value": "microvmtest.Require"
+    },
+    {
+      "kind": "code-span",
+      "value": "InitrdImage"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveEnv"
+    },
+    {
+      "kind": "code-span",
+      "value": "microvmtest.go:133-160"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-guest-kernel"
+    },
+    {
+      "kind": "code-span",
+      "value": "pkgs.linuxPackages.kernel"
+    },
+    {
+      "kind": "code-span",
+      "value": "${out}/bzImage"
+    },
+    {
+      "kind": "code-span",
+      "value": "guest-image/default.nix:115-118"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-guest-rootfs"
+    },
+    {
+      "kind": "code-span",
+      "value": "pkgs.erofs-utils"
+    },
+    {
+      "kind": "code-span",
+      "value": "mkfs.erofs"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-guest-initrd"
+    },
+    {
+      "kind": "code-span",
+      "value": "makeInitrd"
+    },
+    {
+      "kind": "code-span",
+      "value": "virtio_pci"
+    },
+    {
+      "kind": "code-span",
+      "value": "virtio_blk"
+    },
+    {
+      "kind": "code-span",
+      "value": "erofs"
+    },
+    {
+      "kind": "code-span",
+      "value": "overlay"
+    },
+    {
+      "kind": "code-span",
+      "value": "switch_root"
+    },
+    {
+      "kind": "code-span",
+      "value": "/sbin/init"
+    },
+    {
+      "kind": "code-span",
+      "value": "switch_root"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-guest-rootfs"
+    },
+    {
+      "kind": "code-span",
+      "value": "/lib/modules/<version>"
+    },
+    {
+      "kind": "code-span",
+      "value": "virtio_net"
+    },
+    {
+      "kind": "code-span",
+      "value": "virtiofs"
+    },
+    {
+      "kind": "code-span",
+      "value": "guest-image/default.nix:124-160"
+    },
+    {
+      "kind": "code-span",
+      "value": "/sbin/init"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildGoModule"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/cmd/compass-guestd"
+    },
+    {
+      "kind": "code-span",
+      "value": "writeCBin"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "guest-image/moon.yml:46"
+    },
+    {
+      "kind": "code-span",
+      "value": ".config"
+    },
+    {
+      "kind": "code-span",
+      "value": "=m"
+    },
+    {
+      "kind": "code-span",
+      "value": "inputs"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T2 — `compass-guestd` real init"
+    },
+    {
+      "kind": "code-span",
+      "value": "Health"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/cmd/compass-guestd"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/guestd"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-guestd"
+    },
+    {
+      "kind": "code-span",
+      "value": "compassv1connect.GuestControlHandler"
+    },
+    {
+      "kind": "code-span",
+      "value": "/proc/cmdline"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass.vsock_port=<n>"
+    },
+    {
+      "kind": "code-span",
+      "value": "console=ttyS0"
+    },
+    {
+      "kind": "code-span",
+      "value": "workspace"
+    },
+    {
+      "kind": "code-span",
+      "value": "/workspace"
+    },
+    {
+      "kind": "code-span",
+      "value": "guest-image/default.nix:90-113"
+    },
+    {
+      "kind": "code-span",
+      "value": "mount(\"workspace\", \"/workspace\", \"virtiofs\", …)"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/cloud-hypervisor/cloud-hypervisor/blob/main/docs/fs.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "github.com/vishvananda/netlink"
+    },
+    {
+      "kind": "code-span",
+      "value": "github.com/insomniacslk/dhcp"
+    },
+    {
+      "kind": "code-span",
+      "value": "golang.org/x/sys/unix"
+    },
+    {
+      "kind": "code-span",
+      "value": "AF_VSOCK"
+    },
+    {
+      "kind": "code-span",
+      "value": "github.com/mdlayher/vsock"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T3 — `GuestControl` proto seed + hybrid-vsock dialer"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/guest_control.proto"
+    },
+    {
+      "kind": "code-span",
+      "value": ", response fields per (e), with a "
+    },
+    {
+      "kind": "code-span",
+      "value": "ignore_only"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentGateway"
+    },
+    {
+      "kind": "code-span",
+      "value": "buf.yaml:16-36"
+    },
+    {
+      "kind": "code-span",
+      "value": "buf.gen.yaml"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/gen/compass/v1/compassv1connect/"
+    },
+    {
+      "kind": "code-span",
+      "value": " implementing the "
+    },
+    {
+      "kind": "raw-html",
+      "value": "<port>"
+    },
+    {
+      "kind": "code-span",
+      "value": "/"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/cloud-hypervisor/cloud-hypervisor/blob/main/docs/vsock.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "GuestClient(cfg BootConfig) compassv1connect.GuestControlClient"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "CONNECT"
+    },
+    {
+      "kind": "code-span",
+      "value": "OK"
+    },
+    {
+      "kind": "code-span",
+      "value": "Health"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T4 — `Launch` harness + the KVM-gated boot spike test"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runtime/microvm.BootConfig"
+    },
+    {
+      "kind": "code-span",
+      "value": "NetConfig"
+    },
+    {
+      "kind": "code-span",
+      "value": " — starts virtiofsd ("
+    },
+    {
+      "kind": "code-span",
+      "value": "), passt ("
+    },
+    {
+      "kind": "raw-html",
+      "value": "<file>"
+    },
+    {
+      "kind": "raw-html",
+      "value": "<MB>"
+    },
+    {
+      "kind": "raw-html",
+      "value": "<console-log>"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/cloud-hypervisor/cloud-hypervisor/blob/main/docs/fs.md"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/cloud-hypervisor/cloud-hypervisor/blob/main/docs/device_model.md"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/cloud-hypervisor/cloud-hypervisor/blob/main/docs/vsock.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "(*VM) Health(ctx) (*HealthResponse, error)"
+    },
+    {
+      "kind": "code-span",
+      "value": "(*VM) Shutdown(ctx) error"
+    },
+    {
+      "kind": "code-span",
+      "value": "(*VM) PSS() (map[string]int64, error)"
+    },
+    {
+      "kind": "code-span",
+      "value": "Pss"
+    },
+    {
+      "kind": "code-span",
+      "value": "/proc/<pid>/smaps_rollup"
+    },
+    {
+      "kind": "code-span",
+      "value": "VmHWM"
+    },
+    {
+      "kind": "code-span",
+      "value": "SysProcAttr.Pdeathsig = SIGTERM"
+    },
+    {
+      "kind": "code-span",
+      "value": "microvmtest.Require"
+    },
+    {
+      "kind": "code-span",
+      "value": "InitrdImage"
+    },
+    {
+      "kind": "code-span",
+      "value": "COMPASS_TEST_GUEST_INITRD"
+    },
+    {
+      "kind": "code-span",
+      "value": "PasstPath"
+    },
+    {
+      "kind": "code-span",
+      "value": "microvmtest.go:56-62,133-141"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runtime/microvm/boot_microvm_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "//go:build microvm && unix"
+    },
+    {
+      "kind": "code-span",
+      "value": "microvmtest.Require(t)"
+    },
+    {
+      "kind": "code-span",
+      "value": "Health"
+    },
+    {
+      "kind": "code-span",
+      "value": "/workspace"
+    },
+    {
+      "kind": "code-span",
+      "value": "t.Cleanup"
+    },
+    {
+      "kind": "code-span",
+      "value": "/dev/kvm"
+    },
+    {
+      "kind": "code-span",
+      "value": "kvm"
+    },
+    {
+      "kind": "code-span",
+      "value": "COMPASS_REQUIRE_MICROVM=1"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Tasks"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-guest-rootfs"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-guest-initrd"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-guestd"
+    },
+    {
+      "kind": "code-span",
+      "value": "Health"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "GuestControl"
+    },
+    {
+      "kind": "code-span",
+      "value": "DialGuest"
+    },
+    {
+      "kind": "code-span",
+      "value": "GuestClient"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Launch"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Open Questions"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "BootConfig"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "workspace.mount"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "## Alternatives considered"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.nix:165-186"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "-a"
+    },
+    {
+      "kind": "code-span",
+      "value": "-g"
+    },
+    {
+      "kind": "code-span",
+      "value": "-n"
+    },
+    {
+      "kind": "code-span",
+      "value": "-D"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://passt.top/builds/latest/web/passt.1.html"
+    },
+    {
+      "kind": "code-span",
+      "value": "netlink"
+    },
+    {
+      "kind": "code-span",
+      "value": "vishvananda/netlink"
+    },
+    {
+      "kind": "code-span",
+      "value": "insomniacslk/dhcp"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "nix build"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "BootConfig"
+    },
+    {
+      "kind": "code-span",
+      "value": "VsockCID"
+    },
+    {
+      "kind": "code-span",
+      "value": "VsockPort"
+    },
+    {
+      "kind": "code-span",
+      "value": "uint32"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://man7.org/linux/man-pages/man7/vsock.7.html"
+    },
+    {
+      "kind": "code-span",
+      "value": "Initrd"
+    },
+    {
+      "kind": "code-span",
+      "value": "Cmdline"
+    },
+    {
+      "kind": "code-span",
+      "value": "FSSharedDir"
+    },
+    {
+      "kind": "code-span",
+      "value": "FSTag"
+    },
+    {
+      "kind": "code-span",
+      "value": "/workspace"
+    },
+    {
+      "kind": "code-span",
+      "value": "VsockSocket"
+    },
+    {
+      "kind": "code-span",
+      "value": "VsockCID"
+    },
+    {
+      "kind": "code-span",
+      "value": "VsockPort"
+    },
+    {
+      "kind": "code-span",
+      "value": "CPUs"
+    },
+    {
+      "kind": "code-span",
+      "value": "MemoryMB"
+    },
+    {
+      "kind": "code-span",
+      "value": "int"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "workspace.mount"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://patchew.org/Libvirt/20250213181953.922499-1-laine@redhat.com/"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/cloud-hypervisor/cloud-hypervisor/blob/main/docs/vhost-user-net-testing.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "devenv.nix:165-186"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0073.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 solid-markdown"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/solid-markdown"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/andi23rosca/solid-markdown"
+    },
+    {
+      "kind": "code-span",
+      "value": "decisions/<area>/DL-NNN.md"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

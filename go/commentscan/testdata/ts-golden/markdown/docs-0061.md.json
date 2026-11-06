@@ -1,0 +1,1642 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0061.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Compass agent workstream repository writer (RIG-5015)"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Problem / Intent"
+    },
+    {
+      "kind": "link-target",
+      "value": "../compass-workstream-repository-source/design.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_forge_scopes"
+    },
+    {
+      "kind": "code-span",
+      "value": "### Producers"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": "GrantAgentForgeScope"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokeForgeScope"
+    },
+    {
+      "kind": "code-span",
+      "value": "reconcileForgeScopeGrants"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/serve.go"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\nfor _, g := range fc.ScopeGrants {\n\tif err := st.GrantForgeScope(ctx, g); err != nil {"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Approach"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 The authority: the owning user"
+    },
+    {
+      "kind": "code-span",
+      "value": "HasForgeScope"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/queries/forge_scopes.sql"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[sql]\nWHERE scope.account_id IN ($1, agent.owner_user_id)"
+    },
+    {
+      "kind": "code-span",
+      "value": "## Global Constraints"
+    },
+    {
+      "kind": "code-span",
+      "value": "PERMISSION_DENIED"
+    },
+    {
+      "kind": "code-span",
+      "value": "requireUser"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/secrets_service.go"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\nif acct.IsAgent() {\n\treturn \"\", 0, connect.NewError(connect.CodePermissionDenied, errors.New(\"secret writes are user-only\"))\n}"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveSameOwnerAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/resolve.go"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\nif agentOwner != owner {\n\treturn \"\", notFoundHandle(store.ErrNotFound, handle)\n}"
+    },
+    {
+      "kind": "code-span",
+      "value": "Comms"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveOwnedAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "ResolveOwner"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/accounts.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner/agent"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveQualifiedAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/service.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "acc.Agent.OwnerUserID"
+    },
+    {
+      "kind": "code-span",
+      "value": "handleNotFound(raw)"
+    },
+    {
+      "kind": "code-span",
+      "value": ". "
+    },
+    {
+      "kind": "code-span",
+      "value": "BearerInterceptor"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/auth/interceptor.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "next(store.WithTenant(withCaller(ctx, account), tenant), req)"
+    },
+    {
+      "kind": "code-span",
+      "value": "authenticatedOpen"
+    },
+    {
+      "kind": "code-span",
+      "value": "adminOnly"
+    },
+    {
+      "kind": "code-span",
+      "value": "adminOnly"
+    },
+    {
+      "kind": "code-span",
+      "value": "adminGate.check"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/auth/admin_gate.go"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\nif !ok || caller != g.admin {"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Surface: a dedicated `AgentRepositoryService` in `go/server`"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentRepositoryService"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/compass.proto"
+    },
+    {
+      "kind": "code-span",
+      "value": "SecretsService"
+    },
+    {
+      "kind": "code-span",
+      "value": "GrantAgentRepository"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokeAgentRepository"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListAgentRepositories"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/agent_repository_service.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsService"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildDoors"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/serve.go"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n  gitCredentials, err := buildGitCredentialBroker(cfg, st, serverResolver, hub, slog.Default())"
+    },
+    {
+      "kind": "code-span",
+      "value": "Comms"
+    },
+    {
+      "kind": "code-span",
+      "value": "SetPresenceSource"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsService"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/comms.proto"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildGitCredentialBroker"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n  return nil, nil //nolint:nilnil // nil broker means App not configured"
+    },
+    {
+      "kind": "code-span",
+      "value": "FAILED_PRECONDITION"
+    },
+    {
+      "kind": "code-span",
+      "value": "host: rc.Host"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildGitCredentialBroker"
+    },
+    {
+      "kind": "code-span",
+      "value": "gitCredentialBroker.credential"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ForgeProviderGitHub"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListSecrets"
+    },
+    {
+      "kind": "code-span",
+      "value": "SecretsService"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/compass.proto"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Store path"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.GrantAgentForgeScope"
+    },
+    {
+      "kind": "code-span",
+      "value": "added=false"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.RevokeAgentForgeScope"
+    },
+    {
+      "kind": "code-span",
+      "value": "removed"
+    },
+    {
+      "kind": "code-span",
+      "value": "FROM agent_accounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokeForgeScope"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.ListAgentForgeScopeRepos"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListForgeScopeRepos"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Org check on grant"
+    },
+    {
+      "kind": "code-span",
+      "value": "gitCredentialScope"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/git_credential.go"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n} else if owner != grantOwner {\n\treturn \"\", nil, false\n}"
+    },
+    {
+      "kind": "code-span",
+      "value": "ScopedAppMinter.Mint"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/forge/githubapp.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "GrantAgentRepository"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListForgeScopeRepos(agent)"
+    },
+    {
+      "kind": "code-span",
+      "value": "*"
+    },
+    {
+      "kind": "code-span",
+      "value": "FAILED_PRECONDITION"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Agent-spawned agents: copy the parent's rows at creation"
+    },
+    {
+      "kind": "code-span",
+      "value": "SpawnAsAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/lifecycle.go"
+    },
+    {
+      "kind": "code-span",
+      "value": " and then calls "
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.CreateAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "tx, err := s.beginTenantTx(ctx)"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateAgent"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\ncase errors.Is(err, store.ErrConflict):\n\tresp, err = l.resumeOrReject(ctx, callerOwner, req)"
+    },
+    {
+      "kind": "code-span",
+      "value": "ReparentAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "parent_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass agent repo add"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Live refresh: a targeted signal after a change"
+    },
+    {
+      "kind": "code-span",
+      "value": "refreshCredential"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\nfor qualified := range strings.SplitSeq(key, \",\") {"
+    },
+    {
+      "kind": "code-span",
+      "value": "mint"
+    },
+    {
+      "kind": "code-span",
+      "value": "refreshAt: expiresAt.Add(-gitCredentialRefreshLead)"
+    },
+    {
+      "kind": "code-span",
+      "value": "gitCredentialRefreshLead = 15 * time.Minute"
+    },
+    {
+      "kind": "code-span",
+      "value": "refreshSnapshot"
+    },
+    {
+      "kind": "code-span",
+      "value": "if changed && b.signal != nil"
+    },
+    {
+      "kind": "code-span",
+      "value": "added"
+    },
+    {
+      "kind": "code-span",
+      "value": "removed"
+    },
+    {
+      "kind": "code-span",
+      "value": "SignalSecretsVersion"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runnerhub/secrets_signal.go"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\nfor sessionID := range h.sessionAccounts {"
+    },
+    {
+      "kind": "code-span",
+      "value": "Hub.SignalSecretsVersionFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionForAccount(ctx, account)"
+    },
+    {
+      "kind": "code-span",
+      "value": "SecretsVersion"
+    },
+    {
+      "kind": "code-span",
+      "value": "SecretsVersion"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/dispatch.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "d.host.RefreshSecrets(ctx, sessionID)"
+    },
+    {
+      "kind": "code-span",
+      "value": "credential"
+    },
+    {
+      "kind": "code-span",
+      "value": "bumpSecretsVersion"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Transient mint failure keeps the previous token"
+    },
+    {
+      "kind": "code-span",
+      "value": "credential"
+    },
+    {
+      "kind": "code-span",
+      "value": "tok := b.staleCredential(key)"
+    },
+    {
+      "kind": "code-span",
+      "value": "staleCredential"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"\""
+    },
+    {
+      "kind": "code-span",
+      "value": "SecretMaterializer.Install"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runtime/secrets_materialize.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "removeGHHostsScript(homeDir)"
+    },
+    {
+      "kind": "code-span",
+      "value": "staleCredential"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Removal"
+    },
+    {
+      "kind": "code-span",
+      "value": "Install"
+    },
+    {
+      "kind": "code-span",
+      "value": "hosts.yml"
+    },
+    {
+      "kind": "code-span",
+      "value": "DELETE /installation/token"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge.ScopedAppMinter"
+    },
+    {
+      "kind": "code-span",
+      "value": "Mint"
+    },
+    {
+      "kind": "code-span",
+      "value": "mint"
+    },
+    {
+      "kind": "code-span",
+      "value": "expiresAt = now.Add(time.Hour)"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Dispatcher"
+    },
+    {
+      "kind": "code-span",
+      "value": "no-inert-gating"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Plan"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Global Constraints"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "skill://compass-managed-boundary"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ProvisionAgentWorkspaceRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "SpawnAgentRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "SpawnPeerRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "gitCredentialPermissions"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "org/name"
+    },
+    {
+      "kind": "code-span",
+      "value": "*"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "PERMISSION_DENIED"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "NOT_FOUND"
+    },
+    {
+      "kind": "code-span",
+      "value": "handleNotFound"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/service.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "classifyProcedure"
+    },
+    {
+      "kind": "code-span",
+      "value": "classify_exhaustive_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/auth"
+    },
+    {
+      "kind": "code-span",
+      "value": "File_compass_v1_compass_proto"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrInvalidArgument"
+    },
+    {
+      "kind": "code-span",
+      "value": "fmt.Errorf(\"%w: ...\")"
+    },
+    {
+      "kind": "code-span",
+      "value": "ForgeScope.normalized"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/forge_scopes.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "seedTenant"
+    },
+    {
+      "kind": "code-span",
+      "value": "WithTenant"
+    },
+    {
+      "kind": "code-span",
+      "value": "TestForgeScopeRejectsAgentGrantAndSeparatesTenants"
+    },
+    {
+      "kind": "code-span",
+      "value": "buf.gen*.yaml"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/gen"
+    },
+    {
+      "kind": "code-span",
+      "value": "gen"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T1 — Store: agent revoke, agent list, copy at creation"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/queries/forge_scopes.sql"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[sql]\n-- name: RevokeAgentForgeScope :execrows\n-- Agent rows only: a user id deletes nothing, so a user grant is never removed here.\nDELETE FROM account_forge_scopes\nWHERE account_id IN (SELECT a.account_id FROM agent_accounts AS a WHERE a.account_id = $1)\n  AND forge_provider = $2 AND forge_host = $3 AND repo = $4;\n\n-- name: ListAgentForgeScopeRepos :many\n-- An account's own rows only; the owner's grants are not included.\nSELECT scope.repo\nFROM account_forge_scopes AS scope\nWHERE scope.account_id = $1\n  AND scope.forge_provider = $2\n  AND scope.forge_host = $3\nORDER BY scope.repo;\n\n-- name: CopyAgentForgeScopes :exec\n-- A new child starts with its parent agent's own rows; runs under RLS.\nINSERT INTO account_forge_scopes (account_id, forge_provider, forge_host, repo)\nSELECT sqlc.arg(child_id), scope.forge_provider, scope.forge_host, scope.repo\nFROM account_forge_scopes AS scope\nWHERE scope.account_id = sqlc.arg(parent_id)\nON CONFLICT DO NOTHING;"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/forge_scopes.go"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n// RevokeAgentForgeScope removes one agent row; removed is false when none existed.\nfunc (s *Store) RevokeAgentForgeScope(ctx context.Context, scope ForgeScope) (removed bool, err error)\n\n// ListAgentForgeScopeRepos returns an account's own rows, not its owner's grants.\nfunc (s *Store) ListAgentForgeScopeRepos(ctx context.Context, accountID AccountID, provider ForgeProvider, host string) ([]string, error)"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokeAgentForgeScope"
+    },
+    {
+      "kind": "code-span",
+      "value": "normalized()"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListAgentForgeScopeRepos"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListForgeScopeRepos"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.CreateAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/accounts.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "a.ParentAgentID != \"\""
+    },
+    {
+      "kind": "code-span",
+      "value": "qtx.CopyAgentForgeScopes"
+    },
+    {
+      "kind": "code-span",
+      "value": "InsertAgentAccount"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokeAgentForgeScope"
+    },
+    {
+      "kind": "code-span",
+      "value": "true"
+    },
+    {
+      "kind": "code-span",
+      "value": "false"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokeAgentForgeScope"
+    },
+    {
+      "kind": "code-span",
+      "value": "false"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListAgentForgeScopeRepos(agent)"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListForgeScopeRepos(agent)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateAgent"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T2 — Hub: per-account secrets signal"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runnerhub/secrets_signal.go"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n// SignalSecretsVersionFor pushes one SecretsVersion to account's live session.\n// No live session, or no Runner, is a nil no-op.\nfunc (h *Hub) SignalSecretsVersionFor(ctx context.Context, account store.AccountID) error"
+    },
+    {
+      "kind": "code-span",
+      "value": "SessionForAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "mintSecretsVersion"
+    },
+    {
+      "kind": "code-span",
+      "value": "SignalSecretsVersion"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runnerhub/secrets_test.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SecretsVersion"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SignalSecretsVersion"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T3 — Broker: serve the agent's last key on a transient failure"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/git_credential.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "last map[store.AccountID]string"
+    },
+    {
+      "kind": "code-span",
+      "value": "gitCredentialBroker"
+    },
+    {
+      "kind": "code-span",
+      "value": "mu"
+    },
+    {
+      "kind": "code-span",
+      "value": "credential"
+    },
+    {
+      "kind": "code-span",
+      "value": "gitCredentialScopeRejected"
+    },
+    {
+      "kind": "code-span",
+      "value": "staleCredential(key)"
+    },
+    {
+      "kind": "code-span",
+      "value": "staleCredential(b.last[agent])"
+    },
+    {
+      "kind": "code-span",
+      "value": "refreshDue"
+    },
+    {
+      "kind": "code-span",
+      "value": "last"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/git_credential_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "fakeGitCredentialMinter"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "credential"
+    },
+    {
+      "kind": "code-span",
+      "value": "calls"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T4 — `AgentRepositoryService`"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/compass.proto"
+    },
+    {
+      "kind": "code-span",
+      "value": "SecretsService"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[proto]\n// Workstream repositories of one agent: exact GitHub repositories added to\n// the agent's credential and forge write grants. Writes require the agent's\n// owning user; an agent may list its own rows.\nservice AgentRepositoryService {\n  // Add one `org/name`. FAILED_PRECONDITION when no GitHub App is configured\n  // or the org differs from the agent's credential org.\n  rpc GrantAgentRepository(GrantAgentRepositoryRequest) returns (GrantAgentRepositoryResponse);\n  // Remove one `org/name`. removed reports whether the row existed.\n  rpc RevokeAgentRepository(RevokeAgentRepositoryRequest) returns (RevokeAgentRepositoryResponse);\n  // List the agent's own rows, not its owner's grants. An agent caller sends\n  // an empty agent_handle and gets its own rows.\n  rpc ListAgentRepositories(ListAgentRepositoriesRequest) returns (ListAgentRepositoriesResponse);\n}\n\nmessage GrantAgentRepositoryRequest {\n  string agent_handle = 1; // bare (the caller's agent) or `owner/agent`\n  string repository = 2;   // `org/name`; never `*`\n}\nmessage GrantAgentRepositoryResponse { bool added = 1; }\nmessage RevokeAgentRepositoryRequest {\n  string agent_handle = 1;\n  string repository = 2;\n}\nmessage RevokeAgentRepositoryResponse { bool removed = 1; }\nmessage ListAgentRepositoriesRequest { string agent_handle = 1; }\nmessage ListAgentRepositoriesResponse { repeated string repositories = 1; }"
+    },
+    {
+      "kind": "code-span",
+      "value": "authenticatedOpen"
+    },
+    {
+      "kind": "code-span",
+      "value": "classifyProcedure"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/service.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "(*service).resolveQualifiedAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "ProvisionAgentWorkspace"
+    },
+    {
+      "kind": "code-span",
+      "value": "IssueToken"
+    },
+    {
+      "kind": "code-span",
+      "value": "SpawnAgent"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\nfunc resolveQualifiedAgent(ctx context.Context, st *store.Store, raw string) (store.Account, error)"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/agent_repository_service.go"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n// agentSecretsSignaler is the narrow hub surface: one agent's re-fetch prod.\ntype agentSecretsSignaler interface {\n\tSignalSecretsVersionFor(ctx context.Context, account store.AccountID) error\n}\n\ntype agentRepositoryService struct {\n\tstore  *store.Store\n\thost   string // empty when no GitHub App is configured\n\tsignal agentSecretsSignaler\n}\n\nfunc newAgentRepositoryService(st *store.Store, broker *gitCredentialBroker, signal agentSecretsSignaler) *agentRepositoryService\n\n// agentRepository lowercases one GitHub `org/name` and rejects anything else,\n// including `*`, with store.ErrInvalidArgument.\nfunc agentRepository(raw string) (string, error)\n\n// resolveOwnedAgent resolves a bare handle under caller, or an `owner/agent`\n// handle, to an agent caller owns. Every other outcome is handleNotFound(raw).\nfunc resolveOwnedAgent(ctx context.Context, st *store.Store, caller store.AccountID, raw string) (store.Account, error)"
+    },
+    {
+      "kind": "code-span",
+      "value": "host"
+    },
+    {
+      "kind": "code-span",
+      "value": "broker.host"
+    },
+    {
+      "kind": "code-span",
+      "value": "newService"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "UNAUTHENTICATED"
+    },
+    {
+      "kind": "code-span",
+      "value": "PERMISSION_DENIED"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "requireUser"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "host == \"\""
+    },
+    {
+      "kind": "code-span",
+      "value": "FAILED_PRECONDITION"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "agentRepository"
+    },
+    {
+      "kind": "code-span",
+      "value": "INVALID_ARGUMENT"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:4."
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveOwnedAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "NOT_FOUND"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:5."
+    },
+    {
+      "kind": "code-span",
+      "value": "ListForgeScopeRepos(agent)"
+    },
+    {
+      "kind": "code-span",
+      "value": "FAILED_PRECONDITION"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:6."
+    },
+    {
+      "kind": "code-span",
+      "value": "GrantAgentForgeScope"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokeAgentForgeScope"
+    },
+    {
+      "kind": "code-span",
+      "value": "Provider: store.ForgeProviderGitHub, Host: s.host"
+    },
+    {
+      "kind": "code-span",
+      "value": "added"
+    },
+    {
+      "kind": "code-span",
+      "value": "removed"
+    },
+    {
+      "kind": "code-span",
+      "value": "SignalSecretsVersionFor(ctx, agent)"
+    },
+    {
+      "kind": "code-span",
+      "value": "slog.WarnContext"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListAgentRepositories"
+    },
+    {
+      "kind": "code-span",
+      "value": "PERMISSION_DENIED"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListAgentForgeScopeRepos"
+    },
+    {
+      "kind": "code-span",
+      "value": "PERMISSION_DENIED"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildDoors"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/serve.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildGitCredentialBroker"
+    },
+    {
+      "kind": "code-span",
+      "value": "SecretsService"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildNetworkServer"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/network_door.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "GrantAgentForgeScope"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListForgeScopeRepos"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/agent_repository_service_pgtest_test.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "added=true"
+    },
+    {
+      "kind": "code-span",
+      "value": "added=false"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner/agent"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "*"
+    },
+    {
+      "kind": "code-span",
+      "value": "org"
+    },
+    {
+      "kind": "code-span",
+      "value": "org/"
+    },
+    {
+      "kind": "code-span",
+      "value": "a/b/c"
+    },
+    {
+      "kind": "code-span",
+      "value": "INVALID_ARGUMENT"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "NOT_FOUND"
+    },
+    {
+      "kind": "code-span",
+      "value": "UserRoleAdmin"
+    },
+    {
+      "kind": "code-span",
+      "value": "NOT_FOUND"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "PERMISSION_DENIED"
+    },
+    {
+      "kind": "code-span",
+      "value": "PERMISSION_DENIED"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "NOT_FOUND"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "NOT_FOUND"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "FAILED_PRECONDITION"
+    },
+    {
+      "kind": "code-span",
+      "value": "*"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "FAILED_PRECONDITION"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "removed=true"
+    },
+    {
+      "kind": "code-span",
+      "value": "removed=false"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "classify_exhaustive_test.go"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T5 — CLI `compass agent repo`"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/cmd/compass/agent_repo.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "newAgentRepoCmd()"
+    },
+    {
+      "kind": "code-span",
+      "value": "newAgentCmd"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/cmd/compass/agent.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "Short"
+    },
+    {
+      "kind": "code-span",
+      "value": "dialAgentRepositoryClient"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/cmd/compass/client.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "dialSecretsClient"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\nfunc newAgentRepoCmd() *cobra.Command // \"repo\": add <agent> <org/name>, remove <agent> <org/name>, list <agent>; <agent> is bare or owner/agent\n\nfunc runAgentRepoAdd(ctx context.Context, client compassv1connect.AgentRepositoryServiceClient, agent, repo string, out io.Writer) error\nfunc runAgentRepoRemove(ctx context.Context, client compassv1connect.AgentRepositoryServiceClient, agent, repo string, out io.Writer) error\nfunc runAgentRepoList(ctx context.Context, client compassv1connect.AgentRepositoryServiceClient, agent string, out io.Writer) error"
+    },
+    {
+      "kind": "code-span",
+      "value": "added <org/name>"
+    },
+    {
+      "kind": "code-span",
+      "value": "already present <org/name>"
+    },
+    {
+      "kind": "code-span",
+      "value": "removed <org/name>"
+    },
+    {
+      "kind": "code-span",
+      "value": "not present <org/name>"
+    },
+    {
+      "kind": "code-span",
+      "value": "secret_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "startFakeSecretsServer"
+    },
+    {
+      "kind": "code-span",
+      "value": "--token-file"
+    },
+    {
+      "kind": "code-span",
+      "value": "IssueToken"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T6 — End-to-end proof and operator docs"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/agent_repository_pgtest_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "brokeredSecretResolver"
+    },
+    {
+      "kind": "code-span",
+      "value": "fakeGitCredentialMinter"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ResolveFor(agent, gitCredentialReason)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "GrantAgentRepository"
+    },
+    {
+      "kind": "code-span",
+      "value": "ResolveFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "repos"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokeAgentRepository"
+    },
+    {
+      "kind": "code-span",
+      "value": "ResolveFor"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SpawnAsAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "ResolveFor"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SpawnAsAccount"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "DeleteAgentPlacement"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/self-host.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "org/name"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Tasks"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokeAgentForgeScope"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListAgentForgeScopeRepos"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateAgent"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Hub.SignalSecretsVersionFor"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentRepositoryService"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass agent repo add|remove|list"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/self-host.md"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Alternatives considered"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SignalSecretsVersion"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "added"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "RevokeForgeScope"
+    },
+    {
+      "kind": "code-span",
+      "value": "removed"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Rulings"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentRepositoryService"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsService"
+    },
+    {
+      "kind": "code-span",
+      "value": "adminOnly"
+    },
+    {
+      "kind": "code-span",
+      "value": "CompassService"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateAgent"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "DELETE /installation/token"
+    },
+    {
+      "kind": "code-span",
+      "value": "### Lifecycle"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

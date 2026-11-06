@@ -1,0 +1,14 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/astro.ts",
+  "corpus": "go/commentscan/testdata/corpus/astro/script-in-attribute.astro",
+  "scan": {
+    "residues": [
+      "<p data-tpl=\"<script>alert(1)</script>\">x</p>",
+      "",
+      "<p>after</p>",
+      ""
+    ],
+    "ambiguous": false
+  }
+}

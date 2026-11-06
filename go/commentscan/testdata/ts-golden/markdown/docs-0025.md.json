@@ -1,0 +1,14 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0025.md",
+  "fingerprint": [
+    {
+      "kind": "front-matter",
+      "value": "id: DL-008\ndecision: \"Evolve `compass.v1` from a local daemon contract into the Client↔Server contract (multi-user)\"\nstatus: \"Active (Matt, 2026-07-04)\"\nrecord: ../../meta/compass-architecture-lineage/design.md"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

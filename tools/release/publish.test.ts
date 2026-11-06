@@ -8,6 +8,7 @@ import {
 	isPublished,
 	parsePaths,
 	publishAll,
+	publishReleased,
 } from "./publish.ts";
 
 const tree = mkdtempSync(join(tmpdir(), "publish-"));
@@ -98,5 +99,20 @@ describe("publishAll", () => {
 		await expect(publishAll(["packages/a", "packages/b"], d)).rejects.toThrow(
 			"packages/a",
 		);
+	});
+});
+
+describe("publishReleased", () => {
+	test("publishes only package paths from a mixed release", async () => {
+		const { d, published } = deps({});
+		await publishReleased(["go", "packages/length-gate", "docs"], d);
+		expect(published).toEqual(["packages/length-gate"]);
+	});
+
+	test("skips when no npm package was released", async () => {
+		const { d, published, lines } = deps({});
+		await publishReleased(["go"], d);
+		expect(published).toEqual([]);
+		expect(lines).toEqual(["skip: no npm package released"]);
 	});
 });

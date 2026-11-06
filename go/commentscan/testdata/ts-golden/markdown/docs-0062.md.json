@@ -1,0 +1,326 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0062.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Forge scope enforcement — amendment: Open Question rulings"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "link-target",
+      "value": "../compass-forge-scope-enforcement/design.md"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": "## Open Questions"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Problem / Intent"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Approach"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Rulings"
+    },
+    {
+      "kind": "table-header",
+      "value": "| OQ | Ruling |"
+    },
+    {
+      "kind": "table-delimiter",
+      "value": "| -- | -- |"
+    },
+    {
+      "kind": "code-span",
+      "value": "contents: write"
+    },
+    {
+      "kind": "code-span",
+      "value": "pull_requests: write"
+    },
+    {
+      "kind": "code-span",
+      "value": "metadata: read"
+    },
+    {
+      "kind": "code-span",
+      "value": "pull_requests: write"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 OQ-6: no PAT path"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SecretGH"
+    },
+    {
+      "kind": "code-span",
+      "value": "SecretGH"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "brokeredSecretResolver.ResolveFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/git_credential.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "SecretGH"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n  if err != nil || r.broker == nil || reason != gitCredentialReason || hasGitHubSecret(resolved, r.broker.host) {\n  \treturn resolved, err\n  }"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildGitCredentialBroker"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n  return nil, nil //nolint:nilnil // nil broker means App not configured"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SECRET_KIND_GH"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/secrets_service.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "warnPartialForgeWriteSecrets"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/serve.go"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n  if havePrimary == haveReviewer {\n  \treturn // both configured (enabled path, not here) or both absent (intentional off)\n  }"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 OQ-10: permission set"
+    },
+    {
+      "kind": "code-span",
+      "value": "gitCredentialPermissions"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/git_credential.go"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\nvar gitCredentialPermissions = map[string]string{\n\t\"contents\":      \"write\",\n\t\"pull_requests\": \"write\",\n\t\"metadata\":      \"read\",\n}"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Plan"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 A1: Remove the user-secret override"
+    },
+    {
+      "kind": "code-span",
+      "value": "brokeredSecretResolver.ResolveFor"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/git_credential.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/secrets_service.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "SecretGH"
+    },
+    {
+      "kind": "code-span",
+      "value": "SECRET_KIND_GH"
+    },
+    {
+      "kind": "code-span",
+      "value": "SecretGH"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 A2: Fail-closed enforcement default"
+    },
+    {
+      "kind": "code-span",
+      "value": "ForgeConfig.EnforceScopes"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/serve.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "--forge-enforce-scopes"
+    },
+    {
+      "kind": "code-span",
+      "value": "$COMPASS_FORGE_ENFORCE_SCOPES"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveForge"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/cmd/compass-server/main.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/self-host.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "bool"
+    },
+    {
+      "kind": "code-span",
+      "value": "ServeConfig"
+    },
+    {
+      "kind": "code-span",
+      "value": "ForgeConfig.ScopeEnforcementDisabled bool"
+    },
+    {
+      "kind": "code-span",
+      "value": "--forge-disable-scope-enforcement"
+    },
+    {
+      "kind": "code-span",
+      "value": "$COMPASS_FORGE_DISABLE_SCOPE_ENFORCEMENT"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/self-host.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "ServeConfig"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 A3: Workstream repository record"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/compass.proto"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[text]\nRepo carriage removed (RIG-1527, Matt 2026-07-29): spawn/provision no longer\nclone a repo for the agent."
+    },
+    {
+      "kind": "code-span",
+      "value": "runSpawn"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/spawn.go"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\nprovResp, err := s.provisionAgent(ctx, acc, &compassv1.ProvisionAgentWorkspaceRequest{\n\tClientRequestId: crid,\n})"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Tasks"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SecretGH"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ServeConfig"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Ledger delta"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

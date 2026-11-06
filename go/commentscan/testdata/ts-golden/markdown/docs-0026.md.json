@@ -1,0 +1,14 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0026.md",
+  "fingerprint": [
+    {
+      "kind": "front-matter",
+      "value": "id: DL-022\ndecision: \"Config distribution is a Runner-mediated pull into a read-only mount; agent binary + base image ride versioned OCI pulls\"\nstatus: \"Active (Matt, 2026-07-04)\"\nrecord: ../../meta/compass-architecture-lineage/design.md"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

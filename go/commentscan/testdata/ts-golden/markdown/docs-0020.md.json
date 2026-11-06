@@ -1,0 +1,14 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0020.md",
+  "fingerprint": [
+    {
+      "kind": "front-matter",
+      "value": "id: DL-258\ndecision: \"Client install channels are homebrew (RigelBuild/homebrew-tap: cask for the macOS app + a cross-OS CLI formula, semver-bumped by the release workflow) and a repo `flake.nix` (client + stack packages pinned to the devenv.lock nixpkgs), over the raw release assets; distro-native packages (deb/rpm/AUR) deferred\"\nstatus: \"Active (Matt, 2026-08-24)\"\nrecord: ../../infra/release/compass-distribution/design.md#s2--client-app-install-channels"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/jsx.ts",
+  "corpus": "go/commentscan/testdata/corpus/jsx/template-literal-hash.tsx",
+  "scan": {
+    "residues": [
+      "const s = `",
+      "  # in shell",
+      "`;",
+      "x();",
+      ""
+    ],
+    "ambiguous": false
+  }
+}

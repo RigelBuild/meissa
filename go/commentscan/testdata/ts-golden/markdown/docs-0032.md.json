@@ -1,0 +1,14 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0032.md",
+  "fingerprint": [
+    {
+      "kind": "front-matter",
+      "value": "id: DL-186\ndecision: \"Pre-dogfood proto wire-compat is stripped: all `reserved` markers removed across compass/v1, live fields densely renumbered (no holes), and the `buf breaking` CI gate removed (re-armed at GA / first pinned client). Reclaims AgentAttribution field numbers 2,3 (DL-094's forever-reservation) — DL-094's attribution-as-display-fact semantics are UNCHANGED (owner resolved on AgentAccount.owner_user_id, not per-artifact); only its wire-number reservation is dropped, safe because zero clients are deployed and nothing on disk is proto-encoded.\"\nstatus: \"Active (Matt, 2026-08-07)\"\nrecord: ../../server/compass-attribution-simplification/design.md#approach"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

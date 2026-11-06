@@ -1,0 +1,14 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0006.md",
+  "fingerprint": [
+    {
+      "kind": "front-matter",
+      "value": "id: DL-037\ndecision: \"Standalone channel asks are answerable wherever they are asked (first-responder-wins), not read-only-deferred\"\nstatus: \"Active (Matt, 2026-07-20)\"\nrecord: ../../agent/compass-ask-in-channel/design.md#the-designed-change"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

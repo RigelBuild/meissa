@@ -32,6 +32,13 @@ tasks:
       cache: false
       runFromWorkspaceRoot: true
 
+  golden-capture:
+    command: ['bun', 'tools/golden/capture.ts']
+    deps: ['install']
+    options:
+      cache: false
+      runFromWorkspaceRoot: true
+
   test:
     command: 'bun test package-bins.test.ts rumdl-extends.test.ts tools/renovate/config.test.ts tools/renovate/refresh-go-analysis-hashes.test.ts tools/release/publish.test.ts ref-gate.config.test.ts shared-configs.test.ts'
     deps: ['install']

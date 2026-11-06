@@ -1,0 +1,18 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/meissa-0004.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 @rigelbuild/biome-config"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[json]\n{\"extends\": [\"@rigelbuild/biome-config/biome\"]}"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

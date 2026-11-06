@@ -1,0 +1,90 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/meissa-0020.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 @rigelbuild/renovate-preflight"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Run"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[sh]\nbunx @rigelbuild/renovate-preflight"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "REPO"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner/name"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "RENOVATE_TOKEN"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "GH_TOKEN"
+    },
+    {
+      "kind": "code-span",
+      "value": "gh"
+    },
+    {
+      "kind": "code-span",
+      "value": "gh"
+    },
+    {
+      "kind": "code-span",
+      "value": "PATH"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Exit codes"
+    },
+    {
+      "kind": "table-header",
+      "value": "| Code | Meaning |"
+    },
+    {
+      "kind": "table-delimiter",
+      "value": "| --- | --- |"
+    },
+    {
+      "kind": "code-span",
+      "value": "REPO"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner/name"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Library"
+    },
+    {
+      "kind": "code-span",
+      "value": "classify(probe: ProbeResult): PreflightResult"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

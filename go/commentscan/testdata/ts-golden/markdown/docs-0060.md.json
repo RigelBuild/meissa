@@ -1,0 +1,1582 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0060.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Nilaway: advisory → gating"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/designs/repo/"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-renovate-migration.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-drop-proto.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon run :ci"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/moon.yml"
+    },
+    {
+      "kind": "code-span",
+      "value": "ci"
+    },
+    {
+      "kind": "code-span",
+      "value": "infra/"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Problem / Intent"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-go:nilaway"
+    },
+    {
+      "kind": "code-span",
+      "value": "|| true"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/moon.yml:137"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/moon.yml:119"
+    },
+    {
+      "kind": "code-span",
+      "value": "|| true"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Baseline, measured"
+    },
+    {
+      "kind": "code-span",
+      "value": "main"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/moon.yml:137"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[text]\nnilaway -include-pkgs=github.com/RigelBuild/compass/go -test=false \\\n  -exclude-errors-in-files=\"gen/compass/v1/,internal/gen/compass/v1/\" ./..."
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Class A — proto-getter false positives (12 errors, ~57 flagged derefs)"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetFrame"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetCall"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetCommand"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetOp"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetBlock"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetPayload"
+    },
+    {
+      "kind": "code-span",
+      "value": "return nil"
+    },
+    {
+      "kind": "code-span",
+      "value": "gen/compass/v1/runner.pb.go:477"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_gateway.pb.go:1277"
+    },
+    {
+      "kind": "table-header",
+      "value": "| File | Top-level error | Flagged derefs | Getter |"
+    },
+    {
+      "kind": "table-delimiter",
+      "value": "| --- | --- | --- | --- |"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runner/dispatch.go:372"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetCommand()"
+    },
+    {
+      "kind": "code-span",
+      "value": "server/forge.go:192"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetCall()"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/comms/subscribe.go:289"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetPayload()"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runnerhub/relay_comms.go:416"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetCall()"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runnerhub/hub.go:560"
+    },
+    {
+      "kind": "code-span",
+      "value": "relay_comms.go:369"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetFrame()"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runtime/microvm/exec.go:361"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetFrame()"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/comms/mapping.go:352"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetBlock()"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/comms/comms.go:670"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetOp()"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runner/config_fetch.go:75"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetFrame()"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runnerhub/relay_lifecycle.go:107"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetCall()"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runnerhub/relay_board.go:108"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetCall()"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runner/gateway/publish.go:62"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetFrame()"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Class B — the remaining 29 findings (reachable-nil bugs + guard-needed FPs)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "supervisor.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": "ok"
+    },
+    {
+      "kind": "code-span",
+      "value": "err"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": "messages.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "mapping.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "byID"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_transcripts.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "code-span",
+      "value": "entries"
+    },
+    {
+      "kind": "code-span",
+      "value": "config_materialize.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "spawn.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "events.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "blockquote:>"
+    },
+    {
+      "kind": "table-header",
+      "value": "| Site | Flow (from the nilaway trace) |"
+    },
+    {
+      "kind": "table-delimiter",
+      "value": "| --- | --- |"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runtime/agent.go"
+    },
+    {
+      "kind": "code-span",
+      "value": ":68,:71,:75×2,:79,:82×2,:86,:90"
+    },
+    {
+      "kind": "code-span",
+      "value": "registry.Resolve()"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runtime/registry.go:40-44"
+    },
+    {
+      "kind": "code-span",
+      "value": "(*AgentHandle, bool)"
+    },
+    {
+      "kind": "code-span",
+      "value": "host.go"
+    },
+    {
+      "kind": "code-span",
+      "value": ":572,:682,:857"
+    },
+    {
+      "kind": "code-span",
+      "value": "ok"
+    },
+    {
+      "kind": "code-span",
+      "value": "ok"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/comms/agent_caller.go"
+    },
+    {
+      "kind": "code-span",
+      "value": ":147,:176,:272,:294×2,:316×2,:338"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms/comms.go:188,:235,:244,:262,:272,:395,:419,:624"
+    },
+    {
+      "kind": "code-span",
+      "value": "(nil, err)"
+    },
+    {
+      "kind": "code-span",
+      "value": "resp.Msg"
+    },
+    {
+      "kind": "code-span",
+      "value": "err != nil"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/store/messages.go:766,:767"
+    },
+    {
+      "kind": "code-span",
+      "value": "byID[...]"
+    },
+    {
+      "kind": "code-span",
+      "value": ":765"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runner/gateway/control.go:388,:733"
+    },
+    {
+      "kind": "code-span",
+      "value": "existingSession()"
+    },
+    {
+      "kind": "code-span",
+      "value": "control.go:477"
+    },
+    {
+      "kind": "code-span",
+      "value": "p.sessions[...]"
+    },
+    {
+      "kind": "code-span",
+      "value": "ops"
+    },
+    {
+      "kind": "code-span",
+      "value": "control.go:275"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/store/agent_transcripts.go:540"
+    },
+    {
+      "kind": "code-span",
+      "value": "entries"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/comms/comms.go:557"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveHandles()"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms/resolve.go:36"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/comms/mapping.go:339"
+    },
+    {
+      "kind": "code-span",
+      "value": "byID"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runner/agent_exec.go:360"
+    },
+    {
+      "kind": "code-span",
+      "value": "bufio.Reader.ReadSlice()"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runner/config_materialize.go:557"
+    },
+    {
+      "kind": "code-span",
+      "value": "exts"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/guestd/supervisor.go:550-551"
+    },
+    {
+      "kind": "code-span",
+      "value": "os.Stat()"
+    },
+    {
+      "kind": "code-span",
+      "value": "return err == nil && info.Mode()…"
+    },
+    {
+      "kind": "code-span",
+      "value": "info.Mode()"
+    },
+    {
+      "kind": "code-span",
+      "value": "info != nil"
+    },
+    {
+      "kind": "code-span",
+      "value": "server/spawn.go:224"
+    },
+    {
+      "kind": "code-span",
+      "value": "joinOrBeginSpawn()"
+    },
+    {
+      "kind": "code-span",
+      "value": "spawn.go:111"
+    },
+    {
+      "kind": "code-span",
+      "value": "settleSpawn()"
+    },
+    {
+      "kind": "code-span",
+      "value": ".resp"
+    },
+    {
+      "kind": "code-span",
+      "value": "events/events.go:214"
+    },
+    {
+      "kind": "code-span",
+      "value": "subscribers"
+    },
+    {
+      "kind": "code-span",
+      "value": "events.go:227"
+    },
+    {
+      "kind": "code-span",
+      "value": "lagged"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Approach"
+    },
+    {
+      "kind": "code-span",
+      "value": "|| true"
+    },
+    {
+      "kind": "code-span",
+      "value": "//nolint"
+    },
+    {
+      "kind": "code-span",
+      "value": "exclude-file-docstrings"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "if f := resp.GetFrame(); f == nil { return <error/skip> } else { …use f… }"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go:370"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge.go:190"
+    },
+    {
+      "kind": "code-span",
+      "value": "relay_*"
+    },
+    {
+      "kind": "code-span",
+      "value": "default:"
+    },
+    {
+      "kind": "code-span",
+      "value": "nil"
+    },
+    {
+      "kind": "code-span",
+      "value": "case"
+    },
+    {
+      "kind": "code-span",
+      "value": "c.CreateIssue"
+    },
+    {
+      "kind": "code-span",
+      "value": "call.GetCall()"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ok"
+    },
+    {
+      "kind": "code-span",
+      "value": "err"
+    },
+    {
+      "kind": "code-span",
+      "value": "info"
+    },
+    {
+      "kind": "code-span",
+      "value": "registry.Resolve()"
+    },
+    {
+      "kind": "code-span",
+      "value": "(*AgentHandle, bool)"
+    },
+    {
+      "kind": "code-span",
+      "value": "host.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "ok"
+    },
+    {
+      "kind": "code-span",
+      "value": "handle == nil"
+    },
+    {
+      "kind": "code-span",
+      "value": "supervisor.go:550-551"
+    },
+    {
+      "kind": "code-span",
+      "value": "err == nil"
+    },
+    {
+      "kind": "code-span",
+      "value": "info != nil"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ok"
+    },
+    {
+      "kind": "code-span",
+      "value": "byID[...]"
+    },
+    {
+      "kind": "code-span",
+      "value": "messages.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "mapping.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "err"
+    },
+    {
+      "kind": "code-span",
+      "value": "resp.Msg"
+    },
+    {
+      "kind": "code-span",
+      "value": "resp"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_caller.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "entries"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_transcripts.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "config_materialize.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"sessions stream: frame missing command variant\""
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Alternatives considered"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Nilaway declaration annotations (`nilable(…)` / `nonnil(…)`)"
+    },
+    {
+      "kind": "code-span",
+      "value": "nilable"
+    },
+    {
+      "kind": "code-span",
+      "value": "nonnil"
+    },
+    {
+      "kind": "code-span",
+      "value": "nilableKeyword"
+    },
+    {
+      "kind": "code-span",
+      "value": "nonNilKeyword"
+    },
+    {
+      "kind": "code-span",
+      "value": "nilabilityFromCommentGroup"
+    },
+    {
+      "kind": "code-span",
+      "value": "annotation/map.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "nonnil"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/gen"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/gen"
+    },
+    {
+      "kind": "code-span",
+      "value": "clean: true"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/moon.yml:122-124"
+    },
+    {
+      "kind": "code-span",
+      "value": "gen"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 File docstring opt-out (`exclude-file-docstrings`)"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "subscribe.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "relay_comms.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/moon.yml:134-136"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Narrower `-exclude-errors-in-files` additions"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Plan"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Global Constraints"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "go/moon.yml:137"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "//nolint"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "return nil"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:4."
+    },
+    {
+      "kind": "code-span",
+      "value": "-test=false"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/moon.yml:130-133"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:5."
+    },
+    {
+      "kind": "code-span",
+      "value": "go/"
+    },
+    {
+      "kind": "code-span",
+      "value": "nilaway -include-pkgs=github.com/RigelBuild/compass/go -test=false -exclude-errors-in-files=\"gen/compass/v1/,internal/gen/compass/v1/\" ./..."
+    },
+    {
+      "kind": "code-span",
+      "value": "go test ./<lane pkgs>/..."
+    },
+    {
+      "kind": "code-span",
+      "value": "./..."
+    },
+    {
+      "kind": "code-span",
+      "value": "hub.go:560"
+    },
+    {
+      "kind": "code-span",
+      "value": "relay_comms.go:369"
+    },
+    {
+      "kind": "code-span",
+      "value": "./..."
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runner"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:6."
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:7."
+    },
+    {
+      "kind": "code-span",
+      "value": ".golangci.yml"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/moon.yml"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T1 — runner lane (`internal/runner`, `internal/runner/gateway`)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go:372"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetCommand()"
+    },
+    {
+      "kind": "code-span",
+      "value": "config_fetch.go:75"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetFrame()"
+    },
+    {
+      "kind": "code-span",
+      "value": "gateway/publish.go:62"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetFrame().ControlAck"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "gateway/control.go:388,:733"
+    },
+    {
+      "kind": "code-span",
+      "value": "existingSession()"
+    },
+    {
+      "kind": "code-span",
+      "value": "p.sessions[...]"
+    },
+    {
+      "kind": "code-span",
+      "value": "control.go:476-477"
+    },
+    {
+      "kind": "code-span",
+      "value": "ops"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_exec.go:360"
+    },
+    {
+      "kind": "code-span",
+      "value": "ReadSlice"
+    },
+    {
+      "kind": "code-span",
+      "value": "config_materialize.go:557"
+    },
+    {
+      "kind": "code-span",
+      "value": "exts"
+    },
+    {
+      "kind": "code-span",
+      "value": "*compassv1internal.SessionsResponse.GetCommand()"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/gen/compass/v1/runner.pb.go:477"
+    },
+    {
+      "kind": "code-span",
+      "value": "dispatch.go:369-472"
+    },
+    {
+      "kind": "code-span",
+      "value": "existingSession(id string) *session"
+    },
+    {
+      "kind": "code-span",
+      "value": "gateway/control.go:476"
+    },
+    {
+      "kind": "code-span",
+      "value": "(*session, bool)"
+    },
+    {
+      "kind": "code-span",
+      "value": ":333"
+    },
+    {
+      "kind": "code-span",
+      "value": ":636"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T2 — runnerhub lane (`internal/runnerhub`)"
+    },
+    {
+      "kind": "code-span",
+      "value": "hub.go:560"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetFrame()"
+    },
+    {
+      "kind": "code-span",
+      "value": "relay_comms.go:369"
+    },
+    {
+      "kind": "code-span",
+      "value": "relay_comms.go:416"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetCall()"
+    },
+    {
+      "kind": "code-span",
+      "value": "relay_lifecycle.go:107"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetCall()"
+    },
+    {
+      "kind": "code-span",
+      "value": "relay_board.go:108"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetCall()"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent.pb.go:106"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetFrame()"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_gateway.pb.go:185,:759,:2616"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetCall()"
+    },
+    {
+      "kind": "code-span",
+      "value": "relay_comms.go:410-480"
+    },
+    {
+      "kind": "code-span",
+      "value": "relay_lifecycle.go:100-120"
+    },
+    {
+      "kind": "code-span",
+      "value": "relay_board.go:100-115"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T3 — comms lane (`internal/comms`)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "subscribe.go:289"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetPayload()"
+    },
+    {
+      "kind": "code-span",
+      "value": "mapping.go:352"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetBlock()"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.go:670"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetOp()"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_caller.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "resp.Msg"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.go:188,:235,:244,:262,:272,:395,:419,:624"
+    },
+    {
+      "kind": "code-span",
+      "value": "(nil, …)"
+    },
+    {
+      "kind": "code-span",
+      "value": "(nil, nil)"
+    },
+    {
+      "kind": "code-span",
+      "value": "resp"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.go:557"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveHandles"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolve.go:36"
+    },
+    {
+      "kind": "code-span",
+      "value": "mapping.go:339"
+    },
+    {
+      "kind": "code-span",
+      "value": "byID"
+    },
+    {
+      "kind": "code-span",
+      "value": "agentCaller"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_caller.go:143-338"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveHandles(...) ([]string, error)"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms/resolve.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "subscribe.go:280-325"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T4 — store lane (`internal/store`)"
+    },
+    {
+      "kind": "code-span",
+      "value": "messages.go:766,:767"
+    },
+    {
+      "kind": "code-span",
+      "value": "ok"
+    },
+    {
+      "kind": "code-span",
+      "value": "byID[...]"
+    },
+    {
+      "kind": "code-span",
+      "value": ":765"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_transcripts.go:540-541"
+    },
+    {
+      "kind": "code-span",
+      "value": "entries"
+    },
+    {
+      "kind": "code-span",
+      "value": "maybeSafetyValve"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_transcripts.go:472+"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T5 — runtime lane (`internal/runtime`, `internal/runtime/microvm`)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "Registry.Resolve()"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runtime/registry.go:40-44"
+    },
+    {
+      "kind": "code-span",
+      "value": "(*AgentHandle, bool)"
+    },
+    {
+      "kind": "code-span",
+      "value": "host.go"
+    },
+    {
+      "kind": "code-span",
+      "value": ":572,:682,:857"
+    },
+    {
+      "kind": "code-span",
+      "value": "ok"
+    },
+    {
+      "kind": "code-span",
+      "value": "ok"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "handle == nil"
+    },
+    {
+      "kind": "code-span",
+      "value": "host.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "microvm/exec.go:361"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetFrame()"
+    },
+    {
+      "kind": "code-span",
+      "value": "guest_control.pb.go:572"
+    },
+    {
+      "kind": "code-span",
+      "value": "Registry.Resolve"
+    },
+    {
+      "kind": "code-span",
+      "value": "(*AgentHandle, bool)"
+    },
+    {
+      "kind": "code-span",
+      "value": "runner/host.go"
+    },
+    {
+      "kind": "code-span",
+      "value": ":572,:682,:857"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runner"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T6 — server lane (`server/`)"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge.go:192"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetCall()"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge.go:190-213"
+    },
+    {
+      "kind": "code-span",
+      "value": "spawn.go:224"
+    },
+    {
+      "kind": "code-span",
+      "value": "joinOrBeginSpawn"
+    },
+    {
+      "kind": "code-span",
+      "value": "spawn.go:104-111"
+    },
+    {
+      "kind": "code-span",
+      "value": "settleSpawn"
+    },
+    {
+      "kind": "code-span",
+      "value": ".resp"
+    },
+    {
+      "kind": "code-span",
+      "value": ".done"
+    },
+    {
+      "kind": "code-span",
+      "value": ":224,:225,:230"
+    },
+    {
+      "kind": "code-span",
+      "value": "forgeService.ExecuteForgeCallAsAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "forge.go:180"
+    },
+    {
+      "kind": "code-span",
+      "value": "joinOrBeginSpawn"
+    },
+    {
+      "kind": "code-span",
+      "value": "settleSpawn"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T7 — guestd + events lane (`internal/guestd`, `events/`)"
+    },
+    {
+      "kind": "code-span",
+      "value": "supervisor.go:550-551"
+    },
+    {
+      "kind": "code-span",
+      "value": "os.Stat"
+    },
+    {
+      "kind": "code-span",
+      "value": "return err == nil && info.Mode()…"
+    },
+    {
+      "kind": "code-span",
+      "value": "info != nil"
+    },
+    {
+      "kind": "code-span",
+      "value": "events.go:214"
+    },
+    {
+      "kind": "code-span",
+      "value": "subscribers"
+    },
+    {
+      "kind": "code-span",
+      "value": ":227"
+    },
+    {
+      "kind": "code-span",
+      "value": "lagged"
+    },
+    {
+      "kind": "code-span",
+      "value": ":214,:218,:221,:340"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T8 — cutover (LAST, strictly ordered after T1–T7)"
+    },
+    {
+      "kind": "code-span",
+      "value": "|| true"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/moon.yml:137"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/moon.yml:117-136"
+    },
+    {
+      "kind": "code-span",
+      "value": "main"
+    },
+    {
+      "kind": "code-span",
+      "value": "host.go"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Future findings (the forcing function)"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-go:ci"
+    },
+    {
+      "kind": "code-span",
+      "value": "nilaway"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/moon.yml:219"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass/v2"
+    },
+    {
+      "kind": "code-span",
+      "value": "-exclude-errors-in-files"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/moon.yml:129-130"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Tasks"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runner{,/gateway}"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runnerhub"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/comms"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/store"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/runtime{,/microvm}"
+    },
+    {
+      "kind": "code-span",
+      "value": "runner/host.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "server/"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "internal/guestd"
+    },
+    {
+      "kind": "code-span",
+      "value": "events/"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "|| true"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/moon.yml:137"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Open Questions"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "nilable"
+    },
+    {
+      "kind": "code-span",
+      "value": "nonnil"
+    },
+    {
+      "kind": "code-span",
+      "value": "annotation/map.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "|| true"
+    },
+    {
+      "kind": "code-span",
+      "value": "main"
+    },
+    {
+      "kind": "code-span",
+      "value": "main"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:4."
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_caller.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "(resp, err)"
+    },
+    {
+      "kind": "code-span",
+      "value": "return nil, <maybe-nil err>"
+    },
+    {
+      "kind": "code-span",
+      "value": "resp"
+    },
+    {
+      "kind": "code-span",
+      "value": "resp.Msg"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

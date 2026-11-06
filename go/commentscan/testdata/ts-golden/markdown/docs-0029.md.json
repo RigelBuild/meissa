@@ -1,0 +1,14 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0029.md",
+  "fingerprint": [
+    {
+      "kind": "front-matter",
+      "value": "id: DL-414\ndecision: \"On a PR the lock-integrity gate checks only nodes whose `locked` object differs from the merge-base, plus new nodes, and fails if the base cannot be resolved. Push, nightly, dispatch and local runs check every node.\"\nstatus: \"Active (Matt, 2026-10-06)\"\nrecord: ../../repo/compass-renovate-relock-fail-closed/design.md#approach"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

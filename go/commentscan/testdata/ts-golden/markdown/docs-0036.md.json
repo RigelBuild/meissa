@@ -1,0 +1,14 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0036.md",
+  "fingerprint": [
+    {
+      "kind": "front-matter",
+      "value": "id: DL-352\ndecision: \"Key rotation is deferred to a later record; the schema reserves it now via per-row `key_version`, `server_key_state.key_version`, version-carrying AAD, and a key-as-parameter envelope API, so rotation lands as an online row-at-a-time re-encrypt with no schema change. Interim key-incident procedure until that record lands: wipe and re-set every secret, acceptable only under the pre-production single-operator posture — the `server_key_state` tripwire otherwise turns an out-of-band key change into a permanent boot failure\"\nstatus: \"Active (Matt, 2026-09-11)\"\nrecord: ../../server/compass-user-secret-store.md#resolved-decisions"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

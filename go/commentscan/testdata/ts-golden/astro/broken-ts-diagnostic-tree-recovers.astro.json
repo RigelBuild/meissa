@@ -1,0 +1,13 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/astro.ts",
+  "corpus": "go/commentscan/testdata/corpus/astro/broken-ts-diagnostic-tree-recovers.astro",
+  "scan": {
+    "residues": [
+      "<p>{<T>(x: T) => x}</p>",
+      "<p>{<>{value as import('./m', { with: { 'resolution-mode': 'import' } }).X}</>}</p>",
+      ""
+    ],
+    "ambiguous": true
+  }
+}

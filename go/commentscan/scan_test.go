@@ -182,11 +182,13 @@ func TestResidueScannerFor(t *testing.T) {
 			t.Fatal("scanner unexpectedly exists")
 		}
 	})
-	t.Run("TSX stays unrouted until M2: TSX, JSX and Astro have no lexical scanner", func(t *testing.T) {
-		for _, ext := range []string{".tsx", ".jsx", ".astro"} {
-			if _, ok := ResidueScannerFor(ext); ok {
-				t.Errorf("%s must remain unrouted", ext)
-			}
+	t.Run("routes TSX to the parser scanner", func(t *testing.T) {
+		scan, ok := ResidueScannerFor(".tsx")
+		if !ok {
+			t.Fatal("missing tsx scanner")
+		}
+		if got := scan("const E = () => <a>x//y</a>; // note"); got.Residues[0] != "const E = () => <a>x//y</a>;" {
+			t.Fatalf("got %+v", got)
 		}
 	})
 	t.Run("routes proto to the lexical scanner", func(t *testing.T) {
@@ -198,11 +200,14 @@ func TestResidueScannerFor(t *testing.T) {
 			t.Fatalf("got %+v", got)
 		}
 	})
-	t.Run("TSX stays unrouted until M2: CRLF input does not route TSX, JSX or Astro", func(t *testing.T) {
-		for _, ext := range []string{".tsx", ".jsx", ".astro"} {
-			if _, ok := ResidueScannerFor(ext); ok {
-				t.Errorf("%s must remain unrouted", ext)
-			}
+	t.Run("normalizes CRLF for parser-backed TSX scanner", func(t *testing.T) {
+		scan, ok := ResidueScannerFor(".tsx")
+		if !ok {
+			t.Fatal("missing tsx scanner")
+		}
+		got := scan("const A = () => (\r\n  <div />\r\n);\r\n// note\r\n")
+		if !reflect.DeepEqual(got.Residues, []string{"const A = () => (", "  <div />", ");", "", ""}) {
+			t.Fatalf("got %+v", got)
 		}
 	})
 	t.Run("normalizes CRLF block scalar input", func(t *testing.T) {

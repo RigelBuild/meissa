@@ -1,0 +1,14 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0034.md",
+  "fingerprint": [
+    {
+      "kind": "front-matter",
+      "value": "id: DL-270\ndecision: \"Response, stored, and event account fields stay id-typed — ids are the stable join keys clients already hold. A response that needs a handle for display carries it as an explicit sibling field (the `RosterEntry.agent_account_id`+`handle` dual), never by retyping the id field; the response-side getters (`SpawnPeerResponse`/`RosterEntry`/`AgentSessionStatus`) keep their id accessors.\"\nstatus: \"Active (Matt, 2026-08-27)\"\nrecord: ../../server/compass-handle-addressing-cutover/design.md#ledger-impact"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

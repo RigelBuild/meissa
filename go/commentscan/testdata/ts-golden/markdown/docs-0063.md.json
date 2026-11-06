@@ -1,0 +1,2382 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0063.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Design: Contract-wide id→handle cutover for compass request fields (RIG-2751)"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Problem / Intent"
+    },
+    {
+      "kind": "code-span",
+      "value": "@handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "member_account_ids"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsCallRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/agent_gateway.proto:106-114"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Approach"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 The storage contract: `account_handles` + owner-qualified resolution"
+    },
+    {
+      "kind": "code-span",
+      "value": "matt/compass-ux"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-ux"
+    },
+    {
+      "kind": "code-span",
+      "value": "(owner, handle)"
+    },
+    {
+      "kind": "code-span",
+      "value": "handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "handle TEXT NOT NULL UNIQUE"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/migrations/0001_init.sql:38"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner_user_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_accounts.owner_user_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "0001_init.sql:76"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "UNIQUE(handle) WHERE owner_user_id IS NULL"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts.handle"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "UNIQUE(owner_user_id, handle) WHERE owner_user_id IS NOT NULL"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "matt/compass-ux"
+    },
+    {
+      "kind": "code-span",
+      "value": "matt"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner_user_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-ux"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-ux"
+    },
+    {
+      "kind": "code-span",
+      "value": "matt/compass-ux"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner_user_id"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "matt"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass"
+    },
+    {
+      "kind": "code-span",
+      "value": ", no history, no tombstone, no "
+    },
+    {
+      "kind": "code-span",
+      "value": "owner_user_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "0001_init.sql:76"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "matt/compass-ux"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 The pattern being mirrored: `from_handle`"
+    },
+    {
+      "kind": "code-span",
+      "value": "from_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/agent.proto:194-199"
+    },
+    {
+      "kind": "code-span",
+      "value": ":223-229"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/delivery/consumer.go:398-413"
+    },
+    {
+      "kind": "code-span",
+      "value": "authorHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "consumer.go:109-113"
+    },
+    {
+      "kind": "code-span",
+      "value": "deliverOp"
+    },
+    {
+      "kind": "code-span",
+      "value": "steerOp"
+    },
+    {
+      "kind": "code-span",
+      "value": "consumer.go:370-393"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Where resolution lives: the service edge, not the store"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.AccountID"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateChannel"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/channels.go:81"
+    },
+    {
+      "kind": "code-span",
+      "value": "UpdateChannelMembers"
+    },
+    {
+      "kind": "code-span",
+      "value": "channels.go:407"
+    },
+    {
+      "kind": "code-span",
+      "value": "SetChannelPolicy"
+    },
+    {
+      "kind": "code-span",
+      "value": "channels.go:596"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenAgentWorkspace"
+    },
+    {
+      "kind": "code-span",
+      "value": "channels.go:818"
+    },
+    {
+      "kind": "code-span",
+      "value": "ReparentAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/accounts.go:448"
+    },
+    {
+      "kind": "code-span",
+      "value": "accountIDsFromWire"
+    },
+    {
+      "kind": "code-span",
+      "value": "memberUpdatesFromWire"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/mapping.go:264,280"
+    },
+    {
+      "kind": "code-span",
+      "value": "DespawnPeer"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/lifecycle.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "req.GetAgentAccountId()"
+    },
+    {
+      "kind": "code-span",
+      "value": "lifecycle.go:221"
+    },
+    {
+      "kind": "code-span",
+      "value": "SpawnAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/spawn.go:87"
+    },
+    {
+      "kind": "code-span",
+      "value": "ProvisionAgentWorkspace"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/service.go:139"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner/"
+    },
+    {
+      "kind": "code-span",
+      "value": "callerOwner"
+    },
+    {
+      "kind": "code-span",
+      "value": "IssueToken"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/service.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "UserByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner/agent"
+    },
+    {
+      "kind": "code-span",
+      "value": "UserByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "service.go:152,425"
+    },
+    {
+      "kind": "code-span",
+      "value": "spawn.go:103,153,158"
+    },
+    {
+      "kind": "code-span",
+      "value": "@handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner/"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner_user_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "UNIQUE(owner_user_id, handle) WHERE owner_user_id IS NOT NULL"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrNotFound"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/accounts.go:631-668"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts.handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "(owner_user_id, handle)"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "AccountsByHandles"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner/agent"
+    },
+    {
+      "kind": "code-span",
+      "value": "adminByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "systemByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts.go:107-111,178-183"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Error contract: in-band NOT_FOUND, oracle-safe"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ErrNotFound"
+    },
+    {
+      "kind": "code-span",
+      "value": "connect.CodeNotFound"
+    },
+    {
+      "kind": "code-span",
+      "value": "edgeError"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/context.go:47-68"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsCallError"
+    },
+    {
+      "kind": "code-span",
+      "value": "LifecycleCallError"
+    },
+    {
+      "kind": "code-span",
+      "value": "errPeerNotFound"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/lifecycle.go:121-126,208-256"
+    },
+    {
+      "kind": "table-header",
+      "value": "| Handler | Today | Remap |"
+    },
+    {
+      "kind": "table-delimiter",
+      "value": "| --- | --- | --- |"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/lifecycle.go:121-126"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodePermissionDenied"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/comms.go:124-133"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrPermissionDenied"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/accounts.go:507-509"
+    },
+    {
+      "kind": "code-span",
+      "value": "%w: agent %q"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/channels.go:839-840"
+    },
+    {
+      "kind": "code-span",
+      "value": "edgeError"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/context.go:47-68"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts.go:659-665"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrInvalidArgument"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/channels.go:157-158"
+    },
+    {
+      "kind": "code-span",
+      "value": "upsertMemberErr"
+    },
+    {
+      "kind": "code-span",
+      "value": "channels.go:569-573"
+    },
+    {
+      "kind": "code-span",
+      "value": "accountVisibleFromWhere"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/accounts.go:683-698"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/roster.go:43-64"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 GetRoster's dual vantage"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetRosterRequest.agent_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/comms.proto:698-704"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/roster.go:24-36"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent/src/comms.ts:729-733"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/live/stream.ts:99-101"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "vantage_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "roster.go:38-53"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts.go:638-668"
+    },
+    {
+      "kind": "code-span",
+      "value": "ListAccounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "roster.go:47"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Explicit non-goal: responses, stored state, and events keep ids"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/live/adapt.ts:173-208"
+    },
+    {
+      "kind": "code-span",
+      "value": "author=\"${attr(m.authorAccountId, fence)}\""
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent/src/comms.ts:694"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsCallRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/agent_gateway.proto:106-114"
+    },
+    {
+      "kind": "code-span",
+      "value": "author_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "Message"
+    },
+    {
+      "kind": "code-span",
+      "value": "author_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "author_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "Message"
+    },
+    {
+      "kind": "code-span",
+      "value": "adapt.ts:173-208"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto:233,238,243"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentWorkspace.agent_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto:293"
+    },
+    {
+      "kind": "code-span",
+      "value": "Topic.created_by_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto:312"
+    },
+    {
+      "kind": "code-span",
+      "value": "ChannelChanged.removed_account_ids"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto:526"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentPresenceChanged.agent_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto:555"
+    },
+    {
+      "kind": "code-span",
+      "value": "RosterEntry.agent_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto:723"
+    },
+    {
+      "kind": "code-span",
+      "value": "handle"
+    },
+    {
+      "kind": "code-span",
+      "value": ":724"
+    },
+    {
+      "kind": "code-span",
+      "value": "SpawnPeerResponse.agent_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_gateway.proto:175"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Sequencing against the in-flight org-management stack"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsCallRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "create_channel"
+    },
+    {
+      "kind": "code-span",
+      "value": "update_members"
+    },
+    {
+      "kind": "code-span",
+      "value": "create_channel_group"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_gateway.proto"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass.proto"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:4."
+    },
+    {
+      "kind": "code-span",
+      "value": "member_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "member_account_ids"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:5."
+    },
+    {
+      "kind": "code-span",
+      "value": "stream.ts:99-101"
+    },
+    {
+      "kind": "code-span",
+      "value": "despawnParameters"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent/src/lifecycle.ts:91-95"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_handle"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Field inventory (verified against current main)"
+    },
+    {
+      "kind": "table-header",
+      "value": "| # | Message.field | Location | Handler read site |"
+    },
+    {
+      "kind": "table-delimiter",
+      "value": "| --- | --- | --- | --- |"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateChannelRequest.member_account_ids"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/comms.proto:647"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/comms.go:228"
+    },
+    {
+      "kind": "code-span",
+      "value": "accountIDsFromWire"
+    },
+    {
+      "kind": "code-span",
+      "value": "UpdateChannelMembersRequest.add_member_account_ids"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto:658"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.go:250"
+    },
+    {
+      "kind": "code-span",
+      "value": "memberUpdatesFromWire"
+    },
+    {
+      "kind": "code-span",
+      "value": "mapping.go:280"
+    },
+    {
+      "kind": "code-span",
+      "value": "UpdateChannelMembersRequest.remove_member_account_ids"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto:660"
+    },
+    {
+      "kind": "code-span",
+      "value": "UpdateChannelMembersRequest.subscribe_account_ids"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto:662"
+    },
+    {
+      "kind": "code-span",
+      "value": "UpdateChannelMembersRequest.unsubscribe_account_ids"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto:664"
+    },
+    {
+      "kind": "code-span",
+      "value": "ReparentAgentRequest.agent_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto:673"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.go:277"
+    },
+    {
+      "kind": "code-span",
+      "value": "ReparentAgentRequest.new_parent_agent_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto:675"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.go:278"
+    },
+    {
+      "kind": "code-span",
+      "value": "SetChannelPolicyRequest.owner_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto:688"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.go:476"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetRosterRequest.agent_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto:703"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/roster.go:27-36"
+    },
+    {
+      "kind": "code-span",
+      "value": "OpenAgentWorkspaceRequest.agent_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto:758"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.go:300"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateAgentRequest.parent_agent_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto:590"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.go:124-141"
+    },
+    {
+      "kind": "code-span",
+      "value": "DespawnPeerRequest.agent_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/agent_gateway.proto:184"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/lifecycle.go:221"
+    },
+    {
+      "kind": "code-span",
+      "value": "CommsCallRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "create_channel"
+    },
+    {
+      "kind": "code-span",
+      "value": "update_members"
+    },
+    {
+      "kind": "code-span",
+      "value": "create_channel_group"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_gateway.proto"
+    },
+    {
+      "kind": "code-span",
+      "value": "create_channel_group"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto:607-613"
+    },
+    {
+      "kind": "code-span",
+      "value": "SpawnAgentRequest.agent_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/compass.proto:650"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/spawn.go:103,153,158"
+    },
+    {
+      "kind": "code-span",
+      "value": "ProvisionAgentWorkspaceRequest.agent_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass.proto:567"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/service.go:152,166"
+    },
+    {
+      "kind": "code-span",
+      "value": "IssueTokenRequest.account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass.proto:702"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/service.go:420"
+    },
+    {
+      "kind": "code-span",
+      "value": "ReparentAgentRequest.agent_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "new_parent_agent_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "SpawnPeerRequest.handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_gateway.proto:168"
+    },
+    {
+      "kind": "code-span",
+      "value": "SpawnPeerResponse.agent_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_gateway.proto:175"
+    },
+    {
+      "kind": "code-span",
+      "value": "channel_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "group_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "parent_group_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "asker"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Global Constraints"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-proto:lint"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_gateway.proto:22-28"
+    },
+    {
+      "kind": "code-span",
+      "value": "from_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent.proto:194-199"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/moon.yml:169"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/designs/DECISIONS.md:203"
+    },
+    {
+      "kind": "code-span",
+      "value": "reserved"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "moon run compass-proto:gen"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-client/src/gen"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/gen"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent/src/gen"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/gen"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/moon.yml:33-68"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-proto:drift"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-proto:gen-fence"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/moon.yml:69-171"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.*"
+    },
+    {
+      "kind": "code-span",
+      "value": "from_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/delivery/consumer.go:398-413"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ErrNotFound"
+    },
+    {
+      "kind": "code-span",
+      "value": "connect.CodeNotFound"
+    },
+    {
+      "kind": "code-span",
+      "value": "edgeError"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/context.go:47-68"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/lifecycle.go:121-126"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts.go:659-665"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Plan"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T0 — schema: `account_handles` in `0001_init.sql` (no backfill)"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "0001_init.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "0002"
+    },
+    {
+      "kind": "code-span",
+      "value": "; "
+    },
+    {
+      "kind": "code-span",
+      "value": "). In the same file "
+    },
+    {
+      "kind": "code-span",
+      "value": "0001_init.sql:38"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.CreateUser"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts.go:29,254"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateUser"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateAgent"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "matt"
+    },
+    {
+      "kind": "code-span",
+      "value": "matt/compass-ux"
+    },
+    {
+      "kind": "code-span",
+      "value": "matt/compass-ux"
+    },
+    {
+      "kind": "code-span",
+      "value": "alice/compass-ux"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T1 — proto flip + regen (lands first; #628/#630 rebase onto it)"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_gateway.proto"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass.proto"
+    },
+    {
+      "kind": "code-span",
+      "value": "member_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "add_member_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "remove_member_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "subscribe_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "unsubscribe_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "new_parent_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "parent_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "vantage_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "@handle"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetRosterRequest.vantage_handle"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T2 — store batch handle resolver"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/accounts.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner/handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "/"
+    },
+    {
+      "kind": "code-span",
+      "value": "UNIQUE(handle) WHERE owner_user_id IS NULL"
+    },
+    {
+      "kind": "code-span",
+      "value": "UNIQUE(owner_user_id, handle)"
+    },
+    {
+      "kind": "code-span",
+      "value": "callerOwner"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.AccountsByHandles(ctx context.Context, viewer AccountID, callerOwner AccountID, handles []QualifiedHandle) (map[string]AccountID, error)"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "accountVisibleFromWhere"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts.go:683-698"
+    },
+    {
+      "kind": "code-span",
+      "value": "system_accounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/system_account_exclusion_pgtest_test.go:11-14"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrNotFound"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner/handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts.go:655,665"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "(owner_user_id, handle)"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts.go:638"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "viewer"
+    },
+    {
+      "kind": "code-span",
+      "value": "callerOwner"
+    },
+    {
+      "kind": "code-span",
+      "value": "QualifiedHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "{owner, handle}"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "matt/compass-ux"
+    },
+    {
+      "kind": "code-span",
+      "value": "alice/compass-ux"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T3 — comms edge resolution"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/mapping.go:264,280"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.go:228,250,277-278,300"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.go:476"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.go:124-141"
+    },
+    {
+      "kind": "code-span",
+      "value": "roster.go:27-36"
+    },
+    {
+      "kind": "code-span",
+      "value": "AccountsByHandles"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "new_parent_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "parent_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "AccountsByHandles"
+    },
+    {
+      "kind": "code-span",
+      "value": "edgeError"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrPermissionDenied"
+    },
+    {
+      "kind": "code-span",
+      "value": "memberUpdatesFromWire"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveHandles(ctx, st, []string) ([]store.AccountID, error)"
+    },
+    {
+      "kind": "code-span",
+      "value": "resolveAgentHandle(ctx, st, string) (store.AccountID, error)"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms"
+    },
+    {
+      "kind": "code-span",
+      "value": "channels.go:81,407,596,818"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts.go:448"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "roster_pgtest_test.go"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T4 — lifecycle despawn resolution"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/lifecycle.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "lifecycle.go:225-241"
+    },
+    {
+      "kind": "code-span",
+      "value": "callerOwner"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentOwner"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentByHandle(handle)"
+    },
+    {
+      "kind": "code-span",
+      "value": "errPeerNotFound"
+    },
+    {
+      "kind": "code-span",
+      "value": "lifecycle.go:121-126,247-256"
+    },
+    {
+      "kind": "code-span",
+      "value": "acc.OwnerUserID"
+    },
+    {
+      "kind": "code-span",
+      "value": "callerOwner"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "ag.owner_user_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "Account"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts.go:641-651"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentOwner(target)"
+    },
+    {
+      "kind": "code-span",
+      "value": "lifecycle.go:221-224"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "callerOwner"
+    },
+    {
+      "kind": "code-span",
+      "value": "(callerOwner, handle)"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "lifecycle_pgtest_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "lifecycle_e2e_pgtest_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "lifecycle_e2e_pgtest_test.go:348-433"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T5 — rebase the org-management stack (#628, #630)"
+    },
+    {
+      "kind": "code-span",
+      "value": "CreateChannelAsAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "UpdateChannelMembersAsAccount"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T6 — compass-agent tool rewire"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent/src/lifecycle.ts:91-95,181-217"
+    },
+    {
+      "kind": "code-span",
+      "value": "agents_despawn_peer"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "DespawnPeerRequest{agentHandle}"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.ts:729-733"
+    },
+    {
+      "kind": "code-span",
+      "value": "member_handles"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "despawnParameters"
+    },
+    {
+      "kind": "code-span",
+      "value": "lifecycle.ts:91-95"
+    },
+    {
+      "kind": "code-span",
+      "value": "create_channel"
+    },
+    {
+      "kind": "code-span",
+      "value": "update_members"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "lifecycle.test.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.test.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "bun test"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T7 — UI/client sweep + smoke"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/live/stream.ts:99-101"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src"
+    },
+    {
+      "kind": "code-span",
+      "value": "adapt.ts:173-208"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms-stub.ts"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-client/src/gen"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "bun test"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui"
+    },
+    {
+      "kind": "code-span",
+      "value": "_account_ids"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T8 — admin/ops lane (CompassService) handle resolution"
+    },
+    {
+      "kind": "code-span",
+      "value": "SpawnAgent"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/spawn.go:87"
+    },
+    {
+      "kind": "code-span",
+      "value": "ProvisionAgentWorkspace"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/service.go:139"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "IssueToken"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/service.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "UserByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner/agent"
+    },
+    {
+      "kind": "code-span",
+      "value": "UserByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "AccountsByHandles"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner/"
+    },
+    {
+      "kind": "code-span",
+      "value": "callerOwner"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "spawn.go:103,153,158"
+    },
+    {
+      "kind": "code-span",
+      "value": "service.go:152"
+    },
+    {
+      "kind": "code-span",
+      "value": "hub.Provision"
+    },
+    {
+      "kind": "code-span",
+      "value": ":166"
+    },
+    {
+      "kind": "code-span",
+      "value": ":420,425"
+    },
+    {
+      "kind": "code-span",
+      "value": "GetAccount"
+    },
+    {
+      "kind": "code-span",
+      "value": "service.go:154-156,427-429"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "service.go:436-438"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 T9 — additive `author_handle` on `Message` + agent handle-only fence"
+    },
+    {
+      "kind": "code-span",
+      "value": "author_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "Message"
+    },
+    {
+      "kind": "code-span",
+      "value": "proto/compass/v1/comms.proto:332"
+    },
+    {
+      "kind": "code-span",
+      "value": "author_account_id = 3"
+    },
+    {
+      "kind": "code-span",
+      "value": "Message"
+    },
+    {
+      "kind": "code-span",
+      "value": "author_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "from_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/delivery/consumer.go:398-413"
+    },
+    {
+      "kind": "code-span",
+      "value": "author_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent/src/comms.ts:694"
+    },
+    {
+      "kind": "code-span",
+      "value": "author=\"${attr(m.authorHandle, fence)}\""
+    },
+    {
+      "kind": "code-span",
+      "value": "author_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "apps/ui/src/live/adapt.ts:173-208"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Message.author_handle"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "author_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.test.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "bun test"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/compass-agent"
+    },
+    {
+      "kind": "code-span",
+      "value": "author_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "from_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner/handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles.owner_user_id"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Tasks"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "0001_init.sql"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts.handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Store.AccountsByHandles"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "(owner, handle)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Message.author_handle"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Ledger impact"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/designs/DECISIONS.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "@handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "DECISIONS.md:203"
+    },
+    {
+      "kind": "code-span",
+      "value": "reserved"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "from_handle"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "RosterEntry.agent_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "comms.proto:723-724"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles(account_id, handle, owner_user_id NULL)"
+    },
+    {
+      "kind": "code-span",
+      "value": "matt/compass-ux"
+    },
+    {
+      "kind": "code-span",
+      "value": "accounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner/handle"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Rulings (Open Questions — all closed)"
+    },
+    {
+      "kind": "code-span",
+      "value": "account_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner/handle"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "*_account_ids"
+    },
+    {
+      "kind": "code-span",
+      "value": "*_handles"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "new_parent_agent_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "new_parent_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "parent_agent_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "parent_handle"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "reserved"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "channels.go:407-410"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:4."
+    },
+    {
+      "kind": "code-span",
+      "value": "vantage_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "agent_handle"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:5."
+    },
+    {
+      "kind": "code-span",
+      "value": "SpawnAgentRequest.agent_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass.proto:650"
+    },
+    {
+      "kind": "code-span",
+      "value": "ProvisionAgentWorkspaceRequest.agent_account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass.proto:567"
+    },
+    {
+      "kind": "code-span",
+      "value": "IssueTokenRequest.account_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass.proto:702"
+    },
+    {
+      "kind": "code-span",
+      "value": "@handle"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:6."
+    },
+    {
+      "kind": "code-span",
+      "value": "author_handle"
+    },
+    {
+      "kind": "code-span",
+      "value": "Message"
+    },
+    {
+      "kind": "code-span",
+      "value": "author_account_id"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:7."
+    },
+    {
+      "kind": "code-span",
+      "value": "accountVisibleFromWhere"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/accounts.go:683-698"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/comms/roster.go:43-64"
+    },
+    {
+      "kind": "code-span",
+      "value": "accountVisibleFromWhere"
+    },
+    {
+      "kind": "code-span",
+      "value": "ag.owner_user_id = $1"
+    },
+    {
+      "kind": "code-span",
+      "value": "accountVisibleFromWhere"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:8."
+    },
+    {
+      "kind": "code-span",
+      "value": "/"
+    },
+    {
+      "kind": "code-span",
+      "value": "/"
+    },
+    {
+      "kind": "code-span",
+      "value": "matt/compass-ux"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:9."
+    },
+    {
+      "kind": "code-span",
+      "value": "AccountsByHandles"
+    },
+    {
+      "kind": "code-span",
+      "value": "UserByHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "AgentByHandle"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

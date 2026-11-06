@@ -1,0 +1,1694 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0059.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Runner authentication from Kubernetes workload identity"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Problem / Intent"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-mint-runner-token"
+    },
+    {
+      "kind": "link-target",
+      "value": "../compass-runner-containerization/design.md"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Approach"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-runner"
+    },
+    {
+      "kind": "code-span",
+      "value": "store.SubjectRunner"
+    },
+    {
+      "kind": "code-span",
+      "value": "os.Getenv(\"COMPASS_RUNNER_TOKEN\")"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/runner.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "bearerToken"
+    },
+    {
+      "kind": "code-span",
+      "value": "bearerAuth.authenticate"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runnerhub/auth.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "TokenResolver"
+    },
+    {
+      "kind": "code-span",
+      "value": "buildNetworkServer"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/server/network_door.go"
+    },
+    {
+      "kind": "code-span",
+      "value": ", a SHA-256 lookup in "
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Cluster registration: a Server config file"
+    },
+    {
+      "kind": "code-span",
+      "value": "--runner-clusters"
+    },
+    {
+      "kind": "code-span",
+      "value": "$COMPASS_RUNNER_CLUSTERS"
+    },
+    {
+      "kind": "code-span",
+      "value": "--nats-url"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[yaml]\nclusters:\n  - name: prod-eks                 # [a-z0-9-]{1,40}; first segment of the Runner ID\n    issuer: https://oidc.eks.us-east-1.amazonaws.com/id/EXAMPLE\n    audience: compass-runner       # default compass-runner\n    namespace: compass-runner\n    serviceAccount: compass-runner\n    maxTokenLifetime: 600s         # default and minimum 600s; upper bound on exp - iat\n    jwksURI: \"\"                    # optional; overrides OIDC discovery\n    jwksFile: \"\"                   # optional static JWKS; no fetch\n    caFile: \"\"                     # optional PEM CA for a private issuer"
+    },
+    {
+      "kind": "code-span",
+      "value": "name"
+    },
+    {
+      "kind": "code-span",
+      "value": "issuer"
+    },
+    {
+      "kind": "code-span",
+      "value": "/"
+    },
+    {
+      "kind": "code-span",
+      "value": "issuer"
+    },
+    {
+      "kind": "code-span",
+      "value": "https://"
+    },
+    {
+      "kind": "code-span",
+      "value": "jwksURI"
+    },
+    {
+      "kind": "code-span",
+      "value": "jwksFile"
+    },
+    {
+      "kind": "code-span",
+      "value": "maxTokenLifetime"
+    },
+    {
+      "kind": "code-span",
+      "value": "MinTokenAgeSec"
+    },
+    {
+      "kind": "code-span",
+      "value": "pkg/apis/authentication/validation/validation.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "iss"
+    },
+    {
+      "kind": "code-span",
+      "value": "--service-account-issuer"
+    },
+    {
+      "kind": "code-span",
+      "value": "sa.key"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Tenancy"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runnerhub/runner_tenant_pgtest_test.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "PutTokenHash"
+    },
+    {
+      "kind": "code-span",
+      "value": "s.resolveTenant(ctx)"
+    },
+    {
+      "kind": "code-span",
+      "value": "Subject.Tenant"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Verification"
+    },
+    {
+      "kind": "code-span",
+      "value": "auth.RunnerVerifier.Verify"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "code-span",
+      "value": "jwt.ParseSigned(tok, []jose.SignatureAlgorithm{jose.RS256, jose.ES256})"
+    },
+    {
+      "kind": "code-span",
+      "value": "none"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "code-span",
+      "value": "iss"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:3."
+    },
+    {
+      "kind": "code-span",
+      "value": "kid"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:4."
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:5."
+    },
+    {
+      "kind": "code-span",
+      "value": "exp"
+    },
+    {
+      "kind": "code-span",
+      "value": "iat"
+    },
+    {
+      "kind": "code-span",
+      "value": "exp - iat ≤ maxTokenLifetime"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:6."
+    },
+    {
+      "kind": "code-span",
+      "value": "sub == \"system:serviceaccount:<namespace>:<serviceAccount>\""
+    },
+    {
+      "kind": "code-span",
+      "value": "kubernetes.io.namespace"
+    },
+    {
+      "kind": "code-span",
+      "value": "kubernetes.io.serviceaccount.name"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:7."
+    },
+    {
+      "kind": "code-span",
+      "value": "kubernetes.io.pod.name"
+    },
+    {
+      "kind": "code-span",
+      "value": "kubernetes.io.node.name"
+    },
+    {
+      "kind": "code-span",
+      "value": "errUnauthenticated"
+    },
+    {
+      "kind": "code-span",
+      "value": "Verify"
+    },
+    {
+      "kind": "code-span",
+      "value": "auth.ErrKeysUnavailable"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeUnavailable"
+    },
+    {
+      "kind": "code-span",
+      "value": "retryableDialError"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/run.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "aud"
+    },
+    {
+      "kind": "code-span",
+      "value": "exp"
+    },
+    {
+      "kind": "code-span",
+      "value": "iat"
+    },
+    {
+      "kind": "code-span",
+      "value": "iss"
+    },
+    {
+      "kind": "code-span",
+      "value": "jti"
+    },
+    {
+      "kind": "code-span",
+      "value": "sub"
+    },
+    {
+      "kind": "code-span",
+      "value": "\"kubernetes.io\""
+    },
+    {
+      "kind": "code-span",
+      "value": "namespace"
+    },
+    {
+      "kind": "code-span",
+      "value": "node{name,uid}"
+    },
+    {
+      "kind": "code-span",
+      "value": "pod{name,uid}"
+    },
+    {
+      "kind": "code-span",
+      "value": "serviceaccount{name,uid}"
+    },
+    {
+      "kind": "raw-html",
+      "value": "<https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/>"
+    },
+    {
+      "kind": "code-span",
+      "value": "kid"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 JWKS fetch, cache and rotation"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "jwksFile"
+    },
+    {
+      "kind": "code-span",
+      "value": "<issuer>/.well-known/openid-configuration"
+    },
+    {
+      "kind": "code-span",
+      "value": "jwks_uri"
+    },
+    {
+      "kind": "code-span",
+      "value": "jwksURI"
+    },
+    {
+      "kind": "code-span",
+      "value": "caFile"
+    },
+    {
+      "kind": "code-span",
+      "value": "enrollAttemptTimeout"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "kid"
+    },
+    {
+      "kind": "code-span",
+      "value": "singleflight"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "kid"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeUnavailable"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Runner ID derivation"
+    },
+    {
+      "kind": "code-span",
+      "value": "<cluster>/<node>"
+    },
+    {
+      "kind": "code-span",
+      "value": "."
+    },
+    {
+      "kind": "code-span",
+      "value": "_"
+    },
+    {
+      "kind": "code-span",
+      "value": "prod-eks/ip-10-0-1-5_ec2_internal"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "fabric.ValidSubjectToken"
+    },
+    {
+      "kind": "code-span",
+      "value": "."
+    },
+    {
+      "kind": "code-span",
+      "value": "compass.runner.<runner_id>.cmd"
+    },
+    {
+      "kind": "code-span",
+      "value": "_"
+    },
+    {
+      "kind": "code-span",
+      "value": "/"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "/"
+    },
+    {
+      "kind": "code-span",
+      "value": "StoreRunnerTokenHash"
+    },
+    {
+      "kind": "code-span",
+      "value": "MintRunnerToken"
+    },
+    {
+      "kind": "code-span",
+      "value": "/"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "maxSurge: 0"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Subject and enrollment"
+    },
+    {
+      "kind": "raw-html",
+      "value": "<runner id>"
+    },
+    {
+      "kind": "raw-html",
+      "value": "<bootstrap>"
+    },
+    {
+      "kind": "code-span",
+      "value": ". No new "
+    },
+    {
+      "kind": "code-span",
+      "value": " is added ("
+    },
+    {
+      "kind": "code-span",
+      "value": "EnrollResponse.runner_id = 2"
+    },
+    {
+      "kind": "code-span",
+      "value": "subj.ID"
+    },
+    {
+      "kind": "code-span",
+      "value": "Handler.Enroll"
+    },
+    {
+      "kind": "code-span",
+      "value": "EnrollRequest.runner_id"
+    },
+    {
+      "kind": "code-span",
+      "value": "EnrollRequest"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Door ordering"
+    },
+    {
+      "kind": "code-span",
+      "value": "TokenResolver"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Verify"
+    },
+    {
+      "kind": "code-span",
+      "value": "auth.ErrWrongKind"
+    },
+    {
+      "kind": "code-span",
+      "value": "want == store.SubjectRunner"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "auth.ResolveToken"
+    },
+    {
+      "kind": "code-span",
+      "value": "base64.RawURLEncoding"
+    },
+    {
+      "kind": "code-span",
+      "value": "."
+    },
+    {
+      "kind": "code-span",
+      "value": "StoreRunnerTokenHash"
+    },
+    {
+      "kind": "code-span",
+      "value": "."
+    },
+    {
+      "kind": "code-span",
+      "value": "bearerAuth.authenticate"
+    },
+    {
+      "kind": "code-span",
+      "value": "auth.ErrKeysUnavailable"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeUnavailable"
+    },
+    {
+      "kind": "code-span",
+      "value": "Unauthenticated"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Runner side"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "--token-file"
+    },
+    {
+      "kind": "code-span",
+      "value": "$COMPASS_RUNNER_TOKEN_FILE"
+    },
+    {
+      "kind": "code-span",
+      "value": "$COMPASS_RUNNER_TOKEN"
+    },
+    {
+      "kind": "code-span",
+      "value": "--runner-id"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "bearerToken"
+    },
+    {
+      "kind": "code-span",
+      "value": "TokenSource"
+    },
+    {
+      "kind": "code-span",
+      "value": "FileToken"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "FileToken"
+    },
+    {
+      "kind": "code-span",
+      "value": "exp"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-runner"
+    },
+    {
+      "kind": "code-span",
+      "value": "--mount"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 DaemonSet change"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[yaml]\nmetadata:\n  name: compass-runner                      # the policy's owner check names it\n  namespace: compass-runner\nspec:\n  updateStrategy:\n    type: RollingUpdate\n    rollingUpdate:\n      maxSurge: 0                           # the Runner ID is per node\n  template:\n    spec:\n      serviceAccountName: compass-runner\n      automountServiceAccountToken: false   # the Runner never calls the API server\n      containers:\n        - name: runner\n          env:\n            - name: COMPASS_RUNNER_TOKEN_FILE\n              value: /var/run/secrets/compass/runner/token\n          volumeMounts:\n            - name: compass-runner-token\n              mountPath: /var/run/secrets/compass/runner\n              readOnly: true\n      volumes:\n        - name: compass-runner-token\n          projected:\n            sources:\n              - serviceAccountToken:\n                  audience: compass-runner\n                  expirationSeconds: 600    # the Kubernetes minimum; ≤ maxTokenLifetime\n                  path: token"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "controllers"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-runner"
+    },
+    {
+      "kind": "code-span",
+      "value": "system:kube-controller-manager"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "deployers"
+    },
+    {
+      "kind": "code-span",
+      "value": "spec"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "controllers"
+    },
+    {
+      "kind": "code-span",
+      "value": "deployers"
+    },
+    {
+      "kind": "code-span",
+      "value": "spec.variables"
+    },
+    {
+      "kind": "code-span",
+      "value": "paramKind"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[yaml]\napiVersion: admissionregistration.k8s.io/v1\nkind: ValidatingAdmissionPolicy\nmetadata:\n  name: compass-runner-identity\nspec:\n  failurePolicy: Fail\n  matchConstraints:\n    namespaceSelector:\n      matchLabels: {kubernetes.io/metadata.name: compass-runner}\n    resourceRules:\n      - apiGroups: [\"\"]\n        apiVersions: [v1]\n        operations: [CREATE]\n        resources: [pods, serviceaccounts/token]\n      - apiGroups: [\"\"]\n        apiVersions: [v1]\n        operations: [CONNECT]                 # exec/attach are CONNECT requests\n        resources: [pods/exec, pods/attach]\n      - apiGroups: [\"\"]\n        apiVersions: [v1]\n        operations: [UPDATE]\n        resources: [pods/ephemeralcontainers]\n      - apiGroups: [\"\"]\n        apiVersions: [v1]\n        operations: [CREATE, UPDATE]\n        resources: [replicationcontrollers]\n      - apiGroups: [apps]\n        apiVersions: [v1]\n        operations: [CREATE, UPDATE]\n        resources: [daemonsets, deployments, replicasets, statefulsets]\n      - apiGroups: [batch]\n        apiVersions: [v1]\n        operations: [CREATE, UPDATE]\n        resources: [jobs, cronjobs]\n  variables:\n    - name: controllers                     # render parameter\n      expression: >-\n        ['system:serviceaccount:kube-system:daemon-set-controller',\n         'system:kube-controller-manager']\n    - name: deployers                       # render parameter\n      expression: \"['system:serviceaccount:flux-system:kustomize-controller']\"\n    - name: breakGlassGroups                # render parameter; admin exec access\n      expression: \"['system:masters']\"\n    - name: res\n      expression: request.resource.resource\n    - name: podSpec\n      expression: >-\n        request.subResource != '' ? null\n        : variables.res == 'pods' ? object.spec\n        : variables.res == 'cronjobs' ? object.spec.jobTemplate.spec.template.spec\n        : object.spec.template.spec\n    - name: usesRunnerSA\n      expression: >-\n        request.subResource != '' ? false\n        : has(variables.podSpec.serviceAccountName) &&\n          variables.podSpec.serviceAccountName == 'compass-runner'\n    - name: isRunnerDS\n      expression: variables.res == 'daemonsets' && object.metadata.name == 'compass-runner'\n  validations:\n    - expression: >-\n        !(request.subResource in ['exec', 'attach', 'ephemeralcontainers']) ||\n        !request.name.startsWith('compass-runner-') ||\n        request.userInfo.groups.exists(g, g in variables.breakGlassGroups)\n      message: only a break-glass group may exec into, attach to, or add ephemeral containers to the compass-runner pod\n    - expression: >-\n        variables.res != 'serviceaccounts' || request.name != 'compass-runner' ||\n        request.userInfo.username.startsWith('system:node:')\n      message: only kubelets may request a compass-runner token\n    - expression: >-\n        variables.res != 'pods' || !variables.usesRunnerSA ||\n        (request.userInfo.username in variables.controllers &&\n         has(object.metadata.ownerReferences) &&\n         object.metadata.ownerReferences.exists(r,\n           has(r.controller) && r.controller && r.apiVersion == 'apps/v1' &&\n           r.kind == 'DaemonSet' && r.name == 'compass-runner'))\n      message: compass-runner pods must come from the compass-runner DaemonSet\n    - expression: >-\n        variables.res in ['pods', 'serviceaccounts'] || variables.isRunnerDS ||\n        !variables.usesRunnerSA\n      message: only the compass-runner DaemonSet may use the compass-runner ServiceAccount\n    - expression: >-\n        !variables.isRunnerDS || request.userInfo.username in variables.deployers ||\n        (request.operation == 'UPDATE' && object.spec == oldObject.spec)\n      message: only a deployer may create or change the compass-runner DaemonSet\n---\napiVersion: admissionregistration.k8s.io/v1\nkind: ValidatingAdmissionPolicyBinding\nmetadata:\n  name: compass-runner-identity\nspec:\n  policyName: compass-runner-identity\n  validationActions: [Deny]"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 NATS-plane credentials"
+    },
+    {
+      "kind": "code-span",
+      "value": "RunnerVerifier.Verify"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Revocation and node removal"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "maxTokenLifetime"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Threat model"
+    },
+    {
+      "kind": "table-header",
+      "value": "| Threat | Bound |"
+    },
+    {
+      "kind": "table-delimiter",
+      "value": "| --- | --- |"
+    },
+    {
+      "kind": "code-span",
+      "value": "exp"
+    },
+    {
+      "kind": "code-span",
+      "value": "maxTokenLifetime"
+    },
+    {
+      "kind": "code-span",
+      "value": "node.name"
+    },
+    {
+      "kind": "code-span",
+      "value": "edit"
+    },
+    {
+      "kind": "code-span",
+      "value": "admin"
+    },
+    {
+      "kind": "code-span",
+      "value": "create"
+    },
+    {
+      "kind": "code-span",
+      "value": "serviceaccounts/token"
+    },
+    {
+      "kind": "code-span",
+      "value": "pods"
+    },
+    {
+      "kind": "code-span",
+      "value": "spec.nodeName"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-runner"
+    },
+    {
+      "kind": "code-span",
+      "value": "deployers"
+    },
+    {
+      "kind": "code-span",
+      "value": "spec"
+    },
+    {
+      "kind": "code-span",
+      "value": "--mount"
+    },
+    {
+      "kind": "code-span",
+      "value": "aud"
+    },
+    {
+      "kind": "code-span",
+      "value": "iss"
+    },
+    {
+      "kind": "code-span",
+      "value": "exp"
+    },
+    {
+      "kind": "code-span",
+      "value": "iss"
+    },
+    {
+      "kind": "code-span",
+      "value": "kid"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeUnavailable"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Alternatives considered"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "RunnerTokenStatus"
+    },
+    {
+      "kind": "code-span",
+      "value": "TokenOtherSubject"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "exp"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Global Constraints"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Hub"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runnerhub/hub.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "maxSurge: 0"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "edit"
+    },
+    {
+      "kind": "code-span",
+      "value": "admin"
+    },
+    {
+      "kind": "code-span",
+      "value": "create"
+    },
+    {
+      "kind": "code-span",
+      "value": "pods"
+    },
+    {
+      "kind": "code-span",
+      "value": "serviceaccounts/token"
+    },
+    {
+      "kind": "code-span",
+      "value": "deployers"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "controllers"
+    },
+    {
+      "kind": "code-span",
+      "value": "system:serviceaccount:kube-system:daemon-set-controller"
+    },
+    {
+      "kind": "code-span",
+      "value": "system:kube-controller-manager"
+    },
+    {
+      "kind": "code-span",
+      "value": "deployers"
+    },
+    {
+      "kind": "code-span",
+      "value": "system:serviceaccount:flux-system:kustomize-controller"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "github.com/go-jose/go-jose/v4"
+    },
+    {
+      "kind": "code-span",
+      "value": "vendorHash"
+    },
+    {
+      "kind": "code-span",
+      "value": "flake.nix"
+    },
+    {
+      "kind": "code-span",
+      "value": "guest-image/default.nix"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ctx"
+    },
+    {
+      "kind": "code-span",
+      "value": "context.Background()"
+    },
+    {
+      "kind": "code-span",
+      "value": "main"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "errUnauthenticated"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeUnavailable"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "/"
+    },
+    {
+      "kind": "code-span",
+      "value": "."
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "SubjectKind"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Plan"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 W1 — Verifier and cluster config"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/auth/runner_clusters.go"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/auth/workload_identity.go"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\ntype RunnerCluster struct {\n\tName, Issuer, Audience, Namespace, ServiceAccount string\n\tJWKSURI, JWKSFile, CAFile                          string\n\tMaxTokenLifetime                                   time.Duration // default 600s; < 600s fails to parse\n}\nvar ErrKeysUnavailable = errors.New(\"auth: runner cluster keys unavailable\")\nfunc ParseRunnerClusters(data []byte) ([]RunnerCluster, error)\nfunc NewRunnerVerifier(clusters []RunnerCluster, tenant store.TenantID, client *http.Client, now func() time.Time) (*RunnerVerifier, error)\nfunc (v *RunnerVerifier) Start(ctx context.Context) // background first fetch, then hourly, until ctx ends\nfunc (v *RunnerVerifier) Verify(ctx context.Context, token string) (store.Subject, error)\nfunc LooksLikeJWT(token string) bool                 // strings.Count(token, \".\") == 2\nfunc WorkloadRunnerID(cluster, node string) string   // cluster + \"/\" + strings.ReplaceAll(node, \".\", \"_\")"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 W2 — Door wiring, enrollment ID, mint guards"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ServeConfig.RunnerClustersPath string"
+    },
+    {
+      "kind": "code-span",
+      "value": "--runner-clusters"
+    },
+    {
+      "kind": "code-span",
+      "value": "$COMPASS_RUNNER_CLUSTERS"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/cmd/compass-server/main.go"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "st.BootstrapTenant(ctx)"
+    },
+    {
+      "kind": "code-span",
+      "value": "Start(ctx)"
+    },
+    {
+      "kind": "code-span",
+      "value": "st.CountRunnerTokenIDsWithSlash(ctx)"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "runnerResolve"
+    },
+    {
+      "kind": "code-span",
+      "value": "auth.ErrWrongKind"
+    },
+    {
+      "kind": "code-span",
+      "value": "want == store.SubjectRunner"
+    },
+    {
+      "kind": "code-span",
+      "value": "auth.ErrTokenNotFound"
+    },
+    {
+      "kind": "code-span",
+      "value": "Verify"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "bearerAuth.authenticate"
+    },
+    {
+      "kind": "code-span",
+      "value": "auth.ErrKeysUnavailable"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeUnavailable"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "runner.proto"
+    },
+    {
+      "kind": "code-span",
+      "value": "string runner_id = 2;"
+    },
+    {
+      "kind": "code-span",
+      "value": "EnrollResponse"
+    },
+    {
+      "kind": "code-span",
+      "value": "EnrollRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "Handler.Enroll"
+    },
+    {
+      "kind": "code-span",
+      "value": "subj.ID"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "StoreRunnerTokenHash"
+    },
+    {
+      "kind": "code-span",
+      "value": "MintRunnerToken"
+    },
+    {
+      "kind": "code-span",
+      "value": "/"
+    },
+    {
+      "kind": "code-span",
+      "value": "StoreRunnerTokenHash"
+    },
+    {
+      "kind": "code-span",
+      "value": "."
+    },
+    {
+      "kind": "code-span",
+      "value": "store.ErrInvalidArgument"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/store/queries/tokens.sql"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\n// SELECT count(*) FROM tokens\n// WHERE subject_kind = 1 AND revoked_at IS NULL AND strpos(subject_id, '/') > 0\nfunc (s *Store) CountRunnerTokenIDsWithSlash(ctx context.Context) (int64, error)"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 W3 — Runner token source and Server-assigned ID"
+    },
+    {
+      "kind": "code-span",
+      "value": "go/internal/runner/token_source.go"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[go]\ntype TokenSource interface{ Token() (string, error) }\ntype StaticToken string // $COMPASS_RUNNER_TOKEN\ntype FileToken struct{ /* path, logger, clock; mutex-guarded last good token and its exp */ }\nfunc NewFileToken(path string, log *slog.Logger, now func() time.Time) *FileToken\nfunc (l *ServerLink) RunnerID() string // from EnrollResponse.runner_id"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "RunnerConfig.Token"
+    },
+    {
+      "kind": "code-span",
+      "value": "TokenSource"
+    },
+    {
+      "kind": "code-span",
+      "value": "ServerLink.token"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "bearerToken"
+    },
+    {
+      "kind": "code-span",
+      "value": "Token()"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Run"
+    },
+    {
+      "kind": "code-span",
+      "value": "link.RunnerID()"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-runner"
+    },
+    {
+      "kind": "code-span",
+      "value": "--token-file"
+    },
+    {
+      "kind": "code-span",
+      "value": "$COMPASS_RUNNER_TOKEN_FILE"
+    },
+    {
+      "kind": "code-span",
+      "value": "--mount"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 W4 — Manifests, admission policy and operator docs"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "maxSurge: 0"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/self-host.md"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "system:service-account-issuer-discovery"
+    },
+    {
+      "kind": "code-span",
+      "value": "system:serviceaccounts"
+    },
+    {
+      "kind": "code-span",
+      "value": "system:unauthenticated"
+    },
+    {
+      "kind": "code-span",
+      "value": "--service-account-jwks-uri"
+    },
+    {
+      "kind": "code-span",
+      "value": "jwksFile"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "--service-account-issuer"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "deployers"
+    },
+    {
+      "kind": "code-span",
+      "value": "controllers"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 W5 — Ledger row"
+    },
+    {
+      "kind": "code-span",
+      "value": "docs/designs/DECISIONS.md"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Test plan"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "httptest"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "aud"
+    },
+    {
+      "kind": "code-span",
+      "value": "iss"
+    },
+    {
+      "kind": "code-span",
+      "value": "kid"
+    },
+    {
+      "kind": "code-span",
+      "value": "nbf"
+    },
+    {
+      "kind": "code-span",
+      "value": "exp"
+    },
+    {
+      "kind": "code-span",
+      "value": "exp - iat > maxTokenLifetime"
+    },
+    {
+      "kind": "code-span",
+      "value": "sub"
+    },
+    {
+      "kind": "code-span",
+      "value": "alg: none"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "kid"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrKeysUnavailable"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "/"
+    },
+    {
+      "kind": "code-span",
+      "value": "maxTokenLifetime: 599s"
+    },
+    {
+      "kind": "code-span",
+      "value": "600s"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrKeysUnavailable"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ErrWrongKind"
+    },
+    {
+      "kind": "code-span",
+      "value": "want = SubjectAccount"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "Unauthenticated"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeUnavailable"
+    },
+    {
+      "kind": "code-span",
+      "value": "CodeUnauthenticated"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "EnrollResponse.runner_id == subj.ID"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "a/b"
+    },
+    {
+      "kind": "code-span",
+      "value": "."
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "/"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "--mount"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "maxSurge: 0"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "expirationSeconds"
+    },
+    {
+      "kind": "code-span",
+      "value": "maxTokenLifetime"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "automountServiceAccountToken: false"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "controllers"
+    },
+    {
+      "kind": "code-span",
+      "value": "deployers"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "deployers"
+    },
+    {
+      "kind": "code-span",
+      "value": "<cluster>/<node>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "edit"
+    },
+    {
+      "kind": "raw-html",
+      "value": "<runner-pod>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "create"
+    },
+    {
+      "kind": "code-span",
+      "value": "update"
+    },
+    {
+      "kind": "code-span",
+      "value": "daemonsets"
+    },
+    {
+      "kind": "code-span",
+      "value": "evil"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-runner"
+    },
+    {
+      "kind": "code-span",
+      "value": "spec"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-runner"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "controllers"
+    },
+    {
+      "kind": "code-span",
+      "value": "--as-group system:masters"
+    },
+    {
+      "kind": "code-span",
+      "value": "compass-runner"
+    },
+    {
+      "kind": "code-span",
+      "value": "evil"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Tasks"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "--runner-clusters"
+    },
+    {
+      "kind": "code-span",
+      "value": "EnrollResponse.runner_id"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "TokenSource"
+    },
+    {
+      "kind": "code-span",
+      "value": "--token-file"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "maxSurge: 0"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Open Questions"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 OQ-1 [non-load-bearing] — Server-side per-node deny"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

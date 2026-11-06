@@ -1,0 +1,14 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0007.md",
+  "fingerprint": [
+    {
+      "kind": "front-matter",
+      "value": "id: DL-079\ndecision: \"Config carriage is Runner-fetch — a server-STREAMING `FetchAgentConfig` RPC + a `ConfigVersion` signal on the Sessions response stream (signal-then-pull over the frozen dial-out inversion; no inbound Server→Runner route)\"\nstatus: \"Active (Matt, 2026-07-30)\"\nrecord: ../../agent/compass-agent-config-delivery/design.md#decision-cd-2--carriage-streaming-runner-fetch-over-the-frozen-inversion"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

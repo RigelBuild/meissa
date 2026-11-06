@@ -1,0 +1,70 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/meissa-0005.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Changelog"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 [1.0.1](https://github.com/RigelBuild/meissa/compare/comment-scan@v1.0.0...comment-scan@v1.0.1) (2026-10-31)"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Bug Fixes"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:*"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/issues/39"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/commit/de57c71a9ff4fa6eb28fb0ea394b218471f5fa42"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 1.0.0 (2026-10-17)"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Features"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:*"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/issues/29"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/commit/b9442b6a3f4ddd8607a9ecd3970e49a40edceeb5"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Bug Fixes"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:*"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/issues/32"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/commit/55da4adec80227e2375e34a56286000f959ac9e6"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

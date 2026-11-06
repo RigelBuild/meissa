@@ -1,0 +1,14 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0022.md",
+  "fingerprint": [
+    {
+      "kind": "front-matter",
+      "value": "id: DL-317\ndecision: \"Under multi-tenancy, user/system handle uniqueness is PER-ORGANIZATION not global (RIG-2921 = option A): `account_handles` gains a `tenant_id` and its partial-unique indexes become org-scoped, and the handle resolvers gain a tenant filter — two organizations may each hold `@matt`. The sole globally-unique identifier is the organization NAME, CASE-FOLDED for that uniqueness check (normalized index form, display casing preserved) — `Acme` and `acme` are the same organization (GitHub model). Refines DL-271's \\\"user/system handles globally unique\\\" clause to per-organization under multi-tenancy (single-tenant OSS stays degenerate: one org, so per-org == global); implemented on the RIG-2880 `account_handles` storage contract\"\nstatus: \"Active (Matt, 2026-08-31)\"\nrecord: ../../infra/runtime/compass-managed-multitenancy/design.md#resolved-decisions-freeze--matt-2026-08-31"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}
