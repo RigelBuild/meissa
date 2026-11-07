@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/RigelBuild/meissa/compare/dl-claim@v1.1.1...dl-claim@v1.1.2) (2026-11-07)
+
+
+### Bug Fixes
+
+* **dl-claim:** explain the open-claims cap 429 instead of retry later (RIG-8080) ([#44](https://github.com/RigelBuild/meissa/issues/44)) ([4acbc0f](https://github.com/RigelBuild/meissa/commit/4acbc0f88da5260252c61e92384890fd3f476463))
+
 ## [1.1.1](https://github.com/RigelBuild/meissa/compare/dl-claim@v1.1.0...dl-claim@v1.1.1) (2026-10-17)
 
 
