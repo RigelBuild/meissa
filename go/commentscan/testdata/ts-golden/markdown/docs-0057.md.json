@@ -25,7 +25,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[go]\n> func errorResult(id string, err error) *compassv1internal.SessionsRequest {\n>   code := compassv1internal.RunnerErrorCode_RUNNER_ERROR_CODE_INTERNAL\n>   switch {\n>   case errors.Is(err, errAlreadyRunning):\n>     code = compassv1internal.RunnerErrorCode_RUNNER_ERROR_CODE_ALREADY_RUNNING\n>   case errors.Is(err, errSessionUnknown):\n>     code = compassv1internal.RunnerErrorCode_RUNNER_ERROR_CODE_NOT_FOUND\n>   }"
+      "value": "`3[go]\n> func errorResult(id string, err error) *kryptonv1internal.SessionsRequest {\n>   code := kryptonv1internal.RunnerErrorCode_RUNNER_ERROR_CODE_INTERNAL\n>   switch {\n>   case errors.Is(err, errAlreadyRunning):\n>     code = kryptonv1internal.RunnerErrorCode_RUNNER_ERROR_CODE_ALREADY_RUNNING\n>   case errors.Is(err, errSessionUnknown):\n>     code = kryptonv1internal.RunnerErrorCode_RUNNER_ERROR_CODE_NOT_FOUND\n>   }"
     },
     {
       "kind": "code-span",
@@ -41,7 +41,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[go]\n> switch e.GetCode() {\n> case compassv1internal.RunnerErrorCode_RUNNER_ERROR_CODE_ALREADY_RUNNING:\n>   code = connect.CodeAlreadyExists\n> case compassv1internal.RunnerErrorCode_RUNNER_ERROR_CODE_NOT_FOUND:\n>   code = connect.CodeNotFound\n> default:\n>   code = connect.CodeInternal\n> }"
+      "value": "`3[go]\n> switch e.GetCode() {\n> case kryptonv1internal.RunnerErrorCode_RUNNER_ERROR_CODE_ALREADY_RUNNING:\n>   code = connect.CodeAlreadyExists\n> case kryptonv1internal.RunnerErrorCode_RUNNER_ERROR_CODE_NOT_FOUND:\n>   code = connect.CodeNotFound\n> default:\n>   code = connect.CodeInternal\n> }"
     },
     {
       "kind": "code-span",
@@ -85,11 +85,11 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/"
+      "value": "proto/krypton/v1/"
     },
     {
       "kind": "code-span",
-      "value": "go/internal/gen/compass/v1/"
+      "value": "go/internal/gen/krypton/v1/"
     },
     {
       "kind": "code-span",
@@ -97,7 +97,7 @@
     },
     {
       "kind": "code-span",
-      "value": "go/internal/gen/compass/v1/runner.pb.go:69"
+      "value": "go/internal/gen/krypton/v1/runner.pb.go:69"
     },
     {
       "kind": "block-marker",
@@ -109,11 +109,11 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/runner.proto:16-18"
+      "value": "proto/krypton/v1/runner.proto:16-18"
     },
     {
       "kind": "code-span",
-      "value": "compass.v1"
+      "value": "krypton.v1"
     },
     {
       "kind": "code-span",
@@ -177,7 +177,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/runner.proto:408-423"
+      "value": "proto/krypton/v1/runner.proto:408-423"
     },
     {
       "kind": "code-span",
@@ -281,7 +281,7 @@
     },
     {
       "kind": "heading",
-      "value": "H3 (2) Server: `runnerErrorToConnect` arm (compass-server lane, cross-lane)"
+      "value": "H3 (2) Server: `runnerErrorToConnect` arm (krypton-server lane, cross-lane)"
     },
     {
       "kind": "code-span",
@@ -353,7 +353,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[go]\n// package gateway\n// ErrOperatorConfig marks a failure whose remedy is an operator knob\n// (runtime-dir length, socket-dir permissions/ownership) rather than a\n// Compass bug. errorResult (runner/dispatch.go) maps it to\n// RUNNER_ERROR_CODE_FAILED_PRECONDITION instead of INTERNAL.\nvar ErrOperatorConfig = errors.New(\"operator-fault runner configuration\")"
+      "value": "`3[go]\n// package gateway\n// ErrOperatorConfig marks a failure whose remedy is an operator knob\n// (runtime-dir length, socket-dir permissions/ownership) rather than a\n// Krypton bug. errorResult (runner/dispatch.go) maps it to\n// RUNNER_ERROR_CODE_FAILED_PRECONDITION instead of INTERNAL.\nvar ErrOperatorConfig = errors.New(\"operator-fault runner configuration\")"
     },
     {
       "kind": "code-span",
@@ -457,7 +457,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[go]\ncase errors.Is(err, gateway.ErrOperatorConfig):\n  code = compassv1internal.RunnerErrorCode_RUNNER_ERROR_CODE_FAILED_PRECONDITION"
+      "value": "`3[go]\ncase errors.Is(err, gateway.ErrOperatorConfig):\n  code = kryptonv1internal.RunnerErrorCode_RUNNER_ERROR_CODE_FAILED_PRECONDITION"
     },
     {
       "kind": "code-span",
@@ -677,7 +677,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[go]\nfunc (d *dispatcher) errorResult(ctx context.Context, id string, err error) *compassv1internal.SessionsRequest {\n  // classify code as today, then log at a level chosen by class:\n  //   context.Canceled / context.DeadlineExceeded -> skip (or Debug)\n  //   INTERNAL                                     -> Error\n  //   classified operator/client-fault codes       -> Warn\n  // build and return the result frame\n}"
+      "value": "`3[go]\nfunc (d *dispatcher) errorResult(ctx context.Context, id string, err error) *kryptonv1internal.SessionsRequest {\n  // classify code as today, then log at a level chosen by class:\n  //   context.Canceled / context.DeadlineExceeded -> skip (or Debug)\n  //   INTERNAL                                     -> Error\n  //   classified operator/client-fault codes       -> Warn\n  // build and return the result frame\n}"
     },
     {
       "kind": "code-span",
@@ -725,7 +725,7 @@
     },
     {
       "kind": "heading",
-      "value": "H3 T1 — proto: add the enum value (compass-runner lane; prerequisite)"
+      "value": "H3 T1 — proto: add the enum value (krypton-runner lane; prerequisite)"
     },
     {
       "kind": "code-span",
@@ -733,7 +733,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/runner.proto:408-423"
+      "value": "proto/krypton/v1/runner.proto:408-423"
     },
     {
       "kind": "code-span",
@@ -741,11 +741,11 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[proto]\n  // A command failed on an operator-fault condition in the Runner's\n  // deployment (a socket path over the AF_UNIX limit, socket-dir\n  // permissions/ownership, an occupied socket path) -> Connect\n  // FailedPrecondition. Distinguished from INTERNAL so an admin sees a\n  // fix-the-deployment signal rather than a Compass bug.\n  RUNNER_ERROR_CODE_FAILED_PRECONDITION = 5;"
+      "value": "`3[proto]\n  // A command failed on an operator-fault condition in the Runner's\n  // deployment (a socket path over the AF_UNIX limit, socket-dir\n  // permissions/ownership, an occupied socket path) -> Connect\n  // FailedPrecondition. Distinguished from INTERNAL so an admin sees a\n  // fix-the-deployment signal rather than a Krypton bug.\n  RUNNER_ERROR_CODE_FAILED_PRECONDITION = 5;"
     },
     {
       "kind": "code-span",
-      "value": "go/internal/gen/compass/v1/runner.pb.go"
+      "value": "go/internal/gen/krypton/v1/runner.pb.go"
     },
     {
       "kind": "code-span",
@@ -797,7 +797,7 @@
     },
     {
       "kind": "heading",
-      "value": "H3 T2 — server: mapping arm + test row (compass-server lane; CROSS-LANE)"
+      "value": "H3 T2 — server: mapping arm + test row (krypton-server lane; CROSS-LANE)"
     },
     {
       "kind": "block-marker",
@@ -829,7 +829,7 @@
     },
     {
       "kind": "code-span",
-      "value": "runnerErrorToConnect(e *compassv1internal.RunnerError) error"
+      "value": "runnerErrorToConnect(e *kryptonv1internal.RunnerError) error"
     },
     {
       "kind": "code-span",
@@ -857,7 +857,7 @@
     },
     {
       "kind": "heading",
-      "value": "H3 T3 — runner: sentinel, wrapping, `errorResult` arm, logging (compass-runner lane)"
+      "value": "H3 T3 — runner: sentinel, wrapping, `errorResult` arm, logging (krypton-runner lane)"
     },
     {
       "kind": "block-marker",
@@ -997,7 +997,7 @@
     },
     {
       "kind": "code-span",
-      "value": "func (d *dispatcher) errorResult(ctx context.Context, id string, err error) *compassv1internal.SessionsRequest"
+      "value": "func (d *dispatcher) errorResult(ctx context.Context, id string, err error) *kryptonv1internal.SessionsRequest"
     },
     {
       "kind": "block-marker",
@@ -1157,11 +1157,11 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-runner-concurrent-dispatch"
+      "value": "krypton-runner-concurrent-dispatch"
     },
     {
       "kind": "code-span",
-      "value": "compass-runner-arbitrary-uid"
+      "value": "krypton-runner-arbitrary-uid"
     },
     {
       "kind": "code-span",
@@ -1181,7 +1181,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/runner.proto"
+      "value": "proto/krypton/v1/runner.proto"
     },
     {
       "kind": "block-marker",

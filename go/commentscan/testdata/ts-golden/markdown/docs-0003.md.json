@@ -5,7 +5,7 @@
   "fingerprint": [
     {
       "kind": "heading",
-      "value": "H1 Compass forks reversal — Open-Question resolutions (RIG-2336)"
+      "value": "H1 Krypton forks reversal — Open-Question resolutions (RIG-2336)"
     },
     {
       "kind": "link-target",
@@ -65,7 +65,7 @@
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-agent/package.json:19"
+      "value": "packages/krypton-agent/package.json:19"
     },
     {
       "kind": "code-span",

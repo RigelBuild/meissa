@@ -9,7 +9,7 @@
     },
     {
       "kind": "link-target",
-      "value": "https://github.com/RigelBuild/compass/blob/main/docs/designs/observability/compass-go-trace-logs/design.md"
+      "value": "https://github.com/RigelBuild/krypton/blob/main/docs/designs/observability/krypton-go-trace-logs/design.md"
     },
     {
       "kind": "heading",
@@ -121,7 +121,7 @@
     },
     {
       "kind": "link-target",
-      "value": "https://github.com/RigelBuild/compass/blob/main/docs/designs/observability/compass-server-runner-otel/design.md"
+      "value": "https://github.com/RigelBuild/krypton/blob/main/docs/designs/observability/krypton-server-runner-otel/design.md"
     },
     {
       "kind": "code-span",
@@ -181,7 +181,7 @@
     },
     {
       "kind": "code-span",
-      "value": "return compassv1internalconnect.NewGuestControlClient(httpClient, \"http://guest\")"
+      "value": "return kryptonv1internalconnect.NewGuestControlClient(httpClient, \"http://guest\")"
     },
     {
       "kind": "code-span",
@@ -709,7 +709,7 @@
     },
     {
       "kind": "code-span",
-      "value": "github.com/RigelBuild/compass/go/internal/otel"
+      "value": "github.com/RigelBuild/krypton/go/internal/otel"
     },
     {
       "kind": "code-span",
@@ -801,7 +801,7 @@
     },
     {
       "kind": "code-span",
-      "value": "moon run compass-proto:gen"
+      "value": "moon run krypton-proto:gen"
     },
     {
       "kind": "block-marker",
@@ -969,7 +969,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[go]\n  // GuestClient dials the guest control plane over hybrid vsock. opts are\n  // passed to the generated client; the runner wiring supplies the\n  // otelconnect interceptor.\n  func GuestClient(vsockSocket string, port uint32, opts ...connect.ClientOption) compassv1internalconnect.GuestControlClient"
+      "value": "`3[go]\n  // GuestClient dials the guest control plane over hybrid vsock. opts are\n  // passed to the generated client; the runner wiring supplies the\n  // otelconnect interceptor.\n  func GuestClient(vsockSocket string, port uint32, opts ...connect.ClientOption) kryptonv1internalconnect.GuestControlClient"
     },
     {
       "kind": "block-marker",
@@ -1949,7 +1949,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[go]\n  type LifecycleSink interface {\n  \tPublishSessionStatus(ctx context.Context, status *compassv1.AgentSessionStatus)\n  }\n  // presenceSource.PublishActivity and Hub.PublishActivity:\n  PublishActivity(ctx context.Context, agentAccountID store.AccountID, activity string)"
+      "value": "`3[go]\n  type LifecycleSink interface {\n  \tPublishSessionStatus(ctx context.Context, status *kryptonv1.AgentSessionStatus)\n  }\n  // presenceSource.PublishActivity and Hub.PublishActivity:\n  PublishActivity(ctx context.Context, agentAccountID store.AccountID, activity string)"
     },
     {
       "kind": "block-marker",
@@ -2213,7 +2213,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[go]\n  OnSessionLifecycle(ctx context.Context, account store.AccountID, sessionID string, state compassv1.AgentSessionState)\n  OnSessionPromoted(ctx context.Context, account store.AccountID, sessionID string)"
+      "value": "`3[go]\n  OnSessionLifecycle(ctx context.Context, account store.AccountID, sessionID string, state kryptonv1.AgentSessionState)\n  OnSessionPromoted(ctx context.Context, account store.AccountID, sessionID string)"
     },
     {
       "kind": "block-marker",
@@ -2469,11 +2469,11 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-go:lint"
+      "value": "krypton-go:lint"
     },
     {
       "kind": "code-span",
-      "value": "compass-go:test"
+      "value": "krypton-go:test"
     },
     {
       "kind": "code-span",
@@ -2501,7 +2501,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/runner.proto"
+      "value": "proto/krypton/v1/runner.proto"
     },
     {
       "kind": "code-span",
@@ -2849,7 +2849,7 @@
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-agent/src/trace-bridge.ts"
+      "value": "packages/krypton-agent/src/trace-bridge.ts"
     },
     {
       "kind": "block-marker",

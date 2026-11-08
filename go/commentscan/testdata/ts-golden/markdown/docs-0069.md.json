@@ -5,7 +5,7 @@
   "fingerprint": [
     {
       "kind": "heading",
-      "value": "H1 Compass UI fixture boot — fully offline, fixture-seeded UI"
+      "value": "H1 Krypton UI fixture boot — fully offline, fixture-seeded UI"
     },
     {
       "kind": "heading",
@@ -57,7 +57,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-fake.ts"
+      "value": "krypton-fake.ts"
     },
     {
       "kind": "block-marker",
@@ -121,7 +121,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[ts]\nif (options.compass) {\n    ...\n    void runEventStream({\n        client,\n        onIssues: setIssues,"
+      "value": "`3[ts]\nif (options.krypton) {\n    ...\n    void runEventStream({\n        client,\n        onIssues: setIssues,"
     },
     {
       "kind": "code-span",
@@ -141,7 +141,7 @@
     },
     {
       "kind": "code-span",
-      "value": "options.compass"
+      "value": "options.krypton"
     },
     {
       "kind": "code-span",
@@ -157,7 +157,7 @@
     },
     {
       "kind": "code-span",
-      "value": "readonly compass?: CompassClient;"
+      "value": "readonly krypton?: KryptonClient;"
     },
     {
       "kind": "code-span",
@@ -205,7 +205,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[ts]\n  const baseUrl = env.VITE_COMPASS_BASE_URL?.trim();\n  if (!baseUrl) {\n      throw new Error(\n          \"VITE_COMPASS_BASE_URL is required to reach the Compass server; \" +"
+      "value": "`3[ts]\n  const baseUrl = env.VITE_KRYPTON_BASE_URL?.trim();\n  if (!baseUrl) {\n      throw new Error(\n          \"VITE_KRYPTON_BASE_URL is required to reach the Krypton server; \" +"
     },
     {
       "kind": "block-marker",
@@ -217,7 +217,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[ts]\n  const clients = createLiveClients(connection);\n  const callerId = await bootCaller(root, () => resolveCaller(clients.compass));\n  ...\n  if (!callerId) {\n      return;\n  }"
+      "value": "`3[ts]\n  const clients = createLiveClients(connection);\n  const callerId = await bootCaller(root, () => resolveCaller(clients.krypton));\n  ...\n  if (!callerId) {\n      return;\n  }"
     },
     {
       "kind": "code-span",
@@ -233,7 +233,7 @@
     },
     {
       "kind": "code-span",
-      "value": "VITE_COMPASS_FIXTURE=1"
+      "value": "VITE_KRYPTON_FIXTURE=1"
     },
     {
       "kind": "code-span",
@@ -425,7 +425,7 @@
     },
     {
       "kind": "code-span",
-      "value": "VITE_COMPASS_BASE_URL"
+      "value": "VITE_KRYPTON_BASE_URL"
     },
     {
       "kind": "code-span",
@@ -485,7 +485,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass"
+      "value": "krypton"
     },
     {
       "kind": "code-span",
@@ -561,19 +561,19 @@
     },
     {
       "kind": "code-span",
-      "value": "CompassClient"
+      "value": "KryptonClient"
     },
     {
       "kind": "code-span",
-      "value": "options.compass"
+      "value": "options.krypton"
     },
     {
       "kind": "code-span",
-      "value": "apps/ui/src/live/compass-fake.ts"
+      "value": "apps/ui/src/live/krypton-fake.ts"
     },
     {
       "kind": "code-span",
-      "value": "createFakeCompass()"
+      "value": "createFakeKrypton()"
     },
     {
       "kind": "code-span",
@@ -581,7 +581,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-fake.ts:82"
+      "value": "krypton-fake.ts:82"
     },
     {
       "kind": "code-span",
@@ -601,15 +601,15 @@
     },
     {
       "kind": "code-span",
-      "value": "client as unknown as CompassClient"
+      "value": "client as unknown as KryptonClient"
     },
     {
       "kind": "code-span",
-      "value": "compass-fake.ts:112"
+      "value": "krypton-fake.ts:112"
     },
     {
       "kind": "code-span",
-      "value": "createFakeCompass"
+      "value": "createFakeKrypton"
     },
     {
       "kind": "code-span",
@@ -937,7 +937,7 @@
     },
     {
       "kind": "code-span",
-      "value": "if (import.meta.env.MODE === \"fixture\") { void import(\"./boot-fixture\").then((m) => m.bootFixture(root)).catch((error) => renderBootError(root, \"Compass UI cannot start\", …)); } else { …existing chain… }"
+      "value": "if (import.meta.env.MODE === \"fixture\") { void import(\"./boot-fixture\").then((m) => m.bootFixture(root)).catch((error) => renderBootError(root, \"Krypton UI cannot start\", …)); } else { …existing chain… }"
     },
     {
       "kind": "code-span",
@@ -1009,7 +1009,7 @@
     },
     {
       "kind": "code-span",
-      "value": "moon run compass-ui:test"
+      "value": "moon run krypton-ui:test"
     },
     {
       "kind": "code-span",
@@ -1053,7 +1053,7 @@
     },
     {
       "kind": "code-span",
-      "value": "export const FIXTURE_SENTINEL = \"COMPASS-FIXTURE-BOOT-SENTINEL-7f3a\""
+      "value": "export const FIXTURE_SENTINEL = \"KRYPTON-FIXTURE-BOOT-SENTINEL-7f3a\""
     },
     {
       "kind": "block-marker",
@@ -1105,7 +1105,7 @@
     },
     {
       "kind": "code-span",
-      "value": "VITE_COMPASS_BASE_URL"
+      "value": "VITE_KRYPTON_BASE_URL"
     },
     {
       "kind": "heading",
@@ -1129,7 +1129,7 @@
     },
     {
       "kind": "code-span",
-      "value": "VITE_COMPASS_BASE_URL"
+      "value": "VITE_KRYPTON_BASE_URL"
     },
     {
       "kind": "code-span",
@@ -1281,7 +1281,7 @@
     },
     {
       "kind": "code-span",
-      "value": "createFakeCompass"
+      "value": "createFakeKrypton"
     },
     {
       "kind": "code-span",
@@ -1289,7 +1289,7 @@
     },
     {
       "kind": "code-span",
-      "value": "options.compass"
+      "value": "options.krypton"
     },
     {
       "kind": "heading",
@@ -1393,7 +1393,7 @@
     },
     {
       "kind": "code-span",
-      "value": "createFakeCompass"
+      "value": "createFakeKrypton"
     },
     {
       "kind": "heading",
@@ -1429,7 +1429,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-fake.ts"
+      "value": "krypton-fake.ts"
     },
     {
       "kind": "code-span",

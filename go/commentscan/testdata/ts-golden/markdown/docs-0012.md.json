@@ -5,7 +5,7 @@
   "fingerprint": [
     {
       "kind": "front-matter",
-      "value": "id: DL-191\ndecision: \"The `@compass` system-sender is a dedicated `system` account type — a third first-class account shape alongside user and agent (the `system = 12` proto case, not an unset-oneof discriminator), startup-seeded and reserved-handle-guarded at account creation, visible only to shared-channel co-members, and structurally never a deliver recipient nor present in directory/roster (no `agent_accounts` row)\"\nstatus: \"Active (Matt, 2026-08-14)\"\nrecord: ../../agent/compass-system-sender-first-turn/design.md#a--compass-representation-a-dedicated-system-account-type-matt-ruled"
+      "value": "id: DL-191\ndecision: \"The `@krypton` system-sender is a dedicated `system` account type — a third first-class account shape alongside user and agent (the `system = 12` proto case, not an unset-oneof discriminator), startup-seeded and reserved-handle-guarded at account creation, visible only to shared-channel co-members, and structurally never a deliver recipient nor present in directory/roster (no `agent_accounts` row)\"\nstatus: \"Active (Matt, 2026-08-14)\"\nrecord: ../../agent/krypton-system-sender-first-turn/design.md#a--krypton-representation-a-dedicated-system-account-type-matt-ruled"
     }
   ],
   "comparison": {

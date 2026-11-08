@@ -5,7 +5,7 @@
   "fingerprint": [
     {
       "kind": "front-matter",
-      "value": "id: DL-079\ndecision: \"Config carriage is Runner-fetch — a server-STREAMING `FetchAgentConfig` RPC + a `ConfigVersion` signal on the Sessions response stream (signal-then-pull over the frozen dial-out inversion; no inbound Server→Runner route)\"\nstatus: \"Active (Matt, 2026-07-30)\"\nrecord: ../../agent/compass-agent-config-delivery/design.md#decision-cd-2--carriage-streaming-runner-fetch-over-the-frozen-inversion"
+      "value": "id: DL-079\ndecision: \"Config carriage is Runner-fetch — a server-STREAMING `FetchAgentConfig` RPC + a `ConfigVersion` signal on the Sessions response stream (signal-then-pull over the frozen dial-out inversion; no inbound Server→Runner route)\"\nstatus: \"Active (Matt, 2026-07-30)\"\nrecord: ../../agent/krypton-agent-config-delivery/design.md#decision-cd-2--carriage-streaming-runner-fetch-over-the-frozen-inversion"
     }
   ],
   "comparison": {

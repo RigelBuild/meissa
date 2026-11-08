@@ -216,18 +216,18 @@ describe("run", () => {
 			designsRoot: "docs/designs",
 			surfaceDepth: 1,
 		});
-		const compassDocs = tree([file("DL-010", { area: "ci", layout: "flat" })], {
+		const kryptonDocs = tree([file("DL-010", { area: "ci", layout: "flat" })], {
 			designsRoot: "docs/designs",
 			surfaceDepth: 0,
 		});
 		const depthOne = await call([], depthOneDocs);
-		const compass = await call([], compassDocs);
+		const krypton = await call([], kryptonDocs);
 		expect([depthOne.code, ids(depthOne.out), depthOne.err]).toEqual([
 			0,
 			["DL-002", "DL-003", "DL-099", "DL-500"],
 			[],
 		]);
-		expect([compass.code, ids(compass.out), compass.err]).toEqual([
+		expect([krypton.code, ids(krypton.out), krypton.err]).toEqual([
 			0,
 			["DL-010"],
 			[],
@@ -251,7 +251,7 @@ describe("run", () => {
 			designsRoot: "docs/designs",
 			surfaceDepth: 0,
 		});
-		const result = await call(["--surface", "compass"], root);
+		const result = await call(["--surface", "krypton"], root);
 		expect(result.code).toBe(2);
 		expect(result.err[0]).toContain("requires exactly one configured surface");
 	});
@@ -271,9 +271,9 @@ describe("run", () => {
 		const root = tree([file("DL-014", { area: "ci", layout: "flat" })], {
 			designsRoot: "docs/designs",
 			surfaceDepth: 0,
-			surfaces: ["compass"],
+			surfaces: ["krypton"],
 		});
-		const result = await call(["--surface", "compass"], root);
+		const result = await call(["--surface", "krypton"], root);
 		expect([result.code, ids(result.out), result.err]).toEqual([
 			0,
 			["DL-014"],

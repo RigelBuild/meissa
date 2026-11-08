@@ -5,7 +5,7 @@
   "fingerprint": [
     {
       "kind": "front-matter",
-      "value": "id: DL-022\ndecision: \"Config distribution is a Runner-mediated pull into a read-only mount; agent binary + base image ride versioned OCI pulls\"\nstatus: \"Active (Matt, 2026-07-04)\"\nrecord: ../../meta/compass-architecture-lineage/design.md"
+      "value": "id: DL-022\ndecision: \"Config distribution is a Runner-mediated pull into a read-only mount; agent binary + base image ride versioned OCI pulls\"\nstatus: \"Active (Matt, 2026-07-04)\"\nrecord: ../../meta/krypton-architecture-lineage/design.md"
     }
   ],
   "comparison": {

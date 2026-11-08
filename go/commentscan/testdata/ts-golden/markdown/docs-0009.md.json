@@ -5,7 +5,7 @@
   "fingerprint": [
     {
       "kind": "front-matter",
-      "value": "id: DL-131\ndecision: \"\\\"Manager\\\" is an agent ROLE label in prompts/docs/UI/marketing; proto/Go/UI data types stay `Agent`/`AgentAccount` (no rename); the role mechanism itself (role field, per-role bundles, per-role model/thinking) is RIG-1724 (Beta), forward-referenced only\"\nstatus: \"Active (Matt, 2026-08-04)\"\nrecord: ../../agent/compass-manager-prompt/design.md#decision-mp-3--manager-is-a-role-label-not-a-data-type-rename-dl-131"
+      "value": "id: DL-131\ndecision: \"\\\"Manager\\\" is an agent ROLE label in prompts/docs/UI/marketing; proto/Go/UI data types stay `Agent`/`AgentAccount` (no rename); the role mechanism itself (role field, per-role bundles, per-role model/thinking) is RIG-1724 (Beta), forward-referenced only\"\nstatus: \"Active (Matt, 2026-08-04)\"\nrecord: ../../agent/krypton-manager-prompt/design.md#decision-mp-3--manager-is-a-role-label-not-a-data-type-rename-dl-131"
     }
   ],
   "comparison": {

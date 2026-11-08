@@ -5,7 +5,7 @@
   "fingerprint": [
     {
       "kind": "heading",
-      "value": "H1 Design: Contract-wide id→handle cutover for compass request fields (RIG-2751)"
+      "value": "H1 Design: Contract-wide id→handle cutover for krypton request fields (RIG-2751)"
     },
     {
       "kind": "heading",
@@ -33,7 +33,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/agent_gateway.proto:106-114"
+      "value": "proto/krypton/v1/agent_gateway.proto:106-114"
     },
     {
       "kind": "heading",
@@ -45,11 +45,11 @@
     },
     {
       "kind": "code-span",
-      "value": "matt/compass-ux"
+      "value": "matt/krypton-ux"
     },
     {
       "kind": "code-span",
-      "value": "compass-ux"
+      "value": "krypton-ux"
     },
     {
       "kind": "code-span",
@@ -121,7 +121,7 @@
     },
     {
       "kind": "code-span",
-      "value": "matt/compass-ux"
+      "value": "matt/krypton-ux"
     },
     {
       "kind": "code-span",
@@ -137,7 +137,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-ux"
+      "value": "krypton-ux"
     },
     {
       "kind": "block-marker",
@@ -145,11 +145,11 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-ux"
+      "value": "krypton-ux"
     },
     {
       "kind": "code-span",
-      "value": "matt/compass-ux"
+      "value": "matt/krypton-ux"
     },
     {
       "kind": "code-span",
@@ -165,7 +165,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass"
+      "value": "krypton"
     },
     {
       "kind": "code-span",
@@ -189,7 +189,7 @@
     },
     {
       "kind": "code-span",
-      "value": "matt/compass-ux"
+      "value": "matt/krypton-ux"
     },
     {
       "kind": "heading",
@@ -201,7 +201,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/agent.proto:194-199"
+      "value": "proto/krypton/v1/agent.proto:194-199"
     },
     {
       "kind": "code-span",
@@ -581,7 +581,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/comms.proto:698-704"
+      "value": "proto/krypton/v1/comms.proto:698-704"
     },
     {
       "kind": "code-span",
@@ -589,7 +589,7 @@
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-agent/src/comms.ts:729-733"
+      "value": "packages/krypton-agent/src/comms.ts:729-733"
     },
     {
       "kind": "code-span",
@@ -641,7 +641,7 @@
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-agent/src/comms.ts:694"
+      "value": "packages/krypton-agent/src/comms.ts:694"
     },
     {
       "kind": "code-span",
@@ -649,7 +649,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/agent_gateway.proto:106-114"
+      "value": "proto/krypton/v1/agent_gateway.proto:106-114"
     },
     {
       "kind": "code-span",
@@ -773,7 +773,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass.proto"
+      "value": "krypton.proto"
     },
     {
       "kind": "block-marker",
@@ -813,7 +813,7 @@
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-agent/src/lifecycle.ts:91-95"
+      "value": "packages/krypton-agent/src/lifecycle.ts:91-95"
     },
     {
       "kind": "code-span",
@@ -837,7 +837,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/comms.proto:647"
+      "value": "proto/krypton/v1/comms.proto:647"
     },
     {
       "kind": "code-span",
@@ -969,7 +969,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/agent_gateway.proto:184"
+      "value": "proto/krypton/v1/agent_gateway.proto:184"
     },
     {
       "kind": "code-span",
@@ -1009,7 +1009,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/compass.proto:650"
+      "value": "proto/krypton/v1/krypton.proto:650"
     },
     {
       "kind": "code-span",
@@ -1021,7 +1021,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass.proto:567"
+      "value": "krypton.proto:567"
     },
     {
       "kind": "code-span",
@@ -1033,7 +1033,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass.proto:702"
+      "value": "krypton.proto:702"
     },
     {
       "kind": "code-span",
@@ -1089,7 +1089,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-proto:lint"
+      "value": "krypton-proto:lint"
     },
     {
       "kind": "code-span",
@@ -1125,11 +1125,11 @@
     },
     {
       "kind": "code-span",
-      "value": "moon run compass-proto:gen"
+      "value": "moon run krypton-proto:gen"
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-client/src/gen"
+      "value": "packages/krypton-client/src/gen"
     },
     {
       "kind": "code-span",
@@ -1137,7 +1137,7 @@
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-agent/src/gen"
+      "value": "packages/krypton-agent/src/gen"
     },
     {
       "kind": "code-span",
@@ -1149,11 +1149,11 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-proto:drift"
+      "value": "krypton-proto:drift"
     },
     {
       "kind": "code-span",
-      "value": "compass-proto:gen-fence"
+      "value": "krypton-proto:gen-fence"
     },
     {
       "kind": "code-span",
@@ -1285,15 +1285,15 @@
     },
     {
       "kind": "code-span",
-      "value": "matt/compass-ux"
+      "value": "matt/krypton-ux"
     },
     {
       "kind": "code-span",
-      "value": "matt/compass-ux"
+      "value": "matt/krypton-ux"
     },
     {
       "kind": "code-span",
-      "value": "alice/compass-ux"
+      "value": "alice/krypton-ux"
     },
     {
       "kind": "heading",
@@ -1309,7 +1309,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass.proto"
+      "value": "krypton.proto"
     },
     {
       "kind": "code-span",
@@ -1489,11 +1489,11 @@
     },
     {
       "kind": "code-span",
-      "value": "matt/compass-ux"
+      "value": "matt/krypton-ux"
     },
     {
       "kind": "code-span",
-      "value": "alice/compass-ux"
+      "value": "alice/krypton-ux"
     },
     {
       "kind": "heading",
@@ -1713,11 +1713,11 @@
     },
     {
       "kind": "heading",
-      "value": "H3 T6 — compass-agent tool rewire"
+      "value": "H3 T6 — krypton-agent tool rewire"
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-agent/src/lifecycle.ts:91-95,181-217"
+      "value": "packages/krypton-agent/src/lifecycle.ts:91-95,181-217"
     },
     {
       "kind": "code-span",
@@ -1781,7 +1781,7 @@
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-agent"
+      "value": "packages/krypton-agent"
     },
     {
       "kind": "heading",
@@ -1809,7 +1809,7 @@
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-client/src/gen"
+      "value": "packages/krypton-client/src/gen"
     },
     {
       "kind": "block-marker",
@@ -1829,7 +1829,7 @@
     },
     {
       "kind": "heading",
-      "value": "H3 T8 — admin/ops lane (CompassService) handle resolution"
+      "value": "H3 T8 — admin/ops lane (KryptonService) handle resolution"
     },
     {
       "kind": "code-span",
@@ -1953,7 +1953,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/comms.proto:332"
+      "value": "proto/krypton/v1/comms.proto:332"
     },
     {
       "kind": "code-span",
@@ -1981,7 +1981,7 @@
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-agent/src/comms.ts:694"
+      "value": "packages/krypton-agent/src/comms.ts:694"
     },
     {
       "kind": "code-span",
@@ -2021,7 +2021,7 @@
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-agent"
+      "value": "packages/krypton-agent"
     },
     {
       "kind": "code-span",
@@ -2169,7 +2169,7 @@
     },
     {
       "kind": "code-span",
-      "value": "matt/compass-ux"
+      "value": "matt/krypton-ux"
     },
     {
       "kind": "code-span",
@@ -2277,7 +2277,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass.proto:650"
+      "value": "krypton.proto:650"
     },
     {
       "kind": "code-span",
@@ -2285,7 +2285,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass.proto:567"
+      "value": "krypton.proto:567"
     },
     {
       "kind": "code-span",
@@ -2293,7 +2293,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass.proto:702"
+      "value": "krypton.proto:702"
     },
     {
       "kind": "code-span",
@@ -2357,7 +2357,7 @@
     },
     {
       "kind": "code-span",
-      "value": "matt/compass-ux"
+      "value": "matt/krypton-ux"
     },
     {
       "kind": "block-marker",

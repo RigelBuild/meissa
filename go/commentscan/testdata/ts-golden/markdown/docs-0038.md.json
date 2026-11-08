@@ -5,7 +5,7 @@
   "fingerprint": [
     {
       "kind": "front-matter",
-      "value": "id: DL-396\ndecision: \"Cross-owner reach is gated at delivery, not by membership: `SubscribedAgents`, `ChannelAgentMembers`, `UndeliveredMessages`, `OwedMentions`, and the cursor advance admit an agent only when the author shares its owner, is the system account, or is live-peered with its owner, in every channel kind. Revoke deletes one row and mutates nothing else; it stops every deliver, steer, owed row, and wake across the boundary in both directions, and re-approval restores them. Pull reads stay membership-gated. Amends DL-226: a cross-owner wake needs a live peering.\"\nstatus: \"Active (Matt, 2026-09-28)\"\nrecord: ../../server/compass-owner-peering/design.md#ledger-delta"
+      "value": "id: DL-396\ndecision: \"Cross-owner reach is gated at delivery, not by membership: `SubscribedAgents`, `ChannelAgentMembers`, `UndeliveredMessages`, `OwedMentions`, and the cursor advance admit an agent only when the author shares its owner, is the system account, or is live-peered with its owner, in every channel kind. Revoke deletes one row and mutates nothing else; it stops every deliver, steer, owed row, and wake across the boundary in both directions, and re-approval restores them. Pull reads stay membership-gated. Amends DL-226: a cross-owner wake needs a live peering.\"\nstatus: \"Active (Matt, 2026-09-28)\"\nrecord: ../../server/krypton-owner-peering/design.md#ledger-delta"
     }
   ],
   "comparison": {

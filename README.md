@@ -41,7 +41,7 @@ Consumer `.rumdl.toml` files inherit the shared rules and can add local exclusio
 extends = "$RUMDL_BASE_CONFIG"
 ```
 
-The policy is the shared `[MD0nn]` rule set in Compass's [`.rumdl.toml`](https://github.com/RigelBuild/compass/blob/main/.rumdl.toml). Meissa's own development shell also provides Bun, Node.js, and moon from its pinned nixpkgs.
+The policy is the shared `[MD0nn]` rule set from `rumdl/base.toml` in this repo. Meissa's own development shell also provides Bun, Node.js, and moon from its pinned nixpkgs.
 
 ## Renovate preset
 

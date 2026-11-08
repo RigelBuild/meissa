@@ -13,11 +13,11 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-mint-runner-token"
+      "value": "krypton-mint-runner-token"
     },
     {
       "kind": "link-target",
-      "value": "../compass-runner-containerization/design.md"
+      "value": "../krypton-runner-containerization/design.md"
     },
     {
       "kind": "heading",
@@ -25,7 +25,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-runner"
+      "value": "krypton-runner"
     },
     {
       "kind": "code-span",
@@ -33,7 +33,7 @@
     },
     {
       "kind": "code-span",
-      "value": "os.Getenv(\"COMPASS_RUNNER_TOKEN\")"
+      "value": "os.Getenv(\"KRYPTON_RUNNER_TOKEN\")"
     },
     {
       "kind": "code-span",
@@ -77,7 +77,7 @@
     },
     {
       "kind": "code-span",
-      "value": "$COMPASS_RUNNER_CLUSTERS"
+      "value": "$KRYPTON_RUNNER_CLUSTERS"
     },
     {
       "kind": "code-span",
@@ -85,7 +85,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[yaml]\nclusters:\n  - name: prod-eks                 # [a-z0-9-]{1,40}; first segment of the Runner ID\n    issuer: https://oidc.eks.us-east-1.amazonaws.com/id/EXAMPLE\n    audience: compass-runner       # default compass-runner\n    namespace: compass-runner\n    serviceAccount: compass-runner\n    maxTokenLifetime: 600s         # default and minimum 600s; upper bound on exp - iat\n    jwksURI: \"\"                    # optional; overrides OIDC discovery\n    jwksFile: \"\"                   # optional static JWKS; no fetch\n    caFile: \"\"                     # optional PEM CA for a private issuer"
+      "value": "`3[yaml]\nclusters:\n  - name: prod-eks                 # [a-z0-9-]{1,40}; first segment of the Runner ID\n    issuer: https://oidc.eks.us-east-1.amazonaws.com/id/EXAMPLE\n    audience: krypton-runner       # default krypton-runner\n    namespace: krypton-runner\n    serviceAccount: krypton-runner\n    maxTokenLifetime: 600s         # default and minimum 600s; upper bound on exp - iat\n    jwksURI: \"\"                    # optional; overrides OIDC discovery\n    jwksFile: \"\"                   # optional static JWKS; no fetch\n    caFile: \"\"                     # optional PEM CA for a private issuer"
     },
     {
       "kind": "code-span",
@@ -413,7 +413,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass.runner.<runner_id>.cmd"
+      "value": "krypton.runner.<runner_id>.cmd"
     },
     {
       "kind": "code-span",
@@ -573,11 +573,11 @@
     },
     {
       "kind": "code-span",
-      "value": "$COMPASS_RUNNER_TOKEN_FILE"
+      "value": "$KRYPTON_RUNNER_TOKEN_FILE"
     },
     {
       "kind": "code-span",
-      "value": "$COMPASS_RUNNER_TOKEN"
+      "value": "$KRYPTON_RUNNER_TOKEN"
     },
     {
       "kind": "code-span",
@@ -617,7 +617,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-runner"
+      "value": "krypton-runner"
     },
     {
       "kind": "code-span",
@@ -629,7 +629,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[yaml]\nmetadata:\n  name: compass-runner                      # the policy's owner check names it\n  namespace: compass-runner\nspec:\n  updateStrategy:\n    type: RollingUpdate\n    rollingUpdate:\n      maxSurge: 0                           # the Runner ID is per node\n  template:\n    spec:\n      serviceAccountName: compass-runner\n      automountServiceAccountToken: false   # the Runner never calls the API server\n      containers:\n        - name: runner\n          env:\n            - name: COMPASS_RUNNER_TOKEN_FILE\n              value: /var/run/secrets/compass/runner/token\n          volumeMounts:\n            - name: compass-runner-token\n              mountPath: /var/run/secrets/compass/runner\n              readOnly: true\n      volumes:\n        - name: compass-runner-token\n          projected:\n            sources:\n              - serviceAccountToken:\n                  audience: compass-runner\n                  expirationSeconds: 600    # the Kubernetes minimum; ≤ maxTokenLifetime\n                  path: token"
+      "value": "`3[yaml]\nmetadata:\n  name: krypton-runner                      # the policy's owner check names it\n  namespace: krypton-runner\nspec:\n  updateStrategy:\n    type: RollingUpdate\n    rollingUpdate:\n      maxSurge: 0                           # the Runner ID is per node\n  template:\n    spec:\n      serviceAccountName: krypton-runner\n      automountServiceAccountToken: false   # the Runner never calls the API server\n      containers:\n        - name: runner\n          env:\n            - name: KRYPTON_RUNNER_TOKEN_FILE\n              value: /var/run/secrets/krypton/runner/token\n          volumeMounts:\n            - name: krypton-runner-token\n              mountPath: /var/run/secrets/krypton/runner\n              readOnly: true\n      volumes:\n        - name: krypton-runner-token\n          projected:\n            sources:\n              - serviceAccountToken:\n                  audience: krypton-runner\n                  expirationSeconds: 600    # the Kubernetes minimum; ≤ maxTokenLifetime\n                  path: token"
     },
     {
       "kind": "block-marker",
@@ -641,7 +641,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-runner"
+      "value": "krypton-runner"
     },
     {
       "kind": "code-span",
@@ -685,7 +685,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[yaml]\napiVersion: admissionregistration.k8s.io/v1\nkind: ValidatingAdmissionPolicy\nmetadata:\n  name: compass-runner-identity\nspec:\n  failurePolicy: Fail\n  matchConstraints:\n    namespaceSelector:\n      matchLabels: {kubernetes.io/metadata.name: compass-runner}\n    resourceRules:\n      - apiGroups: [\"\"]\n        apiVersions: [v1]\n        operations: [CREATE]\n        resources: [pods, serviceaccounts/token]\n      - apiGroups: [\"\"]\n        apiVersions: [v1]\n        operations: [CONNECT]                 # exec/attach are CONNECT requests\n        resources: [pods/exec, pods/attach]\n      - apiGroups: [\"\"]\n        apiVersions: [v1]\n        operations: [UPDATE]\n        resources: [pods/ephemeralcontainers]\n      - apiGroups: [\"\"]\n        apiVersions: [v1]\n        operations: [CREATE, UPDATE]\n        resources: [replicationcontrollers]\n      - apiGroups: [apps]\n        apiVersions: [v1]\n        operations: [CREATE, UPDATE]\n        resources: [daemonsets, deployments, replicasets, statefulsets]\n      - apiGroups: [batch]\n        apiVersions: [v1]\n        operations: [CREATE, UPDATE]\n        resources: [jobs, cronjobs]\n  variables:\n    - name: controllers                     # render parameter\n      expression: >-\n        ['system:serviceaccount:kube-system:daemon-set-controller',\n         'system:kube-controller-manager']\n    - name: deployers                       # render parameter\n      expression: \"['system:serviceaccount:flux-system:kustomize-controller']\"\n    - name: breakGlassGroups                # render parameter; admin exec access\n      expression: \"['system:masters']\"\n    - name: res\n      expression: request.resource.resource\n    - name: podSpec\n      expression: >-\n        request.subResource != '' ? null\n        : variables.res == 'pods' ? object.spec\n        : variables.res == 'cronjobs' ? object.spec.jobTemplate.spec.template.spec\n        : object.spec.template.spec\n    - name: usesRunnerSA\n      expression: >-\n        request.subResource != '' ? false\n        : has(variables.podSpec.serviceAccountName) &&\n          variables.podSpec.serviceAccountName == 'compass-runner'\n    - name: isRunnerDS\n      expression: variables.res == 'daemonsets' && object.metadata.name == 'compass-runner'\n  validations:\n    - expression: >-\n        !(request.subResource in ['exec', 'attach', 'ephemeralcontainers']) ||\n        !request.name.startsWith('compass-runner-') ||\n        request.userInfo.groups.exists(g, g in variables.breakGlassGroups)\n      message: only a break-glass group may exec into, attach to, or add ephemeral containers to the compass-runner pod\n    - expression: >-\n        variables.res != 'serviceaccounts' || request.name != 'compass-runner' ||\n        request.userInfo.username.startsWith('system:node:')\n      message: only kubelets may request a compass-runner token\n    - expression: >-\n        variables.res != 'pods' || !variables.usesRunnerSA ||\n        (request.userInfo.username in variables.controllers &&\n         has(object.metadata.ownerReferences) &&\n         object.metadata.ownerReferences.exists(r,\n           has(r.controller) && r.controller && r.apiVersion == 'apps/v1' &&\n           r.kind == 'DaemonSet' && r.name == 'compass-runner'))\n      message: compass-runner pods must come from the compass-runner DaemonSet\n    - expression: >-\n        variables.res in ['pods', 'serviceaccounts'] || variables.isRunnerDS ||\n        !variables.usesRunnerSA\n      message: only the compass-runner DaemonSet may use the compass-runner ServiceAccount\n    - expression: >-\n        !variables.isRunnerDS || request.userInfo.username in variables.deployers ||\n        (request.operation == 'UPDATE' && object.spec == oldObject.spec)\n      message: only a deployer may create or change the compass-runner DaemonSet\n---\napiVersion: admissionregistration.k8s.io/v1\nkind: ValidatingAdmissionPolicyBinding\nmetadata:\n  name: compass-runner-identity\nspec:\n  policyName: compass-runner-identity\n  validationActions: [Deny]"
+      "value": "`3[yaml]\napiVersion: admissionregistration.k8s.io/v1\nkind: ValidatingAdmissionPolicy\nmetadata:\n  name: krypton-runner-identity\nspec:\n  failurePolicy: Fail\n  matchConstraints:\n    namespaceSelector:\n      matchLabels: {kubernetes.io/metadata.name: krypton-runner}\n    resourceRules:\n      - apiGroups: [\"\"]\n        apiVersions: [v1]\n        operations: [CREATE]\n        resources: [pods, serviceaccounts/token]\n      - apiGroups: [\"\"]\n        apiVersions: [v1]\n        operations: [CONNECT]                 # exec/attach are CONNECT requests\n        resources: [pods/exec, pods/attach]\n      - apiGroups: [\"\"]\n        apiVersions: [v1]\n        operations: [UPDATE]\n        resources: [pods/ephemeralcontainers]\n      - apiGroups: [\"\"]\n        apiVersions: [v1]\n        operations: [CREATE, UPDATE]\n        resources: [replicationcontrollers]\n      - apiGroups: [apps]\n        apiVersions: [v1]\n        operations: [CREATE, UPDATE]\n        resources: [daemonsets, deployments, replicasets, statefulsets]\n      - apiGroups: [batch]\n        apiVersions: [v1]\n        operations: [CREATE, UPDATE]\n        resources: [jobs, cronjobs]\n  variables:\n    - name: controllers                     # render parameter\n      expression: >-\n        ['system:serviceaccount:kube-system:daemon-set-controller',\n         'system:kube-controller-manager']\n    - name: deployers                       # render parameter\n      expression: \"['system:serviceaccount:flux-system:kustomize-controller']\"\n    - name: breakGlassGroups                # render parameter; admin exec access\n      expression: \"['system:masters']\"\n    - name: res\n      expression: request.resource.resource\n    - name: podSpec\n      expression: >-\n        request.subResource != '' ? null\n        : variables.res == 'pods' ? object.spec\n        : variables.res == 'cronjobs' ? object.spec.jobTemplate.spec.template.spec\n        : object.spec.template.spec\n    - name: usesRunnerSA\n      expression: >-\n        request.subResource != '' ? false\n        : has(variables.podSpec.serviceAccountName) &&\n          variables.podSpec.serviceAccountName == 'krypton-runner'\n    - name: isRunnerDS\n      expression: variables.res == 'daemonsets' && object.metadata.name == 'krypton-runner'\n  validations:\n    - expression: >-\n        !(request.subResource in ['exec', 'attach', 'ephemeralcontainers']) ||\n        !request.name.startsWith('krypton-runner-') ||\n        request.userInfo.groups.exists(g, g in variables.breakGlassGroups)\n      message: only a break-glass group may exec into, attach to, or add ephemeral containers to the krypton-runner pod\n    - expression: >-\n        variables.res != 'serviceaccounts' || request.name != 'krypton-runner' ||\n        request.userInfo.username.startsWith('system:node:')\n      message: only kubelets may request a krypton-runner token\n    - expression: >-\n        variables.res != 'pods' || !variables.usesRunnerSA ||\n        (request.userInfo.username in variables.controllers &&\n         has(object.metadata.ownerReferences) &&\n         object.metadata.ownerReferences.exists(r,\n           has(r.controller) && r.controller && r.apiVersion == 'apps/v1' &&\n           r.kind == 'DaemonSet' && r.name == 'krypton-runner'))\n      message: krypton-runner pods must come from the krypton-runner DaemonSet\n    - expression: >-\n        variables.res in ['pods', 'serviceaccounts'] || variables.isRunnerDS ||\n        !variables.usesRunnerSA\n      message: only the krypton-runner DaemonSet may use the krypton-runner ServiceAccount\n    - expression: >-\n        !variables.isRunnerDS || request.userInfo.username in variables.deployers ||\n        (request.operation == 'UPDATE' && object.spec == oldObject.spec)\n      message: only a deployer may create or change the krypton-runner DaemonSet\n---\napiVersion: admissionregistration.k8s.io/v1\nkind: ValidatingAdmissionPolicyBinding\nmetadata:\n  name: krypton-runner-identity\nspec:\n  policyName: krypton-runner-identity\n  validationActions: [Deny]"
     },
     {
       "kind": "heading",
@@ -765,7 +765,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-runner"
+      "value": "krypton-runner"
     },
     {
       "kind": "code-span",
@@ -1029,11 +1029,11 @@
     },
     {
       "kind": "code-span",
-      "value": "$COMPASS_RUNNER_CLUSTERS"
+      "value": "$KRYPTON_RUNNER_CLUSTERS"
     },
     {
       "kind": "code-span",
-      "value": "go/cmd/compass-server/main.go"
+      "value": "go/cmd/krypton-server/main.go"
     },
     {
       "kind": "block-marker",
@@ -1169,7 +1169,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[go]\ntype TokenSource interface{ Token() (string, error) }\ntype StaticToken string // $COMPASS_RUNNER_TOKEN\ntype FileToken struct{ /* path, logger, clock; mutex-guarded last good token and its exp */ }\nfunc NewFileToken(path string, log *slog.Logger, now func() time.Time) *FileToken\nfunc (l *ServerLink) RunnerID() string // from EnrollResponse.runner_id"
+      "value": "`3[go]\ntype TokenSource interface{ Token() (string, error) }\ntype StaticToken string // $KRYPTON_RUNNER_TOKEN\ntype FileToken struct{ /* path, logger, clock; mutex-guarded last good token and its exp */ }\nfunc NewFileToken(path string, log *slog.Logger, now func() time.Time) *FileToken\nfunc (l *ServerLink) RunnerID() string // from EnrollResponse.runner_id"
     },
     {
       "kind": "block-marker",
@@ -1217,7 +1217,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-runner"
+      "value": "krypton-runner"
     },
     {
       "kind": "code-span",
@@ -1225,7 +1225,7 @@
     },
     {
       "kind": "code-span",
-      "value": "$COMPASS_RUNNER_TOKEN_FILE"
+      "value": "$KRYPTON_RUNNER_TOKEN_FILE"
     },
     {
       "kind": "code-span",
@@ -1605,7 +1605,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-runner"
+      "value": "krypton-runner"
     },
     {
       "kind": "code-span",
@@ -1613,7 +1613,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-runner"
+      "value": "krypton-runner"
     },
     {
       "kind": "block-marker",
@@ -1629,7 +1629,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-runner"
+      "value": "krypton-runner"
     },
     {
       "kind": "code-span",
