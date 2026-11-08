@@ -5,7 +5,7 @@
   "fingerprint": [
     {
       "kind": "heading",
-      "value": "H1 Compass design decisions"
+      "value": "H1 Krypton design decisions"
     },
     {
       "kind": "code-span",
@@ -33,11 +33,11 @@
     },
     {
       "kind": "link-target",
-      "value": "https://compass-eng-docs.pages.dev/designs/decisions/"
+      "value": "https://krypton-eng-docs.pages.dev/designs/decisions/"
     },
     {
       "kind": "link-target",
-      "value": "../meta/compass-design-ledger/design.md"
+      "value": "../meta/krypton-design-ledger/design.md"
     },
     {
       "kind": "link-target",

@@ -5,7 +5,7 @@
   "fingerprint": [
     {
       "kind": "front-matter",
-      "value": "id: DL-216\ndecision: \"The bundle build is a moon-registered project (`compass-app-bundle`) riding affected-detection per-PR and the unconditional main/nightly full sweep — the `compass-agent-image` heavy-build precedent — with a built-in completeness sanity gate (binaries present, uniform `--version` stamp, dist present); never a per-PR unconditional build, never a ci.yml-enumerated job\"\nstatus: \"Active (Matt, 2026-08-19)\"\nrecord: ../../ui/compass-native-packaging/design.md#a4--ci-cadence-affected-gated-per-pr-unconditional-on-main--nightly-fork-3-resolved"
+      "value": "id: DL-216\ndecision: \"The bundle build is a moon-registered project (`krypton-app-bundle`) riding affected-detection per-PR and the unconditional main/nightly full sweep — the `krypton-agent-image` heavy-build precedent — with a built-in completeness sanity gate (binaries present, uniform `--version` stamp, dist present); never a per-PR unconditional build, never a ci.yml-enumerated job\"\nstatus: \"Active (Matt, 2026-08-19)\"\nrecord: ../../ui/krypton-native-packaging/design.md#a4--ci-cadence-affected-gated-per-pr-unconditional-on-main--nightly-fork-3-resolved"
     }
   ],
   "comparison": {

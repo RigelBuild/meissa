@@ -81,7 +81,7 @@
     },
     {
       "kind": "code-span",
-      "value": "go/cmd/compass-stack/main.go:153"
+      "value": "go/cmd/krypton-stack/main.go:153"
     },
     {
       "kind": "code-span",
@@ -173,7 +173,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-postgres"
+      "value": "krypton-postgres"
     },
     {
       "kind": "code-span",
@@ -181,11 +181,11 @@
     },
     {
       "kind": "code-span",
-      "value": "go/cmd/compass-postgres/main.go:3-18"
+      "value": "go/cmd/krypton-postgres/main.go:3-18"
     },
     {
       "kind": "code-span",
-      "value": "COMPASS_TEST_DATABASE_DSN"
+      "value": "KRYPTON_TEST_DATABASE_DSN"
     },
     {
       "kind": "code-span",
@@ -257,7 +257,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-postgres"
+      "value": "krypton-postgres"
     },
     {
       "kind": "code-span",
@@ -553,7 +553,7 @@
     },
     {
       "kind": "code-span",
-      "value": "go/cmd/compass-stack/container_postgres_podman_test.go:51-55"
+      "value": "go/cmd/krypton-stack/container_postgres_podman_test.go:51-55"
     },
     {
       "kind": "heading",
@@ -725,11 +725,11 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-managed"
+      "value": "krypton-managed"
     },
     {
       "kind": "code-span",
-      "value": "docs/designs/infra/runtime/compass-managed-multitenancy/design.md"
+      "value": "docs/designs/infra/runtime/krypton-managed-multitenancy/design.md"
     },
     {
       "kind": "code-span",
@@ -1069,7 +1069,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-postgres"
+      "value": "krypton-postgres"
     },
     {
       "kind": "code-span",
@@ -1081,7 +1081,7 @@
     },
     {
       "kind": "code-span",
-      "value": "go/cmd/compass-postgres/main.go:7"
+      "value": "go/cmd/krypton-postgres/main.go:7"
     },
     {
       "kind": "code-span",
@@ -1105,11 +1105,11 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-postgres"
+      "value": "krypton-postgres"
     },
     {
       "kind": "code-span",
-      "value": "cmd/compass-postgres/main.go:7"
+      "value": "cmd/krypton-postgres/main.go:7"
     },
     {
       "kind": "code-span",

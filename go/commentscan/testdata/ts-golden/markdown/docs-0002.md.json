@@ -5,7 +5,7 @@
   "fingerprint": [
     {
       "kind": "heading",
-      "value": "H1 Compass agent status board"
+      "value": "H1 Krypton agent status board"
     },
     {
       "kind": "block-marker",
@@ -17,11 +17,11 @@
     },
     {
       "kind": "code-span",
-      "value": "compass_roster"
+      "value": "krypton_roster"
     },
     {
       "kind": "code-span",
-      "value": "compass_tree"
+      "value": "krypton_tree"
     },
     {
       "kind": "heading",
@@ -129,7 +129,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass_set_status"
+      "value": "krypton_set_status"
     },
     {
       "kind": "code-span",
@@ -389,7 +389,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass.v1.PullRequest"
+      "value": "krypton.v1.PullRequest"
     },
     {
       "kind": "block-marker",
@@ -581,7 +581,7 @@
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-agent"
+      "value": "packages/krypton-agent"
     },
     {
       "kind": "block-marker",
@@ -809,7 +809,7 @@
     },
     {
       "kind": "code-span",
-      "value": "CompassService"
+      "value": "KryptonService"
     },
     {
       "kind": "code-span",
@@ -949,7 +949,7 @@
     },
     {
       "kind": "code-span",
-      "value": "$COMPASS_PUBLIC_URL"
+      "value": "$KRYPTON_PUBLIC_URL"
     },
     {
       "kind": "code-span",
@@ -977,7 +977,7 @@
     },
     {
       "kind": "code-span",
-      "value": "VITE_COMPASS_BASE_URL"
+      "value": "VITE_KRYPTON_BASE_URL"
     },
     {
       "kind": "heading",
@@ -1025,11 +1025,11 @@
     },
     {
       "kind": "code-span",
-      "value": "compass_roster"
+      "value": "krypton_roster"
     },
     {
       "kind": "code-span",
-      "value": "compass_tree"
+      "value": "krypton_tree"
     },
     {
       "kind": "code-span",
@@ -1109,7 +1109,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass_boards"
+      "value": "krypton_boards"
     },
     {
       "kind": "code-span",
@@ -1117,7 +1117,7 @@
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-agent/src/comms.ts"
+      "value": "packages/krypton-agent/src/comms.ts"
     },
     {
       "kind": "code-span",
@@ -1185,7 +1185,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass_boards"
+      "value": "krypton_boards"
     },
     {
       "kind": "code-span",
@@ -1261,7 +1261,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass_boards"
+      "value": "krypton_boards"
     },
     {
       "kind": "code-span",
@@ -1373,7 +1373,7 @@
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-agent/src/forge.ts"
+      "value": "packages/krypton-agent/src/forge.ts"
     },
     {
       "kind": "code-span",
@@ -1429,7 +1429,7 @@
     },
     {
       "kind": "code-span",
-      "value": "CompassService.GetRefLinkRules"
+      "value": "KryptonService.GetRefLinkRules"
     },
     {
       "kind": "code-span",
@@ -1493,7 +1493,7 @@
     },
     {
       "kind": "code-span",
-      "value": "docs/designs/server/compass-tracker-config/design.md"
+      "value": "docs/designs/server/krypton-tracker-config/design.md"
     },
     {
       "kind": "code-span",
@@ -1541,7 +1541,7 @@
     },
     {
       "kind": "code-span",
-      "value": "CompassIssueFields"
+      "value": "KryptonIssueFields"
     },
     {
       "kind": "code-span",
@@ -1977,7 +1977,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass_boards"
+      "value": "krypton_boards"
     },
     {
       "kind": "block-marker",
@@ -2077,7 +2077,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[proto]\n// comms.proto\nenum BoardTaskState { BOARD_TASK_STATE_UNSPECIFIED = 0; BOARD_TASK_STATE_ACTIVE = 1;\n  BOARD_TASK_STATE_BLOCKED = 2; BOARD_TASK_STATE_WAITING = 3;\n  BOARD_TASK_STATE_PARKED = 4; BOARD_TASK_STATE_DONE = 5; }\nenum BoardHaltKind { BOARD_HALT_KIND_UNSPECIFIED = 0; BOARD_HALT_KIND_DONE = 1;\n  BOARD_HALT_KIND_BLOCKED = 2; BOARD_HALT_KIND_AWAITING_USER = 3; }\nenum BoardWaitingOn { BOARD_WAITING_ON_UNSPECIFIED = 0; BOARD_WAITING_ON_OPERATOR = 1;\n  BOARD_WAITING_ON_AGENT = 2; BOARD_WAITING_ON_EXTERNAL = 3; }\nenum BoardRefKind { BOARD_REF_KIND_UNSPECIFIED = 0; BOARD_REF_KIND_ISSUE = 1;\n  BOARD_REF_KIND_PULL_REQUEST = 2; }\nenum BoardPrGate { BOARD_PR_GATE_UNSPECIFIED = 0; BOARD_PR_GATE_DRAFT = 1;\n  BOARD_PR_GATE_CHECKS_PENDING = 2; BOARD_PR_GATE_CHECKS_FAILED = 3;\n  BOARD_PR_GATE_CHANGES_REQUESTED = 4; BOARD_PR_GATE_AWAITING_REVIEW = 5;\n  BOARD_PR_GATE_AWAITING_ENQUEUE = 6; BOARD_PR_GATE_MERGED = 7; BOARD_PR_GATE_CLOSED = 8;\n  BOARD_PR_GATE_QUEUED = 9; BOARD_PR_GATE_QUEUE_FAILED = 10;\n  BOARD_PR_GATE_QUEUE_REMOVED = 11; BOARD_PR_GATE_CONFLICTS = 12; }\n\nmessage BoardWaiting { BoardWaitingOn on = 1; string agent_handle = 2; string what = 3;\n  string ref = 4; repeated string blocks = 5; }\nmessage BoardSubagent { string id = 1; string agent = 2; string description = 3;\n  string status = 4; int64 started_at_unix_ms = 5; int64 ended_at_unix_ms = 6; }\nmessage BoardTask { string key = 1; string title = 2; string primary_ref = 3;\n  repeated string refs = 4; BoardTaskState state = 5; string note = 6;\n  repeated BoardWaiting waiting = 7; repeated BoardSubagent subagents = 8;\n  int64 written_at_unix_ms = 9; }\n// Write shape: presence-aware. Unset keeps; set replaces; a present list op with\n// no values clears.\nmessage BoardRefsOp { repeated string values = 1; }\nmessage BoardWaitingOp { repeated BoardWaiting values = 1; }\nmessage BoardTaskPatch { string key = 1; optional string title = 2;\n  optional string primary_ref = 3; optional BoardTaskState state = 4;\n  optional string note = 5; BoardRefsOp refs = 6; BoardWaitingOp waiting = 7;\n  repeated BoardSubagent upsert_subagents = 8; }\nmessage BoardHalt { BoardHaltKind kind = 1; string ref = 2; string reason = 3; }\nmessage BoardRef { string ref = 1; BoardRefKind kind = 2; string title = 3; string url = 4;\n  string forge_state = 5; IssueState issue_state = 6; bool draft = 7;\n  string checks_state = 8; BoardPrGate gate = 9; string stack_tip_ref = 10;\n  uint32 stack_position = 11; bool owned = 12; int64 observed_at_unix_ms = 13;\n  string merge_queue_state = 14; bool stale_approval = 15; string tracker_status = 16; }\nmessage BoardAsk { string ask_id = 1; string message_id = 2; string channel_id = 3;\n  string ref = 4; string header = 5; bool answered = 6; int64 posted_at_unix_ms = 7; }\n  // T13 adds mirror_state = 8, mirror_url = 9\nmessage AgentBoard { string agent_account_id = 1; string handle = 2;\n  string focus_task_key = 3; BoardHalt halt = 4; repeated BoardTask tasks = 5;\n  repeated BoardRef refs = 6; repeated string untracked_refs = 7;\n  repeated BoardAsk asks = 8; uint64 written_turn = 9; int64 written_at_unix_ms = 10;\n  bool stale = 11; repeated string matched_task_keys = 12; }\nmessage AgentBoardSummary { string focus = 1; uint32 task_count = 2;\n  uint32 waiting_on_operator = 3; BoardHalt halt = 4; int64 written_at_unix_ms = 5;\n  bool stale = 6; }\nmessage UpdateAgentBoardRequest { repeated BoardTaskPatch upsert_tasks = 1;\n  repeated string remove_task_keys = 2; optional string focus_task_key = 3;\n  BoardHalt halt = 4; bool clear_halt = 5; uint64 turn_sequence = 6; bool automatic = 7; }\nmessage UpdateAgentBoardResponse { AgentBoard board = 1; }\nmessage ListAgentBoardsRequest { repeated string agent_handles = 1; string query = 2;\n  string ref = 3; BoardWaitingOn waiting_on = 4; BoardTaskState state = 5;\n  BoardHaltKind halt = 6; uint32 limit = 7; }\nmessage ListAgentBoardsResponse { repeated AgentBoard boards = 1; }\nmessage AgentBoardChanged { string agent_account_id = 1; AgentBoard board = 2; } // board.asks empty\n\n// RosterEntry: AgentBoardSummary board = 8;\n// Ask: string ref = 4;\n// SubscribeCommsResponse.payload: AgentBoardChanged agent_board_changed = 19;\n// CommsService: rpc ListAgentBoards(ListAgentBoardsRequest) returns (ListAgentBoardsResponse);\n\n// compass.proto\n// PullRequest: string head_sha = 16; string mergeable_state = 17; MergeQueueEntry merge_queue = 18;\n// Review: string commit_id = 5;\n// TrackerRef: string state_id = 5; string state_type = 6;\nmessage MergeQueueEntry { string provider = 1;\n  string state = 2; // \"queued\" | \"testing\" | \"failed\" | \"removed\" | \"merged\"\n  google.protobuf.Timestamp changed_at = 3; }\n\n// agent_gateway.proto\n// CommsCallRequest.call: UpdateAgentBoardRequest update_board = 13; ListAgentBoardsRequest boards = 14;\n// CommsCallResult.result: UpdateAgentBoardResponse update_board = 13; ListAgentBoardsResponse boards = 14;"
+      "value": "`3[proto]\n// comms.proto\nenum BoardTaskState { BOARD_TASK_STATE_UNSPECIFIED = 0; BOARD_TASK_STATE_ACTIVE = 1;\n  BOARD_TASK_STATE_BLOCKED = 2; BOARD_TASK_STATE_WAITING = 3;\n  BOARD_TASK_STATE_PARKED = 4; BOARD_TASK_STATE_DONE = 5; }\nenum BoardHaltKind { BOARD_HALT_KIND_UNSPECIFIED = 0; BOARD_HALT_KIND_DONE = 1;\n  BOARD_HALT_KIND_BLOCKED = 2; BOARD_HALT_KIND_AWAITING_USER = 3; }\nenum BoardWaitingOn { BOARD_WAITING_ON_UNSPECIFIED = 0; BOARD_WAITING_ON_OPERATOR = 1;\n  BOARD_WAITING_ON_AGENT = 2; BOARD_WAITING_ON_EXTERNAL = 3; }\nenum BoardRefKind { BOARD_REF_KIND_UNSPECIFIED = 0; BOARD_REF_KIND_ISSUE = 1;\n  BOARD_REF_KIND_PULL_REQUEST = 2; }\nenum BoardPrGate { BOARD_PR_GATE_UNSPECIFIED = 0; BOARD_PR_GATE_DRAFT = 1;\n  BOARD_PR_GATE_CHECKS_PENDING = 2; BOARD_PR_GATE_CHECKS_FAILED = 3;\n  BOARD_PR_GATE_CHANGES_REQUESTED = 4; BOARD_PR_GATE_AWAITING_REVIEW = 5;\n  BOARD_PR_GATE_AWAITING_ENQUEUE = 6; BOARD_PR_GATE_MERGED = 7; BOARD_PR_GATE_CLOSED = 8;\n  BOARD_PR_GATE_QUEUED = 9; BOARD_PR_GATE_QUEUE_FAILED = 10;\n  BOARD_PR_GATE_QUEUE_REMOVED = 11; BOARD_PR_GATE_CONFLICTS = 12; }\n\nmessage BoardWaiting { BoardWaitingOn on = 1; string agent_handle = 2; string what = 3;\n  string ref = 4; repeated string blocks = 5; }\nmessage BoardSubagent { string id = 1; string agent = 2; string description = 3;\n  string status = 4; int64 started_at_unix_ms = 5; int64 ended_at_unix_ms = 6; }\nmessage BoardTask { string key = 1; string title = 2; string primary_ref = 3;\n  repeated string refs = 4; BoardTaskState state = 5; string note = 6;\n  repeated BoardWaiting waiting = 7; repeated BoardSubagent subagents = 8;\n  int64 written_at_unix_ms = 9; }\n// Write shape: presence-aware. Unset keeps; set replaces; a present list op with\n// no values clears.\nmessage BoardRefsOp { repeated string values = 1; }\nmessage BoardWaitingOp { repeated BoardWaiting values = 1; }\nmessage BoardTaskPatch { string key = 1; optional string title = 2;\n  optional string primary_ref = 3; optional BoardTaskState state = 4;\n  optional string note = 5; BoardRefsOp refs = 6; BoardWaitingOp waiting = 7;\n  repeated BoardSubagent upsert_subagents = 8; }\nmessage BoardHalt { BoardHaltKind kind = 1; string ref = 2; string reason = 3; }\nmessage BoardRef { string ref = 1; BoardRefKind kind = 2; string title = 3; string url = 4;\n  string forge_state = 5; IssueState issue_state = 6; bool draft = 7;\n  string checks_state = 8; BoardPrGate gate = 9; string stack_tip_ref = 10;\n  uint32 stack_position = 11; bool owned = 12; int64 observed_at_unix_ms = 13;\n  string merge_queue_state = 14; bool stale_approval = 15; string tracker_status = 16; }\nmessage BoardAsk { string ask_id = 1; string message_id = 2; string channel_id = 3;\n  string ref = 4; string header = 5; bool answered = 6; int64 posted_at_unix_ms = 7; }\n  // T13 adds mirror_state = 8, mirror_url = 9\nmessage AgentBoard { string agent_account_id = 1; string handle = 2;\n  string focus_task_key = 3; BoardHalt halt = 4; repeated BoardTask tasks = 5;\n  repeated BoardRef refs = 6; repeated string untracked_refs = 7;\n  repeated BoardAsk asks = 8; uint64 written_turn = 9; int64 written_at_unix_ms = 10;\n  bool stale = 11; repeated string matched_task_keys = 12; }\nmessage AgentBoardSummary { string focus = 1; uint32 task_count = 2;\n  uint32 waiting_on_operator = 3; BoardHalt halt = 4; int64 written_at_unix_ms = 5;\n  bool stale = 6; }\nmessage UpdateAgentBoardRequest { repeated BoardTaskPatch upsert_tasks = 1;\n  repeated string remove_task_keys = 2; optional string focus_task_key = 3;\n  BoardHalt halt = 4; bool clear_halt = 5; uint64 turn_sequence = 6; bool automatic = 7; }\nmessage UpdateAgentBoardResponse { AgentBoard board = 1; }\nmessage ListAgentBoardsRequest { repeated string agent_handles = 1; string query = 2;\n  string ref = 3; BoardWaitingOn waiting_on = 4; BoardTaskState state = 5;\n  BoardHaltKind halt = 6; uint32 limit = 7; }\nmessage ListAgentBoardsResponse { repeated AgentBoard boards = 1; }\nmessage AgentBoardChanged { string agent_account_id = 1; AgentBoard board = 2; } // board.asks empty\n\n// RosterEntry: AgentBoardSummary board = 8;\n// Ask: string ref = 4;\n// SubscribeCommsResponse.payload: AgentBoardChanged agent_board_changed = 19;\n// CommsService: rpc ListAgentBoards(ListAgentBoardsRequest) returns (ListAgentBoardsResponse);\n\n// krypton.proto\n// PullRequest: string head_sha = 16; string mergeable_state = 17; MergeQueueEntry merge_queue = 18;\n// Review: string commit_id = 5;\n// TrackerRef: string state_id = 5; string state_type = 6;\nmessage MergeQueueEntry { string provider = 1;\n  string state = 2; // \"queued\" | \"testing\" | \"failed\" | \"removed\" | \"merged\"\n  google.protobuf.Timestamp changed_at = 3; }\n\n// agent_gateway.proto\n// CommsCallRequest.call: UpdateAgentBoardRequest update_board = 13; ListAgentBoardsRequest boards = 14;\n// CommsCallResult.result: UpdateAgentBoardResponse update_board = 13; ListAgentBoardsResponse boards = 14;"
     },
     {
       "kind": "code-span",
@@ -2089,7 +2089,7 @@
     },
     {
       "kind": "code-span",
-      "value": "moon run compass-proto:gen"
+      "value": "moon run krypton-proto:gen"
     },
     {
       "kind": "block-marker",
@@ -2097,15 +2097,15 @@
     },
     {
       "kind": "code-span",
-      "value": "moon run compass-proto:ci"
+      "value": "moon run krypton-proto:ci"
     },
     {
       "kind": "heading",
-      "value": "H3 T2 store: tables, queries, methods (lane compass-server, RIG-5059)"
+      "value": "H3 T2 store: tables, queries, methods (lane krypton-server, RIG-5059)"
     },
     {
       "kind": "fenced-code",
-      "value": "`3[sql]\nCREATE TABLE agent_boards (\n    agent_account_id   TEXT PRIMARY KEY REFERENCES agent_accounts (account_id) ON DELETE RESTRICT,\n    focus_task_key     TEXT     NOT NULL DEFAULT '',\n    halt_kind          SMALLINT NOT NULL DEFAULT 0 CHECK (halt_kind BETWEEN 0 AND 3),\n    halt_ref           TEXT     NOT NULL DEFAULT '',\n    halt_reason        TEXT     NOT NULL DEFAULT '',\n    written_turn       BIGINT   NOT NULL DEFAULT 0,\n    written_at_unix_ms BIGINT   NOT NULL,\n    created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),\n    updated_at         TIMESTAMPTZ NOT NULL DEFAULT now(),\n    tenant_id          TEXT     NOT NULL DEFAULT current_setting('compass.tenant_id', TRUE)\n);\n\nCREATE TABLE agent_board_tasks (\n    agent_account_id   TEXT     NOT NULL REFERENCES agent_boards (agent_account_id) ON DELETE CASCADE,\n    task_key           TEXT     NOT NULL CHECK (task_key <> ''),\n    title              TEXT     NOT NULL,\n    primary_ref        TEXT     NOT NULL DEFAULT '',\n    refs               TEXT[]   NOT NULL DEFAULT '{}',\n    state              SMALLINT NOT NULL DEFAULT 1 CHECK (state BETWEEN 1 AND 5),  -- 1 = ACTIVE\n    note               TEXT     NOT NULL DEFAULT '',\n    waiting            JSONB    NOT NULL DEFAULT '[]',\n    subagents          JSONB    NOT NULL DEFAULT '[]',\n    position           INT      NOT NULL,\n    written_at_unix_ms BIGINT   NOT NULL,\n    created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),\n    updated_at         TIMESTAMPTZ NOT NULL DEFAULT now(),\n    tenant_id          TEXT     NOT NULL DEFAULT current_setting('compass.tenant_id', TRUE),\n    PRIMARY KEY (agent_account_id, task_key)\n);"
+      "value": "`3[sql]\nCREATE TABLE agent_boards (\n    agent_account_id   TEXT PRIMARY KEY REFERENCES agent_accounts (account_id) ON DELETE RESTRICT,\n    focus_task_key     TEXT     NOT NULL DEFAULT '',\n    halt_kind          SMALLINT NOT NULL DEFAULT 0 CHECK (halt_kind BETWEEN 0 AND 3),\n    halt_ref           TEXT     NOT NULL DEFAULT '',\n    halt_reason        TEXT     NOT NULL DEFAULT '',\n    written_turn       BIGINT   NOT NULL DEFAULT 0,\n    written_at_unix_ms BIGINT   NOT NULL,\n    created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),\n    updated_at         TIMESTAMPTZ NOT NULL DEFAULT now(),\n    tenant_id          TEXT     NOT NULL DEFAULT current_setting('krypton.tenant_id', TRUE)\n);\n\nCREATE TABLE agent_board_tasks (\n    agent_account_id   TEXT     NOT NULL REFERENCES agent_boards (agent_account_id) ON DELETE CASCADE,\n    task_key           TEXT     NOT NULL CHECK (task_key <> ''),\n    title              TEXT     NOT NULL,\n    primary_ref        TEXT     NOT NULL DEFAULT '',\n    refs               TEXT[]   NOT NULL DEFAULT '{}',\n    state              SMALLINT NOT NULL DEFAULT 1 CHECK (state BETWEEN 1 AND 5),  -- 1 = ACTIVE\n    note               TEXT     NOT NULL DEFAULT '',\n    waiting            JSONB    NOT NULL DEFAULT '[]',\n    subagents          JSONB    NOT NULL DEFAULT '[]',\n    position           INT      NOT NULL,\n    written_at_unix_ms BIGINT   NOT NULL,\n    created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),\n    updated_at         TIMESTAMPTZ NOT NULL DEFAULT now(),\n    tenant_id          TEXT     NOT NULL DEFAULT current_setting('krypton.tenant_id', TRUE),\n    PRIMARY KEY (agent_account_id, task_key)\n);"
     },
     {
       "kind": "code-span",
@@ -2245,7 +2245,7 @@
     },
     {
       "kind": "heading",
-      "value": "H3 T3 refs and derivation (lane compass-server, RIG-5059)"
+      "value": "H3 T3 refs and derivation (lane krypton-server, RIG-5059)"
     },
     {
       "kind": "code-span",
@@ -2257,7 +2257,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[go]\n// go/internal/refs\ntype Kind int // KindTracker, KindForge\ntype Ref struct { Kind Kind; Key string; Owner, Repo string; Number uint64 }\nfunc Parse(s string) (Ref, error) // canonical: forge owner/repo lowercased\nfunc (r Ref) String() string\nfunc Scan(text string) []Span\ntype Span struct { Start, End int; Ref Ref }\n\n// go/internal/board\ntype RefResolver interface {\n    PullRequestsByCoords(ctx context.Context, coords []store.ForgeCoord) ([]store.PullRequestRow, error)\n    IssuesByCoords(ctx context.Context, coords []store.ForgeCoord) ([]store.Issue, error)\n    OpenAuthoredRefs(ctx context.Context, agent store.AccountID) ([]store.AuthoredRef, error)\n}\ntype Forges struct { GitHubHost string; LinearHost string; LinearTeams map[string]bool }\nfunc DeriveRefs(ctx context.Context, r RefResolver, f Forges, agent store.AccountID, refs []string) (derived []*compassv1.BoardRef, untracked []string, err error)\nfunc PrGate(pr *compassv1.PullRequest) compassv1.BoardPrGate\nfunc StackOf(open []*compassv1.PullRequest) map[string]Stack // key \"owner/repo#N\"\ntype Stack struct { Position uint32; Tip string }"
+      "value": "`3[go]\n// go/internal/refs\ntype Kind int // KindTracker, KindForge\ntype Ref struct { Kind Kind; Key string; Owner, Repo string; Number uint64 }\nfunc Parse(s string) (Ref, error) // canonical: forge owner/repo lowercased\nfunc (r Ref) String() string\nfunc Scan(text string) []Span\ntype Span struct { Start, End int; Ref Ref }\n\n// go/internal/board\ntype RefResolver interface {\n    PullRequestsByCoords(ctx context.Context, coords []store.ForgeCoord) ([]store.PullRequestRow, error)\n    IssuesByCoords(ctx context.Context, coords []store.ForgeCoord) ([]store.Issue, error)\n    OpenAuthoredRefs(ctx context.Context, agent store.AccountID) ([]store.AuthoredRef, error)\n}\ntype Forges struct { GitHubHost string; LinearHost string; LinearTeams map[string]bool }\nfunc DeriveRefs(ctx context.Context, r RefResolver, f Forges, agent store.AccountID, refs []string) (derived []*kryptonv1.BoardRef, untracked []string, err error)\nfunc PrGate(pr *kryptonv1.PullRequest) kryptonv1.BoardPrGate\nfunc StackOf(open []*kryptonv1.PullRequest) map[string]Stack // key \"owner/repo#N\"\ntype Stack struct { Position uint32; Tip string }"
     },
     {
       "kind": "block-marker",
@@ -2321,11 +2321,11 @@
     },
     {
       "kind": "heading",
-      "value": "H3 T4 board write and read paths (lane compass-server, RIG-5059)"
+      "value": "H3 T4 board write and read paths (lane krypton-server, RIG-5059)"
     },
     {
       "kind": "fenced-code",
-      "value": "`3[go]\n// go/internal/comms\nfunc (c *Comms) UpdateBoardAsAccount(ctx context.Context, caller store.AccountID, req *compassv1.UpdateAgentBoardRequest) (*compassv1.UpdateAgentBoardResponse, error)\nfunc (c *Comms) ListBoardsAsAccount(ctx context.Context, caller store.AccountID, req *compassv1.ListAgentBoardsRequest) (*compassv1.ListAgentBoardsResponse, error)\nfunc (c *Comms) ListAgentBoards(ctx context.Context, req *connect.Request[compassv1.ListAgentBoardsRequest]) (*connect.Response[compassv1.ListAgentBoardsResponse], error)\nfunc (c *Comms) boardVisible(ctx context.Context, viewer, agent store.AccountID) (bool, error)\n\n// go/internal/runnerhub\nfunc (h *Hub) PublishBoard(ctx context.Context, agent store.AccountID, board *compassv1.AgentBoard)"
+      "value": "`3[go]\n// go/internal/comms\nfunc (c *Comms) UpdateBoardAsAccount(ctx context.Context, caller store.AccountID, req *kryptonv1.UpdateAgentBoardRequest) (*kryptonv1.UpdateAgentBoardResponse, error)\nfunc (c *Comms) ListBoardsAsAccount(ctx context.Context, caller store.AccountID, req *kryptonv1.ListAgentBoardsRequest) (*kryptonv1.ListAgentBoardsResponse, error)\nfunc (c *Comms) ListAgentBoards(ctx context.Context, req *connect.Request[kryptonv1.ListAgentBoardsRequest]) (*connect.Response[kryptonv1.ListAgentBoardsResponse], error)\nfunc (c *Comms) boardVisible(ctx context.Context, viewer, agent store.AccountID) (bool, error)\n\n// go/internal/runnerhub\nfunc (h *Hub) PublishBoard(ctx context.Context, agent store.AccountID, board *kryptonv1.AgentBoard)"
     },
     {
       "kind": "block-marker",
@@ -2489,7 +2489,7 @@
     },
     {
       "kind": "heading",
-      "value": "H3 T5 asks on the board (lane compass-server, RIG-5059)"
+      "value": "H3 T5 asks on the board (lane krypton-server, RIG-5059)"
     },
     {
       "kind": "fenced-code",
@@ -2569,7 +2569,7 @@
     },
     {
       "kind": "heading",
-      "value": "H3 T6 mirror tool: arm and agent tool (lane compass-comms, RIG-5061)"
+      "value": "H3 T6 mirror tool: arm and agent tool (lane krypton-comms, RIG-5061)"
     },
     {
       "kind": "code-span",
@@ -2589,11 +2589,11 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[go]\n// go/server\nfunc (s *forgeService) mirrorMessages(ctx context.Context, caller store.AccountID, sessionID string, call *compassv1internal.ForgeCallRequest, req *compassv1internal.MirrorMessagesRequest) *compassv1internal.ForgeCallResult"
+      "value": "`3[go]\n// go/server\nfunc (s *forgeService) mirrorMessages(ctx context.Context, caller store.AccountID, sessionID string, call *kryptonv1internal.ForgeCallRequest, req *kryptonv1internal.MirrorMessagesRequest) *kryptonv1internal.ForgeCallResult"
     },
     {
       "kind": "fenced-code",
-      "value": "`3[ts]\n// packages/compass-agent/src/forge.ts, tool forge_mirror_messages\n{ ref: string; message_ids?: string[]; topic_id?: string; channel?: string; note?: string }\n// sends clientRequestId: broker.idempotencyKey(toolCallId), as the create arms do"
+      "value": "`3[ts]\n// packages/krypton-agent/src/forge.ts, tool forge_mirror_messages\n{ ref: string; message_ids?: string[]; topic_id?: string; channel?: string; note?: string }\n// sends clientRequestId: broker.idempotencyKey(toolCallId), as the create arms do"
     },
     {
       "kind": "code-span",
@@ -2637,7 +2637,7 @@
     },
     {
       "kind": "code-span",
-      "value": "moon run compass-proto:gen"
+      "value": "moon run krypton-proto:gen"
     },
     {
       "kind": "block-marker",
@@ -2681,11 +2681,11 @@
     },
     {
       "kind": "heading",
-      "value": "H3 T7 agent: board tools, freshness, subagent sync (lane compass-agent, RIG-5059)"
+      "value": "H3 T7 agent: board tools, freshness, subagent sync (lane krypton-agent, RIG-5059)"
     },
     {
       "kind": "fenced-code",
-      "value": "`3[ts]\n// packages/compass-agent/src/board.ts\nexport class BoardFreshness {\n\tseed(writtenTurn: bigint, writtenAtMs: number): void;\n\tnoteWrite(turn: bigint, atMs: number): void;\n\twroteThisTurn(turn: bigint): boolean;\n\tageMs(nowMs: number): number | undefined;\n}\nexport function createBoardTools(\n\tbroker: CommsBroker,\n\tturnSequence: TurnSequence,\n\tfreshness: BoardFreshness,\n): AgentTool[]; // compass_update_board, compass_boards\nexport function attachSubagentBoardSync(\n\tsubagentBus: EventBus,\n\tbroker: CommsBroker,\n\tturnSequence: TurnSequence,\n): () => void; // \"task:subagent:lifecycle\", 5 s coalescing\n\n// compass_update_board parameters. An omitted field is left unchanged;\n// a given value replaces; [] clears a list; \"\" clears a string.\n// state is optional; a new task without one is \"active\".\n{ tasks?: Array<{ key: string; title?: string; primary_ref?: string; refs?: string[];\n    state?: \"active\" | \"blocked\" | \"waiting\" | \"parked\" | \"done\"; note?: string;\n    waiting?: Array<{ on: \"operator\" | \"agent\" | \"external\"; agent?: string;\n      what: string; ref?: string; blocks?: string[] }> }>;\n  remove?: string[]; focus?: string;\n  halt?: { kind: \"done\" | \"blocked\" | \"awaiting-user\"; ref?: string; reason: string } | null }\n\n// compass_boards parameters\n{ agents?: string[]; query?: string; ref?: string;\n  waiting_on?: \"operator\" | \"agent\" | \"external\";\n  state?: \"active\" | \"blocked\" | \"waiting\" | \"parked\" | \"done\";\n  halt?: \"done\" | \"blocked\" | \"awaiting-user\"; limit?: number }"
+      "value": "`3[ts]\n// packages/krypton-agent/src/board.ts\nexport class BoardFreshness {\n\tseed(writtenTurn: bigint, writtenAtMs: number): void;\n\tnoteWrite(turn: bigint, atMs: number): void;\n\twroteThisTurn(turn: bigint): boolean;\n\tageMs(nowMs: number): number | undefined;\n}\nexport function createBoardTools(\n\tbroker: CommsBroker,\n\tturnSequence: TurnSequence,\n\tfreshness: BoardFreshness,\n): AgentTool[]; // krypton_update_board, krypton_boards\nexport function attachSubagentBoardSync(\n\tsubagentBus: EventBus,\n\tbroker: CommsBroker,\n\tturnSequence: TurnSequence,\n): () => void; // \"task:subagent:lifecycle\", 5 s coalescing\n\n// krypton_update_board parameters. An omitted field is left unchanged;\n// a given value replaces; [] clears a list; \"\" clears a string.\n// state is optional; a new task without one is \"active\".\n{ tasks?: Array<{ key: string; title?: string; primary_ref?: string; refs?: string[];\n    state?: \"active\" | \"blocked\" | \"waiting\" | \"parked\" | \"done\"; note?: string;\n    waiting?: Array<{ on: \"operator\" | \"agent\" | \"external\"; agent?: string;\n      what: string; ref?: string; blocks?: string[] }> }>;\n  remove?: string[]; focus?: string;\n  halt?: { kind: \"done\" | \"blocked\" | \"awaiting-user\"; ref?: string; reason: string } | null }\n\n// krypton_boards parameters\n{ agents?: string[]; query?: string; ref?: string;\n  waiting_on?: \"operator\" | \"agent\" | \"external\";\n  state?: \"active\" | \"blocked\" | \"waiting\" | \"parked\" | \"done\";\n  halt?: \"done\" | \"blocked\" | \"awaiting-user\"; limit?: number }"
     },
     {
       "kind": "block-marker",
@@ -2761,7 +2761,7 @@
     },
     {
       "kind": "code-span",
-      "value": "CompassAgent"
+      "value": "KryptonAgent"
     },
     {
       "kind": "code-span",
@@ -2857,11 +2857,11 @@
     },
     {
       "kind": "heading",
-      "value": "H3 T8 agent: roster render, board render, ask ref (lane compass-agent, RIG-5059)"
+      "value": "H3 T8 agent: roster render, board render, ask ref (lane krypton-agent, RIG-5059)"
     },
     {
       "kind": "fenced-code",
-      "value": "`3[ts]\n// comms.ts\nfunction boardSummary(entry: RosterEntry): string; // appended by rosterRow\nfunction renderBoards(boards: AgentBoard[]): string; // used by compass_boards\n// comms_post_ask: new optional parameter ref?: string"
+      "value": "`3[ts]\n// comms.ts\nfunction boardSummary(entry: RosterEntry): string; // appended by rosterRow\nfunction renderBoards(boards: AgentBoard[]): string; // used by krypton_boards\n// comms_post_ask: new optional parameter ref?: string"
     },
     {
       "kind": "block-marker",
@@ -3021,7 +3021,7 @@
     },
     {
       "kind": "heading",
-      "value": "H3 T10 auto-linking: link rules and UI (lane compass-frontend, RIG-5060)"
+      "value": "H3 T10 auto-linking: link rules and UI (lane krypton-frontend, RIG-5060)"
     },
     {
       "kind": "code-span",
@@ -3033,7 +3033,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[proto]\n// compass.proto, CompassService\nrpc GetRefLinkRules(GetRefLinkRulesRequest) returns (GetRefLinkRulesResponse);\nmessage GetRefLinkRulesRequest {}\nmessage RefLinkRule { string kind = 1; string prefix = 2; string url_template = 3; }\nmessage GetRefLinkRulesResponse { repeated RefLinkRule rules = 1; }"
+      "value": "`3[proto]\n// krypton.proto, KryptonService\nrpc GetRefLinkRules(GetRefLinkRulesRequest) returns (GetRefLinkRulesResponse);\nmessage GetRefLinkRulesRequest {}\nmessage RefLinkRule { string kind = 1; string prefix = 2; string url_template = 3; }\nmessage GetRefLinkRulesResponse { repeated RefLinkRule rules = 1; }"
     },
     {
       "kind": "code-span",
@@ -3073,7 +3073,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[go]\n// go/server/service.go\nfunc (s *service) GetRefLinkRules(ctx context.Context, req *connect.Request[compassv1.GetRefLinkRulesRequest]) (*connect.Response[compassv1.GetRefLinkRulesResponse], error)\n// go/internal/forge\nfunc (l *Linear) OrganizationURLKey(ctx context.Context) (string, error) // cached after the first success"
+      "value": "`3[go]\n// go/server/service.go\nfunc (s *service) GetRefLinkRules(ctx context.Context, req *connect.Request[kryptonv1.GetRefLinkRulesRequest]) (*connect.Response[kryptonv1.GetRefLinkRulesResponse], error)\n// go/internal/forge\nfunc (l *Linear) OrganizationURLKey(ctx context.Context) (string, error) // cached after the first success"
     },
     {
       "kind": "fenced-code",
@@ -3153,7 +3153,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass_update_board"
+      "value": "krypton_update_board"
     },
     {
       "kind": "block-marker",
@@ -3165,15 +3165,15 @@
     },
     {
       "kind": "code-span",
-      "value": "compass_boards"
+      "value": "krypton_boards"
     },
     {
       "kind": "code-span",
-      "value": "compass_tree"
+      "value": "krypton_tree"
     },
     {
       "kind": "code-span",
-      "value": "compass_roster"
+      "value": "krypton_roster"
     },
     {
       "kind": "block-marker",
@@ -3209,7 +3209,7 @@
     },
     {
       "kind": "heading",
-      "value": "H3 T12 Linear board ingest (lane compass-server, RIG-5059)"
+      "value": "H3 T12 Linear board ingest (lane krypton-server, RIG-5059)"
     },
     {
       "kind": "code-span",
@@ -3221,7 +3221,7 @@
     },
     {
       "kind": "code-span",
-      "value": "docs/designs/server/compass-tracker-config/design.md"
+      "value": "docs/designs/server/krypton-tracker-config/design.md"
     },
     {
       "kind": "fenced-code",
@@ -3229,7 +3229,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[go]\n// go/internal/forge\n// Issue gains: StateID, StateName, StateType string (Linear only).\nfunc (l *Linear) ListUpdatedIssues(ctx context.Context, team string, since time.Time, _ string) (ConditionalResult[UpdatedRows], error)\n\n// go/internal/store\n// IssueForgeFields and Issue gain: TrackerStateID, TrackerStateType, TrackerStatus string.\ntype IssueUpsert struct { ID string; Applied bool; PrevTrackerStateID string }\nfunc (s *Store) UpsertIssueForgeFields(ctx context.Context, f IssueForgeFields) (IssueUpsert, error) // was (string, error)\nfunc (s *Store) ListEnabledForgeRepos(ctx context.Context, p ForgeProvider, host string) ([]string, error) // was repo-only\nfunc (s *Store) IsEnabledForgeRepo(ctx context.Context, p ForgeProvider, host, repo string) (bool, error)  // was repo-only\n\n// go/internal/board\nfunc (p *IssueProjection) PublishObservedIssue(ctx context.Context, issue *compassv1.Issue) (store.IssueUpsert, error) // PublishIssueUpdate calls it\n\n// go/server\ntype linearBoardSink struct { brd *board.IssueProjection; st *store.Store; transitions *boardService }\nfunc (s *linearBoardSink) PublishIssueUpdate(ctx context.Context, issue *compassv1.Issue) error\nfunc buildLinearBoardLane(ctx context.Context, cfg ServeConfig, st *store.Store, issueBrd *board.IssueProjection, transitions *boardService, client *forge.Linear, log *slog.Logger) (*boardIngestLane, error)\n// linearWiring gains: board *boardIngestLane (nil when the lane is off)."
+      "value": "`3[go]\n// go/internal/forge\n// Issue gains: StateID, StateName, StateType string (Linear only).\nfunc (l *Linear) ListUpdatedIssues(ctx context.Context, team string, since time.Time, _ string) (ConditionalResult[UpdatedRows], error)\n\n// go/internal/store\n// IssueForgeFields and Issue gain: TrackerStateID, TrackerStateType, TrackerStatus string.\ntype IssueUpsert struct { ID string; Applied bool; PrevTrackerStateID string }\nfunc (s *Store) UpsertIssueForgeFields(ctx context.Context, f IssueForgeFields) (IssueUpsert, error) // was (string, error)\nfunc (s *Store) ListEnabledForgeRepos(ctx context.Context, p ForgeProvider, host string) ([]string, error) // was repo-only\nfunc (s *Store) IsEnabledForgeRepo(ctx context.Context, p ForgeProvider, host, repo string) (bool, error)  // was repo-only\n\n// go/internal/board\nfunc (p *IssueProjection) PublishObservedIssue(ctx context.Context, issue *kryptonv1.Issue) (store.IssueUpsert, error) // PublishIssueUpdate calls it\n\n// go/server\ntype linearBoardSink struct { brd *board.IssueProjection; st *store.Store; transitions *boardService }\nfunc (s *linearBoardSink) PublishIssueUpdate(ctx context.Context, issue *kryptonv1.Issue) error\nfunc buildLinearBoardLane(ctx context.Context, cfg ServeConfig, st *store.Store, issueBrd *board.IssueProjection, transitions *boardService, client *forge.Linear, log *slog.Logger) (*boardIngestLane, error)\n// linearWiring gains: board *boardIngestLane (nil when the lane is off)."
     },
     {
       "kind": "block-marker",
@@ -3349,7 +3349,7 @@
     },
     {
       "kind": "code-span",
-      "value": "$COMPASS_FORGE_LINEAR_TEAMS"
+      "value": "$KRYPTON_FORGE_LINEAR_TEAMS"
     },
     {
       "kind": "code-span",
@@ -3629,19 +3629,19 @@
     },
     {
       "kind": "heading",
-      "value": "H3 T13 ask mirroring: settings, outbox, comment edit (lane compass-comms, RIG-5061)"
+      "value": "H3 T13 ask mirroring: settings, outbox, comment edit (lane krypton-comms, RIG-5061)"
     },
     {
       "kind": "fenced-code",
-      "value": "`3[proto]\n// compass.proto, CompassService\nenum ForgeMirrorMode { FORGE_MIRROR_MODE_UNSPECIFIED = 0; FORGE_MIRROR_MODE_OFF = 1;\n  FORGE_MIRROR_MODE_MANUAL = 2; FORGE_MIRROR_MODE_AUTO = 3; }\nmessage ForgeMirrorSetting { ForgeRef forge = 1; string repo = 2; ForgeMirrorMode mode = 3; }\nmessage ListForgeMirrorSettingsRequest {}\nmessage ListForgeMirrorSettingsResponse { repeated ForgeMirrorSetting settings = 1; bool can_edit = 2; }\nmessage SetForgeMirrorSettingRequest { ForgeMirrorSetting setting = 1; }\nmessage SetForgeMirrorSettingResponse { ForgeMirrorSetting setting = 1; }\nrpc ListForgeMirrorSettings(ListForgeMirrorSettingsRequest) returns (ListForgeMirrorSettingsResponse);\nrpc SetForgeMirrorSetting(SetForgeMirrorSettingRequest) returns (SetForgeMirrorSettingResponse);\n\n// comms.proto\nenum BoardMirrorState { BOARD_MIRROR_STATE_UNSPECIFIED = 0; BOARD_MIRROR_STATE_PENDING = 1;\n  BOARD_MIRROR_STATE_DONE = 2; BOARD_MIRROR_STATE_FAILED = 3; }\n// BoardAsk gains: BoardMirrorState mirror_state = 8; string mirror_url = 9;\nmessage MirrorToForgeRequest { string ref = 1; string ask_id = 2; string topic_id = 3;\n  repeated string message_ids = 4; string channel_id = 5; }\nmessage MirrorToForgeResponse { string comment_url = 1; }\n// CommsService: rpc MirrorToForge(MirrorToForgeRequest) returns (MirrorToForgeResponse);"
+      "value": "`3[proto]\n// krypton.proto, KryptonService\nenum ForgeMirrorMode { FORGE_MIRROR_MODE_UNSPECIFIED = 0; FORGE_MIRROR_MODE_OFF = 1;\n  FORGE_MIRROR_MODE_MANUAL = 2; FORGE_MIRROR_MODE_AUTO = 3; }\nmessage ForgeMirrorSetting { ForgeRef forge = 1; string repo = 2; ForgeMirrorMode mode = 3; }\nmessage ListForgeMirrorSettingsRequest {}\nmessage ListForgeMirrorSettingsResponse { repeated ForgeMirrorSetting settings = 1; bool can_edit = 2; }\nmessage SetForgeMirrorSettingRequest { ForgeMirrorSetting setting = 1; }\nmessage SetForgeMirrorSettingResponse { ForgeMirrorSetting setting = 1; }\nrpc ListForgeMirrorSettings(ListForgeMirrorSettingsRequest) returns (ListForgeMirrorSettingsResponse);\nrpc SetForgeMirrorSetting(SetForgeMirrorSettingRequest) returns (SetForgeMirrorSettingResponse);\n\n// comms.proto\nenum BoardMirrorState { BOARD_MIRROR_STATE_UNSPECIFIED = 0; BOARD_MIRROR_STATE_PENDING = 1;\n  BOARD_MIRROR_STATE_DONE = 2; BOARD_MIRROR_STATE_FAILED = 3; }\n// BoardAsk gains: BoardMirrorState mirror_state = 8; string mirror_url = 9;\nmessage MirrorToForgeRequest { string ref = 1; string ask_id = 2; string topic_id = 3;\n  repeated string message_ids = 4; string channel_id = 5; }\nmessage MirrorToForgeResponse { string comment_url = 1; }\n// CommsService: rpc MirrorToForge(MirrorToForgeRequest) returns (MirrorToForgeResponse);"
     },
     {
       "kind": "fenced-code",
-      "value": "`3[sql]\nCREATE TABLE forge_mirror_settings (\n    forge_provider SMALLINT NOT NULL CHECK (forge_provider IN (1, 2, 3, 4)),\n    forge_host     TEXT     NOT NULL,\n    repo           TEXT     NOT NULL CHECK (repo <> ''),\n    mode           SMALLINT NOT NULL CHECK (mode IN (1, 2)),  -- 1 manual, 2 auto; no row = off\n    updated_by     TEXT     NOT NULL REFERENCES user_accounts (account_id) ON DELETE RESTRICT,\n    created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),\n    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),\n    tenant_id      TEXT     NOT NULL DEFAULT current_setting('compass.tenant_id', TRUE),\n    PRIMARY KEY (tenant_id, forge_provider, forge_host, repo)\n);\n\nCREATE TABLE forge_mirrors (\n    id                TEXT     PRIMARY KEY,\n    source            SMALLINT NOT NULL CHECK (source IN (1, 2)),  -- 1 ask, 2 messages or topic\n    ask_id            TEXT     NOT NULL DEFAULT '',\n    source_key        TEXT     NOT NULL DEFAULT '',  -- topic id, or a sorted message-id hash, for source 2\n    actor_account_id  TEXT     NOT NULL REFERENCES accounts (id) ON DELETE RESTRICT,  -- agent or user\n    agent_account_id  TEXT     REFERENCES agent_accounts (account_id) ON DELETE RESTRICT,  -- NULL for a user click\n    client_request_id TEXT,\n    target_ref        TEXT     NOT NULL CHECK (target_ref <> ''),\n    body_rev          SMALLINT NOT NULL DEFAULT 1,  -- 1 ask, 2 ask plus answer\n    posted_rev        SMALLINT NOT NULL DEFAULT 0,\n    state             SMALLINT NOT NULL DEFAULT 1 CHECK (state IN (1, 2, 3)),  -- pending, done, failed\n    attempts          INT      NOT NULL DEFAULT 0,\n    comment_id        BIGINT   NOT NULL DEFAULT 0,\n    comment_key       TEXT     NOT NULL DEFAULT '',  -- forge.Comment.Key: GitHub id or Linear UUID\n    comment_url       TEXT     NOT NULL DEFAULT '',\n    last_error        TEXT     NOT NULL DEFAULT '',\n    first_attempt_at  TIMESTAMPTZ,  -- set by the first POST; bounds the marker search\n    last_attempt_at   TIMESTAMPTZ,  -- the latest POST; a GitHub retry waits 2 minutes past it\n    client_comment_id UUID     NOT NULL DEFAULT gen_random_uuid(),  -- v4; Linear's CommentCreateInput.id\n    recheck_at        TIMESTAMPTZ,  -- GitHub: a done row with an uncertain POST is scanned once more then\n    lease_until       TIMESTAMPTZ,  -- a Drive holds the row until then\n    lease_token       TEXT     NOT NULL DEFAULT '',  -- fences a stale holder\n    created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),\n    updated_at        TIMESTAMPTZ NOT NULL DEFAULT now(),\n    tenant_id         TEXT     NOT NULL DEFAULT current_setting('compass.tenant_id', TRUE)\n);\nCREATE UNIQUE INDEX forge_mirrors_ask_key ON forge_mirrors (tenant_id, ask_id) WHERE ask_id <> '';\nCREATE UNIQUE INDEX forge_mirrors_request_key ON forge_mirrors (tenant_id, agent_account_id, client_request_id)\n    WHERE client_request_id IS NOT NULL;\nCREATE UNIQUE INDEX forge_mirrors_source_key ON forge_mirrors (tenant_id, source_key, target_ref) WHERE source_key <> '';\nCREATE INDEX forge_mirrors_open_idx ON forge_mirrors (agent_account_id) WHERE state <> 2 OR recheck_at IS NOT NULL;"
+      "value": "`3[sql]\nCREATE TABLE forge_mirror_settings (\n    forge_provider SMALLINT NOT NULL CHECK (forge_provider IN (1, 2, 3, 4)),\n    forge_host     TEXT     NOT NULL,\n    repo           TEXT     NOT NULL CHECK (repo <> ''),\n    mode           SMALLINT NOT NULL CHECK (mode IN (1, 2)),  -- 1 manual, 2 auto; no row = off\n    updated_by     TEXT     NOT NULL REFERENCES user_accounts (account_id) ON DELETE RESTRICT,\n    created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),\n    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),\n    tenant_id      TEXT     NOT NULL DEFAULT current_setting('krypton.tenant_id', TRUE),\n    PRIMARY KEY (tenant_id, forge_provider, forge_host, repo)\n);\n\nCREATE TABLE forge_mirrors (\n    id                TEXT     PRIMARY KEY,\n    source            SMALLINT NOT NULL CHECK (source IN (1, 2)),  -- 1 ask, 2 messages or topic\n    ask_id            TEXT     NOT NULL DEFAULT '',\n    source_key        TEXT     NOT NULL DEFAULT '',  -- topic id, or a sorted message-id hash, for source 2\n    actor_account_id  TEXT     NOT NULL REFERENCES accounts (id) ON DELETE RESTRICT,  -- agent or user\n    agent_account_id  TEXT     REFERENCES agent_accounts (account_id) ON DELETE RESTRICT,  -- NULL for a user click\n    client_request_id TEXT,\n    target_ref        TEXT     NOT NULL CHECK (target_ref <> ''),\n    body_rev          SMALLINT NOT NULL DEFAULT 1,  -- 1 ask, 2 ask plus answer\n    posted_rev        SMALLINT NOT NULL DEFAULT 0,\n    state             SMALLINT NOT NULL DEFAULT 1 CHECK (state IN (1, 2, 3)),  -- pending, done, failed\n    attempts          INT      NOT NULL DEFAULT 0,\n    comment_id        BIGINT   NOT NULL DEFAULT 0,\n    comment_key       TEXT     NOT NULL DEFAULT '',  -- forge.Comment.Key: GitHub id or Linear UUID\n    comment_url       TEXT     NOT NULL DEFAULT '',\n    last_error        TEXT     NOT NULL DEFAULT '',\n    first_attempt_at  TIMESTAMPTZ,  -- set by the first POST; bounds the marker search\n    last_attempt_at   TIMESTAMPTZ,  -- the latest POST; a GitHub retry waits 2 minutes past it\n    client_comment_id UUID     NOT NULL DEFAULT gen_random_uuid(),  -- v4; Linear's CommentCreateInput.id\n    recheck_at        TIMESTAMPTZ,  -- GitHub: a done row with an uncertain POST is scanned once more then\n    lease_until       TIMESTAMPTZ,  -- a Drive holds the row until then\n    lease_token       TEXT     NOT NULL DEFAULT '',  -- fences a stale holder\n    created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),\n    updated_at        TIMESTAMPTZ NOT NULL DEFAULT now(),\n    tenant_id         TEXT     NOT NULL DEFAULT current_setting('krypton.tenant_id', TRUE)\n);\nCREATE UNIQUE INDEX forge_mirrors_ask_key ON forge_mirrors (tenant_id, ask_id) WHERE ask_id <> '';\nCREATE UNIQUE INDEX forge_mirrors_request_key ON forge_mirrors (tenant_id, agent_account_id, client_request_id)\n    WHERE client_request_id IS NOT NULL;\nCREATE UNIQUE INDEX forge_mirrors_source_key ON forge_mirrors (tenant_id, source_key, target_ref) WHERE source_key <> '';\nCREATE INDEX forge_mirrors_open_idx ON forge_mirrors (agent_account_id) WHERE state <> 2 OR recheck_at IS NOT NULL;"
     },
     {
       "kind": "fenced-code",
-      "value": "`3[go]\n// go/internal/store\ntype ForgeMirrorMode int16 // ForgeMirrorOff = 0 (no row), ForgeMirrorManual = 1, ForgeMirrorAuto = 2\ntype ForgeMirrorSetting struct { Provider ForgeProvider; Host, Repo string; Mode ForgeMirrorMode }\ntype ForgeMirrorRow struct { ID string; Source int16; AskID, SourceKey string; Actor, Agent AccountID; ClientRequestID, TargetRef string; BodyRev, PostedRev, State int16; Attempts int; CommentID uint64; CommentKey, CommentURL, LastError string; FirstAttemptAt, LastAttemptAt *time.Time; ClientCommentID string }\nfunc (s *Store) ForgeMirrorMode(ctx context.Context, p ForgeProvider, host, repo string) (ForgeMirrorMode, error)\nfunc (s *Store) ListForgeMirrorSettings(ctx context.Context) ([]ForgeMirrorSetting, error) // every enabled subscription; off when no row\nfunc (s *Store) SetForgeMirrorSetting(ctx context.Context, actor AccountID, set ForgeMirrorSetting) error // off deletes the row\nfunc (s *Store) ClaimForgeMirror(ctx context.Context, m ForgeMirrorRow) (row ForgeMirrorRow, created bool, err error) // a key conflict returns the stored row\n// OpenForgeMirrors returns rows not done, plus done rows whose recheck_at has passed.\nfunc (s *Store) OpenForgeMirrors(ctx context.Context, agent AccountID) ([]ForgeMirrorRow, error)\n// LeaseForgeMirror claims a row for one Drive: UPDATE ... SET lease_until = now() + ttl,\n// lease_token = @token WHERE id = @id AND (state <> 2 OR recheck_at <= now())\n// AND (lease_until IS NULL OR lease_until < now()).\nfunc (s *Store) LeaseForgeMirror(ctx context.Context, id, token string, ttl time.Duration) (row ForgeMirrorRow, ok bool, err error)\n// RenewForgeMirror extends the lease only while lease_token still matches.\nfunc (s *Store) RenewForgeMirror(ctx context.Context, id, token string, ttl time.Duration) (ok bool, err error)\n// MarkForgeMirror writes only when lease_token matches, then clears the lease.\nfunc (s *Store) MarkForgeMirror(ctx context.Context, id, token string, postedRev, state int16, commentID uint64, commentKey, url, errText string) error\n// Ask gains RefCoord *ForgeCoord: set by the comms edge from refs.Parse and the configured forges; not stored.\n// private, in AppendMessage's transaction: one row per ask whose RefCoord is in auto mode\nfunc insertAskMirrors(ctx context.Context, q *db.Queries, msg Message) error\n// private, in AnswerAsk's transaction: body_rev = 2, state = pending\nfunc bumpAskMirror(ctx context.Context, q *db.Queries, askID string) error\n\n// go/internal/forge, Provider gains:\nEditComment(ctx context.Context, repo, commentKey, body string) (Comment, error)\n// DeleteComment removes a duplicate marked comment (GitHub only).\nDeleteComment(ctx context.Context, repo, commentKey string) error\n// CommentOnIssue and CommentOnPullRequest gain an optional clientID; Linear sends it as\n// CommentCreateInput.id (the row's client_comment_id, a UUID v4), GitHub ignores it.\n// ListCommentsSince pages every comment on an issue or PR created at or after\n// since (GitHub `since`; Linear `comments(filter: {createdAt: {gte}})`).\nListCommentsSince(ctx context.Context, repo string, number uint64, since time.Time) ([]Comment, error)\n\n// go/internal/mirror\ntype Link struct { Channel, Topic, URL string } // URL \"\" when no public URL is set\ntype Poster interface { // \"\" key posts, else edits\n    PostMirror(ctx context.Context, actor store.AccountID, need store.ForgeMirrorMode, ref refs.Ref, commentKey, body string) (forge.Comment, error)\n}\nfunc RenderAsk(ask store.Ask, answeredBy string, link Link) string\nfunc Render(msgs []store.Message, authors map[store.AccountID]string, link Link, note string, limit int) string\nfunc Drive(ctx context.Context, st *store.Store, p Poster, rows []store.ForgeMirrorRow)\n\n// go/server\nfunc topicLinkFor(base, channelID, topicID string) string // deeplink.go, beside deepLinkFor\nfunc (s *forgeService) mirrorAllowed(ctx context.Context, actor store.AccountID, need store.ForgeMirrorMode, ref refs.Ref) (resolvedForge, *compassv1internal.ForgeCallError)\nfunc (s *forgeService) PostMirror(ctx context.Context, actor store.AccountID, need store.ForgeMirrorMode, ref refs.Ref, commentKey, body string) (forge.Comment, error)\n\n// go/internal/comms: the MirrorToForge seam, satisfied by forgeService\ntype Mirrorer interface {\n    MirrorAsUser(ctx context.Context, user store.AccountID, req *compassv1.MirrorToForgeRequest) (commentURL string, err error)\n}"
+      "value": "`3[go]\n// go/internal/store\ntype ForgeMirrorMode int16 // ForgeMirrorOff = 0 (no row), ForgeMirrorManual = 1, ForgeMirrorAuto = 2\ntype ForgeMirrorSetting struct { Provider ForgeProvider; Host, Repo string; Mode ForgeMirrorMode }\ntype ForgeMirrorRow struct { ID string; Source int16; AskID, SourceKey string; Actor, Agent AccountID; ClientRequestID, TargetRef string; BodyRev, PostedRev, State int16; Attempts int; CommentID uint64; CommentKey, CommentURL, LastError string; FirstAttemptAt, LastAttemptAt *time.Time; ClientCommentID string }\nfunc (s *Store) ForgeMirrorMode(ctx context.Context, p ForgeProvider, host, repo string) (ForgeMirrorMode, error)\nfunc (s *Store) ListForgeMirrorSettings(ctx context.Context) ([]ForgeMirrorSetting, error) // every enabled subscription; off when no row\nfunc (s *Store) SetForgeMirrorSetting(ctx context.Context, actor AccountID, set ForgeMirrorSetting) error // off deletes the row\nfunc (s *Store) ClaimForgeMirror(ctx context.Context, m ForgeMirrorRow) (row ForgeMirrorRow, created bool, err error) // a key conflict returns the stored row\n// OpenForgeMirrors returns rows not done, plus done rows whose recheck_at has passed.\nfunc (s *Store) OpenForgeMirrors(ctx context.Context, agent AccountID) ([]ForgeMirrorRow, error)\n// LeaseForgeMirror claims a row for one Drive: UPDATE ... SET lease_until = now() + ttl,\n// lease_token = @token WHERE id = @id AND (state <> 2 OR recheck_at <= now())\n// AND (lease_until IS NULL OR lease_until < now()).\nfunc (s *Store) LeaseForgeMirror(ctx context.Context, id, token string, ttl time.Duration) (row ForgeMirrorRow, ok bool, err error)\n// RenewForgeMirror extends the lease only while lease_token still matches.\nfunc (s *Store) RenewForgeMirror(ctx context.Context, id, token string, ttl time.Duration) (ok bool, err error)\n// MarkForgeMirror writes only when lease_token matches, then clears the lease.\nfunc (s *Store) MarkForgeMirror(ctx context.Context, id, token string, postedRev, state int16, commentID uint64, commentKey, url, errText string) error\n// Ask gains RefCoord *ForgeCoord: set by the comms edge from refs.Parse and the configured forges; not stored.\n// private, in AppendMessage's transaction: one row per ask whose RefCoord is in auto mode\nfunc insertAskMirrors(ctx context.Context, q *db.Queries, msg Message) error\n// private, in AnswerAsk's transaction: body_rev = 2, state = pending\nfunc bumpAskMirror(ctx context.Context, q *db.Queries, askID string) error\n\n// go/internal/forge, Provider gains:\nEditComment(ctx context.Context, repo, commentKey, body string) (Comment, error)\n// DeleteComment removes a duplicate marked comment (GitHub only).\nDeleteComment(ctx context.Context, repo, commentKey string) error\n// CommentOnIssue and CommentOnPullRequest gain an optional clientID; Linear sends it as\n// CommentCreateInput.id (the row's client_comment_id, a UUID v4), GitHub ignores it.\n// ListCommentsSince pages every comment on an issue or PR created at or after\n// since (GitHub `since`; Linear `comments(filter: {createdAt: {gte}})`).\nListCommentsSince(ctx context.Context, repo string, number uint64, since time.Time) ([]Comment, error)\n\n// go/internal/mirror\ntype Link struct { Channel, Topic, URL string } // URL \"\" when no public URL is set\ntype Poster interface { // \"\" key posts, else edits\n    PostMirror(ctx context.Context, actor store.AccountID, need store.ForgeMirrorMode, ref refs.Ref, commentKey, body string) (forge.Comment, error)\n}\nfunc RenderAsk(ask store.Ask, answeredBy string, link Link) string\nfunc Render(msgs []store.Message, authors map[store.AccountID]string, link Link, note string, limit int) string\nfunc Drive(ctx context.Context, st *store.Store, p Poster, rows []store.ForgeMirrorRow)\n\n// go/server\nfunc topicLinkFor(base, channelID, topicID string) string // deeplink.go, beside deepLinkFor\nfunc (s *forgeService) mirrorAllowed(ctx context.Context, actor store.AccountID, need store.ForgeMirrorMode, ref refs.Ref) (resolvedForge, *kryptonv1internal.ForgeCallError)\nfunc (s *forgeService) PostMirror(ctx context.Context, actor store.AccountID, need store.ForgeMirrorMode, ref refs.Ref, commentKey, body string) (forge.Comment, error)\n\n// go/internal/comms: the MirrorToForge seam, satisfied by forgeService\ntype Mirrorer interface {\n    MirrorAsUser(ctx context.Context, user store.AccountID, req *kryptonv1.MirrorToForgeRequest) (commentURL string, err error)\n}"
     },
     {
       "kind": "block-marker",
@@ -3757,7 +3757,7 @@
     },
     {
       "kind": "code-span",
-      "value": "<!-- compass-mirror:<row id> -->"
+      "value": "<!-- krypton-mirror:<row id> -->"
     },
     {
       "kind": "block-marker",
@@ -4033,7 +4033,7 @@
     },
     {
       "kind": "heading",
-      "value": "H3 T14 forge: PR and review fields (lane compass-server, RIG-5059)"
+      "value": "H3 T14 forge: PR and review fields (lane krypton-server, RIG-5059)"
     },
     {
       "kind": "fenced-code",
@@ -4093,11 +4093,11 @@
     },
     {
       "kind": "heading",
-      "value": "H3 T15 forge: merge-queue provider and Trunk (lane compass-server, RIG-5059)"
+      "value": "H3 T15 forge: merge-queue provider and Trunk (lane krypton-server, RIG-5059)"
     },
     {
       "kind": "fenced-code",
-      "value": "`3[go]\n// go/internal/forge/mergequeue.go\ntype QueueState int // QueueQueued, QueueTesting, QueueFailed, QueueRemoved, QueueMerged\ntype QueueEntry struct { Number uint64; State QueueState; ChangedAt time.Time }\ntype MergeQueue interface {\n    Name() string // \"trunk\"\n    // Entries reads up to 50 PRs of one repo and queue; a PR never submitted is absent.\n    Entries(ctx context.Context, repo, targetBranch string, numbers []uint64) (map[uint64]QueueEntry, error)\n}\n// go/internal/forge/trunk.go\ntype TrunkConfig struct { Token func(ctx context.Context) ([]byte, error); Host string; HTTP *http.Client }\nfunc NewTrunk(cfg TrunkConfig) *Trunk\n\n// go/internal/ingest\ntype QueueConfigs interface { MergeQueueFor(ctx context.Context, repo string) (provider, branch string, err error) }\n// BoardReconcileConfig and NewPullRequestHydrator gain Queues map[string]forge.MergeQueue and QueueConfigs.\nfunc NewMergeQueueSweeper(queues map[string]forge.MergeQueue, cfgs QueueConfigs, st MergeQueueStore, sink MergeQueueSink, every time.Duration) *MergeQueueSweeper\nfunc (s *MergeQueueSweeper) Run(ctx context.Context) error // ticks every `every` until ctx ends\ntype MergeQueueStore interface { OpenPullRequests(ctx context.Context, repo string) ([]uint64, error) }\ntype MergeQueueSink interface { PublishPullRequestMergeQueue(ctx context.Context, coord store.ForgeCoord, e *compassv1.MergeQueueEntry) error }\n\n// go/internal/store: forge_repo_subscriptions gains\n//   merge_queue        TEXT NOT NULL DEFAULT '',  -- provider name; '' = none\n//   merge_queue_branch TEXT NOT NULL DEFAULT ''\nfunc (s *Store) SetPullRequestMergeQueue(ctx context.Context, pr ForgeCoord, entry []byte) (changed bool, err error) // jsonb_set of pr.mergeQueue"
+      "value": "`3[go]\n// go/internal/forge/mergequeue.go\ntype QueueState int // QueueQueued, QueueTesting, QueueFailed, QueueRemoved, QueueMerged\ntype QueueEntry struct { Number uint64; State QueueState; ChangedAt time.Time }\ntype MergeQueue interface {\n    Name() string // \"trunk\"\n    // Entries reads up to 50 PRs of one repo and queue; a PR never submitted is absent.\n    Entries(ctx context.Context, repo, targetBranch string, numbers []uint64) (map[uint64]QueueEntry, error)\n}\n// go/internal/forge/trunk.go\ntype TrunkConfig struct { Token func(ctx context.Context) ([]byte, error); Host string; HTTP *http.Client }\nfunc NewTrunk(cfg TrunkConfig) *Trunk\n\n// go/internal/ingest\ntype QueueConfigs interface { MergeQueueFor(ctx context.Context, repo string) (provider, branch string, err error) }\n// BoardReconcileConfig and NewPullRequestHydrator gain Queues map[string]forge.MergeQueue and QueueConfigs.\nfunc NewMergeQueueSweeper(queues map[string]forge.MergeQueue, cfgs QueueConfigs, st MergeQueueStore, sink MergeQueueSink, every time.Duration) *MergeQueueSweeper\nfunc (s *MergeQueueSweeper) Run(ctx context.Context) error // ticks every `every` until ctx ends\ntype MergeQueueStore interface { OpenPullRequests(ctx context.Context, repo string) ([]uint64, error) }\ntype MergeQueueSink interface { PublishPullRequestMergeQueue(ctx context.Context, coord store.ForgeCoord, e *kryptonv1.MergeQueueEntry) error }\n\n// go/internal/store: forge_repo_subscriptions gains\n//   merge_queue        TEXT NOT NULL DEFAULT '',  -- provider name; '' = none\n//   merge_queue_branch TEXT NOT NULL DEFAULT ''\nfunc (s *Store) SetPullRequestMergeQueue(ctx context.Context, pr ForgeCoord, entry []byte) (changed bool, err error) // jsonb_set of pr.mergeQueue"
     },
     {
       "kind": "block-marker",
@@ -4165,7 +4165,7 @@
     },
     {
       "kind": "code-span",
-      "value": "$COMPASS_FORGE_MERGE_QUEUES"
+      "value": "$KRYPTON_FORGE_MERGE_QUEUES"
     },
     {
       "kind": "code-span",

@@ -5,7 +5,7 @@
   "fingerprint": [
     {
       "kind": "front-matter",
-      "value": "id: DL-008\ndecision: \"Evolve `compass.v1` from a local daemon contract into the Client↔Server contract (multi-user)\"\nstatus: \"Active (Matt, 2026-07-04)\"\nrecord: ../../meta/compass-architecture-lineage/design.md"
+      "value": "id: DL-008\ndecision: \"Evolve `krypton.v1` from a local daemon contract into the Client↔Server contract (multi-user)\"\nstatus: \"Active (Matt, 2026-07-04)\"\nrecord: ../../meta/krypton-architecture-lineage/design.md"
     }
   ],
   "comparison": {

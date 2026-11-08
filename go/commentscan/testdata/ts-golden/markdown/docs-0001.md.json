@@ -9,7 +9,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass.v1"
+      "value": "krypton.v1"
     },
     {
       "kind": "block-marker",
@@ -69,7 +69,7 @@
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-agent/src/mapping.ts:309-311"
+      "value": "packages/krypton-agent/src/mapping.ts:309-311"
     },
     {
       "kind": "code-span",
@@ -97,11 +97,11 @@
     },
     {
       "kind": "code-span",
-      "value": "compass.v1.SessionEvent.event"
+      "value": "krypton.v1.SessionEvent.event"
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/compass.proto:448"
+      "value": "proto/krypton/v1/krypton.proto:448"
     },
     {
       "kind": "code-span",
@@ -133,7 +133,7 @@
     },
     {
       "kind": "code-span",
-      "value": "docs/specs/product/compass.md:390-398"
+      "value": "docs/specs/product/krypton.md:390-398"
     },
     {
       "kind": "code-span",
@@ -173,7 +173,7 @@
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-agent/src/transport/frame-sink.ts:269-272"
+      "value": "packages/krypton-agent/src/transport/frame-sink.ts:269-272"
     },
     {
       "kind": "code-span",
@@ -225,7 +225,7 @@
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-agent/package.json"
+      "value": "packages/krypton-agent/package.json"
     },
     {
       "kind": "code-span",
@@ -405,7 +405,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/compass.proto"
+      "value": "proto/krypton/v1/krypton.proto"
     },
     {
       "kind": "fenced-code",
@@ -413,7 +413,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass.proto:454-462"
+      "value": "krypton.proto:454-462"
     },
     {
       "kind": "fenced-code",
@@ -569,7 +569,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass.proto:513-516"
+      "value": "krypton.proto:513-516"
     },
     {
       "kind": "code-span",
@@ -649,7 +649,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass.v1.SessionError"
+      "value": "krypton.v1.SessionError"
     },
     {
       "kind": "code-span",
@@ -665,7 +665,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/compass.proto"
+      "value": "proto/krypton/v1/krypton.proto"
     },
     {
       "kind": "code-span",
@@ -681,7 +681,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass.proto:511-516"
+      "value": "krypton.proto:511-516"
     },
     {
       "kind": "code-span",
@@ -689,7 +689,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass.proto:454-462"
+      "value": "krypton.proto:454-462"
     },
     {
       "kind": "block-marker",
@@ -709,15 +709,15 @@
     },
     {
       "kind": "code-span",
-      "value": "go/gen/compass/v1/compass.pb.go"
+      "value": "go/gen/krypton/v1/krypton.pb.go"
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-client/src/gen/compass/v1/compass_pb.ts"
+      "value": "packages/krypton-client/src/gen/krypton/v1/krypton_pb.ts"
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-agent/src/gen/compass/v1/compass_pb.ts"
+      "value": "packages/krypton-agent/src/gen/krypton/v1/krypton_pb.ts"
     },
     {
       "kind": "code-span",
@@ -761,7 +761,7 @@
     },
     {
       "kind": "code-span",
-      "value": "./compassv1"
+      "value": "./kryptonv1"
     },
     {
       "kind": "code-span",
@@ -793,7 +793,7 @@
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-agent/src/mapping.ts:297-320"
+      "value": "packages/krypton-agent/src/mapping.ts:297-320"
     },
     {
       "kind": "code-span",
@@ -801,7 +801,7 @@
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-agent/src/transport/frame-sink.ts"
+      "value": "packages/krypton-agent/src/transport/frame-sink.ts"
     },
     {
       "kind": "code-span",
@@ -1049,7 +1049,7 @@
     },
     {
       "kind": "code-span",
-      "value": "packages/compass-agent/src/transport/frame-sink.test.ts"
+      "value": "packages/krypton-agent/src/transport/frame-sink.test.ts"
     },
     {
       "kind": "code-span",
@@ -1133,7 +1133,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass.v1.SessionEvent"
+      "value": "krypton.v1.SessionEvent"
     },
     {
       "kind": "code-span",
@@ -1261,7 +1261,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass.proto"
+      "value": "krypton.proto"
     },
     {
       "kind": "code-span",

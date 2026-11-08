@@ -5,7 +5,7 @@
   "fingerprint": [
     {
       "kind": "front-matter",
-      "value": "id: DL-387\ndecision: \"The gateway image gets no `:latest` and no `:vX.Y.Z` retag. Its digest reaches `DefaultGatewayImage` only through a reviewed manual pin PR, the same as `DefaultCollectorImage`, and the publish job's step summary supplies the digest\"\nstatus: \"Active (Matt, 2026-10-03)\"\nrecord: ../../infra/release/compass-gateway-image/design.md#approach"
+      "value": "id: DL-387\ndecision: \"The gateway image gets no `:latest` and no `:vX.Y.Z` retag. Its digest reaches `DefaultGatewayImage` only through a reviewed manual pin PR, the same as `DefaultCollectorImage`, and the publish job's step summary supplies the digest\"\nstatus: \"Active (Matt, 2026-10-03)\"\nrecord: ../../infra/release/krypton-gateway-image/design.md#approach"
     }
   ],
   "comparison": {

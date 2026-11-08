@@ -5,7 +5,7 @@
   "fingerprint": [
     {
       "kind": "heading",
-      "value": "H1 Compass agent workstream repository writer (RIG-5015)"
+      "value": "H1 Krypton agent workstream repository writer (RIG-5015)"
     },
     {
       "kind": "heading",
@@ -13,7 +13,7 @@
     },
     {
       "kind": "link-target",
-      "value": "../compass-workstream-repository-source/design.md"
+      "value": "../krypton-workstream-repository-source/design.md"
     },
     {
       "kind": "code-span",
@@ -193,7 +193,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/compass.proto"
+      "value": "proto/krypton/v1/krypton.proto"
     },
     {
       "kind": "code-span",
@@ -253,7 +253,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/comms.proto"
+      "value": "proto/krypton/v1/comms.proto"
     },
     {
       "kind": "block-marker",
@@ -297,7 +297,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/compass.proto"
+      "value": "proto/krypton/v1/krypton.proto"
     },
     {
       "kind": "heading",
@@ -437,7 +437,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass agent repo add"
+      "value": "krypton agent repo add"
     },
     {
       "kind": "heading",
@@ -613,7 +613,7 @@
     },
     {
       "kind": "code-span",
-      "value": "skill://compass-managed-boundary"
+      "value": "skill://krypton-managed-boundary"
     },
     {
       "kind": "block-marker",
@@ -697,7 +697,7 @@
     },
     {
       "kind": "code-span",
-      "value": "File_compass_v1_compass_proto"
+      "value": "File_krypton_v1_krypton_proto"
     },
     {
       "kind": "block-marker",
@@ -985,7 +985,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/compass.proto"
+      "value": "proto/krypton/v1/krypton.proto"
     },
     {
       "kind": "code-span",
@@ -1329,11 +1329,11 @@
     },
     {
       "kind": "heading",
-      "value": "H3 T5 — CLI `compass agent repo`"
+      "value": "H3 T5 — CLI `krypton agent repo`"
     },
     {
       "kind": "code-span",
-      "value": "go/cmd/compass/agent_repo.go"
+      "value": "go/cmd/krypton/agent_repo.go"
     },
     {
       "kind": "code-span",
@@ -1345,7 +1345,7 @@
     },
     {
       "kind": "code-span",
-      "value": "go/cmd/compass/agent.go"
+      "value": "go/cmd/krypton/agent.go"
     },
     {
       "kind": "code-span",
@@ -1357,7 +1357,7 @@
     },
     {
       "kind": "code-span",
-      "value": "go/cmd/compass/client.go"
+      "value": "go/cmd/krypton/client.go"
     },
     {
       "kind": "code-span",
@@ -1365,7 +1365,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[go]\nfunc newAgentRepoCmd() *cobra.Command // \"repo\": add <agent> <org/name>, remove <agent> <org/name>, list <agent>; <agent> is bare or owner/agent\n\nfunc runAgentRepoAdd(ctx context.Context, client compassv1connect.AgentRepositoryServiceClient, agent, repo string, out io.Writer) error\nfunc runAgentRepoRemove(ctx context.Context, client compassv1connect.AgentRepositoryServiceClient, agent, repo string, out io.Writer) error\nfunc runAgentRepoList(ctx context.Context, client compassv1connect.AgentRepositoryServiceClient, agent string, out io.Writer) error"
+      "value": "`3[go]\nfunc newAgentRepoCmd() *cobra.Command // \"repo\": add <agent> <org/name>, remove <agent> <org/name>, list <agent>; <agent> is bare or owner/agent\n\nfunc runAgentRepoAdd(ctx context.Context, client kryptonv1connect.AgentRepositoryServiceClient, agent, repo string, out io.Writer) error\nfunc runAgentRepoRemove(ctx context.Context, client kryptonv1connect.AgentRepositoryServiceClient, agent, repo string, out io.Writer) error\nfunc runAgentRepoList(ctx context.Context, client kryptonv1connect.AgentRepositoryServiceClient, agent string, out io.Writer) error"
     },
     {
       "kind": "code-span",
@@ -1533,7 +1533,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass agent repo add|remove|list"
+      "value": "krypton agent repo add|remove|list"
     },
     {
       "kind": "block-marker",
@@ -1605,7 +1605,7 @@
     },
     {
       "kind": "code-span",
-      "value": "CompassService"
+      "value": "KryptonService"
     },
     {
       "kind": "block-marker",

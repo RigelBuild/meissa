@@ -13,7 +13,7 @@
     },
     {
       "kind": "link-target",
-      "value": "../compass-forge-scope-enforcement/design.md"
+      "value": "../krypton-forge-scope-enforcement/design.md"
     },
     {
       "kind": "block-marker",
@@ -213,7 +213,7 @@
     },
     {
       "kind": "code-span",
-      "value": "$COMPASS_FORGE_ENFORCE_SCOPES"
+      "value": "$KRYPTON_FORGE_ENFORCE_SCOPES"
     },
     {
       "kind": "code-span",
@@ -221,7 +221,7 @@
     },
     {
       "kind": "code-span",
-      "value": "go/cmd/compass-server/main.go"
+      "value": "go/cmd/krypton-server/main.go"
     },
     {
       "kind": "code-span",
@@ -245,7 +245,7 @@
     },
     {
       "kind": "code-span",
-      "value": "$COMPASS_FORGE_DISABLE_SCOPE_ENFORCEMENT"
+      "value": "$KRYPTON_FORGE_DISABLE_SCOPE_ENFORCEMENT"
     },
     {
       "kind": "code-span",
@@ -261,7 +261,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/compass.proto"
+      "value": "proto/krypton/v1/krypton.proto"
     },
     {
       "kind": "fenced-code",
@@ -277,7 +277,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[go]\nprovResp, err := s.provisionAgent(ctx, acc, &compassv1.ProvisionAgentWorkspaceRequest{\n\tClientRequestId: crid,\n})"
+      "value": "`3[go]\nprovResp, err := s.provisionAgent(ctx, acc, &kryptonv1.ProvisionAgentWorkspaceRequest{\n\tClientRequestId: crid,\n})"
     },
     {
       "kind": "heading",

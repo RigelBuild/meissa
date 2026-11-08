@@ -13,11 +13,11 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-renovate-migration.md"
+      "value": "krypton-renovate-migration.md"
     },
     {
       "kind": "code-span",
-      "value": "compass-drop-proto.md"
+      "value": "krypton-drop-proto.md"
     },
     {
       "kind": "code-span",
@@ -41,7 +41,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-go:nilaway"
+      "value": "krypton-go:nilaway"
     },
     {
       "kind": "code-span",
@@ -77,7 +77,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[text]\nnilaway -include-pkgs=github.com/RigelBuild/compass/go -test=false \\\n  -exclude-errors-in-files=\"gen/compass/v1/,internal/gen/compass/v1/\" ./..."
+      "value": "`3[text]\nnilaway -include-pkgs=github.com/RigelBuild/krypton/go -test=false \\\n  -exclude-errors-in-files=\"gen/krypton/v1/,internal/gen/krypton/v1/\" ./..."
     },
     {
       "kind": "heading",
@@ -113,7 +113,7 @@
     },
     {
       "kind": "code-span",
-      "value": "gen/compass/v1/runner.pb.go:477"
+      "value": "gen/krypton/v1/runner.pb.go:477"
     },
     {
       "kind": "code-span",
@@ -817,7 +817,7 @@
     },
     {
       "kind": "code-span",
-      "value": "nilaway -include-pkgs=github.com/RigelBuild/compass/go -test=false -exclude-errors-in-files=\"gen/compass/v1/,internal/gen/compass/v1/\" ./..."
+      "value": "nilaway -include-pkgs=github.com/RigelBuild/krypton/go -test=false -exclude-errors-in-files=\"gen/krypton/v1/,internal/gen/krypton/v1/\" ./..."
     },
     {
       "kind": "code-span",
@@ -933,11 +933,11 @@
     },
     {
       "kind": "code-span",
-      "value": "*compassv1internal.SessionsResponse.GetCommand()"
+      "value": "*kryptonv1internal.SessionsResponse.GetCommand()"
     },
     {
       "kind": "code-span",
-      "value": "internal/gen/compass/v1/runner.pb.go:477"
+      "value": "internal/gen/krypton/v1/runner.pb.go:477"
     },
     {
       "kind": "code-span",
@@ -1393,7 +1393,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-go:ci"
+      "value": "krypton-go:ci"
     },
     {
       "kind": "code-span",
@@ -1421,7 +1421,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass/v2"
+      "value": "krypton/v2"
     },
     {
       "kind": "code-span",

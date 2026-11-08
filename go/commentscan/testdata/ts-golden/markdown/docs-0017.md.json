@@ -5,7 +5,7 @@
   "fingerprint": [
     {
       "kind": "front-matter",
-      "value": "id: DL-456\ndecision: \"The UI shows the board as an AgentBoard panel in AgentView, a halt dot and waiting-on-you count on AgentLeaf, and a waiting-on-you column in FleetPane\"\nstatus: \"Active (Matt, 2026-10-10)\"\nrecord: ../../agent/compass-agent-status-record/design.md#d9-ui-a-board-panel-on-the-agent-badges-in-the-sidebar"
+      "value": "id: DL-456\ndecision: \"The UI shows the board as an AgentBoard panel in AgentView, a halt dot and waiting-on-you count on AgentLeaf, and a waiting-on-you column in FleetPane\"\nstatus: \"Active (Matt, 2026-10-10)\"\nrecord: ../../agent/krypton-agent-status-record/design.md#d9-ui-a-board-panel-on-the-agent-badges-in-the-sidebar"
     }
   ],
   "comparison": {

@@ -5,7 +5,7 @@
   "fingerprint": [
     {
       "kind": "heading",
-      "value": "H1 Compass UI dev-boot smoke gate (RIG-1536)"
+      "value": "H1 Krypton UI dev-boot smoke gate (RIG-1536)"
     },
     {
       "kind": "heading",
@@ -217,7 +217,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-ui:ci"
+      "value": "krypton-ui:ci"
     },
     {
       "kind": "code-span",
@@ -829,7 +829,7 @@
     },
     {
       "kind": "code-span",
-      "value": "VITE_COMPASS_BASE_URL"
+      "value": "VITE_KRYPTON_BASE_URL"
     },
     {
       "kind": "code-span",
@@ -845,7 +845,7 @@
     },
     {
       "kind": "code-span",
-      "value": "VITE_COMPASS_CALLER_ID"
+      "value": "VITE_KRYPTON_CALLER_ID"
     },
     {
       "kind": "code-span",
@@ -1037,7 +1037,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[yaml]\ndev-smoke:\n  command: 'bunx playwright test e2e/dev-boot.spec.ts'\n  deps: ['install']\n  inputs: ['src/**/*', 'index.html', 'tsconfig.json', 'package.json', 'vite.config.ts', 'e2e/dev-boot.spec.ts', 'playwright.config.ts', '/bun.lock', '/packages/compass-client/src/**/*', '/packages/compass-client/package.json']\n  options:\n    cache: false"
+      "value": "`3[yaml]\ndev-smoke:\n  command: 'bunx playwright test e2e/dev-boot.spec.ts'\n  deps: ['install']\n  inputs: ['src/**/*', 'index.html', 'tsconfig.json', 'package.json', 'vite.config.ts', 'e2e/dev-boot.spec.ts', 'playwright.config.ts', '/bun.lock', '/packages/krypton-client/src/**/*', '/packages/krypton-client/package.json']\n  options:\n    cache: false"
     },
     {
       "kind": "code-span",
@@ -1097,11 +1097,11 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-ui:dev-smoke"
+      "value": "krypton-ui:dev-smoke"
     },
     {
       "kind": "code-span",
-      "value": "compass-ui:ci"
+      "value": "krypton-ui:ci"
     },
     {
       "kind": "block-marker",
@@ -1109,7 +1109,7 @@
     },
     {
       "kind": "code-span",
-      "value": "moon run compass-ui:dev-smoke"
+      "value": "moon run krypton-ui:dev-smoke"
     },
     {
       "kind": "code-span",
@@ -1121,7 +1121,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-ui:dev-smoke"
+      "value": "krypton-ui:dev-smoke"
     },
     {
       "kind": "code-span",
@@ -1225,7 +1225,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-ui:dev-smoke"
+      "value": "krypton-ui:dev-smoke"
     },
     {
       "kind": "code-span",
@@ -1297,7 +1297,7 @@
     },
     {
       "kind": "code-span",
-      "value": "moon run compass-ui:dev-smoke"
+      "value": "moon run krypton-ui:dev-smoke"
     },
     {
       "kind": "code-span",
@@ -1377,7 +1377,7 @@
     },
     {
       "kind": "code-span",
-      "value": "moon run compass-ui:dev-smoke"
+      "value": "moon run krypton-ui:dev-smoke"
     },
     {
       "kind": "code-span",
@@ -1401,7 +1401,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-ui:dev-smoke"
+      "value": "krypton-ui:dev-smoke"
     },
     {
       "kind": "block-marker",
@@ -1449,7 +1449,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-ui:ci"
+      "value": "krypton-ui:ci"
     },
     {
       "kind": "code-span",

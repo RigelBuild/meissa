@@ -5,7 +5,7 @@
   "fingerprint": [
     {
       "kind": "front-matter",
-      "value": "id: DL-524\ndecision: \"compass-agent moves from Effect 3 to `effect` and `@effect/opentelemetry` pinned exactly to the same 4.0.x patch (4.0.5) in one PR, with no production behavior change other than the refusal-path drain before close (DL-529); `@effect/platform` is dropped.\"\nstatus: \"Active (Matt, 2026-10-15)\"\nrecord: ../../compass-agent-effect-4.md#rulings"
+      "value": "id: DL-524\ndecision: \"krypton-agent moves from Effect 3 to `effect` and `@effect/opentelemetry` pinned exactly to the same 4.0.x patch (4.0.5) in one PR, with no production behavior change other than the refusal-path drain before close (DL-529); `@effect/platform` is dropped.\"\nstatus: \"Active (Matt, 2026-10-15)\"\nrecord: ../../krypton-agent-effect-4.md#rulings"
     }
   ],
   "comparison": {

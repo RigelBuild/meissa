@@ -21,7 +21,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-guestd"
+      "value": "krypton-guestd"
     },
     {
       "kind": "code-span",
@@ -237,7 +237,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-guest-rootfs"
+      "value": "krypton-guest-rootfs"
     },
     {
       "kind": "code-span",
@@ -261,7 +261,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-guest-initrd"
+      "value": "krypton-guest-initrd"
     },
     {
       "kind": "heading",
@@ -421,7 +421,7 @@
     },
     {
       "kind": "heading",
-      "value": "H3 (d) `compass-guestd` real init: boot sequence and fail-closed posture"
+      "value": "H3 (d) `krypton-guestd` real init: boot sequence and fail-closed posture"
     },
     {
       "kind": "code-span",
@@ -433,7 +433,7 @@
     },
     {
       "kind": "code-span",
-      "value": "go/cmd/compass-guestd"
+      "value": "go/cmd/krypton-guestd"
     },
     {
       "kind": "code-span",
@@ -565,7 +565,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/guest_control.proto"
+      "value": "proto/krypton/v1/guest_control.proto"
     },
     {
       "kind": "code-span",
@@ -609,7 +609,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass.v1"
+      "value": "krypton.v1"
     },
     {
       "kind": "code-span",
@@ -633,7 +633,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/guest_control.proto"
+      "value": "proto/krypton/v1/guest_control.proto"
     },
     {
       "kind": "code-span",
@@ -737,7 +737,7 @@
     },
     {
       "kind": "fenced-code",
-      "value": "`3[go]\n// Package go/internal/runtime/microvm.\n\n// NetConfig wires the userspace net backend (D6: passt) to the VMM.\ntype NetConfig struct {\n    // VhostUserSocket is the AF_UNIX path passt serves with --vhost-user\n    // and CH consumes via --net vhost_user=true,socket=….\n    VhostUserSocket string\n    // MAC is the guest interface MAC handed to --net mac=….\n    MAC string\n}\n\n// BootConfig is everything needed to boot one session guest. Produced by the\n// backend (V2b) or the test harness (V2a); consumed by Launch.\ntype BootConfig struct {\n    Kernel      string // bzImage path (compass-guest-kernel/bzImage)\n    Initrd      string // initramfs path (compass-guest-initrd) — new vs the sketch: required because the pinned kernel's virtio drivers are modules ((a))\n    Rootfs      string // erofs image path (compass-guest-rootfs)\n    Cmdline     string // kernel cmdline; Launch appends the vsock-port + console parameters\n    VsockCID    uint32 // guest CID (>= 3)\n    VsockPort   uint32 // guest port guestd listens on\n    VsockSocket string // host AF_UNIX path for --vsock socket=… (the hybrid endpoint the host dials)\n    FSTag       string // virtio-fs tag (\"workspace\")\n    FSSocket    string // virtiofsd --socket-path the VMM attaches via --fs\n    FSSharedDir string // virtiofsd --shared-dir: the host tree exported as FSTag→/workspace (per-session checkout dir in V2b; a throwaway temp dir in the V2a spike)\n    CPUs        int\n    MemoryMB    int    // always launched with shared=on ((c))\n    Net         NetConfig\n}"
+      "value": "`3[go]\n// Package go/internal/runtime/microvm.\n\n// NetConfig wires the userspace net backend (D6: passt) to the VMM.\ntype NetConfig struct {\n    // VhostUserSocket is the AF_UNIX path passt serves with --vhost-user\n    // and CH consumes via --net vhost_user=true,socket=….\n    VhostUserSocket string\n    // MAC is the guest interface MAC handed to --net mac=….\n    MAC string\n}\n\n// BootConfig is everything needed to boot one session guest. Produced by the\n// backend (V2b) or the test harness (V2a); consumed by Launch.\ntype BootConfig struct {\n    Kernel      string // bzImage path (krypton-guest-kernel/bzImage)\n    Initrd      string // initramfs path (krypton-guest-initrd) — new vs the sketch: required because the pinned kernel's virtio drivers are modules ((a))\n    Rootfs      string // erofs image path (krypton-guest-rootfs)\n    Cmdline     string // kernel cmdline; Launch appends the vsock-port + console parameters\n    VsockCID    uint32 // guest CID (>= 3)\n    VsockPort   uint32 // guest port guestd listens on\n    VsockSocket string // host AF_UNIX path for --vsock socket=… (the hybrid endpoint the host dials)\n    FSTag       string // virtio-fs tag (\"workspace\")\n    FSSocket    string // virtiofsd --socket-path the VMM attaches via --fs\n    FSSharedDir string // virtiofsd --shared-dir: the host tree exported as FSTag→/workspace (per-session checkout dir in V2b; a throwaway temp dir in the V2a spike)\n    CPUs        int\n    MemoryMB    int    // always launched with shared=on ((c))\n    Net         NetConfig\n}"
     },
     {
       "kind": "code-span",
@@ -865,7 +865,7 @@
     },
     {
       "kind": "code-span",
-      "value": "COMPASS_TEST_GUEST_INITRD"
+      "value": "KRYPTON_TEST_GUEST_INITRD"
     },
     {
       "kind": "code-span",
@@ -1037,19 +1037,19 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-guest-kernel"
+      "value": "krypton-guest-kernel"
     },
     {
       "kind": "code-span",
-      "value": "compass-guest-rootfs"
+      "value": "krypton-guest-rootfs"
     },
     {
       "kind": "code-span",
-      "value": "compass-guestd"
+      "value": "krypton-guestd"
     },
     {
       "kind": "code-span",
-      "value": "compass-guest-initrd"
+      "value": "krypton-guest-initrd"
     },
     {
       "kind": "block-marker",
@@ -1117,7 +1117,7 @@
     },
     {
       "kind": "code-span",
-      "value": "COMPASS_REQUIRE_MICROVM=1"
+      "value": "KRYPTON_REQUIRE_MICROVM=1"
     },
     {
       "kind": "code-span",
@@ -1185,7 +1185,7 @@
     },
     {
       "kind": "code-span",
-      "value": "go/cmd/compass-guestd"
+      "value": "go/cmd/krypton-guestd"
     },
     {
       "kind": "heading",
@@ -1201,7 +1201,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compassv1connect.GuestControlHandler"
+      "value": "kryptonv1connect.GuestControlHandler"
     },
     {
       "kind": "code-span",
@@ -1237,7 +1237,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-guest-initrd"
+      "value": "krypton-guest-initrd"
     },
     {
       "kind": "code-span",
@@ -1245,23 +1245,23 @@
     },
     {
       "kind": "code-span",
-      "value": "nix build … compass-guest-kernel compass-guest-rootfs"
+      "value": "nix build … krypton-guest-kernel krypton-guest-rootfs"
     },
     {
       "kind": "code-span",
-      "value": "COMPASS_TEST_GUEST_KERNEL"
+      "value": "KRYPTON_TEST_GUEST_KERNEL"
     },
     {
       "kind": "code-span",
-      "value": "COMPASS_TEST_GUEST_ROOTFS"
+      "value": "KRYPTON_TEST_GUEST_ROOTFS"
     },
     {
       "kind": "code-span",
-      "value": "compass-guest-initrd"
+      "value": "krypton-guest-initrd"
     },
     {
       "kind": "code-span",
-      "value": "COMPASS_TEST_GUEST_INITRD"
+      "value": "KRYPTON_TEST_GUEST_INITRD"
     },
     {
       "kind": "code-span",
@@ -1289,7 +1289,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-guest-kernel"
+      "value": "krypton-guest-kernel"
     },
     {
       "kind": "code-span",
@@ -1305,7 +1305,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-guest-rootfs"
+      "value": "krypton-guest-rootfs"
     },
     {
       "kind": "code-span",
@@ -1317,7 +1317,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-guest-initrd"
+      "value": "krypton-guest-initrd"
     },
     {
       "kind": "code-span",
@@ -1353,7 +1353,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-guest-rootfs"
+      "value": "krypton-guest-rootfs"
     },
     {
       "kind": "code-span",
@@ -1381,7 +1381,7 @@
     },
     {
       "kind": "code-span",
-      "value": "go/cmd/compass-guestd"
+      "value": "go/cmd/krypton-guestd"
     },
     {
       "kind": "code-span",
@@ -1409,7 +1409,7 @@
     },
     {
       "kind": "heading",
-      "value": "H3 T2 — `compass-guestd` real init"
+      "value": "H3 T2 — `krypton-guestd` real init"
     },
     {
       "kind": "code-span",
@@ -1417,7 +1417,7 @@
     },
     {
       "kind": "code-span",
-      "value": "go/cmd/compass-guestd"
+      "value": "go/cmd/krypton-guestd"
     },
     {
       "kind": "code-span",
@@ -1429,11 +1429,11 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-guestd"
+      "value": "krypton-guestd"
     },
     {
       "kind": "code-span",
-      "value": "compassv1connect.GuestControlHandler"
+      "value": "kryptonv1connect.GuestControlHandler"
     },
     {
       "kind": "code-span",
@@ -1441,7 +1441,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass.vsock_port=<n>"
+      "value": "krypton.vsock_port=<n>"
     },
     {
       "kind": "code-span",
@@ -1501,7 +1501,7 @@
     },
     {
       "kind": "code-span",
-      "value": "proto/compass/v1/guest_control.proto"
+      "value": "proto/krypton/v1/guest_control.proto"
     },
     {
       "kind": "code-span",
@@ -1525,7 +1525,7 @@
     },
     {
       "kind": "code-span",
-      "value": "go/gen/compass/v1/compassv1connect/"
+      "value": "go/gen/krypton/v1/kryptonv1connect/"
     },
     {
       "kind": "code-span",
@@ -1545,7 +1545,7 @@
     },
     {
       "kind": "code-span",
-      "value": "GuestClient(cfg BootConfig) compassv1connect.GuestControlClient"
+      "value": "GuestClient(cfg BootConfig) kryptonv1connect.GuestControlClient"
     },
     {
       "kind": "block-marker",
@@ -1649,7 +1649,7 @@
     },
     {
       "kind": "code-span",
-      "value": "COMPASS_TEST_GUEST_INITRD"
+      "value": "KRYPTON_TEST_GUEST_INITRD"
     },
     {
       "kind": "code-span",
@@ -1697,7 +1697,7 @@
     },
     {
       "kind": "code-span",
-      "value": "COMPASS_REQUIRE_MICROVM=1"
+      "value": "KRYPTON_REQUIRE_MICROVM=1"
     },
     {
       "kind": "heading",
@@ -1709,11 +1709,11 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-guest-rootfs"
+      "value": "krypton-guest-rootfs"
     },
     {
       "kind": "code-span",
-      "value": "compass-guest-initrd"
+      "value": "krypton-guest-initrd"
     },
     {
       "kind": "block-marker",
@@ -1721,7 +1721,7 @@
     },
     {
       "kind": "code-span",
-      "value": "compass-guestd"
+      "value": "krypton-guestd"
     },
     {
       "kind": "code-span",
