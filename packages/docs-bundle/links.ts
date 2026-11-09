@@ -49,7 +49,7 @@ function linkTargets(source: string): LinkTarget[] {
 	const links: LinkTarget[] = [];
 	const patterns = [
 		/!?(?:\[[^\]]*\])\(\s*(<[^>]*>|[^\s)]+)(?:\s+[^)]*)?\)/dg,
-		/^ {0,3}\[[^\]\n]+\]:[ \t]*(<[^>\n]*>|[^\s<>]+)(?:[ \t]+[^\n]*)?$/dgm,
+		/^ {0,3}\[(?!\^)[^\]\n]+\]:[ \t]*(<[^>\n]*>|[^\s<>]+)(?:[ \t]+[^\n]*)?$/dgm,
 	];
 	for (const match of patterns.flatMap((pattern) => [
 		...masked.matchAll(pattern),
@@ -86,6 +86,14 @@ function routeKey(repo: string, path: string): string {
 	return `${repo}:${path.replaceAll("\\", "/").replace(/^\.\//, "")}`;
 }
 
+function decodePath(path: string): string {
+	try {
+		return decodeURIComponent(path);
+	} catch {
+		return path;
+	}
+}
+
 function parseGitHubBlob(
 	url: string,
 ): { repo: string; path: string; suffix: string } | undefined {
@@ -96,7 +104,7 @@ function parseGitHubBlob(
 	const remainder = match[2];
 	if (repo === undefined || remainder === undefined) return undefined;
 	const { path, suffix } = targetParts(remainder);
-	return { repo, path: decodeURIComponent(path), suffix };
+	return { repo, path: decodePath(path), suffix };
 }
 
 function blobUrl(repo: string, path: string, suffix: string): string {
@@ -113,7 +121,7 @@ function withinRoot(root: string, path: string): boolean {
 
 function repoTarget(root: string, page: BundlePage, target: string): string {
 	const { path } = targetParts(target);
-	const decodedPath = decodeURIComponent(path);
+	const decodedPath = decodePath(path);
 	const targetPath = decodedPath.startsWith("/")
 		? decodedPath.slice(1)
 		: decodedPath;
@@ -175,7 +183,7 @@ export function rewriteLinks(
 		rewritten += source.slice(cursor, link.start);
 		const target = unwrapTarget(link.raw);
 		const githubTarget = parseGitHubBlob(target);
-		let output = link.raw;
+		let output = target;
 		if (githubTarget !== undefined) {
 			const route = routes.get(routeKey(githubTarget.repo, githubTarget.path));
 			if (route !== undefined) output = `${route}${githubTarget.suffix}`;
@@ -201,9 +209,11 @@ export function rewriteLinks(
 			}
 		}
 		rewritten +=
-			output.startsWith("https://") || !link.raw.startsWith("<")
-				? output
-				: `<${output}>`;
+			output === target
+				? link.raw
+				: output.startsWith("https://") || !link.raw.startsWith("<")
+					? output
+					: `<${output}>`;
 		cursor = link.end;
 	}
 	return rewritten + source.slice(cursor);

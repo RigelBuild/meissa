@@ -4,13 +4,18 @@ const FENCE_OPEN = /^ {0,3}(`{3,}|~{3,})(.*)$/;
 
 function headingText(value: string): string {
 	return value
-		.replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
-		.replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
-		.replace(/\[([^\]]+)\]\[[^\]]*\]/g, "$1")
-		.replace(/`+([^`]+)`+/g, "$1")
-		.replace(/(^|[\s>])<\/?[A-Za-z][^>]*>/g, "$1")
-		.replace(/(\*\*|__|~~|\*|_)(?=\S)(.+?\S|\S)\1/g, "$2")
-		.replace(/\\([\\`*_{}[\]()#+.!<>|~-])/g, "$1")
+		.split(/(`+[^`]+`+)/g)
+		.map((part, index) => {
+			if (index % 2 === 1) return part.replace(/^`+|`+$/g, "");
+			return part
+				.replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+				.replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+				.replace(/\[([^\]]+)\]\[[^\]]*\]/g, "$1")
+				.replace(/<([A-Za-z][\w-]*)\b[^>]*>(.*?)<\/\1\s*>/gi, "$2")
+				.replace(/(\*\*|__|~~|\*|_)(?=\S)(.+?\S|\S)\1/g, "$2")
+				.replace(/\\([\\`*_{}[\]()#+.!<>|~-])/g, "$1");
+		})
+		.join("")
 		.replace(/\s+/g, " ")
 		.trim();
 }

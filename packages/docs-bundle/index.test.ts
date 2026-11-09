@@ -79,6 +79,75 @@ describe("docs bundle helpers", () => {
 		expect(extractTitle("# Title ##\n", "docs/title.md")).toBe("Title");
 		expect(stripFirstH1("# C#\nBody\n")).toBe("Body\n");
 	});
+	test("preserves angle-wrapped external links and fragments", () => {
+		const input = "[x](<https://example.com/a b>) [x](<#sec>)";
+		expect(
+			rewriteLinks(
+				input,
+				page("index.md", "/"),
+				new Map(),
+				"/tmp/acme-widgets",
+			),
+		).toBe(input);
+	});
+	test("ignores footnote definitions when rewriting and checking links", async () => {
+		const root = await fixture();
+		const input = "[^1]: This is a footnote.\n";
+		await writeFile(join(root, "index.md"), input);
+		expect(rewriteLinks(input, page("index.md", "/"), new Map(), root)).toBe(
+			input,
+		);
+		expect(
+			await findBrokenLinks(root, source.repo, [page("index.md", "/")]),
+		).toEqual([]);
+	});
+	test("handles bare percent signs in existing and missing paths", async () => {
+		const root = await fixture();
+		const current = page("index.md", "/");
+		await writeFile(join(root, "100%.md"), "# Present");
+		await writeFile(
+			join(root, "index.md"),
+			"[exists](100%.md) [missing](99%.md)",
+		);
+		const missing: string[] = [];
+		expect(
+			rewriteLinks(
+				"[exists](100%.md) [missing](99%.md)",
+				current,
+				new Map(),
+				root,
+				(link) => missing.push(link.target),
+			),
+		).toBe(
+			"[exists](https://github.com/acme/widgets/blob/main/100%25.md) [missing](https://github.com/acme/widgets/blob/main/99%25.md)",
+		);
+		expect(missing).toEqual(["99%.md"]);
+		expect(await findBrokenLinks(root, source.repo, [current])).toEqual([
+			{ repo: source.repo, sourcePath: "index.md", target: "99%.md" },
+		]);
+	});
+	test("handles bare percent signs in GitHub blob targets", () => {
+		const input = "[x](https://github.com/acme/widgets/blob/main/100%.md)";
+		expect(
+			rewriteLinks(
+				input,
+				page("index.md", "/"),
+				new Map([["acme/widgets:100%.md", "/hundred"]]),
+				"/tmp/acme-widgets",
+			),
+		).toBe("[x](/hundred)");
+	});
+	test("preserves code span tags in titles", () => {
+		expect(extractTitle("# Use `<div>` tag", "page.md")).toBe("Use <div> tag");
+	});
+	test("preserves generic parameters in titles", () => {
+		expect(extractTitle("# Generic <T> helpers", "page.md")).toBe(
+			"Generic <T> helpers",
+		);
+	});
+	test("strips paired HTML tags and emphasis from titles", () => {
+		expect(extractTitle("# **Bold** <em>x</em>", "page.md")).toBe("Bold x");
+	});
 	test("preserves literal underscores and angle brackets in titles", () => {
 		expect(extractTitle("# snake_case", "page.md")).toBe("snake_case");
 		expect(extractTitle("# List<T>", "page.md")).toBe("List<T>");
