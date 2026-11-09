@@ -79,6 +79,117 @@ describe("docs bundle helpers", () => {
 		expect(extractTitle("# Title ##\n", "docs/title.md")).toBe("Title");
 		expect(stripFirstH1("# C#\nBody\n")).toBe("Body\n");
 	});
+	test("preserves literal underscores and angle brackets in titles", () => {
+		expect(extractTitle("# snake_case", "page.md")).toBe("snake_case");
+		expect(extractTitle("# List<T>", "page.md")).toBe("List<T>");
+		expect(extractTitle("# **Bold** title", "page.md")).toBe("Bold title");
+	});
+	test("resolves root-absolute links from the source root", () => {
+		const routes = new Map([["acme/widgets:docs/next.md", "/guide/next"]]);
+		expect(
+			rewriteLinks(
+				"[x](/docs/next.md)",
+				page("docs/index.md", "/guide"),
+				routes,
+				"/tmp/acme-widgets",
+			),
+		).toBe("[x](/guide/next)");
+	});
+	test("rewrites reference definitions outside fences", () => {
+		const routes = new Map([["acme/widgets:docs/next.md", "/guide/next"]]);
+		const input = "[ref]: next.md\n```\n[hidden]: missing.md\n```\n";
+		expect(
+			rewriteLinks(
+				input,
+				page("docs/index.md", "/guide"),
+				routes,
+				"/tmp/acme-widgets",
+			),
+		).toBe("[ref]: /guide/next\n```\n[hidden]: missing.md\n```\n");
+	});
+	test("reports broken reference definitions outside fences", async () => {
+		const root = await fixture();
+		await writeFile(
+			join(root, "index.md"),
+			"[ref]: missing.md\n```\n[hidden]: ignored.md\n```\n",
+		);
+		expect(
+			await findBrokenLinks(root, source.repo, [page("index.md", "/")]),
+		).toEqual([
+			{ repo: source.repo, sourcePath: "index.md", target: "missing.md" },
+		]);
+	});
+	test("decodes encoded paths for bundled route lookup and broken link checks", async () => {
+		const root = await fixture();
+		await writeFile(join(root, "index.md"), "[x](my%20doc.md)");
+		await writeFile(join(root, "my doc.md"), "# Document");
+		const current = page("index.md", "/");
+		const target = page("my doc.md", "/my-doc");
+		expect(
+			rewriteLinks(
+				"[x](my%20doc.md)",
+				current,
+				new Map([["acme/widgets:my doc.md", "/my-doc"]]),
+				root,
+			),
+		).toBe("[x](/my-doc)");
+		expect(await findBrokenLinks(root, source.repo, [current, target])).toEqual(
+			[],
+		);
+		expect(await findBrokenLinks(root, source.repo, [current])).toEqual([]);
+	});
+	test("encodes blob URL segments for an existing unbundled file", async () => {
+		const root = await fixture();
+		await writeFile(join(root, "My Doc.md"), "# Document");
+		const missing: string[] = [];
+		expect(
+			rewriteLinks(
+				"[x](<My Doc.md>)",
+				page("index.md", "/"),
+				new Map(),
+				root,
+				(link) => missing.push(link.target),
+			),
+		).toBe("[x](https://github.com/acme/widgets/blob/main/My%20Doc.md)");
+		expect(missing).toEqual([]);
+	});
+	test("rejects an allowed package README deeper than readmeDepth", async () => {
+		const root = await fixture();
+		await mkdir(join(root, "packages/widgets/a/b"), { recursive: true });
+		await writeFile(join(root, "packages/widgets/a/b/README.md"), "# Deep");
+		await expect(
+			collectPages(
+				{ ...source, root, config: "required" },
+				{
+					exclude: [],
+					sections: [],
+					packages: { route: "/packages", allow: ["widgets"], readmeDepth: 1 },
+				},
+			),
+		).rejects.toThrow("stray package page: packages/widgets/a/b/README.md");
+	});
+	test("routes a page under a section prefix without a trailing slash", async () => {
+		const root = await fixture();
+		await mkdir(join(root, "docs/guide"), { recursive: true });
+		await writeFile(join(root, "docs/guide/intro.md"), "# Intro");
+		const pages = await collectPages(
+			{ ...source, root, config: "required" },
+			{
+				exclude: [],
+				sections: [
+					{
+						id: "guide",
+						label: "Guide",
+						route: "/guide",
+						prefix: "docs/guide",
+					},
+				],
+			},
+		);
+		expect(pages.map(({ sourcePath, route }) => [sourcePath, route])).toEqual([
+			["docs/guide/intro.md", "/guide/intro"],
+		]);
+	});
 	test("rewrites the href when link text equals its target", () => {
 		const current = page("index.md", "/guide");
 		const routes = new Map([["acme/widgets:next.md", "/guide/next"]]);

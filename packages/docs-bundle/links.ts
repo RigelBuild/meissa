@@ -47,8 +47,13 @@ function maskedMarkdown(source: string): string {
 function linkTargets(source: string): LinkTarget[] {
 	const masked = maskedMarkdown(source);
 	const links: LinkTarget[] = [];
-	const pattern = /!?(?:\[[^\]]*\])\(\s*(<[^>]*>|[^\s)]+)(?:\s+[^)]*)?\)/dg;
-	for (const match of masked.matchAll(pattern)) {
+	const patterns = [
+		/!?(?:\[[^\]]*\])\(\s*(<[^>]*>|[^\s)]+)(?:\s+[^)]*)?\)/dg,
+		/^ {0,3}\[[^\]\n]+\]:[ \t]*(<[^>\n]*>|[^\s<>]+)(?:[ \t]+[^\n]*)?$/dgm,
+	];
+	for (const match of patterns.flatMap((pattern) => [
+		...masked.matchAll(pattern),
+	])) {
 		const captured = match[1];
 		const offset = match.indices?.[1]?.[0];
 		if (
@@ -61,7 +66,7 @@ function linkTargets(source: string): LinkTarget[] {
 		const raw = source.slice(start, start + captured.length);
 		links.push({ start, end: start + captured.length, raw });
 	}
-	return links;
+	return links.sort((a, b) => a.start - b.start);
 }
 
 function unwrapTarget(target: string): string {
@@ -91,11 +96,11 @@ function parseGitHubBlob(
 	const remainder = match[2];
 	if (repo === undefined || remainder === undefined) return undefined;
 	const { path, suffix } = targetParts(remainder);
-	return { repo, path, suffix };
+	return { repo, path: decodeURIComponent(path), suffix };
 }
 
 function blobUrl(repo: string, path: string, suffix: string): string {
-	return `https://github.com/${repo}/blob/main/${path}${suffix}`;
+	return `https://github.com/${repo}/blob/main/${path.split("/").map(encodeURIComponent).join("/")}${suffix}`;
 }
 
 function withinRoot(root: string, path: string): boolean {
@@ -108,13 +113,14 @@ function withinRoot(root: string, path: string): boolean {
 
 function repoTarget(root: string, page: BundlePage, target: string): string {
 	const { path } = targetParts(target);
-	const targetPath = path.startsWith("/") ? path.slice(1) : path;
-	return posix.normalize(
-		posix.relative(
-			root,
-			resolve(dirname(join(root, page.sourcePath)), targetPath),
-		),
-	);
+	const decodedPath = decodeURIComponent(path);
+	const targetPath = decodedPath.startsWith("/")
+		? decodedPath.slice(1)
+		: decodedPath;
+	const base = decodedPath.startsWith("/")
+		? root
+		: dirname(join(root, page.sourcePath));
+	return posix.normalize(posix.relative(root, resolve(base, targetPath)));
 }
 
 export async function findBrokenLinks(

@@ -8,9 +8,9 @@ function headingText(value: string): string {
 		.replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
 		.replace(/\[([^\]]+)\]\[[^\]]*\]/g, "$1")
 		.replace(/`+([^`]+)`+/g, "$1")
-		.replace(/<[^>]+>/g, "")
+		.replace(/(^|[\s>])<\/?[A-Za-z][^>]*>/g, "$1")
+		.replace(/(\*\*|__|~~|\*|_)(?=\S)(.+?\S|\S)\1/g, "$2")
 		.replace(/\\([\\`*_{}[\]()#+.!<>|~-])/g, "$1")
-		.replace(/[*_~]/g, "")
 		.replace(/\s+/g, " ")
 		.trim();
 }

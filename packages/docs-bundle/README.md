@@ -25,4 +25,6 @@ const title = extractTitle(markdown, "docs/guide.md");
 const rewritten = rewriteLinks(markdown, page, routes, repositoryRoot);
 ```
 
+Only ATX `#` headings are read for titles; Setext headings are not supported.
+
 `rewriteLinks` routes bundled pages to the site. Existing files outside the bundle and missing targets link to the source repository's GitHub blob URL; missing targets also call `onMissing` when supplied.
