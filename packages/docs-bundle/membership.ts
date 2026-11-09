@@ -6,8 +6,21 @@ export function isGatherable(path: string): boolean {
 	if (normalized.split("/").includes("node_modules")) return false;
 	if (normalized.split("/").includes("dist")) return false;
 	if (normalized.split("/").includes("outputs")) return false;
-	if (normalized.split("/").some((segment) => segment.startsWith(".")) && normalized !== PULL_REQUEST_TEMPLATE) return false;
-	if (normalized.split("/").some((segment, index, parts) => segment === "designs" && parts[index - 1] === "docs")) return false;
-	if (normalized.split("/").at(-1)?.toLowerCase() === "changelog.md") return false;
+	if (
+		normalized.split("/").some((segment) => segment.startsWith(".")) &&
+		normalized !== PULL_REQUEST_TEMPLATE
+	)
+		return false;
+	if (
+		normalized
+			.split("/")
+			.some(
+				(segment, index, parts) =>
+					segment === "designs" && parts[index - 1] === "docs",
+			)
+	)
+		return false;
+	if (normalized.split("/").at(-1)?.toLowerCase() === "changelog.md")
+		return false;
 	return true;
 }

@@ -8,23 +8,41 @@ const roots: string[] = [];
 async function makeRepo(): Promise<string> {
 	const root = await mkdtemp(join(tmpdir(), "docs-bundle-cli-"));
 	roots.push(root);
-	await writeFile(join(root, "docs-bundle.toml"), `exclude = []\n\n[[sections]]\nid = "docs"\nlabel = "Docs"\nroute = "/docs"\nprefix = "docs/"\n`);
+	await writeFile(
+		join(root, "docs-bundle.toml"),
+		`exclude = []\n\n[[sections]]\nid = "docs"\nlabel = "Docs"\nroute = "/docs"\nprefix = "docs/"\n`,
+	);
 	await mkdir(join(root, "docs"), { recursive: true });
 	return root;
 }
 
-async function check(root: string): Promise<{ exitCode: number | null; stderr: string }> {
+async function check(
+	root: string,
+): Promise<{ exitCode: number | null; stderr: string }> {
 	const result = Bun.spawnSync({
-		cmd: ["bun", join(import.meta.dir, "cli.ts"), "check", "--root", root, "--config", "required"],
+		cmd: [
+			"bun",
+			join(import.meta.dir, "cli.ts"),
+			"check",
+			"--root",
+			root,
+			"--config",
+			"required",
+		],
 		cwd: import.meta.dir,
 		stdout: "pipe",
 		stderr: "pipe",
 	});
-	return { exitCode: result.exitCode, stderr: new TextDecoder().decode(result.stderr) };
+	return {
+		exitCode: result.exitCode,
+		stderr: new TextDecoder().decode(result.stderr),
+	};
 }
 
 afterAll(async () => {
-	await Promise.all(roots.map((root) => rm(root, { recursive: true, force: true })));
+	await Promise.all(
+		roots.map((root) => rm(root, { recursive: true, force: true })),
+	);
 });
 
 describe("docs-bundle check", () => {
@@ -42,7 +60,10 @@ describe("docs-bundle check", () => {
 		await mkdir(join(root, "docs", "second"), { recursive: true });
 		await writeFile(join(root, "docs", "first", "readme.md"), "# First\n");
 		await writeFile(join(root, "docs", "second", "readme.md"), "# Second\n");
-		await writeFile(join(root, "docs-bundle.toml"), `exclude = []\n\n[[sections]]\nid = "one"\nlabel = "One"\nroute = "/same"\nfiles = ["docs/first/readme.md"]\n\n[[sections]]\nid = "two"\nlabel = "Two"\nroute = "/same"\nfiles = ["docs/second/readme.md"]\n`);
+		await writeFile(
+			join(root, "docs-bundle.toml"),
+			`exclude = []\n\n[[sections]]\nid = "one"\nlabel = "One"\nroute = "/same"\nfiles = ["docs/first/readme.md"]\n\n[[sections]]\nid = "two"\nlabel = "Two"\nroute = "/same"\nfiles = ["docs/second/readme.md"]\n`,
+		);
 		const result = await check(root);
 		expect(result.exitCode).toBe(1);
 		expect(result.stderr).toContain("docs-bundle: 2 page(s)");

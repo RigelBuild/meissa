@@ -1,6 +1,14 @@
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
-import { dirname, isAbsolute, join, relative, resolve, sep, posix } from "node:path";
+import {
+	dirname,
+	isAbsolute,
+	join,
+	posix,
+	relative,
+	resolve,
+	sep,
+} from "node:path";
 import type { BrokenLink, BundlePage } from "./types.ts";
 
 interface LinkTarget {
@@ -16,7 +24,9 @@ function maskedMarkdown(source: string): string {
 		const line = lines[index] ?? "";
 		if (fence !== undefined) {
 			lines[index] = " ".repeat(line.length);
-			const close = new RegExp(`^ {0,3}${fence.marker}{${fence.length},}[ \\t]*$`);
+			const close = new RegExp(
+				`^ {0,3}${fence.marker}{${fence.length},}[ \\t]*$`,
+			);
 			if (close.test(line)) fence = undefined;
 			continue;
 		}
@@ -27,7 +37,9 @@ function maskedMarkdown(source: string): string {
 			lines[index] = " ".repeat(line.length);
 			continue;
 		}
-		lines[index] = line.replace(/(`+).*?\1/g, (code) => " ".repeat(code.length));
+		lines[index] = line.replace(/(`+).*?\1/g, (code) =>
+			" ".repeat(code.length),
+		);
 	}
 	return lines.join("\n");
 }
@@ -35,11 +47,17 @@ function maskedMarkdown(source: string): string {
 function linkTargets(source: string): LinkTarget[] {
 	const masked = maskedMarkdown(source);
 	const links: LinkTarget[] = [];
-	const pattern = /!?(?:\[[^\]]*\])\(\s*(<[^>]*>|[^\s)]+)(?:\s+[^)]*)?\)/g;
+	const pattern = /!?(?:\[[^\]]*\])\(\s*(<[^>]*>|[^\s)]+)(?:\s+[^)]*)?\)/dg;
 	for (const match of masked.matchAll(pattern)) {
 		const captured = match[1];
-		if (captured === undefined || match.index === undefined) continue;
-		const start = match.index + match[0].indexOf(captured);
+		const offset = match.indices?.[1]?.[0];
+		if (
+			captured === undefined ||
+			match.index === undefined ||
+			offset === undefined
+		)
+			continue;
+		const start = offset;
 		const raw = source.slice(start, start + captured.length);
 		links.push({ start, end: start + captured.length, raw });
 	}
@@ -47,7 +65,9 @@ function linkTargets(source: string): LinkTarget[] {
 }
 
 function unwrapTarget(target: string): string {
-	return target.startsWith("<") && target.endsWith(">") ? target.slice(1, -1) : target;
+	return target.startsWith("<") && target.endsWith(">")
+		? target.slice(1, -1)
+		: target;
 }
 
 function targetParts(target: string): { path: string; suffix: string } {
@@ -61,8 +81,11 @@ function routeKey(repo: string, path: string): string {
 	return `${repo}:${path.replaceAll("\\", "/").replace(/^\.\//, "")}`;
 }
 
-function parseGitHubBlob(url: string): { repo: string; path: string; suffix: string } | undefined {
-	const match = /^https:\/\/github\.com\/([^/]+\/[^/]+)\/blob\/main\/(.+)$/i.exec(url);
+function parseGitHubBlob(
+	url: string,
+): { repo: string; path: string; suffix: string } | undefined {
+	const match =
+		/^https:\/\/github\.com\/([^/]+\/[^/]+)\/blob\/main\/(.+)$/i.exec(url);
 	if (match === null) return undefined;
 	const repo = match[1];
 	const remainder = match[2];
@@ -77,18 +100,31 @@ function blobUrl(repo: string, path: string, suffix: string): string {
 
 function withinRoot(root: string, path: string): boolean {
 	const rel = relative(root, path);
-	return rel.length === 0 || (!rel.startsWith(`..${sep}`) && rel !== ".." && !isAbsolute(rel));
+	return (
+		rel.length === 0 ||
+		(!rel.startsWith(`..${sep}`) && rel !== ".." && !isAbsolute(rel))
+	);
 }
 
 function repoTarget(root: string, page: BundlePage, target: string): string {
 	const { path } = targetParts(target);
 	const targetPath = path.startsWith("/") ? path.slice(1) : path;
-	return posix.normalize(posix.relative(root, resolve(dirname(join(root, page.sourcePath)), targetPath)));
+	return posix.normalize(
+		posix.relative(
+			root,
+			resolve(dirname(join(root, page.sourcePath)), targetPath),
+		),
+	);
 }
 
-export async function findBrokenLinks(root: string, repo: string, pages: readonly BundlePage[]): Promise<BrokenLink[]> {
+export async function findBrokenLinks(
+	root: string,
+	repo: string,
+	pages: readonly BundlePage[],
+): Promise<BrokenLink[]> {
 	const routes = new Map<string, string>();
-	for (const page of pages) routes.set(routeKey(page.repo, page.sourcePath), page.route);
+	for (const page of pages)
+		routes.set(routeKey(page.repo, page.sourcePath), page.route);
 	const rootPath = resolve(root);
 	const broken: BrokenLink[] = [];
 	for (const page of pages) {
@@ -102,8 +138,15 @@ export async function findBrokenLinks(root: string, repo: string, pages: readonl
 			const resolvedTarget = repoTarget(rootPath, page, target);
 			if (routes.has(routeKey(repo, resolvedTarget))) continue;
 			const absoluteTarget = resolve(rootPath, resolvedTarget);
-			if (!withinRoot(rootPath, absoluteTarget) || !existsSync(absoluteTarget)) {
-				broken.push({ repo, sourcePath: page.sourcePath, target: resolvedTarget });
+			if (
+				!withinRoot(rootPath, absoluteTarget) ||
+				!existsSync(absoluteTarget)
+			) {
+				broken.push({
+					repo,
+					sourcePath: page.sourcePath,
+					target: resolvedTarget,
+				});
 			}
 		}
 	}
@@ -138,13 +181,23 @@ export function rewriteLinks(
 				output = `${route}${suffix}`;
 			} else {
 				const absoluteTarget = resolve(rootPath, resolvedTarget);
-				if (path.length > 0 && (!withinRoot(rootPath, absoluteTarget) || !existsSync(absoluteTarget))) {
-					onMissing?.({ repo: page.repo, sourcePath: page.sourcePath, target: resolvedTarget });
+				if (
+					path.length > 0 &&
+					(!withinRoot(rootPath, absoluteTarget) || !existsSync(absoluteTarget))
+				) {
+					onMissing?.({
+						repo: page.repo,
+						sourcePath: page.sourcePath,
+						target: resolvedTarget,
+					});
 				}
 				output = blobUrl(page.repo, resolvedTarget, suffix);
 			}
 		}
-		rewritten += output.startsWith("https://") || !link.raw.startsWith("<") ? output : `<${output}>`;
+		rewritten +=
+			output.startsWith("https://") || !link.raw.startsWith("<")
+				? output
+				: `<${output}>`;
 		cursor = link.end;
 	}
 	return rewritten + source.slice(cursor);

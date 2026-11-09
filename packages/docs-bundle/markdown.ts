@@ -21,7 +21,9 @@ function firstH1Line(source: string): number {
 	for (let index = 0; index < lines.length; index += 1) {
 		const line = lines[index] ?? "";
 		if (fence !== undefined) {
-			const close = new RegExp(`^ {0,3}${fence.marker}{${fence.length},}[ \\t]*$`);
+			const close = new RegExp(
+				`^ {0,3}${fence.marker}{${fence.length},}[ \\t]*$`,
+			);
 			if (close.test(line)) fence = undefined;
 			continue;
 		}
@@ -51,12 +53,13 @@ export function extractTitle(source: string, sourcePath: string): string {
 	const index = firstH1Line(source);
 	if (index >= 0) {
 		const line = source.split("\n")[index] ?? "";
-		const match = /^ {0,3}# +(.+?) *#* *$/.exec(line);
+		const match = /^ {0,3}# +(.+?)(?: +#+ *)?$/.exec(line);
 		if (match?.[1] !== undefined) return headingText(match[1]);
 	}
 	const filename = sourcePath.replaceAll("\\", "/").split("/").at(-1) ?? "";
 	const stem = filename.replace(/\.md$/i, "").replace(/[-_]+/g, " ").trim();
-	return stem.length === 0 ? "Untitled" : stem[0]!.toUpperCase() + stem.slice(1);
+	if (stem.length === 0) return "Untitled";
+	return stem.charAt(0).toUpperCase() + stem.slice(1);
 }
 
 export function stripFirstH1(source: string): string {
