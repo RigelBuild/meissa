@@ -1,0 +1,210 @@
+{
+  "revision": "b3549997fcaab879d39b9dd98d633747183fe00c",
+  "docsRevision": "fc2d4ac1004e132b9458682af29becdca452f7a7",
+  "fixtures": [
+    {
+      "name": "content before the block",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 1,
+      "reason": "file must start with a `---` front-matter block"
+    },
+    {
+      "name": "an unclosed block",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 1,
+      "reason": "front-matter block is not closed with `---`"
+    },
+    {
+      "name": "an unterminated quote",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 3,
+      "reason": "`decision` must be a one-line double-quoted string"
+    },
+    {
+      "name": "a YAML-only \\x escape",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 3,
+      "reason": "`decision` must be a one-line double-quoted string"
+    },
+    {
+      "name": "a literal tab",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 3,
+      "reason": "`decision` must be a one-line double-quoted string"
+    },
+    {
+      "name": "a decoded newline",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 3,
+      "reason": "`decision` must be one line"
+    },
+    {
+      "name": "a decoded line separator",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 3,
+      "reason": "`decision` must be one line"
+    },
+    {
+      "name": "an anchored record",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 5,
+      "reason": "`record` must be a plain unquoted value"
+    },
+    {
+      "name": "a tagged id",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 2,
+      "reason": "`id` must be a plain unquoted value"
+    },
+    {
+      "name": "a trailing comment on the id",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 2,
+      "reason": "id `DL-297 # c` is not canonical DL-NNN"
+    },
+    {
+      "name": "a duplicate key",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 2,
+      "reason": "front matter must hold exactly id, decision, status, record"
+    },
+    {
+      "name": "an extra key",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 2,
+      "reason": "front matter must hold exactly id, decision, status, record"
+    },
+    {
+      "name": "a missing key",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 2,
+      "reason": "front matter must hold exactly id, decision, status, record"
+    },
+    {
+      "name": "keys out of order",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 3,
+      "reason": "expected key `decision` at line 3"
+    },
+    {
+      "name": "an unquoted decision",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 3,
+      "reason": "`decision` must be a one-line double-quoted string"
+    },
+    {
+      "name": "a single-quoted status",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 4,
+      "reason": "`status` must be a one-line double-quoted string"
+    },
+    {
+      "name": "a quoted id",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 2,
+      "reason": "`id` must be a plain unquoted value"
+    },
+    {
+      "name": "a width-drifted id",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 2,
+      "reason": "id `DL-0297` is not canonical DL-NNN"
+    },
+    {
+      "name": "an id that disagrees with the file name",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 2,
+      "reason": "id `DL-298` does not match file name `DL-297.md`"
+    },
+    {
+      "name": "an empty decision",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 3,
+      "reason": "`decision` is empty"
+    },
+    {
+      "name": "a status without provenance",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 4,
+      "reason": "status `Active` is not Active, Superseded by DL-NNN, or Retired with (<who>, YYYY-MM-DD)"
+    },
+    {
+      "name": "a superseded target of the wrong width",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 4,
+      "reason": "status `Superseded by DL-30 (Matt, 2026-10-07)` is not Active, Superseded by DL-NNN, or Retired with (<who>, YYYY-MM-DD)"
+    },
+    {
+      "name": "a record that is not markdown",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 5,
+      "reason": "`record` must be a relative `.md` path of letters, digits, `.`, `_`, `-` and `/`"
+    },
+    {
+      "name": "an absolute record",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 5,
+      "reason": "`record` must be a relative `.md` path of letters, digits, `.`, `_`, `-` and `/`"
+    },
+    {
+      "name": "a URL record",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 5,
+      "reason": "`record` must be a relative `.md` path of letters, digits, `.`, `_`, `-` and `/`"
+    },
+    {
+      "name": "a non-slug anchor",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 5,
+      "reason": "record anchor `#Approach Two` is not a heading slug"
+    },
+    {
+      "name": "an uppercase anchor",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 5,
+      "reason": "record anchor `#Approach` is not a heading slug"
+    },
+    {
+      "name": "a record with a pipe",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 5,
+      "reason": "`record` must be a relative `.md` path of letters, digits, `.`, `_`, `-` and `/`"
+    },
+    {
+      "name": "a record with a paren",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 5,
+      "reason": "`record` must be a relative `.md` path of letters, digits, `.`, `_`, `-` and `/`"
+    },
+    {
+      "name": "a record with a space",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 5,
+      "reason": "`record` must be a relative `.md` path of letters, digits, `.`, `_`, `-` and `/`"
+    },
+    {
+      "name": "a record with a query",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 5,
+      "reason": "`record` must be a relative `.md` path of letters, digits, `.`, `_`, `-` and `/`"
+    },
+    {
+      "name": "a nameless record",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 5,
+      "reason": "`record` must be a relative `.md` path of letters, digits, `.`, `_`, `-` and `/`"
+    },
+    {
+      "name": "a record above the repo root",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 5,
+      "reason": "`record` climbs above the repository root"
+    },
+    {
+      "name": "lone surrogate",
+      "path": "docs/designs/decisions/meta/DL-297.md",
+      "line": 2,
+      "reason": "malformed YAML:"
+    }
+  ]
+}
