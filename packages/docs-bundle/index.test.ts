@@ -126,6 +126,37 @@ describe("docs bundle helpers", () => {
 			await findBrokenLinks(root, source.repo, [page("index.md", "/")]),
 		).toEqual([]);
 	});
+	test("rewrites and checks reference targets containing apostrophes", async () => {
+		const root = await fixture();
+		const input = "[k]: docs/don't.md\n";
+		const current = page("index.md", "/");
+		await writeFile(join(root, "index.md"), input);
+		expect(
+			rewriteLinks(
+				input,
+				current,
+				new Map([["acme/widgets:docs/don't.md", "/guide"]]),
+				root,
+			),
+		).toBe("[k]: /guide\n");
+		expect(await findBrokenLinks(root, source.repo, [current])).toEqual([
+			{ repo: source.repo, sourcePath: "index.md", target: "docs/don't.md" },
+		]);
+	});
+	test("rejects root readmes not claimed by a section", async () => {
+		const root = await fixture();
+		await writeFile(join(root, "README.md"), "# Root\n");
+		await expect(
+			collectPages(
+				{ ...source, root, config: "required" },
+				{
+					exclude: [],
+					sections: [],
+					packages: { route: "/packages", allow: [], readmeDepth: 3 },
+				},
+			),
+		).rejects.toThrow("stray package page: README.md");
+	});
 	test("uses GitHub slug rules for every route segment", () => {
 		expect(routeSlug("Guides/Hello, World!.md")).toBe("/guides/hello-world");
 		expect(routeSlug("README.md")).toBe("/readme");

@@ -52,6 +52,7 @@ export async function collectPages(
 			const name = parts.at(-1);
 			const readme =
 				(name === "README.md" || name === "AGENTS.md") &&
+				parts.length >= 2 &&
 				parts.length <= packageRules.readmeDepth;
 			const allowed = packageRules.allow.some((entry) =>
 				entry.endsWith("/") ? path.startsWith(entry) : path === entry,
