@@ -98,6 +98,7 @@
           package = self.packages.${system}.tools;
         in pkgs.runCommand "meissa-tools-check" { } ''
           test -x "${package}/bin/ref-gate"
+          test -x "${package}/bin/refresh-nix-hashes"
           touch "$out"
         '';
       } // (if system == "x86_64-linux" then {

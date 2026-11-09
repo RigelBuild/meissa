@@ -47,6 +47,12 @@ jobs:
       - name: Assert pinned Node.js is on PATH
         run: node --version
 
+      - name: Put pinned Go toolchain on PATH
+        run: echo "$(nix build --no-link --print-out-paths --inputs-from . nixpkgs#go_1_27)/bin" >> "$GITHUB_PATH"
+
+      - name: Assert pinned Go toolchain is on PATH
+        run: go version
+
       - name: Run Renovate
         env:
           RENOVATE_CONFIG_FILE: tools/renovate/bot-config.json5
