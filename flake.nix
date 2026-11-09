@@ -32,6 +32,7 @@
             inherit (pkgs) buildGo127Module lib;
           };
           "rumdl-base-config" = import ./rumdl-base-config.nix { inherit pkgs; };
+          hk = import ./tools/toolchain/hk.nix { inherit pkgs; };
         };
       moduleCheck = system:
         let
