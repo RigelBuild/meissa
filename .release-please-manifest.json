@@ -1,4 +1,5 @@
 {
+	"packages/docs-bundle": "1.0.0",
 	"packages/design-ledger-gate": "2.0.1",
 	"packages/dl-claim": "1.1.1",
 	"packages/dl-list": "1.0.1",

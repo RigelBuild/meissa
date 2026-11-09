@@ -68,6 +68,20 @@
         "typescript": "6.0.3",
       },
     },
+    "packages/docs-bundle": {
+      "name": "@rigelbuild/docs-bundle",
+      "version": "1.0.0",
+      "bin": {
+        "docs-bundle": "cli.ts",
+      },
+      "dependencies": {
+        "github-slugger": "2.0.0",
+      },
+      "devDependencies": {
+        "@types/bun": "1.4.4",
+        "typescript": "6.0.3",
+      },
+    },
     "packages/length-gate": {
       "name": "@rigelbuild/length-gate",
       "version": "1.0.2",
@@ -118,6 +132,10 @@
 
     "@rigelbuild/dl-reconcile": ["@rigelbuild/dl-reconcile@workspace:packages/dl-reconcile"],
 
+    "@rigelbuild/docs-bundle": ["@rigelbuild/docs-bundle@workspace:packages/docs-bundle"],
+
+    "@rigelbuild/length-gate": ["@rigelbuild/length-gate@workspace:packages/length-gate"],
+
     "@rigelbuild/renovate-preflight": ["@rigelbuild/renovate-preflight@workspace:packages/renovate-preflight"],
 
     "@rigelbuild/tsconfig": ["@rigelbuild/tsconfig@workspace:packages/tsconfig"],
@@ -155,6 +173,8 @@
     "fault": ["fault@2.0.1", "", { "dependencies": { "format": "^0.2.0" } }, "sha512-WtySTkS4OKev5JtpHXnib4Gxiurzh5NCGvWrFaZ34m6JehfTUhKZvn9njTfw48t6JumVQOmrKqpmGcdwxnhqBQ=="],
 
     "format": ["format@0.2.2", "", {}, "sha512-wzsgA6WOq+09wrU1tsJ09udeR/YZRaeArL9e1wPbFg3GG2yDnC2ldKpxs4xunpFF9DgqCqOIra3bc1HWrJ37Ww=="],
+
+    "github-slugger": ["github-slugger@2.0.0", "", {}, "sha512-IaOQ9puYtjrkq7Y0Ygl9KDZnrf/aiUJYUpVf89y8kyaxbRG7Y1SrX/jaumrv81vc61+kiMempujsM3Yw7w5qcw=="],
 
     "longest-streak": ["longest-streak@3.1.0", "", {}, "sha512-9Ri+o0JYgehTaVBBDoMqIl8GXtbWg711O3srftcHhZ0dqnETqLaoIK0x17fUw9rFSlK/0NlsKe0Ahhyl5pXE2g=="],
 

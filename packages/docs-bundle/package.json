@@ -1,0 +1,45 @@
+{
+	"name": "@rigelbuild/docs-bundle",
+	"version": "1.0.0",
+	"type": "module",
+	"description": "Shared Markdown docs bundling helpers and publish check.",
+	"license": "MIT OR Apache-2.0",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/RigelBuild/meissa.git",
+		"directory": "packages/docs-bundle"
+	},
+	"bin": {
+		"docs-bundle": "cli.ts"
+	},
+	"exports": {
+		".": "./index.ts"
+	},
+	"files": [
+		"package.json",
+		"index.ts",
+		"cli.ts",
+		"config.ts",
+		"fetched.ts",
+		"links.ts",
+		"manifest.ts",
+		"markdown.ts",
+		"membership.ts",
+		"pages.ts",
+		"exclusions.ts",
+		"types.ts",
+		"README.md",
+		"LICENSE-MIT",
+		"LICENSE-APACHE"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"dependencies": {
+		"github-slugger": "2.0.0"
+	},
+	"devDependencies": {
+		"@types/bun": "1.4.4",
+		"typescript": "6.0.3"
+	}
+}
