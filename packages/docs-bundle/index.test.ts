@@ -64,9 +64,71 @@ describe("docs bundle helpers", () => {
 		expect(isExcluded("private/notes.md", exclusions)).toBe(true);
 		expect(isExcluded("public/guide.md", exclusions)).toBe(false);
 	});
+	test("matches content routes including index and mdx", () => {
+		expect(routeSlug("Guides/Index.mdx")).toBe("/guides");
+		expect(routeSlug("README.md")).toBe("/readme");
+	});
+	test("keeps nested design directories outside the root design corpus", () => {
+		expect(isGatherable("team/docs/designs/page.md")).toBe(true);
+		expect(isGatherable("docs/designs/page.md")).toBe(false);
+	});
+	test("routes catch-all and explicit files without collisions", async () => {
+		const root = await fixture();
+		for (const path of [
+			"README.md",
+			"docs/README.md",
+			"apps/widget/README.md",
+			"tools/item/AGENTS.md",
+			"notes/guide.md",
+		]) {
+			await mkdir(join(root, path, ".."), { recursive: true });
+			await writeFile(join(root, path), "# Page");
+		}
+		const config = {
+			exclude: [],
+			sections: [
+				{
+					id: "contributing",
+					label: "Contributing",
+					route: "/contributing",
+					files: ["README.md", "docs/README.md"],
+				},
+			],
+			packages: {
+				route: "/packages",
+				allow: ["notes/"],
+				readmeDepth: 3,
+				nested: ["apps"],
+			},
+		};
+		const pages = await collectPages(
+			{ ...source, root, config: "required" },
+			config,
+		);
+		expect(
+			Object.fromEntries(pages.map((p) => [p.sourcePath, p.route])),
+		).toEqual({
+			"README.md": "/contributing/readme",
+			"docs/README.md": "/contributing/docs-readme",
+			"apps/widget/README.md": "/packages/apps-widget/readme",
+			"tools/item/AGENTS.md": "/packages/tools/item/agents",
+			"notes/guide.md": "/packages/notes/guide",
+		});
+		await writeFile(join(root, "tools/item/stray.md"), "# Stray");
+		await expect(
+			collectPages({ ...source, root, config: "required" }, config),
+		).rejects.toThrow("stray package page: tools/item/stray.md");
+	});
+	test("does not treat a quoted statement after a reference as a definition", async () => {
+		const root = await fixture();
+		await writeFile(join(root, "index.md"), '[rule]: "A quoted statement."\n');
+		expect(
+			await findBrokenLinks(root, source.repo, [page("index.md", "/")]),
+		).toEqual([]);
+	});
 	test("uses GitHub slug rules for every route segment", () => {
-		expect(routeSlug("Guides/Hello, World!.md")).toBe("guides/hello-world");
-		expect(routeSlug("README.md")).toBe("readme");
+		expect(routeSlug("Guides/Hello, World!.md")).toBe("/guides/hello-world");
+		expect(routeSlug("README.md")).toBe("/readme");
 	});
 
 	test("extracts the first H1 outside code fences and strips only that heading", () => {
@@ -290,7 +352,7 @@ describe("docs bundle helpers", () => {
 			},
 		);
 		expect(pages.map(({ sourcePath, route }) => [sourcePath, route])).toEqual([
-			["packages/widgets/README.md", "/packages/widgets/index"],
+			["packages/widgets/README.md", "/packages/packages/widgets/readme"],
 		]);
 	});
 	test("does not match a section prefix that is a sibling name", async () => {
@@ -351,7 +413,7 @@ describe("docs bundle helpers", () => {
 		const root = await fixture();
 		await writeFile(
 			join(root, "docs-bundle.toml"),
-			`exclude = ["private/**"]\n\n[[sections]]\nid = "guide"\nlabel = "Guide"\nroute = "/guide"\nprefix = "docs/guide/"\npagefind = false\n\n[packages]\nroute = "/packages"\nallow = ["widgets"]\nreadme_depth = 2\n`,
+			`exclude = ["private/**"]\n\n[[sections]]\nid = "guide"\nlabel = "Guide"\nroute = "/guide"\nprefix = "docs/guide/"\npagefind = false\n\n[packages]\nroute = "/packages"\nallow = ["widgets"]\nreadme_depth = 2\nnested = ["apps"]\n`,
 		);
 		const config = await readPublishConfig(root, "required");
 		expect(config.exclude).toEqual(["private/**"]);
@@ -366,6 +428,7 @@ describe("docs bundle helpers", () => {
 			route: "/packages",
 			allow: ["widgets"],
 			readmeDepth: 2,
+			nested: ["apps"],
 		});
 	});
 
@@ -387,7 +450,7 @@ describe("docs bundle helpers", () => {
 	test("throws when package docs exceed configured allow rules", async () => {
 		const root = await fixture();
 		await mkdir(join(root, "packages", "stray"), { recursive: true });
-		await writeFile(join(root, "packages", "stray", "README.md"), "# Stray\n");
+		await writeFile(join(root, "packages", "stray", "guide.md"), "# Stray\n");
 		await expect(
 			collectPages(
 				{ ...source, root },

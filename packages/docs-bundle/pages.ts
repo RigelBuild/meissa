@@ -21,11 +21,6 @@ function sectionMatches(path: string, section: SectionRule): boolean {
 	);
 }
 
-function packageName(path: string): string | undefined {
-	const match = /^packages\/([^/]+)\//.exec(path);
-	return match?.[1];
-}
-
 async function markdownFiles(root: string): Promise<string[]> {
 	const files: string[] = [];
 	async function walk(directory: string): Promise<void> {
@@ -42,10 +37,6 @@ async function markdownFiles(root: string): Promise<string[]> {
 	return files.sort();
 }
 
-function isReadme(path: string): boolean {
-	return /^packages\/[^/]+\/(?:[^/]+\/){0,}README\.md$/i.test(path);
-}
-
 export async function collectPages(
 	source: FetchedSource,
 	config: PublishConfig,
@@ -55,33 +46,28 @@ export async function collectPages(
 	const packageRules = config.packages;
 	if (packageRules !== undefined) {
 		for (const path of eligible) {
-			const name = packageName(path);
-			if (name === undefined) continue;
-			const isAllowed = packageRules.allow.some(
-				(allowed) => name === allowed || path === allowed,
+			if (config.sections.some((section) => sectionMatches(path, section)))
+				continue;
+			const parts = path.split("/");
+			const name = parts.at(-1);
+			const readme =
+				(name === "README.md" || name === "AGENTS.md") &&
+				parts.length <= packageRules.readmeDepth;
+			const allowed = packageRules.allow.some((entry) =>
+				entry.endsWith("/") ? path.startsWith(entry) : path === entry,
 			);
-			if (!isAllowed) throw new Error(`stray package page: ${path}`);
-			if (isReadme(path)) {
-				const depth =
-					path.slice(`packages/${name}/`.length).split("/").length - 1;
-				if (depth > packageRules.readmeDepth)
-					throw new Error(`stray package page: ${path}`);
-			}
+			if (!readme && !allowed) throw new Error(`stray package page: ${path}`);
 		}
 	}
 
 	const pages: BundlePage[] = [];
 	for (const path of eligible) {
 		const section = config.sections.find((rule) => sectionMatches(path, rule));
-		const name = packageName(path);
-		const isPackageAllowed =
-			packageRules !== undefined &&
-			name !== undefined &&
-			packageRules.allow.some(
-				(allowed) => allowed === name || allowed === path,
-			);
-		const packageRoute = isPackageAllowed;
-		if (config.sections.length > 0 && section === undefined && !packageRoute) {
+		if (
+			config.sections.length > 0 &&
+			section === undefined &&
+			packageRules === undefined
+		) {
 			if (source.config === "required")
 				throw new Error(`unassigned page: ${path}`);
 			continue;
@@ -92,20 +78,20 @@ export async function collectPages(
 		if (section !== undefined) {
 			const prefix = section.prefix ?? "";
 			const relativePath = section.files?.includes(path)
-				? (path.split("/").at(-1) ?? path)
-				: path.slice(prefix.length);
-			route = posix.join(section.route, routeSlug(relativePath));
-		} else if (
-			packageRoute &&
-			packageRules !== undefined &&
-			name !== undefined
-		) {
-			const relativePath = path
-				.slice(`packages/${name}/`.length)
-				.replace(/^README\.md$/i, "index.md");
-			route = posix.join(packageRules.route, name, routeSlug(relativePath));
+				? path.replace(/^\./, "").replaceAll("/", "-")
+				: path.slice(prefix.length).replace(/^\//, "");
+			route = `${section.route.replace(/\/$/, "")}${routeSlug(relativePath)}`;
+		} else if (packageRules !== undefined) {
+			const parts = path.split("/");
+			const first = parts[0] ?? "";
+			const nested = parts.length > 2 && packageRules.nested?.includes(first);
+			const id = nested ? `${first}-${parts[1]}` : first;
+			const rest = parts.slice(nested ? 2 : 1).join("/");
+			route = routeSlug(
+				`${packageRules.route.replace(/^\/+|\/+$/g, "")}/${id}${rest ? `/${rest}` : ""}`,
+			);
 		} else {
-			route = `/${source.repo}/${routeSlug(contentPath)}`;
+			route = `/${source.repo}${routeSlug(contentPath)}`;
 		}
 		pages.push({
 			repo: source.repo,

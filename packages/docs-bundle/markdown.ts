@@ -49,14 +49,13 @@ function firstH1Line(source: string): number {
 }
 
 export function routeSlug(contentPath: string): string {
-	const segments = contentPath.replaceAll("\\", "/").split("/").filter(Boolean);
-	const last = segments.length - 1;
-	return segments
-		.map((segment, index) => {
-			const value = index === last ? segment.replace(/\.md$/i, "") : segment;
-			return new GithubSlugger().slug(value);
-		})
-		.join("/");
+	const slug = contentPath
+		.replace(/\.mdx?$/i, "")
+		.split("/")
+		.map((segment) => new GithubSlugger().slug(segment))
+		.join("/")
+		.replace(/\/index$/, "");
+	return `/${slug}`;
 }
 
 export function extractTitle(source: string, sourcePath: string): string {

@@ -62,7 +62,7 @@ describe("docs-bundle check", () => {
 		await writeFile(join(root, "docs", "second", "readme.md"), "# Second\n");
 		await writeFile(
 			join(root, "docs-bundle.toml"),
-			`exclude = []\n\n[[sections]]\nid = "one"\nlabel = "One"\nroute = "/same"\nfiles = ["docs/first/readme.md"]\n\n[[sections]]\nid = "two"\nlabel = "Two"\nroute = "/same"\nfiles = ["docs/second/readme.md"]\n`,
+			`exclude = []\n\n[[sections]]\nid = "one"\nlabel = "One"\nroute = "/same"\nprefix = "docs/first/"\n\n[[sections]]\nid = "two"\nlabel = "Two"\nroute = "/same"\nprefix = "docs/second/"\n`,
 		);
 		const result = await check(root);
 		expect(result.exitCode).toBe(1);

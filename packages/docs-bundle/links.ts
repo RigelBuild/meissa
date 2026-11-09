@@ -49,7 +49,7 @@ function linkTargets(source: string): LinkTarget[] {
 	const links: LinkTarget[] = [];
 	const patterns = [
 		/!?(?:\[[^\]]*\])\(\s*(<[^>]*>|[^\s)]+)(?:\s+[^)]*)?\)/dg,
-		/^ {0,3}\[(?!\^)[^\]\n]+\]:[ \t]*(<[^>\n]*>|[^\s<>]+)(?:[ \t]+[^\n]*)?$/dgm,
+		/^ {0,3}\[(?!\^)[^\]\n]+\]:[ \t]*(<[^>\n]*>|[^\s<>"']+)(?:[ \t]+[^\n]*)?$/dgm,
 	];
 	for (const match of patterns.flatMap((pattern) => [
 		...masked.matchAll(pattern),

@@ -73,7 +73,14 @@ function parsePackages(value: unknown): NonNullable<PublishConfig["packages"]> {
 	) {
 		throw new Error("packages.readme_depth must be a non-negative integer");
 	}
-	return { route: input.route, allow, readmeDepth: input.readme_depth };
+	return {
+		route: input.route,
+		allow,
+		readmeDepth: input.readme_depth,
+		...(input.nested === undefined
+			? {}
+			: { nested: strings(input.nested, "packages.nested") }),
+	};
 }
 
 export async function readPublishConfig(

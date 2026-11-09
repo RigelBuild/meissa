@@ -24,7 +24,12 @@ export interface SectionRule {
 export interface PublishConfig {
 	exclude: string[];
 	sections: SectionRule[];
-	packages?: { route: string; allow: string[]; readmeDepth: number };
+	packages?: {
+		route: string;
+		allow: string[];
+		readmeDepth: number;
+		nested?: string[];
+	};
 }
 
 export interface BundlePage {

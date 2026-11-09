@@ -11,15 +11,7 @@ export function isGatherable(path: string): boolean {
 		normalized !== PULL_REQUEST_TEMPLATE
 	)
 		return false;
-	if (
-		normalized
-			.split("/")
-			.some(
-				(segment, index, parts) =>
-					segment === "designs" && parts[index - 1] === "docs",
-			)
-	)
-		return false;
+	if (normalized.startsWith("docs/designs/")) return false;
 	if (normalized.split("/").at(-1)?.toLowerCase() === "changelog.md")
 		return false;
 	return true;
