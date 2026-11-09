@@ -3,19 +3,24 @@ import GithubSlugger from "github-slugger";
 const FENCE_OPEN = /^ {0,3}(`{3,}|~{3,})(.*)$/;
 
 function headingText(value: string): string {
-	return value
-		.split(/(`+[^`]+`+)/g)
-		.map((part, index) => {
-			if (index % 2 === 1) return part.replace(/^`+|`+$/g, "");
-			return part
-				.replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
-				.replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
-				.replace(/\[([^\]]+)\]\[[^\]]*\]/g, "$1")
-				.replace(/<([A-Za-z][\w-]*)\b[^>]*>(.*?)<\/\1\s*>/gi, "$2")
-				.replace(/(\*\*|__|~~|\*|_)(?=\S)(.+?\S|\S)\1/g, "$2")
-				.replace(/\\([\\`*_{}[\]()#+.!<>|~-])/g, "$1");
-		})
-		.join("")
+	const codeSpans: string[] = [];
+	let marker = "DOCSCODESPAN";
+	while (value.includes(marker)) marker += "X";
+	const masked = value.replace(/`+[^`]+`+/g, (span) => {
+		const index = codeSpans.push(span.replace(/^`+|`+$/g, "")) - 1;
+		return `${marker}${index}Z`;
+	});
+	return masked
+		.replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+		.replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+		.replace(/\[([^\]]+)\]\[[^\]]*\]/g, "$1")
+		.replace(/<([A-Za-z][\w-]*)\b[^>]*>(.*?)<\/\1\s*>/gi, "$2")
+		.replace(/(\*\*|__|~~|\*|_)(?=\S)(.+?\S|\S)\1/g, "$2")
+		.replace(/\\([\\`*_{}[\]()#+.!<>|~-])/g, "$1")
+		.replace(
+			new RegExp(`${marker}(\\d+)Z`, "g"),
+			(_match, index: string) => codeSpans[Number(index)] ?? "",
+		)
 		.replace(/\s+/g, " ")
 		.trim();
 }

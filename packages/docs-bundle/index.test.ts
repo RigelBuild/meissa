@@ -140,6 +140,14 @@ describe("docs bundle helpers", () => {
 	test("preserves code span tags in titles", () => {
 		expect(extractTitle("# Use `<div>` tag", "page.md")).toBe("Use <div> tag");
 	});
+	test("strips emphasis wrapping a code span in a title", () => {
+		expect(extractTitle("# **`npm`** install", "page.md")).toBe("npm install");
+	});
+	test("strips a link wrapping a code span in a title", () => {
+		expect(extractTitle("# [`foo`](./foo.md) guide", "page.md")).toBe(
+			"foo guide",
+		);
+	});
 	test("preserves generic parameters in titles", () => {
 		expect(extractTitle("# Generic <T> helpers", "page.md")).toBe(
 			"Generic <T> helpers",
