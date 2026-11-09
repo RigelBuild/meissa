@@ -11,5 +11,7 @@ in
     description = "Go toolchain used to build the Go analysis tools.";
   };
 
-  config.packages = builtins.attrValues goAnalysis;
+  config.packages = builtins.attrValues goAnalysis ++ [ (import ./go/package.nix {
+    inherit (pkgs) buildGo127Module lib;
+  }) ];
 }

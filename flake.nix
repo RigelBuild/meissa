@@ -69,18 +69,18 @@
             ];
           };
           packages = evaluated.config.packages;
-          expectedPackages = [ pkgs.hello ] ++ builtins.attrValues goAnalysis;
-          hasExpectedPackages = builtins.length packages == 5
+          expectedPackages = [ pkgs.hello self.packages.${system}.tools ] ++ builtins.attrValues goAnalysis;
+          hasExpectedPackages = builtins.length packages == 6
             && builtins.all (package: builtins.elem package packages) expectedPackages
             && builtins.all (tool: builtins.elem tool packages) (builtins.attrValues goAnalysis);
         in
         if !hasExpectedPackages then
-          throw "devenvModules.go must add four analysis tools to configured packages"
+          throw "devenvModules.go must add the analysis tools and shared Go tools"
         else
           pkgs.runCommand "meissa-go-analysis-check" {
             nativeBuildInputs = packages;
           } ''
-            command -v hello golangci-lint govulncheck go-licenses nilaway
+            command -v hello golangci-lint govulncheck go-licenses nilaway code-shape-gate
             touch "$out"
           '';
     in
@@ -99,6 +99,7 @@
         in pkgs.runCommand "meissa-tools-check" { } ''
           test -x "${package}/bin/ref-gate"
           test -x "${package}/bin/refresh-nix-hashes"
+          test -x "${package}/bin/code-shape-gate"
           touch "$out"
         '';
       } // (if system == "x86_64-linux" then {
