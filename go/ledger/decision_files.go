@@ -19,7 +19,8 @@ import (
 const keyCount = 4
 
 var (
-	keyLineRE = regexp.MustCompile(`^([A-Za-z_]+): (.*)$`)
+	// JS `.` also stops at \r, U+2028 and U+2029; Go's stops only at \n.
+	keyLineRE = regexp.MustCompile(`^([A-Za-z_]+): ([^\r\n\x{2028}\x{2029}]*)$`)
 	idRE      = regexp.MustCompile(`^DL-(?:\d{3}|[1-9]\d{3,})$`)
 	fileRE    = regexp.MustCompile(`^(DL-(?:\d{3}|[1-9]\d{3,}))\.md$`)
 	recordRE  = regexp.MustCompile(`^(?:[A-Za-z0-9_-][A-Za-z0-9._-]*\/|\.\.?\/)*[A-Za-z0-9_-][A-Za-z0-9._-]*\.md$`)

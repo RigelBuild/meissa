@@ -168,6 +168,19 @@ func TestParseDecisionFileCRLF(t *testing.T) {
 	}
 }
 
+// The TS oracle (Bun) rejects each of these at the key line, because JS `.` stops at them.
+func TestParseDecisionFileJSLineTerminatorInKeyLine(t *testing.T) {
+	for name, sep := range map[string]string{"CR": "\r", "U+2028": "\u2028", "U+2029": "\u2029"} {
+		t.Run(name, func(t *testing.T) {
+			_, err := ParseDecisionFile(testPath, []byte(replaceGood("id: DL-297", "id: DL-297"+sep+"x")))
+			var malformed *MalformedDecision
+			if !errors.As(err, &malformed) || malformed.Line != 2 || malformed.Reason != "expected key `id` at line 2" {
+				t.Fatalf("ParseDecisionFile() error = %v, want line 2 expected key `id`", err)
+			}
+		})
+	}
+}
+
 func TestParseDecisionFileLoneSurrogate(t *testing.T) {
 	golden := readGolden[fixtureIndexGolden](t, "fixture-index.json")
 	var got string
