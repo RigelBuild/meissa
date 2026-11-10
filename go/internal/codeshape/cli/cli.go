@@ -147,7 +147,7 @@ func writeUpdated(
 	snapshot codeshape.Snapshot,
 	seed bool,
 	stdout, stderr io.Writer,
-	preserved codeshape.FunctionMeasurements, policy ...[]codeshape.Finding,
+	preserved codeshape.FunctionMeasurements, policy []codeshape.Finding,
 ) int {
 	updated, changed, err := rewriteAllowlist(config, allow, snapshot, seed)
 	if err != nil {
@@ -156,9 +156,7 @@ func writeUpdated(
 	}
 	findings := codeshape.Judge(config, updated, base, snapshot)
 	ratchetFailures := len(findings) > 0
-	if len(policy) > 0 {
-		findings = append(findings, policy[0]...)
-	}
+	findings = append(findings, policy...)
 	codeshape.SortFindings(findings)
 	err = writeFindings(stdout, findings)
 	if err != nil {
