@@ -175,6 +175,9 @@ func nilawayVersionDate(ctx context.Context, rev, fetchURL string, run Runner) (
 	defer func() { _ = os.RemoveAll(directory) }()
 	_, stderr, exit, err := run.Run(ctx, "git", "-C", directory, "init", "-q")
 	if err != nil || exit != 0 {
+		if ctx.Err() != nil {
+			return "", failf("interrupted by %s", context.Cause(ctx))
+		}
 		return "", failf("nilaway revision fetch failed: %s", commandOutput(err, stderr))
 	}
 	_, stderr, exit, err = run.Run(ctx, "git", "-C", directory, "fetch", "--depth=1", fetchURL, rev)
@@ -237,6 +240,10 @@ func resolveDrvPath(ctx context.Context, entry Entry, attr string, run Runner) (
 		ctx, "nix", "eval", "--raw", "--impure", "--expr", expression,
 	)
 	if err != nil || exit != 0 {
+		if ctx.Err() != nil {
+			cause := context.Cause(ctx)
+			return "", errors.Join(failf("interrupted by %s", cause), cause)
+		}
 		return "", failf("could not resolve %s.%s: %s", entry.Name, attr, commandOutput(err, stderr))
 	}
 	drvPath := strings.TrimSpace(stdout)

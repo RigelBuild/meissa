@@ -5,7 +5,9 @@ package renovatehashes
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -21,6 +23,7 @@ func TestRefreshInterruptions(t *testing.T) {
 	})
 	t.Run("reports SIGINT when base-ref lookup is interrupted", testRefreshInterruptedBeforeSelection)
 	t.Run("classifies canceled exec child as SIGINT", testRefreshClassifiesCanceledExecChild)
+	t.Run("reports SIGINT when derivation path resolution is interrupted", testResolveDrvPathCancellation)
 	t.Run(
 		"keeps the original failure when build fails before context cancellation",
 		testRefreshBuildFailureBeforeCancellation,
@@ -98,6 +101,12 @@ func testRefreshInterruptedBeforeSelection(t *testing.T) {
 }
 
 func testRefreshClassifiesCanceledExecChild(t *testing.T) {
+	for _, command := range []string{"sh", "sleep", "touch"} {
+		_, err := exec.LookPath(command)
+		if err != nil {
+			t.Skipf("required command %q is unavailable: %v", command, err)
+		}
+	}
 	ctx, cancel := context.WithCancelCause(t.Context())
 	defer cancel(nil)
 	root := t.TempDir()
@@ -123,6 +132,8 @@ func testRefreshClassifiesCanceledExecChild(t *testing.T) {
 			t.Fatalf("checking exec child readiness: %v (child error: %v)", statErr, childErr)
 		}
 		select {
+		case childErr := <-errCh:
+			t.Fatalf("exec child returned before readiness: %v", childErr)
 		case <-timeout.C:
 			cancel(ErrRefreshSIGINT)
 			childErr := <-errCh
@@ -138,6 +149,26 @@ func testRefreshClassifiesCanceledExecChild(t *testing.T) {
 	if !errors.Is(err, ErrRefreshSIGINT) || !strings.Contains(err.Error(), "interrupted by SIGINT") {
 		t.Fatalf("refresh error = %v; want SIGINT interruption", err)
 	}
+}
+
+func testResolveDrvPathCancellation(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	defer cancel(nil)
+
+	cancelOnEval := cancelDuringNixEvalRunner{cancel: cancel}
+	_, err := resolveDrvPath(ctx, defaultEntries()[0], "src", cancelOnEval)
+	if !errors.Is(err, ErrRefreshSIGINT) || !strings.Contains(err.Error(), "interrupted by SIGINT") {
+		t.Fatalf("resolveDrvPath error = %v; want SIGINT interruption", err)
+	}
+}
+
+type cancelDuringNixEvalRunner struct {
+	cancel context.CancelCauseFunc
+}
+
+func (r cancelDuringNixEvalRunner) Run(ctx context.Context, _ string, _ ...string) (string, string, int, error) {
+	r.cancel(ErrRefreshSIGINT)
+	return "", "", -1, fmt.Errorf("run nix: %w", context.Cause(ctx))
 }
 
 type execRunnerCancellationRunner struct {
