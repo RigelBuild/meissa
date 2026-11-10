@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/RigelBuild/meissa/go/internal/codeshape"
+	"github.com/RigelBuild/meissa/go/internal/codeshape/golang"
 )
 
 var errCannotRaiseAllowlist = errors.New("--write cannot add or raise allowlist entries")
@@ -55,7 +56,7 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
 	}
-	functions, skips, err := codeshape.GoMetrics(ctx, root, config)
+	functions, skips, err := golang.GoMetrics(ctx, root, config)
 	if err != nil {
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
@@ -78,7 +79,7 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 	functions[codeshape.MetricTSCognitive] = tsFunctions[codeshape.MetricTSCognitive]
 	functions[codeshape.MetricTSLines] = tsFunctions[codeshape.MetricTSLines]
 	snapshot.Functions = functions
-	suppressions, err := codeshape.GoSuppressionFindings(ctx, root, config)
+	suppressions, err := golang.SuppressionFindings(ctx, root, config)
 	if err != nil {
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2

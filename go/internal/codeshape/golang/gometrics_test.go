@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package codeshape
+package golang
 
 import (
 	"fmt"
@@ -9,6 +9,8 @@ import (
 	"os/exec"
 	"strings"
 	"testing"
+
+	"github.com/RigelBuild/meissa/go/internal/codeshape"
 )
 
 func TestGoCollectorFixture(t *testing.T) {
@@ -26,14 +28,14 @@ func TestGoCollectorFixture(t *testing.T) {
 	trackedFile(t, root, "fixture.go", source.String())
 	commitFiles(t, root)
 	cfg := testConfig()
-	cfg.Functions = FunctionLimits{Go: GoFunctionLimits{Cognitive: 20, Lines: 60, Statements: 40},
-		TS: TSFunctionLimits{Cognitive: 0, Lines: 0}}
+	cfg.Functions = codeshape.FunctionLimits{Go: codeshape.GoFunctionLimits{Cognitive: 20, Lines: 60, Statements: 40},
+		TS: codeshape.TSFunctionLimits{Cognitive: 0, Lines: 0}}
 	values, _, err := GoMetrics(t.Context(), root, cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
 	count := 0
-	for _, entry := range values[MetricGoStatements]["fixture.go"] {
+	for _, entry := range values[codeshape.MetricGoStatements]["fixture.go"] {
 		if entry.Value > 40 {
 			count++
 		}
@@ -99,7 +101,7 @@ func TestGoSuppressionFinding(t *testing.T) {
 	trackedFile(t, root, "x.go", "package p\n//nolint:gocognit,funlen\n//nolint:all\n"+
 		"//nolint\n//nolint:gocyclo\n//nolint:unused\nfunc x() {}\n")
 	commitFiles(t, root)
-	findings, err := goSuppressionFindings(t.Context(), root, testConfig())
+	findings, err := SuppressionFindings(t.Context(), root, testConfig())
 	if err != nil || len(findings) != 7 || findings[0].Path != "x.go:2" {
 		t.Fatalf("findings=%v err=%v", findings, err)
 	}
@@ -123,13 +125,13 @@ func TestGoNestedModules(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, path := range []string{"x.go", "child/child.go"} {
-		entries := values[MetricGoStatements][path]
+		entries := values[codeshape.MetricGoStatements][path]
 		if len(entries) != 1 || entries[0].Value != 41 {
 			t.Fatalf("%s: %#v", path, entries)
 		}
 	}
-	if len(values[MetricGoStatements]) != 2 {
-		t.Fatalf("unexpected paths: %#v", values[MetricGoStatements])
+	if len(values[codeshape.MetricGoStatements]) != 2 {
+		t.Fatalf("unexpected paths: %#v", values[codeshape.MetricGoStatements])
 	}
 }
 
@@ -147,8 +149,8 @@ func TestGoExcludedAndUnbuiltFiles(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(skips) != 2 || len(values[MetricGoStatements]) != 1 {
-		t.Fatalf("skips=%v measurements=%v", skips, values[MetricGoStatements])
+	if len(skips) != 2 || len(values[codeshape.MetricGoStatements]) != 1 {
+		t.Fatalf("skips=%v measurements=%v", skips, values[codeshape.MetricGoStatements])
 	}
 }
 func TestGoExcludedModule(t *testing.T) {
@@ -162,19 +164,19 @@ func TestGoExcludedModule(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = goSuppressionFindings(t.Context(), root, cfg)
+	_, err = SuppressionFindings(t.Context(), root, cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 func TestGoBareAndAllSuppressions(t *testing.T) {
 	root := goTestRepo(t, "package p\n//nolint\n//nolint:all\nfunc F() {}\n")
-	findings, err := goSuppressionFindings(t.Context(), root, testConfig())
+	findings, err := SuppressionFindings(t.Context(), root, testConfig())
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, line := range []int{2, 3} {
-		for _, metric := range []Metric{MetricGoCognitive, MetricGoLines} {
+		for _, metric := range []codeshape.Metric{codeshape.MetricGoCognitive, codeshape.MetricGoLines} {
 			found := false
 			for _, finding := range findings {
 				if finding.Path == fmt.Sprintf("x.go:%d", line) && finding.Value == line && finding.Metric == metric {

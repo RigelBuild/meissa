@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package codeshape
+package golang
 
 import (
 	"bytes"
@@ -20,6 +20,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/RigelBuild/meissa/go/internal/codeshape"
 )
 
 const highFunlenLimit = 1_000_000_000
@@ -71,28 +73,22 @@ type goFunction struct {
 	id   string
 }
 
-// Skip records a source file that could not be measured.
-type Skip struct {
-	Path   string
-	Reason string
-}
-
 // GoMetrics measures function complexity and length in every included module.
-func GoMetrics(ctx context.Context, root string, cfg Config) (map[Metric]map[string][]Entry, []Skip, error) {
-	paths, err := trackedPaths(ctx, root)
+func GoMetrics(ctx context.Context, root string, cfg codeshape.Config) (map[codeshape.Metric]map[string][]codeshape.Entry, []codeshape.Skip, error) {
+	paths, err := codeshape.TrackedPaths(ctx, root)
 	if err != nil {
 		return nil, nil, err
 	}
 	modules := goModules(paths, cfg)
 	if len(modules) == 0 {
-		return newFunctionMeasurements(), nil, nil
+		return codeshape.NewFunctionMeasurements(), nil, nil
 	}
 	binary, err := exec.LookPath("golangci-lint")
 	if err != nil {
 		return nil, nil, fmt.Errorf("find golangci-lint: %w", err)
 	}
-	measurements := newFunctionMeasurements()
-	skips := []Skip{}
+	measurements := codeshape.NewFunctionMeasurements()
+	skips := []codeshape.Skip{}
 	for _, module := range modules {
 		files, skipped, err := parseGoSources(root, module, paths, cfg)
 		if err != nil {
@@ -103,19 +99,19 @@ func GoMetrics(ctx context.Context, root string, cfg Config) (map[Metric]map[str
 			continue
 		}
 		limits := []struct {
-			metric     Metric
+			metric     codeshape.Metric
 			linter     string
 			lines      int
 			statements int
 		}{
-			{metric: MetricGoCognitive, linter: "gocognit", lines: 0, statements: 0},
-			{metric: MetricGoLines, linter: "funlen", lines: cfg.Functions.Go.Lines, statements: highFunlenLimit},
-			{metric: MetricGoStatements, linter: "funlen", lines: highFunlenLimit, statements: cfg.Functions.Go.Statements},
+			{metric: codeshape.MetricGoCognitive, linter: "gocognit", lines: 0, statements: 0},
+			{metric: codeshape.MetricGoLines, linter: "funlen", lines: cfg.Functions.Go.Lines, statements: highFunlenLimit},
+			{metric: codeshape.MetricGoStatements, linter: "funlen", lines: highFunlenLimit, statements: cfg.Functions.Go.Statements},
 		}
 		for _, file := range files {
 			for _, function := range file.functions {
-				for _, metric := range []Metric{MetricGoCognitive, MetricGoLines, MetricGoStatements} {
-					appendFunctionValue(measurements, metric, function.path, function.id, 0)
+				for _, metric := range []codeshape.Metric{codeshape.MetricGoCognitive, codeshape.MetricGoLines, codeshape.MetricGoStatements} {
+					codeshape.AppendFunctionValue(measurements, metric, function.path, function.id, 0)
 				}
 			}
 		}
@@ -135,7 +131,7 @@ func GoMetrics(ctx context.Context, root string, cfg Config) (map[Metric]map[str
 					path = filepath.Join(module, path)
 				}
 				path = filepath.ToSlash(path)
-				if excludedFunctionPath(path, cfg) || !countedPath(path, cfg) {
+				if excludedFunctionPath(path, cfg) || !codeshape.CountedPath(path, cfg) {
 					continue
 				}
 				value, err := metricValue(issue.Text, limit.metric)
@@ -146,28 +142,14 @@ func GoMetrics(ctx context.Context, root string, cfg Config) (map[Metric]map[str
 				if err != nil {
 					return nil, nil, err
 				}
-				appendFunctionValue(measurements, limit.metric, path, function, value)
+				codeshape.AppendFunctionValue(measurements, limit.metric, path, function, value)
 			}
 		}
 	}
 	return measurements, skips, nil
 }
 
-func trackedPaths(ctx context.Context, root string) ([]string, error) {
-	command := exec.CommandContext(ctx, "git", "ls-files", "-z")
-	command.Dir = root
-	output, err := command.Output()
-	if err != nil {
-		return nil, fmt.Errorf("list tracked files: %w", err)
-	}
-	paths := strings.Split(string(output), "\x00")
-	if len(paths) > 0 && paths[len(paths)-1] == "" {
-		paths = paths[:len(paths)-1]
-	}
-	return paths, nil
-}
-
-func goModules(paths []string, cfg Config) []string {
+func goModules(paths []string, cfg codeshape.Config) []string {
 	modules := make([]string, 0)
 	for _, path := range paths {
 		if filepath.Base(path) != "go.mod" || excludedFunctionPath(path, cfg) {
@@ -179,18 +161,18 @@ func goModules(paths []string, cfg Config) []string {
 	return modules
 }
 
-func excludedFunctionPath(path string, cfg Config) bool {
+func excludedFunctionPath(path string, cfg codeshape.Config) bool {
 	for segment := range strings.SplitSeq(filepath.ToSlash(path), "/") {
 		if segment == "testdata" || segment == "fixtures" {
 			return true
 		}
 	}
-	return matchesAny(filepath.ToSlash(path), cfg.Exclude)
+	return codeshape.MatchesAny(filepath.ToSlash(path), cfg.Exclude)
 }
 
-func parseGoSources(root, module string, paths []string, cfg Config) (map[string]goSourceFile, []Skip, error) {
+func parseGoSources(root, module string, paths []string, cfg codeshape.Config) (map[string]goSourceFile, []codeshape.Skip, error) {
 	files := make(map[string]goSourceFile)
-	skips := []Skip{}
+	skips := []codeshape.Skip{}
 	buildContext := build.Default
 	buildContext.CgoEnabled = false
 	modules := make([]string, 0)
@@ -218,7 +200,7 @@ func parseGoSources(root, module string, paths []string, cfg Config) (map[string
 		if nested {
 			continue
 		}
-		if !countedPath(filepath.ToSlash(path), cfg) {
+		if !codeshape.CountedPath(filepath.ToSlash(path), cfg) {
 			continue
 		}
 		fullPath := filepath.Join(root, filepath.FromSlash(path))
@@ -227,7 +209,7 @@ func parseGoSources(root, module string, paths []string, cfg Config) (map[string
 			return nil, nil, fmt.Errorf("check Go build constraints %q: %w", path, err)
 		}
 		if !matches {
-			skips = append(skips, Skip{Path: path, Reason: "not in default Go build"})
+			skips = append(skips, codeshape.Skip{Path: path, Reason: "not in default Go build"})
 			continue
 		}
 		//nolint:gosec // G304: path from the repo's tracked file list
@@ -341,7 +323,7 @@ func runGolangci(
 	ctx context.Context,
 	binary, root, module, linter string,
 	lines, statements int,
-	cfg Config,
+	cfg codeshape.Config,
 ) (golangciReport, error) {
 	configuration := fmt.Sprintf(
 		"version: '2'\nlinters:\n  default: none\n  enable:\n    - %s\n"+
@@ -422,9 +404,9 @@ func runGolangciWithConfig(
 	return report, nil
 }
 
-func metricValue(text string, metric Metric) (int, error) {
+func metricValue(text string, metric codeshape.Metric) (int, error) {
 	pattern := funlenValue
-	if metric == MetricGoCognitive {
+	if metric == codeshape.MetricGoCognitive {
 		pattern = gocognitValue
 	}
 	matches := pattern.FindStringSubmatch(text)
@@ -488,7 +470,7 @@ func findGoFunction(
 	return path, match.id, nil
 }
 
-func hasAnyFunctionMeasurement(values map[Metric]map[string][]Entry) bool {
+func hasAnyFunctionMeasurement(values map[codeshape.Metric]map[string][]codeshape.Entry) bool {
 	for _, paths := range values {
 		for _, entries := range paths {
 			if len(entries) > 0 {

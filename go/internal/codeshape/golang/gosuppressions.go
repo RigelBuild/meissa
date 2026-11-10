@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package codeshape
+package golang
 
 import (
 	"context"
@@ -11,10 +11,12 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/RigelBuild/meissa/go/internal/codeshape"
 )
 
-func goSuppressionFindings(ctx context.Context, root string, cfg Config) ([]Finding, error) {
-	paths, err := trackedPaths(ctx, root)
+func SuppressionFindings(ctx context.Context, root string, cfg codeshape.Config) ([]codeshape.Finding, error) {
+	paths, err := codeshape.TrackedPaths(ctx, root)
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +31,7 @@ func goSuppressionFindings(ctx context.Context, root string, cfg Config) ([]Find
 			eligible[path] = true
 		}
 	}
-	findings := []Finding{}
+	findings := []codeshape.Finding{}
 	for _, path := range paths {
 		if !eligible[path] {
 			continue
@@ -54,26 +56,26 @@ func goSuppressionFindings(ctx context.Context, root string, cfg Config) ([]Find
 					continue
 				}
 				directive := fields[0]
-				metrics := make(map[Metric]bool)
+				metrics := make(map[codeshape.Metric]bool)
 				if directive == "nolint" || directive == "nolint:all" {
-					metrics[MetricGoCognitive] = true
-					metrics[MetricGoLines] = true
+					metrics[codeshape.MetricGoCognitive] = true
+					metrics[codeshape.MetricGoLines] = true
 				} else if after, ok := strings.CutPrefix(directive, "nolint:"); ok {
 					for name := range strings.SplitSeq(after, ",") {
 						switch name {
 						case "all":
-							metrics[MetricGoCognitive] = true
-							metrics[MetricGoLines] = true
+							metrics[codeshape.MetricGoCognitive] = true
+							metrics[codeshape.MetricGoLines] = true
 						case "gocognit", "gocyclo":
-							metrics[MetricGoCognitive] = true
+							metrics[codeshape.MetricGoCognitive] = true
 						case "funlen":
-							metrics[MetricGoLines] = true
+							metrics[codeshape.MetricGoLines] = true
 						}
 					}
 				}
 				for metric := range metrics {
 					line := set.Position(comment.Pos()).Line
-					findings = append(findings, Finding{
+					findings = append(findings, codeshape.Finding{
 						Path: path + ":" + strconv.Itoa(line), Metric: metric, Value: line, Limit: 0,
 						Fix: "remove complexity nolint suppression",
 					})
@@ -81,6 +83,6 @@ func goSuppressionFindings(ctx context.Context, root string, cfg Config) ([]Find
 			}
 		}
 	}
-	sortFindings(findings)
+	codeshape.SortFindings(findings)
 	return findings, nil
 }

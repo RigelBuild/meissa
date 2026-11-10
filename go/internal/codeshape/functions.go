@@ -9,6 +9,12 @@ import (
 	"sort"
 )
 
+// Skip records a source file that could not be measured.
+type Skip struct {
+	Path   string
+	Reason string
+}
+
 var errFunctionID = errors.New("invalid function allowlist id")
 
 // FunctionLimits holds per-language function thresholds.

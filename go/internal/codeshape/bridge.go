@@ -8,10 +8,6 @@ import (
 	"cuelang.org/go/cue/cuecontext"
 )
 
-func GoSuppressionFindings(ctx context.Context, root string, cfg Config) ([]Finding, error) {
-	return goSuppressionFindings(ctx, root, cfg)
-}
-
 func TSPolicyFindings(ctx context.Context, root string, cfg Config) ([]Finding, error) {
 	return tsPolicyFindings(ctx, root, cfg)
 }
