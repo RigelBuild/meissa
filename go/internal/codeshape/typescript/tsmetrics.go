@@ -465,11 +465,8 @@ func tsOffset(line, column int, source []byte) (int, error) {
 		if offset >= len(source) || source[offset] == '\n' {
 			return 0, fmt.Errorf("biome position %d:%d is outside source: %w", line, column, errBiomeOutsideSource)
 		}
-		r, size := utf8.DecodeRune(source[offset:])
+		_, size := utf8.DecodeRune(source[offset:])
 		units++
-		if r > 0xffff {
-			units++
-		}
 		offset += size
 	}
 	if offset > len(source) {

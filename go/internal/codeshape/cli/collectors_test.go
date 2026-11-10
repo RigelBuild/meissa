@@ -157,6 +157,16 @@ func TestBiomeMeasuredErrors(t *testing.T) {
 		t.Fatalf("code=%d out=%q stderr=%q", code, out, stderr)
 	}
 }
+
+func TestBiomeAstralColumnAttribution(t *testing.T) {
+	source := "function outer() { const x = '" + strings.Repeat("😀", 20) + "'; return () => {\n" +
+		strings.Repeat("console.log(1);\n", 51) + "}; }\n"
+	root := tsRepo(t, source)
+	code, out, stderr := runGoGate(t, root)
+	if code != 1 || !strings.Contains(out, "x.ts#outer/anonymous") {
+		t.Fatalf("code=%d out=%q stderr=%q", code, out, stderr)
+	}
+}
 func TestTSDrift(t *testing.T) {
 	root := tsRepo(t, "function f() {}\n")
 	err := os.WriteFile(filepath.Join(root, "biome.json"),

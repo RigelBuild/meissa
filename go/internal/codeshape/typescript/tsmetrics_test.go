@@ -74,7 +74,7 @@ func TestTSGeneratorAndUnicodePosition(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer tree.Release()
-	fn, err := findTSFunction(funcs, 1, 19, source)
+	fn, err := findTSFunction(funcs, 1, 18, source)
 	if err != nil || fn.id != "generate" {
 		t.Fatalf("function=%v err=%v", fn, err)
 	}
