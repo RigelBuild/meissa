@@ -84,7 +84,7 @@ func runBiome(ctx context.Context, binary, root, configDir string, paths []strin
 	var report biomeReport
 	err := json.Unmarshal(stdout.Bytes(), &report)
 	if err != nil {
-		return biomeReport{}, fmt.Errorf("parse biome output: %w", err)
+		return biomeReport{}, fmt.Errorf("parse biome output: %w: %s", err, strings.TrimSpace(stderr.String()))
 	}
 	if report.Summary == nil || report.Diagnostics == nil {
 		return biomeReport{}, errBiomeMissingOutput

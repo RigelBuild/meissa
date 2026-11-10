@@ -306,14 +306,16 @@ func assignTSFunctionIDs(functions []tsFunction, lang *gotreesitter.Language, so
 	counts := make(map[string]int)
 	for i := range functions {
 		parentID := ""
+		var parentNode *gotreesitter.Node
 		for j := i - 1; j >= 0; j-- {
 			if functions[j].node.StartByte() <= functions[i].node.StartByte() &&
 				functions[j].node.EndByte() >= functions[i].node.EndByte() {
 				parentID = functions[j].id + "/"
+				parentNode = functions[j].node
 				break
 			}
 		}
-		classID := tsClassPrefix(functions[i].node, lang, source, parentID)
+		classID := tsClassPrefix(functions[i].node, parentNode, lang, source)
 		base := parentID + classID + functions[i].id
 		counts[base]++
 		functions[i].id = base
@@ -323,21 +325,25 @@ func assignTSFunctionIDs(functions []tsFunction, lang *gotreesitter.Language, so
 	}
 }
 
-func tsClassPrefix(node *gotreesitter.Node, lang *gotreesitter.Language, source []byte, parentID string) string {
-	for parent := node.Parent(); parent != nil; parent = parent.Parent() {
-		if parent.Type(lang) != "class_declaration" && parent.Type(lang) != "class" {
-			continue
-		}
-		name := parent.ChildByFieldName("name", lang)
-		if name != nil {
-			classID := name.Text(source) + "/"
-			if !strings.Contains("/"+parentID, "/"+classID) {
-				return classID
-			}
-		}
-		break
+func tsClassPrefix(node, parentFunction *gotreesitter.Node, lang *gotreesitter.Language, source []byte) string {
+	class := enclosingTSClass(node, lang)
+	if class == nil || parentFunction != nil && enclosingTSClass(parentFunction, lang) == class {
+		return ""
 	}
-	return ""
+	name := class.ChildByFieldName("name", lang)
+	if name == nil {
+		return ""
+	}
+	return name.Text(source) + "/"
+}
+
+func enclosingTSClass(node *gotreesitter.Node, lang *gotreesitter.Language) *gotreesitter.Node {
+	for parent := node.Parent(); parent != nil; parent = parent.Parent() {
+		if parent.Type(lang) == "class_declaration" || parent.Type(lang) == "class" {
+			return parent
+		}
+	}
+	return nil
 }
 
 func collectTSFunctions(

@@ -47,7 +47,8 @@ func TestTSOnlyOffUsesOptions(t *testing.T) {
 	seen := map[string]bool{}
 	for _, d := range report.Diagnostics {
 		seen[d.Category] = true
-		if d.Category == "lint/complexity/noExcessiveLinesPerFunction" && !strings.Contains(d.Message, "3") {
+		if d.Category == "lint/complexity/noExcessiveLinesPerFunction" &&
+			!strings.Contains(d.Message, "Maximum allowed is 3.") {
 			t.Fatalf("missing configured limit: %q", d.Message)
 		}
 	}
@@ -180,4 +181,15 @@ func TestTSNestedDescribeIdentity(t *testing.T) {
 		}
 	}
 	t.Fatalf("missing nested title: %#v", funcs)
+}
+
+func TestClassNameMatchesOuterFunction(t *testing.T) {
+	functions, tree, err := parseTSFunctions("x.ts", []byte(`function A() { class A { m() {} } }`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tree.Release()
+	if len(functions) != 2 || functions[1].id != "A/A/m" {
+		t.Fatalf("functions=%v", functions)
+	}
 }
