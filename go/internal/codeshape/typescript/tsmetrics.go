@@ -230,15 +230,15 @@ func runBiome(ctx context.Context, binary, root string, paths []string) (biomeRe
 	return report, nil
 }
 
-func readBiomeConfig(root string) (map[string]any, error) {
-	data, err := os.ReadFile(filepath.Join(root, "biome.json")) //nolint:gosec // G304: read repo config
+func readBiomeConfig(root, path string) (map[string]any, error) {
+	data, err := os.ReadFile(filepath.Join(root, path)) //nolint:gosec // G304: read repo config
 	if err != nil {
-		return nil, fmt.Errorf("read biome.json: %w", err)
+		return nil, fmt.Errorf("read %s: %w", path, err)
 	}
 	var config map[string]any
 	err = json5.Unmarshal(data, &config)
 	if err != nil {
-		return nil, fmt.Errorf("parse biome.json: %w", err)
+		return nil, fmt.Errorf("parse %s: %w", path, err)
 	}
 	return config, nil
 }

@@ -4,7 +4,9 @@ package typescript
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -35,13 +37,24 @@ func PolicyFindings(ctx context.Context, root string, cfg codeshape.Config) ([]c
 	if !hasTS {
 		return findings, nil
 	}
-	config, err := readBiomeConfig(root)
-	if os.IsNotExist(err) {
+	path := "biome.json"
+	config, err := readBiomeConfig(root, path)
+	if errors.Is(err, fs.ErrNotExist) {
+		path = "biome.jsonc"
+		config, err = readBiomeConfig(root, path)
+	}
+	if errors.Is(err, fs.ErrNotExist) {
 		return findings, nil
 	}
 	if err != nil {
 		return nil, err
 	}
+	findings = append(findings, biomeDriftFindings(path, config, cfg, true)...)
+	return findings, nil
+}
+
+func biomeDriftFindings(path string, config map[string]any, cfg codeshape.Config, require bool) []codeshape.Finding {
+	findings := []codeshape.Finding{}
 	rules := nestedMap(config, "linter", "rules", "complexity")
 	for _, check := range []struct {
 		name, option string
@@ -50,16 +63,21 @@ func PolicyFindings(ctx context.Context, root string, cfg codeshape.Config) ([]c
 		{"noExcessiveCognitiveComplexity", "maxAllowedComplexity", codeshape.MetricTSCognitive},
 		{"noExcessiveLinesPerFunction", "maxLines", codeshape.MetricTSLines},
 	} {
-		rule, _ := rules[check.name].(map[string]any)
+		value, present := rules[check.name]
+		if !require && !present {
+			continue
+		}
+		rule, _ := value.(map[string]any)
 		options, _ := rule["options"].(map[string]any)
-		if value, ok := options[check.option]; ok && numericValue(value) != cfg.Functions.LimitFor(check.metric) {
-			findings = append(findings, codeshape.Finding{
-				Path: "biome.json", Metric: check.metric, Value: numericValue(value),
-				Limit: cfg.Functions.LimitFor(check.metric), Fix: "match biome rule option to gate config",
-			})
+		option, exists := options[check.option]
+		level, _ := rule["level"].(string)
+		if !exists || level != "off" || numericValue(option) != cfg.Functions.LimitFor(check.metric) {
+			findings = append(findings, codeshape.Finding{Path: path, Metric: check.metric,
+				Value: numericValue(option), Limit: cfg.Functions.LimitFor(check.metric),
+				Fix: "match biome rule option to gate config"})
 		}
 	}
-	return findings, nil
+	return findings
 }
 
 func tsDirectiveFindings(path string, source []byte) []codeshape.Finding {
