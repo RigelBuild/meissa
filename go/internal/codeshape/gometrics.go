@@ -251,6 +251,24 @@ func parseGoSources(root, module string, paths []string, cfg Config) (map[string
 
 func goFunctions(file *ast.File, set *token.FileSet) []goFunction {
 	functions := make([]goFunction, 0)
+	topLevel := make(map[*ast.FuncLit]string)
+	for _, decl := range file.Decls {
+		group, ok := decl.(*ast.GenDecl)
+		if !ok {
+			continue
+		}
+		for _, spec := range group.Specs {
+			value, ok := spec.(*ast.ValueSpec)
+			if !ok {
+				continue
+			}
+			for i, expr := range value.Values {
+				if literal, ok := expr.(*ast.FuncLit); ok && i < len(value.Names) {
+					topLevel[literal] = value.Names[i].Name
+				}
+			}
+		}
+	}
 	ast.Inspect(file, func(node ast.Node) bool {
 		switch function := node.(type) {
 		case *ast.FuncDecl:
@@ -264,7 +282,7 @@ func goFunctions(file *ast.File, set *token.FileSet) []goFunction {
 			}
 			functions = append(functions, goFunction{node: function, path: "", base: name, id: ""})
 		case *ast.FuncLit:
-			functions = append(functions, goFunction{node: function, path: "", base: "", id: ""})
+			functions = append(functions, goFunction{node: function, path: "", base: topLevel[function], id: ""})
 		}
 		return true
 	})

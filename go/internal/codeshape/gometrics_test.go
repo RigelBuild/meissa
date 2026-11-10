@@ -79,6 +79,22 @@ func TestGoFunctionIdentity(t *testing.T) {
 	}
 }
 
+func TestGoTopLevelLiteralIdentity(t *testing.T) {
+	ids := func(source string) []goFunction {
+		set := token.NewFileSet()
+		file, err := parser.ParseFile(set, "x.go", source, 0)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return goFunctions(file, set)
+	}
+	a := ids("package p\nvar target = func() {}")
+	b := ids("package p\nvar other = func() {}\nvar target = func() {}")
+	if a[0].id != "target" || b[1].id != a[0].id {
+		t.Fatalf("ids %v %v", a, b)
+	}
+}
+
 func TestGoSuppressionFinding(t *testing.T) {
 	root := newFixtureRepo(t)
 	trackedFile(t, root, "go.mod", "module example.com/x\n\ngo 1.25\n")

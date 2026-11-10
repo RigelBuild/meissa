@@ -76,6 +76,28 @@ func TestTSGeneratorAndUnicodePosition(t *testing.T) {
 	}
 }
 
+func TestTSStructuralIdentity(t *testing.T) {
+	ids := func(source string) []string {
+		functions, tree, err := parseTSFunctions("x.ts", []byte(source))
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer tree.Release()
+		result := []string{}
+		for _, fn := range functions {
+			if strings.Contains(fn.id, "big/") || strings.HasPrefix(fn.id, "A/") {
+				result = append(result, fn.id)
+			}
+		}
+		return result
+	}
+	a := ids(`function big() { xs.map(() => 1) } class A { run() {} }`)
+	b := ids(`ys.map(() => 0); class B { run() {} } function big() { xs.map(() => 1) } class A { run() {} }`)
+	if len(a) != 2 || strings.Join(a, ",") != strings.Join(b, ",") {
+		t.Fatalf("ids %v %v", a, b)
+	}
+}
+
 func TestTSCognitiveLimit(t *testing.T) {
 	root := tsRepo(t, "function f(x: boolean) {\n"+strings.Repeat("if (x) { console.log(x); }\n", 16)+"}\n")
 	code, out, errout := runGoGate(t, root)

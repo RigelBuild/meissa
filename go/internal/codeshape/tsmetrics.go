@@ -66,9 +66,8 @@ type biomeReport struct {
 }
 
 type tsFunction struct {
-	node   *gotreesitter.Node
-	id     string
-	parent *tsFunction
+	node *gotreesitter.Node
+	id   string
 }
 
 // TSMetrics measures Biome's function complexity and line count rules.
@@ -272,15 +271,28 @@ func parseTSFunctions(path string, source []byte) ([]tsFunction, *gotreesitter.T
 	functions := make([]tsFunction, 0)
 	collectTSFunctions(root, lang, nil, nil, &functions, source)
 	counts := make(map[string]int)
-	for _, function := range functions {
-		counts[function.id]++
-	}
-	seen := make(map[string]int)
 	for i := range functions {
-		id := functions[i].id
-		if counts[id] > 1 {
-			seen[id]++
-			functions[i].id = fmt.Sprintf("%s#%d", id, seen[id])
+		parentID := ""
+		for j := i - 1; j >= 0; j-- {
+			if functions[j].node.StartByte() <= functions[i].node.StartByte() && functions[j].node.EndByte() >= functions[i].node.EndByte() {
+				parentID = functions[j].id + "/"
+				break
+			}
+		}
+		classID := ""
+		for parent := functions[i].node.Parent(); parent != nil; parent = parent.Parent() {
+			if parent.Type(lang) == "class_declaration" || parent.Type(lang) == "class" {
+				if name := parent.ChildByFieldName("name", lang); name != nil {
+					classID = name.Text(source) + "/"
+				}
+				break
+			}
+		}
+		base := parentID + classID + functions[i].id
+		counts[base]++
+		functions[i].id = base
+		if counts[base] > 1 {
+			functions[i].id += fmt.Sprintf("#%d", counts[base])
 		}
 	}
 	return functions, tree, nil
@@ -300,7 +312,7 @@ func collectTSFunctions(
 	if node.Type(lang) == "call_expression" {
 		callable := node.ChildByFieldName("function", lang)
 		if callable != nil && (callable.Text(source) == "describe" || callable.Text(source) == "test" ||
-			callable.Text(source) == "it") {
+			callable.Text(source) == "it" || strings.HasPrefix(callable.Text(source), "describe.") || strings.HasPrefix(callable.Text(source), "test.") || strings.HasPrefix(callable.Text(source), "it.")) {
 			arguments := node.ChildByFieldName("arguments", lang)
 			title := firstStringArgument(arguments, lang, source)
 			callback := lastFunctionArgument(arguments, lang)
@@ -312,7 +324,7 @@ func collectTSFunctions(
 		}
 	}
 	if isTSFunctionNode(node, lang) {
-		function := tsFunction{node: node, id: "", parent: parent}
+		function := tsFunction{node: node, id: ""}
 		function.id = tsFunctionID(node, lang, titlePath, source)
 		*functions = append(*functions, function)
 		parent = &(*functions)[len(*functions)-1]
@@ -339,7 +351,7 @@ func firstStringArgument(arguments *gotreesitter.Node, lang *gotreesitter.Langua
 		return ""
 	}
 	child := arguments.NamedChild(0)
-	if child.Type(lang) != "string" {
+	if child.Type(lang) != "string" && (child.Type(lang) != "template_string" || strings.Contains(child.Text(source), "${")) {
 		return ""
 	}
 	return strings.Trim(strings.TrimSpace(child.Text(source)), "`\"'")
@@ -363,9 +375,12 @@ func tsFunctionID(node *gotreesitter.Node, lang *gotreesitter.Language, titlePat
 	functionName := "anonymous"
 	if name != nil {
 		functionName = name.Text(source)
-	} else if parent := node.Parent(); parent != nil && parent.Type(lang) == "variable_declarator" {
+	} else if parent := node.Parent(); parent != nil && (parent.Type(lang) == "variable_declarator" || parent.Type(lang) == "public_field_definition" || parent.Type(lang) == "pair") {
 		if variable := parent.ChildByFieldName("name", lang); variable != nil {
 			functionName = variable.Text(source)
+		}
+		if key := parent.ChildByFieldName("key", lang); key != nil {
+			functionName = key.Text(source)
 		}
 	}
 	if len(titlePath) > 0 {
