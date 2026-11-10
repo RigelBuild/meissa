@@ -30,7 +30,7 @@ func TestGoCollectorFixture(t *testing.T) {
 	cfg := testConfig()
 	cfg.Functions = FunctionLimits{Go: GoFunctionLimits{Cognitive: 20, Lines: 60, Statements: 40},
 		TS: TSFunctionLimits{Cognitive: 0, Lines: 0}}
-	values, err := GoMetrics(t.Context(), root, cfg)
+	values, _, err := GoMetrics(t.Context(), root, cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -132,7 +132,7 @@ func TestGoNestedModules(t *testing.T) {
 	trackedFile(t, root, "child/go.mod", "module example.com/child\n\ngo 1.25\n")
 	trackedFile(t, root, "child/child.go", "package child\nfunc Child() {\n"+strings.Repeat("println(1)\n", 41)+"}\n")
 	commitFiles(t, root)
-	values, err := GoMetrics(t.Context(), root, testConfig())
+	values, _, err := GoMetrics(t.Context(), root, testConfig())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,6 +146,25 @@ func TestGoNestedModules(t *testing.T) {
 		t.Fatalf("unexpected paths: %#v", values[MetricGoStatements])
 	}
 }
+
+func TestGoExcludedAndUnbuiltFiles(t *testing.T) {
+	root := goTestRepo(t, "package p\nfunc Parent() {}\n")
+	offender := "package fixture\nfunc Large() {\n" + strings.Repeat("println(1)\n", 41) + "}\n"
+	trackedFile(t, root, "fixtures/x.go", offender)
+	trackedFile(t, root, "excluded/x.go", offender)
+	trackedFile(t, root, "tagged.go", "//go:build integration\n\n"+offender)
+	trackedFile(t, root, "platform_windows.go", offender)
+	commitFiles(t, root)
+	cfg := testConfig()
+	cfg.Exclude = []string{"excluded/**"}
+	values, skips, err := GoMetrics(t.Context(), root, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(skips) != 2 || len(values[MetricGoStatements]) != 1 {
+		t.Fatalf("skips=%v measurements=%v", skips, values[MetricGoStatements])
+	}
+}
 func TestGoExcludedModule(t *testing.T) {
 	root := goTestRepo(t, "package p\nfunc Parent() {}\n")
 	trackedFile(t, root, "excluded/go.mod", "module example.com/excluded\n\ngo 1.25\n")
@@ -153,7 +172,7 @@ func TestGoExcludedModule(t *testing.T) {
 	commitFiles(t, root)
 	cfg := testConfig()
 	cfg.Exclude = []string{"excluded/**"}
-	_, err := GoMetrics(t.Context(), root, cfg)
+	_, _, err := GoMetrics(t.Context(), root, cfg)
 	if err != nil {
 		t.Fatal(err)
 	}

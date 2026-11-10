@@ -21,7 +21,7 @@ func goSuppressionFindings(ctx context.Context, root string, cfg Config) ([]Find
 	modules := goModules(paths, cfg)
 	eligible := make(map[string]bool)
 	for _, module := range modules {
-		files, err := parseGoSources(root, module, paths, cfg)
+		files, _, err := parseGoSources(root, module, paths, cfg)
 		if err != nil {
 			return nil, err
 		}

@@ -55,10 +55,15 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
 	}
-	functions, err := GoMetrics(ctx, root, config)
+	functions, skips, err := GoMetrics(ctx, root, config)
 	if err != nil {
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
+	}
+	for _, skip := range skips {
+		if !writeOutput(stderr, "code-shape-gate: skip %s: %s\n", skip.Path, skip.Reason) {
+			return 2
+		}
 	}
 	tsFunctions, err := TSMetrics(ctx, root, config)
 	if err != nil {

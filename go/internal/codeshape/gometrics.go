@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
+	"go/build"
 	"go/format"
 	"go/parser"
 	"go/token"
@@ -70,28 +71,36 @@ type goFunction struct {
 	id   string
 }
 
+// Skip records a source file that could not be measured.
+type Skip struct {
+	Path   string
+	Reason string
+}
+
 // GoMetrics measures function complexity and length in every included module.
-func GoMetrics(ctx context.Context, root string, cfg Config) (map[Metric]map[string][]Entry, error) {
+func GoMetrics(ctx context.Context, root string, cfg Config) (map[Metric]map[string][]Entry, []Skip, error) {
 	paths, err := trackedPaths(ctx, root)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	modules := goModules(paths, cfg)
 	if len(modules) == 0 {
-		return newFunctionMeasurements(), nil
+		return newFunctionMeasurements(), nil, nil
 	}
 	binary, err := exec.LookPath("golangci-lint")
 	if err != nil {
-		return nil, fmt.Errorf("find golangci-lint: %w", err)
+		return nil, nil, fmt.Errorf("find golangci-lint: %w", err)
 	}
 	measurements := newFunctionMeasurements()
+	skips := []Skip{}
 	for _, module := range modules {
-		files, err := parseGoSources(root, module, paths, cfg)
+		files, skipped, err := parseGoSources(root, module, paths, cfg)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
+		skips = append(skips, skipped...)
 		if len(files) == 0 {
-			return nil, fmt.Errorf("go module %q: %w", module, errEmptyGoModule)
+			continue
 		}
 		limits := []struct {
 			metric     Metric
@@ -113,25 +122,35 @@ func GoMetrics(ctx context.Context, root string, cfg Config) (map[Metric]map[str
 		for _, limit := range limits {
 			report, err := runGolangci(ctx, binary, root, module, limit.linter, limit.lines, limit.statements, cfg)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			for _, issue := range report.Issues {
+				path := issue.Pos.Filename
+				if filepath.IsAbs(path) {
+					path, err = filepath.Rel(root, path)
+					if err != nil {
+						return nil, nil, fmt.Errorf("relativize Go diagnostic path: %w", err)
+					}
+				} else {
+					path = filepath.Join(module, path)
+				}
+				path = filepath.ToSlash(path)
+				if excludedFunctionPath(path, cfg) || !countedPath(path, cfg) {
+					continue
+				}
 				value, err := metricValue(issue.Text, limit.metric)
 				if err != nil {
-					return nil, err
+					return nil, nil, err
 				}
 				path, function, err := findGoFunction(root, module, files, issue.Pos.Filename, issue.Pos.Line, issue.Pos.Column)
 				if err != nil {
-					return nil, err
+					return nil, nil, err
 				}
 				appendFunctionValue(measurements, limit.metric, path, function, value)
 			}
 		}
 	}
-	if !hasAnyFunctionMeasurement(measurements) {
-		return nil, errEmptyGoMeasurement
-	}
-	return measurements, nil
+	return measurements, skips, nil
 }
 
 func trackedPaths(ctx context.Context, root string) ([]string, error) {
@@ -169,8 +188,11 @@ func excludedFunctionPath(path string, cfg Config) bool {
 	return matchesAny(filepath.ToSlash(path), cfg.Exclude)
 }
 
-func parseGoSources(root, module string, paths []string, cfg Config) (map[string]goSourceFile, error) {
+func parseGoSources(root, module string, paths []string, cfg Config) (map[string]goSourceFile, []Skip, error) {
 	files := make(map[string]goSourceFile)
+	skips := []Skip{}
+	buildContext := build.Default
+	buildContext.CgoEnabled = false
 	modules := make([]string, 0)
 	for _, path := range paths {
 		if filepath.Base(path) == "go.mod" {
@@ -199,15 +221,24 @@ func parseGoSources(root, module string, paths []string, cfg Config) (map[string
 		if !countedPath(filepath.ToSlash(path), cfg) {
 			continue
 		}
+		fullPath := filepath.Join(root, filepath.FromSlash(path))
+		matches, err := buildContext.MatchFile(filepath.Dir(fullPath), filepath.Base(fullPath))
+		if err != nil {
+			return nil, nil, fmt.Errorf("check Go build constraints %q: %w", path, err)
+		}
+		if !matches {
+			skips = append(skips, Skip{Path: path, Reason: "not in default Go build"})
+			continue
+		}
 		//nolint:gosec // G304: path from the repo's tracked file list
 		source, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(path)))
 		if err != nil {
-			return nil, fmt.Errorf("read Go source %q: %w", path, err)
+			return nil, nil, fmt.Errorf("read Go source %q: %w", path, err)
 		}
 		set := token.NewFileSet()
 		file, err := parser.ParseFile(set, path, source, parser.ParseComments|parser.AllErrors)
 		if err != nil {
-			return nil, fmt.Errorf("parse Go source %q: %w", path, err)
+			return nil, nil, fmt.Errorf("parse Go source %q: %w", path, err)
 		}
 		functions := goFunctions(file, set)
 		for index := range functions {
@@ -215,7 +246,7 @@ func parseGoSources(root, module string, paths []string, cfg Config) (map[string
 		}
 		files[path] = goSourceFile{set: set, functions: functions}
 	}
-	return files, nil
+	return files, skips, nil
 }
 
 func goFunctions(file *ast.File, set *token.FileSet) []goFunction {
