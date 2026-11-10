@@ -33,7 +33,8 @@ type Allowlist struct {
 	Present   bool                          `json:"-"`
 }
 
-func emptyAllowlist() Allowlist {
+// EmptyAllowlist creates an empty allowlist.
+func EmptyAllowlist() Allowlist {
 	return Allowlist{Files: map[string]Entry{}, Dirs: map[string]Entry{},
 		Functions: map[Metric]map[string][]Entry{}, Present: false}
 }

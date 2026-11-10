@@ -47,7 +47,7 @@ func inventoryPaths(repository *os.Root, output []byte, cfg Config) (Snapshot, e
 			continue
 		}
 		trackedPath := filepath.ToSlash(string(rawPath))
-		if matchesAny(trackedPath, cfg.Exclude) {
+		if MatchesAny(trackedPath, cfg.Exclude) {
 			continue
 		}
 		parent := filepath.ToSlash(filepath.Dir(filepath.FromSlash(trackedPath)))
@@ -55,7 +55,7 @@ func inventoryPaths(repository *os.Root, output []byte, cfg Config) (Snapshot, e
 			parent = ""
 		}
 		dirs[parent]++
-		if !countedPath(trackedPath, cfg) {
+		if !CountedPath(trackedPath, cfg) {
 			continue
 		}
 		file, err := repository.Open(filepath.FromSlash(trackedPath))
@@ -80,7 +80,8 @@ func inventoryPaths(repository *os.Root, output []byte, cfg Config) (Snapshot, e
 	return Snapshot{Files: files, Dirs: dirs, Functions: nil}, nil
 }
 
-func countedPath(path string, cfg Config) bool {
+// CountedPath reports whether the configuration includes a path.
+func CountedPath(path string, cfg Config) bool {
 	for segment := range strings.SplitSeq(path, "/") {
 		if segment == "testdata" || segment == "fixtures" {
 			return false
@@ -90,10 +91,11 @@ func countedPath(path string, cfg Config) bool {
 	if !slices.Contains(cfg.Extensions, extension) {
 		return false
 	}
-	return !matchesAny(path, cfg.Exclude)
+	return !MatchesAny(path, cfg.Exclude)
 }
 
-func matchesAny(path string, patterns []string) bool {
+// MatchesAny reports whether a path matches a pattern.
+func MatchesAny(path string, patterns []string) bool {
 	for _, pattern := range patterns {
 		if matchGlob(pattern, path) {
 			return true
@@ -192,7 +194,9 @@ func completePhysicalLine(count int, generated, increment, marker bool) (int, bo
 	}
 	return count, generated
 }
-func trackedPaths(ctx context.Context, root string) ([]string, error) {
+
+// TrackedPaths lists tracked repository paths.
+func TrackedPaths(ctx context.Context, root string) ([]string, error) {
 	command := exec.CommandContext(ctx, "git", "ls-files", "-z")
 	command.Dir = root
 	output, err := command.Output()

@@ -43,7 +43,8 @@ type TSFunctionLimits struct {
 	Lines     int `json:"lines"`
 }
 
-func (limits FunctionLimits) limitFor(metric Metric) int {
+// LimitFor returns the threshold for a function metric.
+func (limits FunctionLimits) LimitFor(metric Metric) int {
 	switch metric {
 	case MetricGoCognitive:
 		return limits.Go.Cognitive
@@ -62,22 +63,27 @@ func (limits FunctionLimits) limitFor(metric Metric) int {
 	}
 }
 
-func isFunctionMetric(metric Metric) bool {
-	return slices.Contains(functionMetrics(), metric)
+// IsFunctionMetric reports whether a metric measures functions.
+func IsFunctionMetric(metric Metric) bool {
+	return slices.Contains(FunctionMetrics(), metric)
 }
 
-func functionMetrics() []Metric {
+// FunctionMetrics lists supported function metrics.
+func FunctionMetrics() []Metric {
 	return []Metric{MetricGoCognitive, MetricGoLines, MetricGoStatements, MetricTSCognitive, MetricTSLines}
 }
-func newFunctionMeasurements() map[Metric]map[string][]Entry {
+
+// NewFunctionMeasurements initializes the function metric maps.
+func NewFunctionMeasurements() map[Metric]map[string][]Entry {
 	values := make(map[Metric]map[string][]Entry)
-	for _, metric := range functionMetrics() {
+	for _, metric := range FunctionMetrics() {
 		values[metric] = make(map[string][]Entry)
 	}
 	return values
 }
 
-func appendFunctionValue(values map[Metric]map[string][]Entry, metric Metric, path, id string, value int) {
+// AppendFunctionValue records a function measurement.
+func AppendFunctionValue(values map[Metric]map[string][]Entry, metric Metric, path, id string, value int) {
 	entries := values[metric][path]
 	for index, entry := range entries {
 		if entry.ID == id {
@@ -91,13 +97,15 @@ func appendFunctionValue(values map[Metric]map[string][]Entry, metric Metric, pa
 	values[metric][path] = append(entries, Entry{ID: id, Value: value, Reason: ""})
 }
 
-func sortedFunctionEntries(entries []Entry) []Entry {
+// SortedFunctionEntries returns entries ordered by identifier.
+func SortedFunctionEntries(entries []Entry) []Entry {
 	sorted := append([]Entry(nil), entries...)
 	sort.Slice(sorted, func(i, j int) bool { return sorted[i].ID < sorted[j].ID })
 	return sorted
 }
 
-func validateFunctionEntryIDs(entries map[string][]Entry) error {
+// ValidateFunctionEntryIDs checks function entry identifiers.
+func ValidateFunctionEntryIDs(entries map[string][]Entry) error {
 	for path, functions := range entries {
 		seen := make(map[string]bool, len(functions))
 		for _, entry := range functions {
@@ -113,12 +121,13 @@ func validateFunctionEntryIDs(entries map[string][]Entry) error {
 	return nil
 }
 
-func rewriteFunctionEntries(updated, allow, values FunctionMeasurements, cfg Config, seed bool) (bool, []string) {
+// RewriteFunctionEntries updates function ratchet entries.
+func RewriteFunctionEntries(updated, allow, values FunctionMeasurements, cfg Config, seed bool) (bool, []string) {
 	changed := false
 	errs := []string{}
-	for _, metric := range functionMetrics() {
-		paths, dropped := retainFunctionEntries(allow[metric], values[metric], cfg.Functions.limitFor(metric))
-		added, metricErrors := seedFunctionEntries(paths, values[metric], metric, cfg.Functions.limitFor(metric), seed)
+	for _, metric := range FunctionMetrics() {
+		paths, dropped := retainFunctionEntries(allow[metric], values[metric], cfg.Functions.LimitFor(metric))
+		added, metricErrors := seedFunctionEntries(paths, values[metric], metric, cfg.Functions.LimitFor(metric), seed)
 		changed = changed || dropped || added
 		errs = append(errs, metricErrors...)
 		if len(paths) > 0 {

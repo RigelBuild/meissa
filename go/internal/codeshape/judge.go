@@ -13,7 +13,7 @@ func Judge(cfg Config, allow, baseAllow Allowlist, snap Snapshot) []Finding {
 	findings = append(findings, judgeMetric(cfg, snap.Dirs, allow.Dirs, MetricDirs)...)
 	findings = append(findings, judgeFunctions(cfg, snap.Functions, allow.Functions)...)
 	findings = append(findings, judgeBaseEntries(allow, baseAllow)...)
-	for _, path := range sortedEntryPaths(allow.Files) {
+	for _, path := range SortedEntryPaths(allow.Files) {
 		if _, exists := snap.Files[path]; !exists {
 			findings = append(findings, Finding{
 				Path:   path,
@@ -24,13 +24,13 @@ func Judge(cfg Config, allow, baseAllow Allowlist, snap Snapshot) []Finding {
 			})
 		}
 	}
-	for _, path := range sortedEntryPaths(allow.Dirs) {
+	for _, path := range SortedEntryPaths(allow.Dirs) {
 		if _, exists := snap.Dirs[path]; !exists {
 			findings = append(findings, Finding{
 				Path:   displayDir(path),
 				Metric: MetricDirs,
 				Value:  0,
-				Limit:  cfg.limitFor(MetricDirs, path),
+				Limit:  cfg.LimitFor(MetricDirs, path),
 				Fix:    "remove the stale allowlist entry",
 			})
 		}
@@ -41,27 +41,27 @@ func Judge(cfg Config, allow, baseAllow Allowlist, snap Snapshot) []Finding {
 				if !functionExists(snap.Functions[metric][path], entry.ID) {
 					findings = append(findings, Finding{
 						Path: path + "#" + entry.ID, Metric: metric, Value: 0,
-						Limit: cfg.Functions.limitFor(metric), Fix: "remove the stale allowlist entry",
+						Limit: cfg.Functions.LimitFor(metric), Fix: "remove the stale allowlist entry",
 					})
 				}
 			}
 		}
 	}
-	sortFindings(findings)
+	SortFindings(findings)
 	return findings
 }
 
 func judgeMetric(cfg Config, values map[string]int, entries map[string]Entry, metric Metric) []Finding {
-	paths := sortedEntryPaths(values)
+	paths := SortedEntryPaths(values)
 	findings := make([]Finding, 0)
 	for _, path := range paths {
 		value := values[path]
-		limit := cfg.limitFor(metric, path)
+		limit := cfg.LimitFor(metric, path)
 		entry, listed := entries[path]
 		if !listed {
 			if value > limit {
 				findings = append(findings, Finding{
-					Path:   displayPath(metric, path),
+					Path:   DisplayPath(metric, path),
 					Metric: metric,
 					Value:  value,
 					Limit:  limit,
@@ -72,7 +72,7 @@ func judgeMetric(cfg Config, values map[string]int, entries map[string]Entry, me
 		}
 		if value <= limit {
 			findings = append(findings, Finding{
-				Path:   displayPath(metric, path),
+				Path:   DisplayPath(metric, path),
 				Metric: metric,
 				Value:  value,
 				Limit:  limit,
@@ -82,7 +82,7 @@ func judgeMetric(cfg Config, values map[string]int, entries map[string]Entry, me
 		}
 		if value > entry.Value {
 			findings = append(findings, Finding{
-				Path:   displayPath(metric, path),
+				Path:   DisplayPath(metric, path),
 				Metric: metric,
 				Value:  value,
 				Limit:  entry.Value,
@@ -95,11 +95,11 @@ func judgeMetric(cfg Config, values map[string]int, entries map[string]Entry, me
 
 func judgeFunctions(cfg Config, values, entries map[Metric]map[string][]Entry) []Finding {
 	findings := make([]Finding, 0)
-	for _, metric := range functionMetrics() {
-		paths := sortedEntryPaths(values[metric])
+	for _, metric := range FunctionMetrics() {
+		paths := SortedEntryPaths(values[metric])
 		for _, path := range paths {
 			for _, current := range values[metric][path] {
-				limit := cfg.Functions.limitFor(metric)
+				limit := cfg.Functions.LimitFor(metric)
 				previous, listed := functionEntry(entries[metric][path], current.ID)
 				findingPath := path + "#" + current.ID
 				if !listed {
@@ -141,7 +141,7 @@ func judgeBaseEntries(allow, base Allowlist) []Finding {
 			previous, exists := group.base[path]
 			if !exists || entry.Value > previous.Value {
 				findings = append(findings, Finding{
-					Path: displayPath(group.metric, path), Metric: group.metric,
+					Path: DisplayPath(group.metric, path), Metric: group.metric,
 					Value: entry.Value, Limit: previous.Value,
 					Fix: "do not add or raise allowlist entries in pull requests",
 				})
@@ -178,7 +178,8 @@ func functionExists(entries []Entry, id string) bool {
 	return exists
 }
 
-func (cfg Config) limitFor(metric Metric, path string) int {
+// LimitFor returns the limit for a path and metric.
+func (cfg Config) LimitFor(metric Metric, path string) int {
 	if metric != MetricDirs {
 		return cfg.FileLimit
 	}
@@ -195,13 +196,14 @@ func (cfg Config) limitFor(metric Metric, path string) int {
 }
 
 func fixForPath(cfg Config, metric Metric, path string) string {
-	if metric == MetricDirs && cfg.limitFor(metric, path) != cfg.DirLimit {
+	if metric == MetricDirs && cfg.LimitFor(metric, path) != cfg.DirLimit {
 		return "reorganize the record's decisions"
 	}
 	return fixFor(metric)
 }
 
-func sortedEntryPaths[V any](entries map[string]V) []string {
+// SortedEntryPaths returns sorted path map keys.
+func SortedEntryPaths[V any](entries map[string]V) []string {
 	paths := make([]string, 0, len(entries))
 	for path := range entries {
 		paths = append(paths, path)
@@ -210,7 +212,8 @@ func sortedEntryPaths[V any](entries map[string]V) []string {
 	return paths
 }
 
-func sortFindings(findings []Finding) {
+// SortFindings orders findings by path and metric.
+func SortFindings(findings []Finding) {
 	sort.Slice(findings, func(i, j int) bool {
 		if findings[i].Path != findings[j].Path {
 			return findings[i].Path < findings[j].Path
@@ -219,7 +222,8 @@ func sortFindings(findings []Finding) {
 	})
 }
 
-func displayPath(metric Metric, path string) string {
+// DisplayPath formats a path for a finding.
+func DisplayPath(metric Metric, path string) string {
 	if metric == MetricDirs {
 		return displayDir(path)
 	}

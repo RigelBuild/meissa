@@ -19,7 +19,7 @@ func TestJudge(t *testing.T) {
 			Dirs:      map[string]int{},
 			Functions: nil,
 		}
-		findings := Judge(config, allow, emptyAllowlist(), snapshot)
+		findings := Judge(config, allow, EmptyAllowlist(), snapshot)
 		if !hasFinding(findings, "large.go", MetricFiles, 502, 501, "grew") {
 			t.Fatalf("missing grew finding: %#v", findings)
 		}
@@ -34,7 +34,7 @@ func TestJudge(t *testing.T) {
 			Dirs:      map[string]int{},
 			Functions: nil,
 		}
-		findings := Judge(config, allow, emptyAllowlist(), snapshot)
+		findings := Judge(config, allow, EmptyAllowlist(), snapshot)
 		if !hasFinding(findings, "small.go", MetricFiles, 500, 500, "remove") {
 			t.Fatalf("missing remove finding: %#v", findings)
 		}
@@ -44,7 +44,7 @@ func TestJudge(t *testing.T) {
 			Files: map[string]Entry{"gone.go": {ID: "", Value: 501, Reason: "split by concern"}},
 			Dirs:  map[string]Entry{}, Functions: nil, Present: false,
 		}
-		findings := Judge(config, allow, emptyAllowlist(), Snapshot{
+		findings := Judge(config, allow, EmptyAllowlist(), Snapshot{
 			Files:     map[string]int{},
 			Dirs:      map[string]int{},
 			Functions: nil,
@@ -62,7 +62,7 @@ func TestJudgeBase(t *testing.T) {
 			Files: map[string]Entry{"large.go": {ID: "", Value: 501, Reason: "split by concern"}},
 			Dirs:  map[string]Entry{}, Functions: nil, Present: false,
 		}
-		base := emptyAllowlist()
+		base := EmptyAllowlist()
 		base.Present = true
 		findings := Judge(config, allow, base, Snapshot{
 			Files:     map[string]int{"large.go": 501},
@@ -101,7 +101,7 @@ func TestJudgeBase(t *testing.T) {
 			Dirs:      map[string]int{},
 			Functions: nil,
 		}
-		if findings := Judge(config, allow, emptyAllowlist(), snapshot); len(findings) != 0 {
+		if findings := Judge(config, allow, EmptyAllowlist(), snapshot); len(findings) != 0 {
 			t.Fatalf("head-only findings = %#v", findings)
 		}
 	})
@@ -110,7 +110,7 @@ func TestJudgeBase(t *testing.T) {
 			Files: map[string]Entry{"gone.go": {ID: "", Value: 501, Reason: "split by concern"}},
 			Dirs:  map[string]Entry{}, Functions: nil, Present: false,
 		}
-		base := emptyAllowlist()
+		base := EmptyAllowlist()
 		base.Present = true
 		findings := Judge(config, allow, base, Snapshot{
 			Files:     map[string]int{},
@@ -145,12 +145,12 @@ func TestJudgeFunctionRatchets(t *testing.T) {
 	values := FunctionMeasurements{MetricGoCognitive: {"f.go": {
 		{ID: "first", Value: 31, Reason: ""}, {ID: "second", Value: 29, Reason: ""},
 	}}}
-	findings := Judge(cfg, allow, emptyAllowlist(), Snapshot{Files: nil, Dirs: nil, Functions: values})
+	findings := Judge(cfg, allow, EmptyAllowlist(), Snapshot{Files: nil, Dirs: nil, Functions: values})
 	if len(findings) != 1 || !hasFinding(findings, "f.go#first", MetricGoCognitive, 31, 30, "grew") {
 		t.Fatalf("independent ratchets: %#v", findings)
 	}
 	values[MetricGoCognitive]["f.go"][0].Value = 30
-	findings = Judge(cfg, allow, emptyAllowlist(), Snapshot{Files: nil, Dirs: nil, Functions: values})
+	findings = Judge(cfg, allow, EmptyAllowlist(), Snapshot{Files: nil, Dirs: nil, Functions: values})
 	if len(findings) != 0 {
 		t.Fatalf("unchanged and shrunk functions: %#v", findings)
 	}

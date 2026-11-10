@@ -89,7 +89,7 @@ func TestInventory(t *testing.T) {
 		if snapshot.Files["large.go"] != 501 {
 			t.Fatalf("file lines = %d, want 501", snapshot.Files["large.go"])
 		}
-		findings := Judge(testConfig(), emptyAllowlist(), emptyAllowlist(), snapshot)
+		findings := Judge(testConfig(), EmptyAllowlist(), EmptyAllowlist(), snapshot)
 		if !hasFinding(findings, "large.go", MetricFiles, 501, 500, "split this file") {
 			t.Fatalf("missing one-over finding: %#v", findings)
 		}
@@ -192,7 +192,7 @@ func TestInventoryDirectoryWidth(t *testing.T) {
 		if snapshot.Dirs["wide"] != 11 {
 			t.Fatalf("directory files = %d, want 11", snapshot.Dirs["wide"])
 		}
-		findings := Judge(testConfig(), emptyAllowlist(), emptyAllowlist(), snapshot)
+		findings := Judge(testConfig(), EmptyAllowlist(), EmptyAllowlist(), snapshot)
 		if !hasFinding(findings, "wide", MetricDirs, 11, 10, "split the directory") {
 			t.Fatalf("missing 11-file directory finding: %#v", findings)
 		}
@@ -207,7 +207,7 @@ func TestInventoryDirectoryWidth(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if findings := Judge(testConfig(), emptyAllowlist(), emptyAllowlist(), snapshot); len(findings) != 0 {
+		if findings := Judge(testConfig(), EmptyAllowlist(), EmptyAllowlist(), snapshot); len(findings) != 0 {
 			t.Fatalf("10-file directory findings = %#v", findings)
 		}
 	})
