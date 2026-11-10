@@ -99,58 +99,78 @@ func GoMetrics(ctx context.Context, root string, cfg codeshape.Config) (
 		if len(files) == 0 {
 			continue
 		}
-		limits := []struct {
-			metric     codeshape.Metric
-			linter     string
-			lines      int
-			statements int
-		}{
-			{metric: codeshape.MetricGoCognitive, linter: "gocognit", lines: 0, statements: 0},
-			{metric: codeshape.MetricGoLines, linter: "funlen", lines: cfg.Functions.Go.Lines, statements: highFunlenLimit},
-			{metric: codeshape.MetricGoStatements, linter: "funlen", lines: highFunlenLimit,
-				statements: cfg.Functions.Go.Statements},
-		}
-		for _, file := range files {
-			for _, function := range file.functions {
-				for _, metric := range []codeshape.Metric{
-					codeshape.MetricGoCognitive, codeshape.MetricGoLines, codeshape.MetricGoStatements,
-				} {
-					codeshape.AppendFunctionValue(measurements, metric, function.path, function.id, 0)
-				}
-			}
-		}
-		for _, limit := range limits {
-			report, err := runGolangci(ctx, binary, root, module, limit.linter, limit.lines, limit.statements, cfg)
-			if err != nil {
-				return nil, nil, err
-			}
-			for _, issue := range report.Issues {
-				path := issue.Pos.Filename
-				if filepath.IsAbs(path) {
-					path, err = filepath.Rel(root, path)
-					if err != nil {
-						return nil, nil, fmt.Errorf("relativize Go diagnostic path: %w", err)
-					}
-				} else {
-					path = filepath.Join(module, path)
-				}
-				path = filepath.ToSlash(path)
-				if excludedFunctionPath(path, cfg) || !codeshape.CountedPath(path, cfg) {
-					continue
-				}
-				value, err := metricValue(issue.Text, limit.metric)
-				if err != nil {
-					return nil, nil, err
-				}
-				path, function, err := findGoFunction(root, module, files, issue.Pos.Filename, issue.Pos.Line, issue.Pos.Column)
-				if err != nil {
-					return nil, nil, err
-				}
-				codeshape.AppendFunctionValue(measurements, limit.metric, path, function, value)
-			}
+		err = measureGoModule(ctx, binary, root, module, cfg, files, measurements)
+		if err != nil {
+			return nil, nil, err
 		}
 	}
 	return measurements, skips, nil
+}
+
+func measureGoModule(ctx context.Context, binary, root, module string, cfg codeshape.Config,
+	files map[string]goSourceFile, measurements map[codeshape.Metric]map[string][]codeshape.Entry,
+) error {
+	limits := []struct {
+		metric            codeshape.Metric
+		linter            string
+		lines, statements int
+	}{
+		{metric: codeshape.MetricGoCognitive, linter: "gocognit", lines: 0, statements: 0},
+		{metric: codeshape.MetricGoLines, linter: "funlen", lines: cfg.Functions.Go.Lines, statements: highFunlenLimit},
+		{metric: codeshape.MetricGoStatements, linter: "funlen", lines: highFunlenLimit,
+			statements: cfg.Functions.Go.Statements},
+	}
+	for _, file := range files {
+		for _, function := range file.functions {
+			for _, metric := range []codeshape.Metric{
+				codeshape.MetricGoCognitive, codeshape.MetricGoLines, codeshape.MetricGoStatements,
+			} {
+				codeshape.AppendFunctionValue(measurements, metric, function.path, function.id, 0)
+			}
+		}
+	}
+	for _, limit := range limits {
+		report, err := runGolangci(ctx, binary, root, module, limit.linter, limit.lines, limit.statements, cfg)
+		if err != nil {
+			return err
+		}
+		err = applyGoIssues(root, module, files, cfg, limit.metric, report, measurements)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func applyGoIssues(root, module string, files map[string]goSourceFile, cfg codeshape.Config,
+	metric codeshape.Metric, report golangciReport, measurements map[codeshape.Metric]map[string][]codeshape.Entry,
+) error {
+	for _, issue := range report.Issues {
+		path := issue.Pos.Filename
+		if filepath.IsAbs(path) {
+			var err error
+			path, err = filepath.Rel(root, path)
+			if err != nil {
+				return fmt.Errorf("relativize Go diagnostic path: %w", err)
+			}
+		} else {
+			path = filepath.Join(module, path)
+		}
+		path = filepath.ToSlash(path)
+		if excludedFunctionPath(path, cfg) || !codeshape.CountedPath(path, cfg) {
+			continue
+		}
+		value, err := metricValue(issue.Text, metric)
+		if err != nil {
+			return err
+		}
+		path, function, err := findGoFunction(root, module, files, issue.Pos.Filename, issue.Pos.Line, issue.Pos.Column)
+		if err != nil {
+			return err
+		}
+		codeshape.AppendFunctionValue(measurements, metric, path, function, value)
+	}
+	return nil
 }
 
 func goModules(paths []string, cfg codeshape.Config) []string {
@@ -189,24 +209,7 @@ func parseGoSources(root, module string, paths []string, cfg codeshape.Config) (
 	}
 	sort.Strings(modules)
 	for _, path := range paths {
-		if filepath.Ext(path) != ".go" || excludedFunctionPath(path, cfg) {
-			continue
-		}
-		if module != "." && !strings.HasPrefix(filepath.ToSlash(path), strings.TrimSuffix(module, "/")+"/") {
-			continue
-		}
-		nested := false
-		for _, dir := range modules {
-			if dir != "." && dir != module && (module == "." || strings.HasPrefix(dir, module+"/")) &&
-				strings.HasPrefix(filepath.ToSlash(path), dir+"/") {
-				nested = true
-				break
-			}
-		}
-		if nested {
-			continue
-		}
-		if !codeshape.CountedPath(filepath.ToSlash(path), cfg) {
+		if !eligibleGoSource(path, module, modules, cfg) {
 			continue
 		}
 		fullPath := filepath.Join(root, filepath.FromSlash(path))
@@ -237,26 +240,29 @@ func parseGoSources(root, module string, paths []string, cfg codeshape.Config) (
 	return files, skips, nil
 }
 
-func goFunctions(file *ast.File, set *token.FileSet) []goFunction {
-	functions := make([]goFunction, 0)
-	topLevel := make(map[*ast.FuncLit]string)
-	for _, decl := range file.Decls {
-		group, ok := decl.(*ast.GenDecl)
-		if !ok {
-			continue
-		}
-		for _, spec := range group.Specs {
-			value, ok := spec.(*ast.ValueSpec)
-			if !ok {
-				continue
-			}
-			for i, expr := range value.Values {
-				if literal, ok := expr.(*ast.FuncLit); ok && i < len(value.Names) {
-					topLevel[literal] = value.Names[i].Name
-				}
-			}
+func eligibleGoSource(path, module string, modules []string, cfg codeshape.Config) bool {
+	if filepath.Ext(path) != ".go" || excludedFunctionPath(path, cfg) {
+		return false
+	}
+	if module != "." && !strings.HasPrefix(filepath.ToSlash(path), strings.TrimSuffix(module, "/")+"/") {
+		return false
+	}
+	return !nestedModulePath(path, module, modules) && codeshape.CountedPath(filepath.ToSlash(path), cfg)
+}
+
+func nestedModulePath(path, module string, modules []string) bool {
+	for _, dir := range modules {
+		if dir != "." && dir != module && (module == "." || strings.HasPrefix(dir, module+"/")) &&
+			strings.HasPrefix(filepath.ToSlash(path), dir+"/") {
+			return true
 		}
 	}
+	return false
+}
+
+func goFunctions(file *ast.File, set *token.FileSet) []goFunction {
+	functions := make([]goFunction, 0)
+	topLevel := topLevelLiterals(file)
 	ast.Inspect(file, func(node ast.Node) bool {
 		switch function := node.(type) {
 		case *ast.FuncDecl:
@@ -275,6 +281,33 @@ func goFunctions(file *ast.File, set *token.FileSet) []goFunction {
 		return true
 	})
 	sort.Slice(functions, func(i, j int) bool { return functions[i].node.Pos() < functions[j].node.Pos() })
+	assignGoFunctionIDs(functions, goFunctionParents(functions))
+	return functions
+}
+
+func topLevelLiterals(file *ast.File) map[*ast.FuncLit]string {
+	topLevel := make(map[*ast.FuncLit]string)
+	for _, decl := range file.Decls {
+		group, ok := decl.(*ast.GenDecl)
+		if !ok {
+			continue
+		}
+		for _, spec := range group.Specs {
+			value, ok := spec.(*ast.ValueSpec)
+			if !ok {
+				continue
+			}
+			for i, expr := range value.Values {
+				if literal, ok := expr.(*ast.FuncLit); ok && i < len(value.Names) {
+					topLevel[literal] = value.Names[i].Name
+				}
+			}
+		}
+	}
+	return topLevel
+}
+
+func goFunctionParents(functions []goFunction) []int {
 	parent := make([]int, len(functions))
 	for index := range parent {
 		parent[index] = -1
@@ -295,6 +328,10 @@ func goFunctions(file *ast.File, set *token.FileSet) []goFunction {
 			}
 		}
 	}
+	return parent
+}
+
+func assignGoFunctionIDs(functions []goFunction, parent []int) {
 	closureCounts := make(map[int]int)
 	duplicates := make(map[string]int)
 	totals := make(map[string]int)
@@ -322,7 +359,6 @@ func goFunctions(file *ast.File, set *token.FileSet) []goFunction {
 			functions[index].id = name
 		}
 	}
-	return functions
 }
 
 func runGolangci(

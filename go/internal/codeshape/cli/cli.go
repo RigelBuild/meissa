@@ -59,41 +59,11 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
 	}
-	functions, skips, err := golang.GoMetrics(ctx, root, config)
+	suppressions, err := collectMeasurements(ctx, root, config, &snapshot, stderr)
 	if err != nil {
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
 	}
-	for _, skip := range skips {
-		if !writeOutput(stderr, "code-shape-gate: skip %s: %s\n", skip.Path, skip.Reason) {
-			return 2
-		}
-	}
-	tsFunctions, tsSkips, err := typescript.TSMetrics(ctx, root, config)
-	if err != nil {
-		writeOutput(stderr, "code-shape-gate: %v\n", err)
-		return 2
-	}
-	for _, skip := range tsSkips {
-		if !writeOutput(stderr, "code-shape-gate: skip %s: %s\n", skip.Path, skip.Reason) {
-			return 2
-		}
-	}
-	functions[codeshape.MetricTSCognitive] = tsFunctions[codeshape.MetricTSCognitive]
-	functions[codeshape.MetricTSLines] = tsFunctions[codeshape.MetricTSLines]
-	snapshot.Functions = functions
-	suppressions, err := golang.SuppressionFindings(ctx, root, config)
-	if err != nil {
-		writeOutput(stderr, "code-shape-gate: %v\n", err)
-		return 2
-	}
-	tsFindings, err := typescript.PolicyFindings(ctx, root, config)
-	if err != nil {
-		writeOutput(stderr, "code-shape-gate: %v\n", err)
-		return 2
-	}
-	suppressions = append(suppressions, tsFindings...)
-	codeshape.SortFindings(suppressions)
 	if len(suppressions) > 0 {
 		err := writeFindings(stdout, suppressions)
 		if err != nil {
@@ -115,6 +85,45 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 		return 1
 	}
 	return 0
+}
+
+func collectMeasurements(
+	ctx context.Context, root string, config codeshape.Config, snapshot *codeshape.Snapshot, stderr io.Writer,
+) ([]codeshape.Finding, error) {
+	functions, skips, err := golang.GoMetrics(ctx, root, config)
+	if err != nil {
+		return nil, fmt.Errorf("collect Go metrics: %w", err)
+	}
+	for _, skip := range skips {
+		_, err := fmt.Fprintf(stderr, "code-shape-gate: skip %s: %s\n", skip.Path, skip.Reason)
+		if err != nil {
+			return nil, fmt.Errorf("write skip: %w", err)
+		}
+	}
+	tsFunctions, tsSkips, err := typescript.TSMetrics(ctx, root, config)
+	if err != nil {
+		return nil, fmt.Errorf("collect TypeScript metrics: %w", err)
+	}
+	for _, skip := range tsSkips {
+		_, err := fmt.Fprintf(stderr, "code-shape-gate: skip %s: %s\n", skip.Path, skip.Reason)
+		if err != nil {
+			return nil, fmt.Errorf("write skip: %w", err)
+		}
+	}
+	functions[codeshape.MetricTSCognitive] = tsFunctions[codeshape.MetricTSCognitive]
+	functions[codeshape.MetricTSLines] = tsFunctions[codeshape.MetricTSLines]
+	snapshot.Functions = functions
+	suppressions, err := golang.SuppressionFindings(ctx, root, config)
+	if err != nil {
+		return nil, fmt.Errorf("collect Go suppressions: %w", err)
+	}
+	tsFindings, err := typescript.PolicyFindings(ctx, root, config)
+	if err != nil {
+		return nil, fmt.Errorf("collect TypeScript policy: %w", err)
+	}
+	suppressions = append(suppressions, tsFindings...)
+	codeshape.SortFindings(suppressions)
+	return suppressions, nil
 }
 
 func writeUpdated(

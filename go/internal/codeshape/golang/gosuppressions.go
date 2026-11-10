@@ -5,6 +5,7 @@ package golang
 import (
 	"context"
 	"fmt"
+	"go/ast"
 	"go/parser"
 	"go/token"
 	"os"
@@ -46,44 +47,53 @@ func SuppressionFindings(ctx context.Context, root string, cfg codeshape.Config)
 		if err != nil {
 			return nil, fmt.Errorf("parse Go source %q: %w", path, err)
 		}
-		for _, group := range file.Comments {
-			for _, comment := range group.List {
-				if !strings.HasPrefix(comment.Text, "//") {
-					continue
-				}
-				text := strings.TrimSpace(strings.TrimPrefix(comment.Text, "//"))
-				fields := strings.Fields(text)
-				if len(fields) == 0 {
-					continue
-				}
-				directive := fields[0]
-				metrics := make(map[codeshape.Metric]bool)
-				if directive == "nolint" || directive == "nolint:all" {
-					metrics[codeshape.MetricGoCognitive] = true
-					metrics[codeshape.MetricGoLines] = true
-				} else if after, ok := strings.CutPrefix(directive, "nolint:"); ok {
-					for name := range strings.SplitSeq(after, ",") {
-						switch name {
-						case "all":
-							metrics[codeshape.MetricGoCognitive] = true
-							metrics[codeshape.MetricGoLines] = true
-						case "gocognit", "gocyclo":
-							metrics[codeshape.MetricGoCognitive] = true
-						case "funlen":
-							metrics[codeshape.MetricGoLines] = true
-						}
-					}
-				}
-				for metric := range metrics {
-					line := set.Position(comment.Pos()).Line
-					findings = append(findings, codeshape.Finding{
-						Path: path + ":" + strconv.Itoa(line), Metric: metric, Value: line, Limit: 0,
-						Fix: "remove complexity nolint suppression",
-					})
-				}
-			}
-		}
+		findings = append(findings, goCommentFindings(path, file.Comments, set)...)
 	}
 	codeshape.SortFindings(findings)
 	return findings, nil
+}
+
+func goCommentFindings(path string, groups []*ast.CommentGroup, set *token.FileSet) []codeshape.Finding {
+	findings := []codeshape.Finding{}
+	for _, group := range groups {
+		for _, comment := range group.List {
+			for metric := range goDirectiveMetrics(comment.Text) {
+				line := set.Position(comment.Pos()).Line
+				findings = append(findings, codeshape.Finding{
+					Path: path + ":" + strconv.Itoa(line), Metric: metric, Value: line, Limit: 0,
+					Fix: "remove complexity nolint suppression",
+				})
+			}
+		}
+	}
+	return findings
+}
+
+func goDirectiveMetrics(comment string) map[codeshape.Metric]bool {
+	metrics := make(map[codeshape.Metric]bool)
+	if !strings.HasPrefix(comment, "//") {
+		return metrics
+	}
+	fields := strings.Fields(strings.TrimSpace(strings.TrimPrefix(comment, "//")))
+	if len(fields) == 0 {
+		return metrics
+	}
+	directive := fields[0]
+	if directive == "nolint" || directive == "nolint:all" {
+		metrics[codeshape.MetricGoCognitive] = true
+		metrics[codeshape.MetricGoLines] = true
+	} else if after, ok := strings.CutPrefix(directive, "nolint:"); ok {
+		for name := range strings.SplitSeq(after, ",") {
+			switch name {
+			case "all":
+				metrics[codeshape.MetricGoCognitive] = true
+				metrics[codeshape.MetricGoLines] = true
+			case "gocognit", "gocyclo":
+				metrics[codeshape.MetricGoCognitive] = true
+			case "funlen":
+				metrics[codeshape.MetricGoLines] = true
+			}
+		}
+	}
+	return metrics
 }

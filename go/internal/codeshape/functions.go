@@ -110,55 +110,74 @@ func rewriteFunctionEntries(updated, allow, values FunctionMeasurements, cfg Con
 	changed := false
 	errs := []string{}
 	for _, metric := range functionMetrics() {
-		paths := map[string][]Entry{}
-		for path, entries := range allow[metric] {
-			for _, entry := range entries {
-				current, exists := functionEntry(values[metric][path], entry.ID)
-				if !exists || current.Value <= cfg.Functions.limitFor(metric) {
-					changed = true
-					continue
-				}
-				if current.Value < entry.Value {
-					entry.Value = current.Value
-					changed = true
-				}
-				paths[path] = append(paths[path], entry)
-			}
-		}
-		for path, entries := range values[metric] {
-			for _, current := range entries {
-				if current.Value <= cfg.Functions.limitFor(metric) {
-					continue
-				}
-				entry, exists := functionEntry(paths[path], current.ID)
-				if exists && current.Value <= entry.Value {
-					continue
-				}
-				if !seed {
-					errs = append(errs, fmt.Sprintf(
-						"%s#%s %s value %d needs --seed to add or raise the allowlist", path, current.ID, metric, current.Value,
-					))
-					continue
-				}
-				if !exists {
-					entry = Entry{ID: current.ID, Value: 0, Reason: "seeded at rollout, burn down"}
-				}
-				entry.Value = current.Value
-				if exists {
-					for i := range paths[path] {
-						if paths[path][i].ID == current.ID {
-							paths[path][i] = entry
-						}
-					}
-				} else {
-					paths[path] = append(paths[path], entry)
-				}
-				changed = true
-			}
-		}
+		paths, dropped := retainFunctionEntries(allow[metric], values[metric], cfg.Functions.limitFor(metric))
+		added, metricErrors := seedFunctionEntries(paths, values[metric], metric, cfg.Functions.limitFor(metric), seed)
+		changed = changed || dropped || added
+		errs = append(errs, metricErrors...)
 		if len(paths) > 0 {
 			updated[metric] = paths
 		}
 	}
 	return changed, errs
+}
+
+func retainFunctionEntries(allow, values map[string][]Entry, limit int) (map[string][]Entry, bool) {
+	paths := map[string][]Entry{}
+	changed := false
+	for path, entries := range allow {
+		for _, entry := range entries {
+			current, exists := functionEntry(values[path], entry.ID)
+			if !exists || current.Value <= limit {
+				changed = true
+				continue
+			}
+			if current.Value < entry.Value {
+				entry.Value = current.Value
+				changed = true
+			}
+			paths[path] = append(paths[path], entry)
+		}
+	}
+	return paths, changed
+}
+
+func seedFunctionEntries(paths, values map[string][]Entry, metric Metric, limit int, seed bool) (bool, []string) {
+	changed := false
+	errs := []string{}
+	for path, entries := range values {
+		for _, current := range entries {
+			if current.Value <= limit {
+				continue
+			}
+			entry, exists := functionEntry(paths[path], current.ID)
+			if exists && current.Value <= entry.Value {
+				continue
+			}
+			if !seed {
+				errs = append(errs, fmt.Sprintf(
+					"%s#%s %s value %d needs --seed to add or raise the allowlist", path, current.ID, metric, current.Value,
+				))
+				continue
+			}
+			if !exists {
+				entry = Entry{ID: current.ID, Value: 0, Reason: "seeded at rollout, burn down"}
+			}
+			entry.Value = current.Value
+			paths[path] = replaceFunctionEntry(paths[path], entry, exists)
+			changed = true
+		}
+	}
+	return changed, errs
+}
+
+func replaceFunctionEntry(entries []Entry, entry Entry, exists bool) []Entry {
+	if !exists {
+		return append(entries, entry)
+	}
+	for i := range entries {
+		if entries[i].ID == entry.ID {
+			entries[i] = entry
+		}
+	}
+	return entries
 }

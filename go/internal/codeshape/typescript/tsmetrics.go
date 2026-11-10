@@ -111,18 +111,9 @@ func TSMetrics(ctx context.Context, root string, cfg codeshape.Config) (
 	if report.Summary.DiagnosticsNotPrinted != 0 {
 		return nil, nil, fmt.Errorf("%w: %d were not printed", errBiomeTruncated, report.Summary.DiagnosticsNotPrinted)
 	}
-	skips := []codeshape.Skip{}
-	if report.Summary.Changed+report.Summary.Unchanged != len(sourcePaths) {
-		for _, path := range sourcePaths {
-			single, singleErr := runBiome(ctx, binary, root, []string{path})
-			if singleErr != nil {
-				return nil, nil, singleErr
-			}
-			if single.Summary.Changed+single.Summary.Unchanged == 0 {
-				delete(sources, path)
-				skips = append(skips, codeshape.Skip{Path: path, Reason: "ignored by Biome"})
-			}
-		}
+	skips, err := biomeSkippedPaths(ctx, binary, root, sourcePaths, report, sources)
+	if err != nil {
+		return nil, nil, err
 	}
 	values := codeshape.NewFunctionMeasurements()
 	files := make(map[string][]tsFunction, len(sources))
@@ -140,6 +131,36 @@ func TSMetrics(ctx context.Context, root string, cfg codeshape.Config) (
 			codeshape.AppendFunctionValue(values, codeshape.MetricTSLines, path, function.id, 0)
 		}
 	}
+	err = applyBiomeIssues(report, files, sources, skips, values)
+	if err != nil {
+		return nil, nil, err
+	}
+	return values, skips, nil
+}
+
+func biomeSkippedPaths(ctx context.Context, binary, root string, paths []string, report biomeReport,
+	sources map[string][]byte,
+) ([]codeshape.Skip, error) {
+	skips := []codeshape.Skip{}
+	if report.Summary.Changed+report.Summary.Unchanged == len(paths) {
+		return skips, nil
+	}
+	for _, path := range paths {
+		single, err := runBiome(ctx, binary, root, []string{path})
+		if err != nil {
+			return nil, err
+		}
+		if single.Summary.Changed+single.Summary.Unchanged == 0 {
+			delete(sources, path)
+			skips = append(skips, codeshape.Skip{Path: path, Reason: "ignored by Biome"})
+		}
+	}
+	return skips, nil
+}
+
+func applyBiomeIssues(report biomeReport, files map[string][]tsFunction, sources map[string][]byte,
+	skips []codeshape.Skip, values map[codeshape.Metric]map[string][]codeshape.Entry,
+) error {
 	metrics := biomeRuleMetrics()
 	for _, diagnostic := range report.Diagnostics {
 		metric, relevant := metrics[diagnostic.Category]
@@ -154,21 +175,21 @@ func TSMetrics(ctx context.Context, root string, cfg codeshape.Config) (
 			continue
 		}
 		if !exists {
-			return nil, nil, fmt.Errorf("%w %q", errBiomeUnknownSource, path)
+			return fmt.Errorf("%w %q", errBiomeUnknownSource, path)
 		}
 		function, err := findTSFunction(
 			functions, diagnostic.Location.Start.Line, diagnostic.Location.Start.Column, sources[path],
 		)
 		if err != nil {
-			return nil, nil, err
+			return err
 		}
 		value, err := biomeValue(diagnostic.Message, metric)
 		if err != nil {
-			return nil, nil, err
+			return err
 		}
 		codeshape.AppendFunctionValue(values, metric, path, function.id, value)
 	}
-	return values, skips, nil
+	return nil
 }
 
 func isTypeScriptPath(path string) bool {
@@ -277,6 +298,11 @@ func parseTSFunctions(path string, source []byte) ([]tsFunction, *gotreesitter.T
 	}
 	functions := make([]tsFunction, 0)
 	collectTSFunctions(root, lang, nil, nil, &functions, source)
+	assignTSFunctionIDs(functions, lang, source)
+	return functions, tree, nil
+}
+
+func assignTSFunctionIDs(functions []tsFunction, lang *gotreesitter.Language, source []byte) {
 	counts := make(map[string]int)
 	for i := range functions {
 		parentID := ""
@@ -303,7 +329,6 @@ func parseTSFunctions(path string, source []byte) ([]tsFunction, *gotreesitter.T
 			functions[i].id += fmt.Sprintf("#%d", counts[base])
 		}
 	}
-	return functions, tree, nil
 }
 
 func collectTSFunctions(
@@ -405,28 +430,9 @@ func findTSFunction(functions []tsFunction, line, column int, source []byte) (*t
 	if line < 1 || column < 1 {
 		return nil, errBiomePosition
 	}
-	lineStart := 0
-	for current := 1; current < line; current++ {
-		next := bytes.IndexByte(source[lineStart:], '\n')
-		if next < 0 {
-			return nil, fmt.Errorf("biome position line %d is outside source: %w", line, errBiomeOutsideSource)
-		}
-		lineStart += next + 1
-	}
-	offset := lineStart
-	for units := 1; units < column; {
-		if offset >= len(source) || source[offset] == '\n' {
-			return nil, fmt.Errorf("biome position %d:%d is outside source: %w", line, column, errBiomeOutsideSource)
-		}
-		r, size := utf8.DecodeRune(source[offset:])
-		units++
-		if r > 0xffff {
-			units++
-		}
-		offset += size
-	}
-	if offset > len(source) {
-		return nil, fmt.Errorf("biome position %d:%d is outside source: %w", line, column, errBiomeOutsideSource)
+	offset, err := tsOffset(line, column, source)
+	if err != nil {
+		return nil, err
 	}
 	var match *tsFunction
 	var smallest uint32
@@ -444,4 +450,31 @@ func findTSFunction(functions []tsFunction, line, column int, source []byte) (*t
 		return nil, fmt.Errorf("biome position %d:%d is outside any function: %w", line, column, errBiomeOutsideFunction)
 	}
 	return match, nil
+}
+
+func tsOffset(line, column int, source []byte) (int, error) {
+	lineStart := 0
+	for current := 1; current < line; current++ {
+		next := bytes.IndexByte(source[lineStart:], '\n')
+		if next < 0 {
+			return 0, fmt.Errorf("biome position line %d is outside source: %w", line, errBiomeOutsideSource)
+		}
+		lineStart += next + 1
+	}
+	offset := lineStart
+	for units := 1; units < column; {
+		if offset >= len(source) || source[offset] == '\n' {
+			return 0, fmt.Errorf("biome position %d:%d is outside source: %w", line, column, errBiomeOutsideSource)
+		}
+		r, size := utf8.DecodeRune(source[offset:])
+		units++
+		if r > 0xffff {
+			units++
+		}
+		offset += size
+	}
+	if offset > len(source) {
+		return 0, fmt.Errorf("biome position %d:%d is outside source: %w", line, column, errBiomeOutsideSource)
+	}
+	return offset, nil
 }

@@ -155,26 +155,14 @@ func physicalLines(source io.Reader) (int, bool, error) {
 	for {
 		chunk, readErr := reader.ReadSlice('\n')
 		lineHasBytes = lineHasBytes || len(chunk) > 0
-		body := chunk
-		if readErr == nil {
-			body = body[:len(body)-1]
-		}
-		if (readErr == nil || errors.Is(readErr, io.EOF)) && len(body) > 0 && body[len(body)-1] == '\r' {
-			body = body[:len(body)-1]
-		}
-		observe(body)
-		if readErr == nil || errors.Is(readErr, io.EOF) {
-			if lineHasBytes || readErr == nil {
-				count++
-				if count <= 5 && (hasGeneratedMarker || hasCodeGenerated && hasDoNotEdit) {
-					generated = true
-				}
-			}
-			carryLen = 0
-			lineHasBytes = false
-			hasGeneratedMarker = false
-			hasCodeGenerated = false
-			hasDoNotEdit = false
+		observe(trimPhysicalLine(chunk, readErr))
+		complete := readErr == nil || errors.Is(readErr, io.EOF)
+		if complete {
+			increment := lineHasBytes || readErr == nil
+			count, generated = completePhysicalLine(count, generated, increment,
+				hasGeneratedMarker || hasCodeGenerated && hasDoNotEdit)
+			carryLen, lineHasBytes = 0, false
+			hasGeneratedMarker, hasCodeGenerated, hasDoNotEdit = false, false, false
 		}
 		if errors.Is(readErr, io.EOF) {
 			break
@@ -184,6 +172,25 @@ func physicalLines(source io.Reader) (int, bool, error) {
 		}
 	}
 	return count, generated, nil
+}
+
+func trimPhysicalLine(chunk []byte, readErr error) []byte {
+	body := chunk
+	if readErr == nil {
+		body = body[:len(body)-1]
+	}
+	if (readErr == nil || errors.Is(readErr, io.EOF)) && len(body) > 0 && body[len(body)-1] == '\r' {
+		body = body[:len(body)-1]
+	}
+	return body
+}
+
+func completePhysicalLine(count int, generated, increment, marker bool) (int, bool) {
+	if increment {
+		count++
+		generated = generated || count <= 5 && marker
+	}
+	return count, generated
 }
 func trackedPaths(ctx context.Context, root string) ([]string, error) {
 	command := exec.CommandContext(ctx, "git", "ls-files", "-z")

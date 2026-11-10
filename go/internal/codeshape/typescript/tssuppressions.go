@@ -30,21 +30,7 @@ func PolicyFindings(ctx context.Context, root string, cfg codeshape.Config) ([]c
 		if err != nil {
 			return nil, fmt.Errorf("read TypeScript source %q: %w", path, err)
 		}
-		for i, line := range strings.Split(string(source), "\n") {
-			pos := strings.Index(line, "biome-ignore")
-			if pos < 0 {
-				continue
-			}
-			directive, _, _ := strings.Cut(line[pos:], ":")
-			for name, metric := range biomeRuleMetrics() {
-				if strings.Contains(directive, strings.TrimPrefix(name, "lint/")) {
-					findings = append(findings, codeshape.Finding{
-						Path: path + ":" + strconv.Itoa(i+1), Metric: metric, Value: i + 1, Limit: 0,
-						Fix: "remove biome-ignore suppression",
-					})
-				}
-			}
-		}
+		findings = append(findings, tsDirectiveFindings(path, source)...)
 	}
 	if !hasTS {
 		return findings, nil
@@ -74,4 +60,24 @@ func PolicyFindings(ctx context.Context, root string, cfg codeshape.Config) ([]c
 		}
 	}
 	return findings, nil
+}
+
+func tsDirectiveFindings(path string, source []byte) []codeshape.Finding {
+	findings := []codeshape.Finding{}
+	for i, line := range strings.Split(string(source), "\n") {
+		pos := strings.Index(line, "biome-ignore")
+		if pos < 0 {
+			continue
+		}
+		directive, _, _ := strings.Cut(line[pos:], ":")
+		for name, metric := range biomeRuleMetrics() {
+			if strings.Contains(directive, strings.TrimPrefix(name, "lint/")) {
+				findings = append(findings, codeshape.Finding{
+					Path: path + ":" + strconv.Itoa(i+1), Metric: metric, Value: i + 1, Limit: 0,
+					Fix: "remove biome-ignore suppression",
+				})
+			}
+		}
+	}
+	return findings
 }
