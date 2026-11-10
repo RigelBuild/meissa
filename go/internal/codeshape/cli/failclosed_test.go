@@ -29,6 +29,7 @@ func TestBiomeFailClosed(t *testing.T) {
 	}{
 		{"truncated", `{"summary":{"changed":1,"diagnosticsNotPrinted":1,"errors":0},"diagnostics":[]}`, 0},
 		{"errors", `{"summary":{"changed":1,"diagnosticsNotPrinted":0,"errors":1},"diagnostics":[]}`, 0},
+		{"unprocessed", `{"summary":{"changed":0,"unchanged":0,"diagnosticsNotPrinted":0,"errors":0},"diagnostics":[]}`, 0},
 		{"exit", `{"summary":{"changed":1,"diagnosticsNotPrinted":0,"errors":0},"diagnostics":[]}`, 2},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
