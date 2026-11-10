@@ -48,6 +48,22 @@ func TestMainBaseModes(t *testing.T) {
 	}
 }
 
+func TestMainRelativeRoot(t *testing.T) {
+	var source strings.Builder
+	source.WriteString("package p\nfunc Large() {\n")
+	for range 41 {
+		source.WriteString("println(1)\n")
+	}
+	source.WriteString("}\n")
+	root := goTestRepo(t, source.String())
+	t.Chdir(root)
+	var stdout, stderr strings.Builder
+	code := Main(t.Context(), []string{"."}, func(string) string { return "" }, &stdout, &stderr)
+	if code != 1 || !strings.Contains(stdout.String(), "x.go") {
+		t.Fatalf("code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+	}
+}
+
 func TestMainRejectsEscapingAllowlist(t *testing.T) {
 	root := newFixtureRepo(t)
 	writeConfigFiles(t, root, validConfig, "files: {}\n")

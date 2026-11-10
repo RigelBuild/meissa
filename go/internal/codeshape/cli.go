@@ -10,6 +10,7 @@ import (
 	"maps"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -29,6 +30,11 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 	writeMode, seed, root, ok := parseArgs(args)
 	if !ok {
 		writeOutput(stderr, "usage: code-shape-gate [--write] [--seed] <root>\n")
+		return 2
+	}
+	root, err := filepath.Abs(root)
+	if err != nil {
+		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
 	}
 	config, allow, err := Load(root)
