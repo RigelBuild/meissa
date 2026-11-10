@@ -103,8 +103,8 @@ func TestGoUnparseableIssue(t *testing.T) {
 }
 
 const tsBiomeConfig = `{"linter":{"rules":{"complexity":{"noExcessiveCognitiveComplexity":` +
-	`{"level":"off","options":{"maxAllowedComplexity":15}},` +
-	`"noExcessiveLinesPerFunction":{"level":"off","options":{"maxLines":50}}}}}}`
+	`{"level":"warn","options":{"maxAllowedComplexity":15}},` +
+	`"noExcessiveLinesPerFunction":{"level":"warn","options":{"maxLines":50}}}}}}`
 
 func tsRepo(t *testing.T, source string) string {
 	t.Helper()

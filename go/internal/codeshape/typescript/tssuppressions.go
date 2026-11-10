@@ -89,7 +89,7 @@ func biomeDriftFindings(path string, config map[string]any, cfg codeshape.Config
 		options, _ := rule["options"].(map[string]any)
 		option, exists := options[check.option]
 		level, _ := rule["level"].(string)
-		if !exists || level != "off" || numericValue(option) != cfg.Functions.LimitFor(check.metric) {
+		if !exists || level == "off" || numericValue(option) != cfg.Functions.LimitFor(check.metric) {
 			findings = append(findings, codeshape.Finding{Path: path, Metric: check.metric,
 				Value: numericValue(option), Limit: cfg.Functions.LimitFor(check.metric),
 				Fix: "match biome rule option to gate config"})

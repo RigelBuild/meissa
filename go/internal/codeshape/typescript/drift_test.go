@@ -21,6 +21,15 @@ func TestBiomeDriftMissingOptions(t *testing.T) {
 	if len(findings) != 2 {
 		t.Fatalf("findings = %#v", findings)
 	}
+	config := map[string]any{"linter": map[string]any{"rules": map[string]any{"complexity": map[string]any{
+		"noExcessiveCognitiveComplexity": map[string]any{
+			"level": "off", "options": map[string]any{"maxAllowedComplexity": 15}},
+		"noExcessiveLinesPerFunction": map[string]any{"level": "off", "options": map[string]any{"maxLines": 50}},
+	}}}}
+	findings = biomeDriftFindings("biome.json", config, cfg, true)
+	if len(findings) != 2 {
+		t.Fatalf("disabled rules: %#v", findings)
+	}
 }
 
 func TestBiomeJSONCAndMissingConfig(t *testing.T) {
@@ -43,12 +52,12 @@ func TestTrackedBiomeDrift(t *testing.T) {
 	root := newFixtureRepo(t)
 	trackedFile(t, root, "src/x.ts", "function f() {}\n")
 	trackedFile(t, root, "nested/biome.jsonc", `{"linter":{"rules":{"complexity":`+
-		`{"noExcessiveLinesPerFunction":{"level":"off","options":{"maxLines":500}}}}}}`)
+		`{"noExcessiveLinesPerFunction":{"level":"off","options":{"maxLines":50}}}}}}`)
 	trackedFile(t, root, "biome.json", `{"linter":{"rules":{"complexity":{`+
-		`"noExcessiveCognitiveComplexity":{"level":"off","options":{"maxAllowedComplexity":15}},`+
-		`"noExcessiveLinesPerFunction":{"level":"off","options":{"maxLines":50}}}}},`+
+		`"noExcessiveCognitiveComplexity":{"level":"warn","options":{"maxAllowedComplexity":15}},`+
+		`"noExcessiveLinesPerFunction":{"level":"warn","options":{"maxLines":50}}}}},`+
 		`"overrides":[{"linter":{"rules":{"complexity":`+
-		`{"noExcessiveLinesPerFunction":{"level":"off","options":{"maxLines":500}}}}}}]}`)
+		`{"noExcessiveLinesPerFunction":{"level":"off","options":{"maxLines":50}}}}}}]}`)
 	commitFiles(t, root)
 	cfg := codeshape.Config{FileLimit: 500, DirLimit: 10, Extensions: []string{".ts"}, Exclude: []string{},
 		DirLimits: map[string]codeshape.DirLimit{}, Functions: codeshape.FunctionLimits{
