@@ -13,10 +13,11 @@ import (
 	"github.com/RigelBuild/meissa/go/internal/codeshape"
 )
 
+// PolicyFindings reports TypeScript suppressions and policy drift.
 func PolicyFindings(ctx context.Context, root string, cfg codeshape.Config) ([]codeshape.Finding, error) {
 	paths, err := codeshape.TrackedPaths(ctx, root)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("collect TypeScript policy paths: %w", err)
 	}
 	findings := []codeshape.Finding{}
 	hasTS := false

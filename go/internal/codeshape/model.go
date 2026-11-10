@@ -34,7 +34,8 @@ type Allowlist struct {
 }
 
 func emptyAllowlist() Allowlist {
-	return Allowlist{Files: map[string]Entry{}, Dirs: map[string]Entry{}, Functions: map[Metric]map[string][]Entry{}}
+	return Allowlist{Files: map[string]Entry{}, Dirs: map[string]Entry{},
+		Functions: map[Metric]map[string][]Entry{}, Present: false}
 }
 
 // Snapshot contains current measurements.

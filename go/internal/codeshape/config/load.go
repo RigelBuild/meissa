@@ -44,6 +44,7 @@ func schemaValue(ctx *cue.Context) (cue.Value, error) {
 	return value, nil
 }
 
+// DecodeBaseAllowlist decodes an allowlist from a base revision.
 func DecodeBaseAllowlist(data []byte) (codeshape.Allowlist, error) {
 	ctx := cuecontext.New()
 	schema, err := schemaValue(ctx)

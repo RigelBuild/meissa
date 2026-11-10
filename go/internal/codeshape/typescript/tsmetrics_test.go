@@ -50,7 +50,8 @@ func TestTSOnlyOffUsesOptions(t *testing.T) {
 func TestTSIgnoredFileIsSkipped(t *testing.T) {
 	root := tsRepo(t, "function f() {}\n")
 	config := strings.Replace(tsBiomeConfig, `{`, `{"files":{"includes":["**", "!ignored.ts"]},`, 1)
-	if err := os.WriteFile(filepath.Join(root, "biome.json"), []byte(config), 0600); err != nil {
+	err := os.WriteFile(filepath.Join(root, "biome.json"), []byte(config), 0600)
+	if err != nil {
 		t.Fatal(err)
 	}
 	trackedFile(t, root, "ignored.ts", "function ignored() {}\n")
@@ -60,7 +61,8 @@ func TestTSIgnoredFileIsSkipped(t *testing.T) {
 		t.Fatal(err)
 	}
 	values, skips, err := TSMetrics(t.Context(), root, cfg)
-	if err != nil || len(skips) != 1 || skips[0].Path != "ignored.ts" || len(values[codeshape.MetricTSLines]["ignored.ts"]) != 0 {
+	if err != nil || len(skips) != 1 || skips[0].Path != "ignored.ts" ||
+		len(values[codeshape.MetricTSLines]["ignored.ts"]) != 0 {
 		t.Fatalf("values=%v skips=%v err=%v", values, skips, err)
 	}
 }

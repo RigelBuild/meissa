@@ -14,13 +14,15 @@ func TestMain(m *testing.M) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	if err = os.Setenv("TMPDIR", dir); err != nil {
+	err = os.Setenv("TMPDIR", dir)
+	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
-		os.RemoveAll(dir)
+		fmt.Fprintln(os.Stderr, os.RemoveAll(dir))
 		os.Exit(1)
 	}
 	code := m.Run()
-	if err = os.RemoveAll(dir); err != nil {
+	err = os.RemoveAll(dir)
+	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		code = 1
 	}

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+// Package golang collects Go function measurements.
 package golang
 
 import (
@@ -29,8 +30,6 @@ const highFunlenLimit = 1_000_000_000
 var (
 	gocognitValue          = regexp.MustCompile(`cognitive complexity ([0-9]+) of func`)
 	funlenValue            = regexp.MustCompile(`\(([0-9]+) > [0-9]+\)`)
-	errEmptyGoModule       = errors.New("has no included source files")
-	errEmptyGoMeasurement  = errors.New("go function measurement is empty")
 	errGoLintReport        = errors.New("reported an error")
 	errGoLintMissing       = errors.New("measurement omitted")
 	errGoMetricParse       = errors.New("cannot parse value")
@@ -74,10 +73,12 @@ type goFunction struct {
 }
 
 // GoMetrics measures function complexity and length in every included module.
-func GoMetrics(ctx context.Context, root string, cfg codeshape.Config) (map[codeshape.Metric]map[string][]codeshape.Entry, []codeshape.Skip, error) {
+func GoMetrics(ctx context.Context, root string, cfg codeshape.Config) (
+	map[codeshape.Metric]map[string][]codeshape.Entry, []codeshape.Skip, error,
+) {
 	paths, err := codeshape.TrackedPaths(ctx, root)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("collect Go paths: %w", err)
 	}
 	modules := goModules(paths, cfg)
 	if len(modules) == 0 {
@@ -106,11 +107,14 @@ func GoMetrics(ctx context.Context, root string, cfg codeshape.Config) (map[code
 		}{
 			{metric: codeshape.MetricGoCognitive, linter: "gocognit", lines: 0, statements: 0},
 			{metric: codeshape.MetricGoLines, linter: "funlen", lines: cfg.Functions.Go.Lines, statements: highFunlenLimit},
-			{metric: codeshape.MetricGoStatements, linter: "funlen", lines: highFunlenLimit, statements: cfg.Functions.Go.Statements},
+			{metric: codeshape.MetricGoStatements, linter: "funlen", lines: highFunlenLimit,
+				statements: cfg.Functions.Go.Statements},
 		}
 		for _, file := range files {
 			for _, function := range file.functions {
-				for _, metric := range []codeshape.Metric{codeshape.MetricGoCognitive, codeshape.MetricGoLines, codeshape.MetricGoStatements} {
+				for _, metric := range []codeshape.Metric{
+					codeshape.MetricGoCognitive, codeshape.MetricGoLines, codeshape.MetricGoStatements,
+				} {
 					codeshape.AppendFunctionValue(measurements, metric, function.path, function.id, 0)
 				}
 			}
@@ -170,7 +174,9 @@ func excludedFunctionPath(path string, cfg codeshape.Config) bool {
 	return codeshape.MatchesAny(filepath.ToSlash(path), cfg.Exclude)
 }
 
-func parseGoSources(root, module string, paths []string, cfg codeshape.Config) (map[string]goSourceFile, []codeshape.Skip, error) {
+func parseGoSources(root, module string, paths []string, cfg codeshape.Config) (
+	map[string]goSourceFile, []codeshape.Skip, error,
+) {
 	files := make(map[string]goSourceFile)
 	skips := []codeshape.Skip{}
 	buildContext := build.Default
@@ -468,15 +474,4 @@ func findGoFunction(
 			path, line, column, errGoOutsideFunction)
 	}
 	return path, match.id, nil
-}
-
-func hasAnyFunctionMeasurement(values map[codeshape.Metric]map[string][]codeshape.Entry) bool {
-	for _, paths := range values {
-		for _, entries := range paths {
-			if len(entries) > 0 {
-				return true
-			}
-		}
-	}
-	return false
 }

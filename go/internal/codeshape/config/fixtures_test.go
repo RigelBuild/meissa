@@ -12,7 +12,8 @@ func newFixtureRepo(t *testing.T) string {
 	root := t.TempDir()
 	cmd := exec.CommandContext(t.Context(), "git", "init", "-q")
 	cmd.Dir = root
-	if output, err := cmd.CombinedOutput(); err != nil {
+	output, err := cmd.CombinedOutput()
+	if err != nil {
 		t.Fatalf("git init: %v: %s", err, output)
 	}
 	return root

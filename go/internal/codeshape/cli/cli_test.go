@@ -302,10 +302,11 @@ func TestMainWriteUpdates(t *testing.T) {
 func TestRewriteFunctionEntries(t *testing.T) {
 	cfg := testConfig()
 	cfg.Functions.Go.Lines = 60
-	allow := codeshape.Allowlist{Files: nil, Dirs: nil, Present: false, Functions: codeshape.FunctionMeasurements{codeshape.MetricGoLines: {"f.go": {
-		{ID: "lower", Value: 80, Reason: "split by concern"},
-		{ID: "remove", Value: 70, Reason: "split by concern"},
-	}}}}
+	allow := codeshape.Allowlist{Files: nil, Dirs: nil, Present: false,
+		Functions: codeshape.FunctionMeasurements{codeshape.MetricGoLines: {"f.go": {
+			{ID: "lower", Value: 80, Reason: "split by concern"},
+			{ID: "remove", Value: 70, Reason: "split by concern"},
+		}}}}
 	values := codeshape.FunctionMeasurements{codeshape.MetricGoLines: {"f.go": {
 		{ID: "lower", Value: 70, Reason: ""}, {ID: "new", Value: 61, Reason: ""},
 	}}}
@@ -313,7 +314,9 @@ func TestRewriteFunctionEntries(t *testing.T) {
 	if err == nil {
 		t.Fatal("write accepted a new offender")
 	}
-	updated, changed, err := rewriteAllowlist(cfg, allow, codeshape.Snapshot{Files: nil, Dirs: nil, Functions: values}, true)
+	updated, changed, err := rewriteAllowlist(
+		cfg, allow, codeshape.Snapshot{Files: nil, Dirs: nil, Functions: values}, true,
+	)
 	if err != nil || !changed {
 		t.Fatalf("seed: changed=%v err=%v", changed, err)
 	}

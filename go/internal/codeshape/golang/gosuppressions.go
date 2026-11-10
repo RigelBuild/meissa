@@ -15,10 +15,11 @@ import (
 	"github.com/RigelBuild/meissa/go/internal/codeshape"
 )
 
+// SuppressionFindings reports Go complexity suppressions.
 func SuppressionFindings(ctx context.Context, root string, cfg codeshape.Config) ([]codeshape.Finding, error) {
 	paths, err := codeshape.TrackedPaths(ctx, root)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("collect Go suppression paths: %w", err)
 	}
 	modules := goModules(paths, cfg)
 	eligible := make(map[string]bool)

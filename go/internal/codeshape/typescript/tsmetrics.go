@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+// Package typescript collects TypeScript function measurements.
 package typescript
 
 import (
@@ -72,10 +73,12 @@ type tsFunction struct {
 }
 
 // TSMetrics measures Biome's function complexity and line count rules.
-func TSMetrics(ctx context.Context, root string, cfg codeshape.Config) (map[codeshape.Metric]map[string][]codeshape.Entry, []codeshape.Skip, error) {
+func TSMetrics(ctx context.Context, root string, cfg codeshape.Config) (
+	map[codeshape.Metric]map[string][]codeshape.Entry, []codeshape.Skip, error,
+) {
 	paths, err := codeshape.TrackedPaths(ctx, root)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("collect TypeScript paths: %w", err)
 	}
 	sources := make(map[string][]byte)
 	for _, path := range paths {
@@ -145,7 +148,9 @@ func TSMetrics(ctx context.Context, root string, cfg codeshape.Config) (map[code
 		}
 		path := filepath.ToSlash(diagnostic.Location.Path)
 		functions, exists := files[path]
-		if _, included := sources[path]; !included && slices.ContainsFunc(skips, func(skip codeshape.Skip) bool { return skip.Path == path }) {
+		if _, included := sources[path]; !included && slices.ContainsFunc(skips, func(skip codeshape.Skip) bool {
+			return skip.Path == path
+		}) {
 			continue
 		}
 		if !exists {
@@ -178,7 +183,8 @@ func isTypeScriptPath(path string) bool {
 func runBiome(ctx context.Context, binary, root string, paths []string) (biomeReport, error) {
 	args := make([]string, 0, 5+len(paths))
 	args = append(args, "lint", "--reporter=json", "--max-diagnostics="+strconv.Itoa(maxBiomeDiagnostics),
-		"--only=complexity/noExcessiveCognitiveComplexity", "--only=complexity/noExcessiveLinesPerFunction", "--no-errors-on-unmatched")
+		"--only=complexity/noExcessiveCognitiveComplexity", "--only=complexity/noExcessiveLinesPerFunction",
+		"--no-errors-on-unmatched")
 	args = append(args, paths...)
 	command := exec.CommandContext(ctx, binary, args...) //nolint:gosec // G204: execute the biome linter
 	command.Dir = root
@@ -275,7 +281,8 @@ func parseTSFunctions(path string, source []byte) ([]tsFunction, *gotreesitter.T
 	for i := range functions {
 		parentID := ""
 		for j := i - 1; j >= 0; j-- {
-			if functions[j].node.StartByte() <= functions[i].node.StartByte() && functions[j].node.EndByte() >= functions[i].node.EndByte() {
+			if functions[j].node.StartByte() <= functions[i].node.StartByte() &&
+				functions[j].node.EndByte() >= functions[i].node.EndByte() {
 				parentID = functions[j].id + "/"
 				break
 			}
@@ -313,7 +320,8 @@ func collectTSFunctions(
 	if node.Type(lang) == "call_expression" {
 		callable := node.ChildByFieldName("function", lang)
 		if callable != nil && (callable.Text(source) == "describe" || callable.Text(source) == "test" ||
-			callable.Text(source) == "it" || strings.HasPrefix(callable.Text(source), "describe.") || strings.HasPrefix(callable.Text(source), "test.") || strings.HasPrefix(callable.Text(source), "it.")) {
+			callable.Text(source) == "it" || strings.HasPrefix(callable.Text(source), "describe.") ||
+			strings.HasPrefix(callable.Text(source), "test.") || strings.HasPrefix(callable.Text(source), "it.")) {
 			arguments := node.ChildByFieldName("arguments", lang)
 			title := firstStringArgument(arguments, lang, source)
 			callback := lastFunctionArgument(arguments, lang)
@@ -337,7 +345,8 @@ func collectTSFunctions(
 
 func isTSFunctionNode(node *gotreesitter.Node, lang *gotreesitter.Language) bool {
 	switch node.Type(lang) {
-	case "function_declaration", "function_expression", "arrow_function", "method_definition", "generator_function_declaration", "generator_function":
+	case "function_declaration", "function_expression", "arrow_function", "method_definition",
+		"generator_function_declaration", "generator_function":
 		return true
 	default:
 		return false
@@ -352,7 +361,8 @@ func firstStringArgument(arguments *gotreesitter.Node, lang *gotreesitter.Langua
 		return ""
 	}
 	child := arguments.NamedChild(0)
-	if child.Type(lang) != "string" && (child.Type(lang) != "template_string" || strings.Contains(child.Text(source), "${")) {
+	if child.Type(lang) != "string" &&
+		(child.Type(lang) != "template_string" || strings.Contains(child.Text(source), "${")) {
 		return ""
 	}
 	return strings.Trim(strings.TrimSpace(child.Text(source)), "`\"'")
@@ -376,7 +386,8 @@ func tsFunctionID(node *gotreesitter.Node, lang *gotreesitter.Language, titlePat
 	functionName := "anonymous"
 	if name != nil {
 		functionName = name.Text(source)
-	} else if parent := node.Parent(); parent != nil && (parent.Type(lang) == "variable_declarator" || parent.Type(lang) == "public_field_definition" || parent.Type(lang) == "pair") {
+	} else if parent := node.Parent(); parent != nil && (parent.Type(lang) == "variable_declarator" ||
+		parent.Type(lang) == "public_field_definition" || parent.Type(lang) == "pair") {
 		if variable := parent.ChildByFieldName("name", lang); variable != nil {
 			functionName = variable.Text(source)
 		}

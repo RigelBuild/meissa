@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+// Package cli implements the code shape gate command.
 package cli
 
 import (
@@ -201,7 +202,7 @@ func loadBaseAllowlist(ctx context.Context, root, ref string) (codeshape.Allowli
 	}
 	allowlist, err := shapeconfig.DecodeBaseAllowlist(data)
 	if err != nil {
-		return codeshape.Allowlist{}, err
+		return codeshape.Allowlist{}, fmt.Errorf("decode base allowlist: %w", err)
 	}
 	allowlist.Present = true
 	return allowlist, nil
@@ -215,7 +216,9 @@ func gitBaseError(ref string, err error) error {
 	return fmt.Errorf("read base allowlist at %q: %w", ref, err)
 }
 
-func rewriteAllowlist(cfg codeshape.Config, allow codeshape.Allowlist, snapshot codeshape.Snapshot, seed bool) (codeshape.Allowlist, bool, error) {
+func rewriteAllowlist(
+	cfg codeshape.Config, allow codeshape.Allowlist, snapshot codeshape.Snapshot, seed bool,
+) (codeshape.Allowlist, bool, error) {
 	updated := codeshape.Allowlist{
 		Files:     make(map[string]codeshape.Entry, len(allow.Files)),
 		Dirs:      make(map[string]codeshape.Entry, len(allow.Dirs)),
@@ -226,7 +229,9 @@ func rewriteAllowlist(cfg codeshape.Config, allow codeshape.Allowlist, snapshot 
 	maps.Copy(updated.Dirs, allow.Dirs)
 	changedFiles, fileErrors := rewriteEntries(updated.Files, snapshot.Files, cfg, codeshape.MetricFiles, seed)
 	changedDirs, dirErrors := rewriteEntries(updated.Dirs, snapshot.Dirs, cfg, codeshape.MetricDirs, seed)
-	changedFunctions, functionErrors := codeshape.RewriteFunctionEntries(updated.Functions, allow.Functions, snapshot.Functions, cfg, seed)
+	changedFunctions, functionErrors := codeshape.RewriteFunctionEntries(
+		updated.Functions, allow.Functions, snapshot.Functions, cfg, seed,
+	)
 	errs := make([]string, 0, len(fileErrors)+len(dirErrors))
 	errs = append(errs, fileErrors...)
 	errs = append(errs, dirErrors...)
