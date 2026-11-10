@@ -39,6 +39,9 @@ func TestBiomeFailClosed(t *testing.T) {
 			if code != 2 {
 				t.Fatalf("code=%d stderr=%q", code, stderr)
 			}
+			if tc.name == "unprocessed" && !strings.Contains(stderr, "did not process all requested paths") {
+				t.Fatalf("stderr=%q, want unprocessed-path error", stderr)
+			}
 		})
 	}
 }

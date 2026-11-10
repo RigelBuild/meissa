@@ -173,8 +173,10 @@ func runGateBiome(ctx context.Context, binary, root, dir string, paths []string,
 		return biomeReport{}, fmt.Errorf("%w: %d were not printed",
 			errBiomeTruncated, report.Summary.DiagnosticsNotPrinted)
 	}
-	if report.Summary.Changed+report.Summary.Unchanged != len(paths) {
-		return biomeReport{}, fmt.Errorf("requested paths %v: %w", paths, errBiomeUnprocessed)
+	processed := report.Summary.Changed + report.Summary.Unchanged
+	if processed != len(paths) {
+		return biomeReport{}, fmt.Errorf("processed %d of %d requested paths: %w",
+			processed, len(paths), errBiomeUnprocessed)
 	}
 	return report, nil
 }
