@@ -138,7 +138,7 @@ func measureGoModule(ctx context.Context, binary, root, module string, cfg codes
 		if err != nil {
 			return err
 		}
-		err = applyGoIssues(root, module, files, cfg, limit.metric, report, measurements)
+		err = applyGoIssues(root, module, files, cfg, limit.metric, limit.linter, report, measurements)
 		if err != nil {
 			return err
 		}
@@ -147,9 +147,14 @@ func measureGoModule(ctx context.Context, binary, root, module string, cfg codes
 }
 
 func applyGoIssues(root, module string, files map[string]goSourceFile, cfg codeshape.Config,
-	metric codeshape.Metric, report golangciReport, measurements map[codeshape.Metric]map[string][]codeshape.Entry,
+	metric codeshape.Metric, linter string, report golangciReport,
+	measurements map[codeshape.Metric]map[string][]codeshape.Entry,
 ) error {
 	for _, issue := range report.Issues {
+		if issue.FromLinter != linter {
+			return fmt.Errorf("golangci-lint %s reported %s issue: %s: %w", linter, issue.FromLinter, issue.Text,
+				errGoLintReport)
+		}
 		path := issue.Pos.Filename
 		if filepath.IsAbs(path) {
 			var err error

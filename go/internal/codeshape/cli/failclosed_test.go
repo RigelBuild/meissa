@@ -61,6 +61,17 @@ func TestGoLintFailClosed(t *testing.T) {
 	}
 }
 
+func TestGoTypecheckIssue(t *testing.T) {
+	root := goTestRepo(t, "package p\nfunc F() {}\n")
+	output := `{"Issues":[{"FromLinter":"typecheck","Text":"bad type","Pos":{"Filename":"x.go","Line":2}}],` +
+		`"Report":{"Linters":[{"Name":"gocognit","Enabled":true}]}}`
+	fakeCollector(t, "golangci-lint", "golangci-lint has version 2.15.0", output, 1)
+	code, _, stderr := runGoGate(t, root)
+	if code != 2 || !strings.Contains(stderr, "typecheck issue: bad type") {
+		t.Fatalf("code=%d stderr=%q", code, stderr)
+	}
+}
+
 func TestTwoLargeInitFunctions(t *testing.T) {
 	body := strings.Repeat("println(1)\n", 41)
 	root := goTestRepo(t, "package p\nfunc init() {\n"+body+"}\nfunc init() {\n"+body+"}\n")
