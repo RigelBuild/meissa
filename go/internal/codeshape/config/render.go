@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package codeshape
+package config
 
 import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/RigelBuild/meissa/go/internal/codeshape"
 )
 
 // Render serializes the T1 file and directory entries in stable key order.
-func Render(allow Allowlist) []byte {
+func Render(allow codeshape.Allowlist) []byte {
 	var output strings.Builder
 	writeEntries(&output, "files", allow.Files)
 	writeEntries(&output, "dirs", allow.Dirs)
@@ -20,7 +22,7 @@ func Render(allow Allowlist) []byte {
 	return []byte(output.String())
 }
 
-func writeEntries(output *strings.Builder, name string, entries map[string]Entry) {
+func writeEntries(output *strings.Builder, name string, entries map[string]codeshape.Entry) {
 	if len(entries) == 0 {
 		return
 	}
@@ -38,16 +40,16 @@ func writeEntries(output *strings.Builder, name string, entries map[string]Entry
 	output.WriteString("}\n")
 }
 
-func writeFunctionEntries(output *strings.Builder, functions map[Metric]map[string][]Entry) {
-	for _, metric := range functionMetrics() {
+func writeFunctionEntries(output *strings.Builder, functions map[codeshape.Metric]map[string][]codeshape.Entry) {
+	for _, metric := range codeshape.FunctionMetrics() {
 		paths := functions[metric]
 		if len(paths) == 0 {
 			continue
 		}
 		output.WriteString("functions: " + strconv.Quote(string(metric)) + ": {\n")
-		for _, path := range sortedEntryPaths(paths) {
+		for _, path := range codeshape.SortedEntryPaths(paths) {
 			output.WriteString("\t" + strconv.Quote(path) + ": [\n")
-			for _, entry := range sortedFunctionEntries(paths[path]) {
+			for _, entry := range codeshape.SortedFunctionEntries(paths[path]) {
 				output.WriteString("\t\t{id: " + strconv.Quote(entry.ID) + ", value: " + strconv.Itoa(entry.Value) +
 					", reason: " + strconv.Quote(entry.Reason) + "},\n")
 			}

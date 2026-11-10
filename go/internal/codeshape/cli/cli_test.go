@@ -5,6 +5,7 @@ package cli
 import (
 	"fmt"
 	"github.com/RigelBuild/meissa/go/internal/codeshape"
+	shapeconfig "github.com/RigelBuild/meissa/go/internal/codeshape/config"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -234,7 +235,7 @@ func TestMainModes(t *testing.T) {
 		if code != 0 {
 			t.Fatalf("Main = %d, stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 		}
-		_, allowlist, err := codeshape.Load(root)
+		_, allowlist, err := shapeconfig.Load(root)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -255,7 +256,7 @@ func TestMainWriteUpdates(t *testing.T) {
 		if code != 0 {
 			t.Fatalf("Main = %d, stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 		}
-		_, allowlist, err := codeshape.Load(root)
+		_, allowlist, err := shapeconfig.Load(root)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -273,7 +274,7 @@ func TestMainWriteUpdates(t *testing.T) {
 		if code != 0 {
 			t.Fatalf("Main = %d, stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 		}
-		_, allowlist, err := codeshape.Load(root)
+		_, allowlist, err := shapeconfig.Load(root)
 		if err != nil {
 			t.Fatal(err)
 		}

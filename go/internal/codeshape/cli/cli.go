@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/RigelBuild/meissa/go/internal/codeshape"
+	shapeconfig "github.com/RigelBuild/meissa/go/internal/codeshape/config"
 	"github.com/RigelBuild/meissa/go/internal/codeshape/golang"
 	"github.com/RigelBuild/meissa/go/internal/codeshape/typescript"
 )
@@ -39,7 +40,7 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
 	}
-	config, allow, err := codeshape.Load(root)
+	config, allow, err := shapeconfig.Load(root)
 	if err != nil {
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
@@ -143,7 +144,7 @@ func writeUpdated(
 			writeOutput(stderr, "code-shape-gate: open repository: %v\n", openErr)
 			return 2
 		}
-		err = repository.WriteFile("tools/code-shape-gate/allowlist.cue", codeshape.Render(updated), 0o644)
+		err = repository.WriteFile("tools/code-shape-gate/allowlist.cue", shapeconfig.Render(updated), 0o644)
 		closeErr := repository.Close()
 		err = errors.Join(err, closeErr)
 		if err != nil {
@@ -198,7 +199,7 @@ func loadBaseAllowlist(ctx context.Context, root, ref string) (codeshape.Allowli
 	if err != nil {
 		return codeshape.Allowlist{}, gitBaseError(ref, err)
 	}
-	allowlist, err := codeshape.DecodeBaseAllowlist(data)
+	allowlist, err := shapeconfig.DecodeBaseAllowlist(data)
 	if err != nil {
 		return codeshape.Allowlist{}, err
 	}

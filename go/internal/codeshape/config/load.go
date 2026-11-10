@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-// Package codeshape measures tracked source and directory sizes.
-package codeshape
+// Package config loads and renders code shape configuration.
+package config
 
 import (
 	"embed"
@@ -15,6 +15,8 @@ import (
 	"cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/parser"
+
+	"github.com/RigelBuild/meissa/go/internal/codeshape"
 )
 
 var (
@@ -29,63 +31,6 @@ var (
 //go:embed schema.cue
 var schemaFiles embed.FS
 
-// Config contains the repository's file, directory, and function thresholds.
-type Config struct {
-	FileLimit  int                 `json:"fileLimit"`
-	DirLimit   int                 `json:"dirLimit"`
-	Extensions []string            `json:"extensions"`
-	Exclude    []string            `json:"exclude"`
-	DirLimits  map[string]DirLimit `json:"dirLimits"`
-	Functions  FunctionLimits      `json:"functions"`
-}
-
-// DirLimit records a directory width exception and its reason.
-type DirLimit struct {
-	Limit  int    `json:"limit"`
-	Reason string `json:"reason"`
-}
-
-// Entry records a measured value and its burn-down reason.
-type Entry struct {
-	ID     string `json:"id,omitempty"`
-	Value  int    `json:"value"`
-	Reason string `json:"reason"`
-}
-
-// Allowlist contains file, directory, and function ratchet entries.
-// Present distinguishes a loaded base allowlist from head-only mode.
-type Allowlist struct {
-	Files     map[string]Entry              `json:"files,omitempty"`
-	Dirs      map[string]Entry              `json:"dirs,omitempty"`
-	Functions map[Metric]map[string][]Entry `json:"functions,omitempty"`
-	Present   bool                          `json:"-"`
-}
-
-func emptyAllowlist() Allowlist {
-	return Allowlist{
-		Files:     map[string]Entry{},
-		Dirs:      map[string]Entry{},
-		Functions: map[Metric]map[string][]Entry{},
-		Present:   false,
-	}
-}
-
-// Snapshot contains current measurements.
-type Snapshot struct {
-	Files     map[string]int
-	Dirs      map[string]int
-	Functions map[Metric]map[string][]Entry
-}
-
-// Finding describes one enforced size or ratchet violation.
-type Finding struct {
-	Path   string
-	Metric Metric
-	Value  int
-	Limit  int
-	Fix    string
-}
-
 func schemaValue(ctx *cue.Context) (cue.Value, error) {
 	data, err := schemaFiles.ReadFile("schema.cue")
 	if err != nil {
@@ -99,11 +44,20 @@ func schemaValue(ctx *cue.Context) (cue.Value, error) {
 	return value, nil
 }
 
+func DecodeBaseAllowlist(data []byte) (codeshape.Allowlist, error) {
+	ctx := cuecontext.New()
+	schema, err := schemaValue(ctx)
+	if err != nil {
+		return codeshape.Allowlist{}, err
+	}
+	return decodeAllowlistBytes(ctx, schema, data, "base allowlist")
+}
+
 // Load reads and validates the repository's CUE configuration and allowlist.
-func Load(root string) (Config, Allowlist, error) {
+func Load(root string) (codeshape.Config, codeshape.Allowlist, error) {
 	repository, err := os.OpenRoot(root)
 	if err != nil {
-		return Config{}, Allowlist{}, fmt.Errorf("open repository root: %w", err)
+		return codeshape.Config{}, codeshape.Allowlist{}, fmt.Errorf("open repository root: %w", err)
 	}
 	config, allowlist, loadErr := loadFromRoot(repository)
 	closeErr := repository.Close()
@@ -113,40 +67,40 @@ func Load(root string) (Config, Allowlist, error) {
 	return config, allowlist, errors.Join(loadErr, closeErr)
 }
 
-func loadFromRoot(repository *os.Root) (Config, Allowlist, error) {
+func loadFromRoot(repository *os.Root) (codeshape.Config, codeshape.Allowlist, error) {
 	ctx := cuecontext.New()
 	schema, err := schemaValue(ctx)
 	if err != nil {
-		return Config{}, Allowlist{}, err
+		return codeshape.Config{}, codeshape.Allowlist{}, err
 	}
 
 	configValue, err := loadCUEFile(ctx, repository, "tools/code-shape-gate/config.cue")
 	if err != nil {
-		return Config{}, Allowlist{}, err
+		return codeshape.Config{}, codeshape.Allowlist{}, err
 	}
 	configSchema := schema.LookupPath(cue.MakePath(cue.Def("Config")))
 	configValue = configValue.Unify(configSchema)
 	err = configValue.Err()
 	if err != nil {
-		return Config{}, Allowlist{}, fmt.Errorf("validate config.cue: %w", err)
+		return codeshape.Config{}, codeshape.Allowlist{}, fmt.Errorf("validate config.cue: %w", err)
 	}
-	var config Config
+	var config codeshape.Config
 	err = configValue.Decode(&config)
 	if err != nil {
-		return Config{}, Allowlist{}, fmt.Errorf("decode config.cue: %w", err)
+		return codeshape.Config{}, codeshape.Allowlist{}, fmt.Errorf("decode config.cue: %w", err)
 	}
 	err = validateConfig(config)
 	if err != nil {
-		return Config{}, Allowlist{}, err
+		return codeshape.Config{}, codeshape.Allowlist{}, err
 	}
 
 	allowValue, err := loadCUEFile(ctx, repository, "tools/code-shape-gate/allowlist.cue")
 	if err != nil {
-		return Config{}, Allowlist{}, err
+		return codeshape.Config{}, codeshape.Allowlist{}, err
 	}
 	allowlist, err := decodeAllowlist(schema, allowValue, "allowlist.cue")
 	if err != nil {
-		return Config{}, Allowlist{}, err
+		return codeshape.Config{}, codeshape.Allowlist{}, err
 	}
 	allowlist.Present = true
 	return config, allowlist, nil
@@ -178,47 +132,47 @@ func compileCUEFile(ctx *cue.Context, data []byte, name string) (cue.Value, erro
 	return value, nil
 }
 
-func decodeAllowlistBytes(ctx *cue.Context, schema cue.Value, data []byte, name string) (Allowlist, error) {
+func decodeAllowlistBytes(ctx *cue.Context, schema cue.Value, data []byte, name string) (codeshape.Allowlist, error) {
 	value, err := compileCUEFile(ctx, data, name)
 	if err != nil {
-		return Allowlist{}, err
+		return codeshape.Allowlist{}, err
 	}
 	return decodeAllowlist(schema, value, name)
 }
 
-func decodeAllowlist(schema, value cue.Value, name string) (Allowlist, error) {
+func decodeAllowlist(schema, value cue.Value, name string) (codeshape.Allowlist, error) {
 	allowSchema := schema.LookupPath(cue.MakePath(cue.Def("Allowlist")))
 	value = value.Unify(allowSchema)
 	err := value.Err()
 	if err != nil {
-		return Allowlist{}, fmt.Errorf("validate %s: %w", name, err)
+		return codeshape.Allowlist{}, fmt.Errorf("validate %s: %w", name, err)
 	}
-	var allowlist Allowlist
+	var allowlist codeshape.Allowlist
 	err = value.Decode(&allowlist)
 	if err != nil {
-		return Allowlist{}, fmt.Errorf("decode %s: %w", name, err)
+		return codeshape.Allowlist{}, fmt.Errorf("decode %s: %w", name, err)
 	}
 	if allowlist.Files == nil {
-		allowlist.Files = map[string]Entry{}
+		allowlist.Files = map[string]codeshape.Entry{}
 	}
 	if allowlist.Dirs == nil {
-		allowlist.Dirs = map[string]Entry{}
+		allowlist.Dirs = map[string]codeshape.Entry{}
 	}
 	if allowlist.Functions == nil {
-		allowlist.Functions = map[Metric]map[string][]Entry{}
+		allowlist.Functions = map[codeshape.Metric]map[string][]codeshape.Entry{}
 	}
 	for metric, paths := range allowlist.Functions {
-		if !isFunctionMetric(metric) {
-			return Allowlist{}, fmt.Errorf("%s: %w %q", name, errUnsupportedMetric, metric)
+		if !codeshape.IsFunctionMetric(metric) {
+			return codeshape.Allowlist{}, fmt.Errorf("%s: %w %q", name, errUnsupportedMetric, metric)
 		}
-		err := validateFunctionEntryIDs(paths)
+		err := codeshape.ValidateFunctionEntryIDs(paths)
 		if err != nil {
-			return Allowlist{}, fmt.Errorf("%s: %w", name, err)
+			return codeshape.Allowlist{}, fmt.Errorf("%s: %w", name, err)
 		}
 	}
 	if entry, exists := allowlist.Dirs["."]; exists {
 		if _, duplicate := allowlist.Dirs[""]; duplicate {
-			return Allowlist{}, fmt.Errorf("%s: %w", name, errDuplicateRoot)
+			return codeshape.Allowlist{}, fmt.Errorf("%s: %w", name, errDuplicateRoot)
 		}
 		allowlist.Dirs[""] = entry
 		delete(allowlist.Dirs, ".")
@@ -226,7 +180,7 @@ func decodeAllowlist(schema, value cue.Value, name string) (Allowlist, error) {
 	return allowlist, nil
 }
 
-func validateConfig(config Config) error {
+func validateConfig(config codeshape.Config) error {
 	if config.FileLimit != 500 || config.DirLimit != 10 {
 		return errInvalidThresholds
 	}

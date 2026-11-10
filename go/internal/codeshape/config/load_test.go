@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package codeshape
+package config
 
 import (
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/RigelBuild/meissa/go/internal/codeshape"
 )
 
 func TestLoad(t *testing.T) {
@@ -57,7 +59,7 @@ func TestLoadFunctionEntries(t *testing.T) {
 			if (err == nil) != tc.valid {
 				t.Fatalf("Load error = %v", err)
 			}
-			if tc.valid && (cfg.Functions.Go.Lines != 60 || entries.Functions[MetricGoLines]["f.go"][0].ID != "work") {
+			if tc.valid && (cfg.Functions.Go.Lines != 60 || entries.Functions[codeshape.MetricGoLines]["f.go"][0].ID != "work") {
 				t.Fatalf("decoded config=%#v entries=%#v", cfg, entries)
 			}
 		})

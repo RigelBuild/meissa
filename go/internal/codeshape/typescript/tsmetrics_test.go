@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/RigelBuild/meissa/go/internal/codeshape"
+	shapeconfig "github.com/RigelBuild/meissa/go/internal/codeshape/config"
 )
 
 const tsBiomeConfig = `{"linter":{"rules":{"complexity":{"noExcessiveCognitiveComplexity":` +
@@ -54,7 +55,7 @@ func TestTSIgnoredFileIsSkipped(t *testing.T) {
 	}
 	trackedFile(t, root, "ignored.ts", "function ignored() {}\n")
 	commitFiles(t, root)
-	cfg, _, err := codeshape.Load(root)
+	cfg, _, err := shapeconfig.Load(root)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,7 +106,7 @@ func TestTSManyOffenders(t *testing.T) {
 		fmt.Fprintf(&source, "function f%d() {\n%s}\n", i, strings.Repeat("console.log(1);\n", 51))
 	}
 	root := tsRepo(t, source.String())
-	cfg, _, err := codeshape.Load(root)
+	cfg, _, err := shapeconfig.Load(root)
 	if err != nil {
 		t.Fatal(err)
 	}
