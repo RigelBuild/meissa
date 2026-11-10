@@ -4,6 +4,7 @@ package renovatehashes
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,7 +19,8 @@ func TestRefreshInterruptions(t *testing.T) {
 	t.Run("reports SIGINT and restores the original pins", func(t *testing.T) {
 		testRefreshInterrupted(t, "SIGINT")
 	})
-	t.Run("does not write pins when base-ref lookup is interrupted", testRefreshInterruptedBeforeSelection)
+	t.Run("reports SIGINT when base-ref lookup is interrupted", testRefreshInterruptedBeforeSelection)
+	t.Run("classifies canceled exec child as SIGINT", testRefreshClassifiesCanceledExecChild)
 	t.Run(
 		"keeps the original failure when build fails before context cancellation",
 		testRefreshBuildFailureBeforeCancellation,
@@ -59,6 +61,9 @@ func testRefreshInterrupted(t *testing.T, signalName string) {
 func testRefreshInterruptedBeforeSelection(t *testing.T) {
 	t.Helper()
 	root, runner := newFixture(t)
+	initial := readFixture(t, root, pinFile)
+	changed := strings.Replace(initial, `sha256-m9PoJHescRuT9DiKsb6LL+lQlc7RKAWDiRyf8pNMffA=`, "sha256-previous", 1)
+	writeFixture(t, root, pinFile, changed)
 	ctx, cancel := context.WithCancelCause(t.Context())
 	defer cancel(nil)
 	runner.cancel = cancel
@@ -80,6 +85,9 @@ func testRefreshInterruptedBeforeSelection(t *testing.T) {
 	if code != 1 || !strings.Contains(stderr.String(), want) {
 		t.Fatalf("Main = %d, stderr %q; want %q", code, stderr.String(), want)
 	}
+	if got := readFixture(t, root, pinFile); got != changed {
+		t.Fatal("interrupted refresh changed the pin file")
+	}
 	after, err := os.Stat(pinPath)
 	if err != nil {
 		t.Fatal(err)
@@ -87,6 +95,57 @@ func testRefreshInterruptedBeforeSelection(t *testing.T) {
 	if !after.ModTime().Equal(before.ModTime()) {
 		t.Fatal("interrupted refresh wrote the pin file")
 	}
+}
+
+func testRefreshClassifiesCanceledExecChild(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	defer cancel(nil)
+	root := t.TempDir()
+	readyPath := filepath.Join(root, "child-ready")
+	errCh := make(chan error, 1)
+	go func() {
+		_, err := refresh(ctx, root, nil, execRunnerCancellationRunner{readyPath: readyPath}, envValue("main"))
+		errCh <- err
+	}()
+
+	timeout := time.NewTimer(5 * time.Second)
+	ticker := time.NewTicker(10 * time.Millisecond)
+	defer timeout.Stop()
+	defer ticker.Stop()
+	for {
+		_, statErr := os.Stat(readyPath)
+		if statErr == nil {
+			break
+		}
+		if !os.IsNotExist(statErr) {
+			cancel(ErrRefreshSIGINT)
+			childErr := <-errCh
+			t.Fatalf("checking exec child readiness: %v (child error: %v)", statErr, childErr)
+		}
+		select {
+		case <-timeout.C:
+			cancel(ErrRefreshSIGINT)
+			childErr := <-errCh
+			if childErr != nil {
+				t.Fatalf("exec child returned before readiness: %v", childErr)
+			}
+			t.Fatal("exec child did not start")
+		case <-ticker.C:
+		}
+	}
+	cancel(ErrRefreshSIGINT)
+	err := <-errCh
+	if !errors.Is(err, ErrRefreshSIGINT) || !strings.Contains(err.Error(), "interrupted by SIGINT") {
+		t.Fatalf("refresh error = %v; want SIGINT interruption", err)
+	}
+}
+
+type execRunnerCancellationRunner struct {
+	readyPath string
+}
+
+func (r execRunnerCancellationRunner) Run(ctx context.Context, _ string, _ ...string) (string, string, int, error) {
+	return (execRunner{root: ""}).Run(ctx, "sh", "-c", `touch "$1"; exec sleep 10`, "sh", r.readyPath)
 }
 
 func testRefreshBuildFailureBeforeCancellation(t *testing.T) {
