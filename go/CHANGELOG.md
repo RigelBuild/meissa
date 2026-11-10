@@ -35,6 +35,9 @@
 
 ### Added
 
+- `code-shape-gate` measures Go and TypeScript functions, reports skipped files and unmeasured extensions, and detects suppression and Biome policy drift.
+
+
 - Added a Renovate hash refresh command for Go source and vendor hashes, including the Go tools package vendor hash.
 - Added `code-shape-gate`, which checks file length and directory width against a per-repo allowlist with a ratchet.
 - `code-shape-gate` supports per-glob directory limits and excludes matching files from directory width counts.

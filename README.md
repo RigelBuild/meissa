@@ -48,6 +48,14 @@ The policy is the shared `[MD0nn]` rule set from `rumdl/base.toml` in this repo.
 `code-shape-gate` checks tracked source-file line counts and direct tracked-file counts per directory. Add `tools/code-shape-gate/config.cue` with `fileLimit`, `dirLimit`, counted `extensions`, and path `exclude` globs. The fixed limits are 500 physical lines per file and 10 direct files per directory, unless a directory matches a `dirLimits` exception. File counts omit tracked files under `testdata` or `fixtures`, generated headers in the first five lines, and configured excludes. Directory counts include every tracked file except configured excludes.
 
 Optional `dirLimits` maps directory globs to `{limit: 50, reason: "record decisions together"}`. Limits must exceed 10 and reasons must contain at least three words. When multiple globs match, the smallest limit wins.
+The gate also measures Go cognitive complexity, function lines and statements, and TypeScript cognitive complexity and function lines. The optional `functions` field uses the fixed Go limits 20, 60 and 40, and TypeScript limits 15 and 50. Existing configurations may omit it. Function collection requires `golangci-lint` and `biome` on PATH. The gate reports counted extensions without a collector on stderr.
+
+Function allowlist entries are keyed by metric, path and function ID. Go IDs use function and receiver names, with closure ordinals within their enclosing function. TypeScript IDs use enclosing functions, classes and test titles where available. Suppression directives and mismatched Biome rule options are findings. Files that cannot be measured are reported as skips on stderr; skips do not change the exit code.
+
+```cue
+functions: "go-lines": "src/example.go": [{id: "Example", value: 70, reason: "split by concern"}]
+```
+
 
 Add `tools/code-shape-gate/allowlist.cue` with `files` and `dirs` maps. Each entry has a measured `value` and a `reason` of at least three words:
 
