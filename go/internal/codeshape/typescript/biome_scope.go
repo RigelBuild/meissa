@@ -3,6 +3,7 @@
 package typescript
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"path"
@@ -108,27 +109,45 @@ func biomeOverrideEnabled(config map[string]any, name string, enabled bool) (boo
 	return enabled, nil
 }
 
-func biomeSkippedPaths(root string, tracked, paths []string, report biomeReport, sources map[string][]byte) (
-	[]codeshape.Skip, error,
+func biomeSkippedPaths(root string, tracked, paths []string, sources map[string][]byte) (
+	[]codeshape.Skip, []string, []string, error,
 ) {
 	scopes, err := biomeScopes(root, tracked)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 	var skips []codeshape.Skip
+	var included, ignored []string
 	for _, name := range paths {
 		excluded, err := biomeExcluded(name, scopes)
 		if err != nil {
-			return nil, err
+			return nil, nil, nil, err
 		}
 		if excluded {
+			ignored = append(ignored, name)
 			delete(sources, name)
 			skips = append(skips, codeshape.Skip{Path: name, Reason: "ignored by Biome",
 				Unmeasured: &codeshape.UnmeasuredFunctions{Values: map[codeshape.Metric]int{}, Ignored: true}})
+		} else {
+			included = append(included, name)
 		}
 	}
-	if report.Summary.Changed+report.Summary.Unchanged != len(paths)-len(skips) {
-		return nil, fmt.Errorf("processed count differs from configuration: %w", errBiomeScope)
+	return skips, included, ignored, nil
+}
+
+func runBiomePartition(ctx context.Context, binary, root string, paths []string, expected int) (biomeReport, error) {
+	if len(paths) == 0 {
+		return biomeReport{Summary: nil, Diagnostics: nil}, nil
 	}
-	return skips, nil
+	report, err := runBiome(ctx, binary, root, paths)
+	if err != nil {
+		return biomeReport{}, err
+	}
+	if report.Summary.DiagnosticsNotPrinted != 0 {
+		return biomeReport{}, fmt.Errorf("%w: %d were not printed", errBiomeTruncated, report.Summary.DiagnosticsNotPrinted)
+	}
+	if report.Summary.Changed+report.Summary.Unchanged != expected {
+		return biomeReport{}, fmt.Errorf("processed count differs from configuration: %w", errBiomeScope)
+	}
+	return report, nil
 }

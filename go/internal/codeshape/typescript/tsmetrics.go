@@ -86,11 +86,7 @@ func TSMetrics(ctx context.Context, root string, cfg codeshape.Config) (
 	if len(sources) == 0 {
 		return codeshape.NewFunctionMeasurements(), nil, nil
 	}
-	_, report, sourcePaths, err := prepareBiome(ctx, root, sources)
-	if err != nil {
-		return nil, nil, err
-	}
-	skips, err := biomeSkippedPaths(root, paths, sourcePaths, report, sources)
+	report, skips, err := prepareBiome(ctx, root, paths, sources)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -118,26 +114,37 @@ func TSMetrics(ctx context.Context, root string, cfg codeshape.Config) (
 	return values, skips, nil
 }
 
-func prepareBiome(ctx context.Context, root string, sources map[string][]byte) (string, biomeReport, []string, error) {
+func prepareBiome(ctx context.Context, root string, tracked []string, sources map[string][]byte) (
+	biomeReport, []codeshape.Skip, error,
+) {
 	binary, err := exec.LookPath("biome")
 	if err != nil {
-		return "", biomeReport{}, nil, fmt.Errorf("find biome: %w", err)
+		return biomeReport{}, nil, fmt.Errorf("find biome: %w", err)
 	}
 	err = codeshape.CheckToolVersion(ctx, binary, codeshape.BiomeVersion)
 	if err != nil {
-		return "", biomeReport{}, nil, fmt.Errorf("check biome: %w", err)
+		return biomeReport{}, nil, fmt.Errorf("check biome: %w", err)
 	}
 	var paths []string
 	for path := range sources {
 		paths = append(paths, path)
 	}
 	sort.Strings(paths)
-	report, err := runBiome(ctx, binary, root, paths)
-	if err == nil && report.Summary.DiagnosticsNotPrinted != 0 {
-		return "", biomeReport{}, nil, fmt.Errorf("%w: %d were not printed",
-			errBiomeTruncated, report.Summary.DiagnosticsNotPrinted)
+	skips, included, ignored, err := biomeSkippedPaths(root, tracked, paths, sources)
+	if err != nil {
+		return biomeReport{}, nil, err
 	}
-	return binary, report, paths, err
+	report, err := runBiomePartition(ctx, binary, root, included, len(included))
+	if err != nil {
+		return biomeReport{}, nil, err
+	}
+	if len(ignored) > 0 {
+		_, err = runBiomePartition(ctx, binary, root, ignored, 0)
+		if err != nil {
+			return biomeReport{}, nil, err
+		}
+	}
+	return report, skips, nil
 }
 
 func readTSSources(root string, paths []string, cfg codeshape.Config) (map[string][]byte, error) {

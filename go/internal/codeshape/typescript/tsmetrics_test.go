@@ -76,6 +76,33 @@ func TestTSIgnoredFileIsSkipped(t *testing.T) {
 	}
 }
 
+func TestBiomeOppositeScopeMismatchesFailClosed(t *testing.T) {
+	root := tsRepo(t, "function f() {}\n")
+	config := strings.Replace(tsBiomeConfig, `{`, `{"files":{"includes":["**", "!ignored.ts"]},`, 1)
+	trackedFile(t, root, "biome.json", config)
+	trackedFile(t, root, "ignored.ts", "function ignored() {}\n")
+	commitFiles(t, root)
+	binary, err := exec.LookPath("biome")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tc := range []struct {
+		name     string
+		paths    []string
+		expected int
+	}{
+		{"predicted processed", []string{"ignored.ts"}, 1},
+		{"predicted ignored", []string{"x.ts"}, 0},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := runBiomePartition(t.Context(), binary, root, tc.paths, tc.expected)
+			if err == nil {
+				t.Fatal("scope mismatch passed")
+			}
+		})
+	}
+}
+
 func TestTSGeneratorAndUnicodePosition(t *testing.T) {
 	source := []byte("const s = 'é😀'; function* generate() { yield 1; }")
 	funcs, tree, err := parseTSFunctions("x.ts", source)
