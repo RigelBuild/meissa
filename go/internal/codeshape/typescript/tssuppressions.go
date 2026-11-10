@@ -4,9 +4,8 @@ package typescript
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"io/fs"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -35,20 +34,41 @@ func PolicyFindings(ctx context.Context, root string, cfg codeshape.Config) ([]c
 	if !hasTS {
 		return findings, nil
 	}
-	path := "biome.json"
-	config, err := readBiomeConfig(root, path)
-	if errors.Is(err, fs.ErrNotExist) {
-		path = "biome.jsonc"
-		config, err = readBiomeConfig(root, path)
-	}
-	if errors.Is(err, fs.ErrNotExist) {
-		return findings, nil
-	}
+	drift, err := trackedBiomeDrift(root, paths, cfg)
 	if err != nil {
 		return nil, err
 	}
-	findings = append(findings, biomeDriftFindings(path, config, cfg, true)...)
+	return append(findings, drift...), nil
+}
+
+func trackedBiomeDrift(root string, paths []string, cfg codeshape.Config) ([]codeshape.Finding, error) {
+	findings := []codeshape.Finding{}
+	for _, path := range paths {
+		base := filepath.Base(path)
+		if base != "biome.json" && base != "biome.jsonc" {
+			continue
+		}
+		config, err := readBiomeConfig(root, path)
+		if err != nil {
+			return nil, err
+		}
+		require := path == "biome.json" || path == "biome.jsonc"
+		findings = append(findings, biomeDriftFindings(path, config, cfg, require)...)
+		findings = append(findings, biomeOverrideDrift(path, config, cfg)...)
+	}
 	return findings, nil
+}
+
+func biomeOverrideDrift(path string, config map[string]any, cfg codeshape.Config) []codeshape.Finding {
+	findings := []codeshape.Finding{}
+	overrides, _ := config["overrides"].([]any)
+	for _, raw := range overrides {
+		override, ok := raw.(map[string]any)
+		if ok {
+			findings = append(findings, biomeDriftFindings(path, override, cfg, false)...)
+		}
+	}
+	return findings
 }
 
 func biomeDriftFindings(path string, config map[string]any, cfg codeshape.Config, require bool) []codeshape.Finding {

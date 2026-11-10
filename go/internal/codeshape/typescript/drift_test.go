@@ -38,3 +38,24 @@ func TestBiomeJSONCAndMissingConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestTrackedBiomeDrift(t *testing.T) {
+	root := newFixtureRepo(t)
+	trackedFile(t, root, "src/x.ts", "function f() {}\n")
+	trackedFile(t, root, "nested/biome.jsonc", `{"linter":{"rules":{"complexity":`+
+		`{"noExcessiveLinesPerFunction":{"level":"off","options":{"maxLines":500}}}}}}`)
+	trackedFile(t, root, "biome.json", `{"linter":{"rules":{"complexity":{`+
+		`"noExcessiveCognitiveComplexity":{"level":"off","options":{"maxAllowedComplexity":15}},`+
+		`"noExcessiveLinesPerFunction":{"level":"off","options":{"maxLines":50}}}}},`+
+		`"overrides":[{"linter":{"rules":{"complexity":`+
+		`{"noExcessiveLinesPerFunction":{"level":"off","options":{"maxLines":500}}}}}}]}`)
+	commitFiles(t, root)
+	cfg := codeshape.Config{FileLimit: 500, DirLimit: 10, Extensions: []string{".ts"}, Exclude: []string{},
+		DirLimits: map[string]codeshape.DirLimit{}, Functions: codeshape.FunctionLimits{
+			Go: codeshape.GoFunctionLimits{Cognitive: 20, Lines: 60, Statements: 40},
+			TS: codeshape.TSFunctionLimits{Cognitive: 15, Lines: 50}}}
+	findings, err := PolicyFindings(t.Context(), root, cfg)
+	if err != nil || len(findings) != 2 {
+		t.Fatalf("findings=%#v err=%v", findings, err)
+	}
+}
