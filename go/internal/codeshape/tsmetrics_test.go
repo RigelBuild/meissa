@@ -45,6 +45,37 @@ func TestTSOnlyOffUsesOptions(t *testing.T) {
 	}
 }
 
+func TestTSIgnoredFileIsSkipped(t *testing.T) {
+	root := tsRepo(t, "function f() {}\n")
+	config := strings.Replace(tsBiomeConfig, `{`, `{"files":{"includes":["**", "!ignored.ts"]},`, 1)
+	if err := os.WriteFile(filepath.Join(root, "biome.json"), []byte(config), 0600); err != nil {
+		t.Fatal(err)
+	}
+	trackedFile(t, root, "ignored.ts", "function ignored() {}\n")
+	commitFiles(t, root)
+	cfg, _, err := Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	values, skips, err := TSMetrics(t.Context(), root, cfg)
+	if err != nil || len(skips) != 1 || skips[0].Path != "ignored.ts" || len(values[MetricTSLines]["ignored.ts"]) != 0 {
+		t.Fatalf("values=%v skips=%v err=%v", values, skips, err)
+	}
+}
+
+func TestTSGeneratorAndUnicodePosition(t *testing.T) {
+	source := []byte("const s = 'é😀'; function* generate() { yield 1; }")
+	funcs, tree, err := parseTSFunctions("x.ts", source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tree.Release()
+	fn, err := findTSFunction(funcs, 1, 19, source)
+	if err != nil || fn.id != "generate" {
+		t.Fatalf("function=%v err=%v", fn, err)
+	}
+}
+
 func TestTSCognitiveLimit(t *testing.T) {
 	root := tsRepo(t, "function f(x: boolean) {\n"+strings.Repeat("if (x) { console.log(x); }\n", 16)+"}\n")
 	code, out, errout := runGoGate(t, root)
@@ -69,7 +100,7 @@ func TestTSManyOffenders(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	values, err := TSMetrics(t.Context(), root, cfg)
+	values, _, err := TSMetrics(t.Context(), root, cfg)
 	if err != nil {
 		t.Fatal(err)
 	}

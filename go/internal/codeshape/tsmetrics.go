@@ -11,9 +11,11 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/odvcencio/gotreesitter"
 	"github.com/odvcencio/gotreesitter/grammars/tsx"
@@ -44,6 +46,8 @@ var (
 
 type biomeReport struct {
 	Summary *struct {
+		Changed               int `json:"changed"`
+		Unchanged             int `json:"unchanged"`
 		DiagnosticsNotPrinted int `json:"diagnosticsNotPrinted"`
 		Errors                int `json:"errors"`
 	} `json:"summary"`
@@ -68,10 +72,10 @@ type tsFunction struct {
 }
 
 // TSMetrics measures Biome's function complexity and line count rules.
-func TSMetrics(ctx context.Context, root string, cfg Config) (map[Metric]map[string][]Entry, error) {
+func TSMetrics(ctx context.Context, root string, cfg Config) (map[Metric]map[string][]Entry, []Skip, error) {
 	paths, err := trackedPaths(ctx, root)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	sources := make(map[string][]byte)
 	for _, path := range paths {
@@ -81,16 +85,16 @@ func TSMetrics(ctx context.Context, root string, cfg Config) (map[Metric]map[str
 		//nolint:gosec // G304: path from the repo's tracked file list
 		source, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(path)))
 		if err != nil {
-			return nil, fmt.Errorf("read TypeScript source %q: %w", path, err)
+			return nil, nil, fmt.Errorf("read TypeScript source %q: %w", path, err)
 		}
 		sources[path] = source
 	}
 	if len(sources) == 0 {
-		return newFunctionMeasurements(), nil
+		return newFunctionMeasurements(), nil, nil
 	}
 	binary, err := exec.LookPath("biome")
 	if err != nil {
-		return nil, fmt.Errorf("find biome: %w", err)
+		return nil, nil, fmt.Errorf("find biome: %w", err)
 	}
 	var sourcePaths []string
 	for path := range sources {
@@ -99,17 +103,32 @@ func TSMetrics(ctx context.Context, root string, cfg Config) (map[Metric]map[str
 	sort.Strings(sourcePaths)
 	report, err := runBiome(ctx, binary, root, sourcePaths)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if report.Summary.DiagnosticsNotPrinted != 0 {
-		return nil, fmt.Errorf("%w: %d were not printed", errBiomeTruncated, report.Summary.DiagnosticsNotPrinted)
+		return nil, nil, fmt.Errorf("%w: %d were not printed", errBiomeTruncated, report.Summary.DiagnosticsNotPrinted)
+	}
+	skips := []Skip{}
+	if report.Summary.Changed+report.Summary.Unchanged != len(sourcePaths) {
+		for _, path := range sourcePaths {
+			single, singleErr := runBiome(ctx, binary, root, []string{path})
+			if singleErr != nil {
+				return nil, nil, singleErr
+			}
+			if single.Summary.Changed+single.Summary.Unchanged == 0 {
+				delete(sources, path)
+				skips = append(skips, Skip{Path: path, Reason: "ignored by Biome"})
+			}
+		}
 	}
 	values := newFunctionMeasurements()
 	files := make(map[string][]tsFunction, len(sources))
 	for path, source := range sources {
 		functions, tree, err := parseTSFunctions(path, source)
 		if err != nil {
-			return nil, err
+			skips = append(skips, Skip{Path: path, Reason: err.Error()})
+			delete(sources, path)
+			continue
 		}
 		defer tree.Release()
 		files[path] = functions
@@ -126,22 +145,25 @@ func TSMetrics(ctx context.Context, root string, cfg Config) (map[Metric]map[str
 		}
 		path := filepath.ToSlash(diagnostic.Location.Path)
 		functions, exists := files[path]
+		if _, included := sources[path]; !included && slices.ContainsFunc(skips, func(skip Skip) bool { return skip.Path == path }) {
+			continue
+		}
 		if !exists {
-			return nil, fmt.Errorf("%w %q", errBiomeUnknownSource, path)
+			return nil, nil, fmt.Errorf("%w %q", errBiomeUnknownSource, path)
 		}
 		function, err := findTSFunction(
 			functions, diagnostic.Location.Start.Line, diagnostic.Location.Start.Column, sources[path],
 		)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		value, err := biomeValue(diagnostic.Message, metric)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		appendFunctionValue(values, metric, path, function.id, value)
 	}
-	return values, nil
+	return values, skips, nil
 }
 
 func isTypeScriptPath(path string) bool {
@@ -156,7 +178,7 @@ func isTypeScriptPath(path string) bool {
 func runBiome(ctx context.Context, binary, root string, paths []string) (biomeReport, error) {
 	args := make([]string, 0, 5+len(paths))
 	args = append(args, "lint", "--reporter=json", "--max-diagnostics="+strconv.Itoa(maxBiomeDiagnostics),
-		"--only=complexity/noExcessiveCognitiveComplexity", "--only=complexity/noExcessiveLinesPerFunction")
+		"--only=complexity/noExcessiveCognitiveComplexity", "--only=complexity/noExcessiveLinesPerFunction", "--no-errors-on-unmatched")
 	args = append(args, paths...)
 	command := exec.CommandContext(ctx, binary, args...) //nolint:gosec // G204: execute the biome linter
 	command.Dir = root
@@ -302,7 +324,7 @@ func collectTSFunctions(
 
 func isTSFunctionNode(node *gotreesitter.Node, lang *gotreesitter.Language) bool {
 	switch node.Type(lang) {
-	case "function_declaration", "function_expression", "arrow_function", "method_definition":
+	case "function_declaration", "function_expression", "arrow_function", "method_definition", "generator_function_declaration", "generator_function":
 		return true
 	default:
 		return false
@@ -364,7 +386,18 @@ func findTSFunction(functions []tsFunction, line, column int, source []byte) (*t
 		}
 		lineStart += next + 1
 	}
-	offset := lineStart + column - 1
+	offset := lineStart
+	for units := 1; units < column; {
+		if offset >= len(source) || source[offset] == '\n' {
+			return nil, fmt.Errorf("biome position %d:%d is outside source: %w", line, column, errBiomeOutsideSource)
+		}
+		r, size := utf8.DecodeRune(source[offset:])
+		units++
+		if r > 0xffff {
+			units++
+		}
+		offset += size
+	}
 	if offset > len(source) {
 		return nil, fmt.Errorf("biome position %d:%d is outside source: %w", line, column, errBiomeOutsideSource)
 	}

@@ -65,10 +65,15 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 			return 2
 		}
 	}
-	tsFunctions, err := TSMetrics(ctx, root, config)
+	tsFunctions, tsSkips, err := TSMetrics(ctx, root, config)
 	if err != nil {
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
+	}
+	for _, skip := range tsSkips {
+		if !writeOutput(stderr, "code-shape-gate: skip %s: %s\n", skip.Path, skip.Reason) {
+			return 2
+		}
 	}
 	functions[MetricTSCognitive] = tsFunctions[MetricTSCognitive]
 	functions[MetricTSLines] = tsFunctions[MetricTSLines]
