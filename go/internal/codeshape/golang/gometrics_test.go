@@ -56,7 +56,7 @@ func TestGoCollectorFixture(t *testing.T) {
 	}
 }
 
-func TestGoFunctionIdentity(t *testing.T) {
+func TestGoInitIDsStableWhenDifferentFunctionAdded(t *testing.T) {
 	ids := func(source string) []string {
 		set := token.NewFileSet()
 		file, err := parser.ParseFile(set, "x.go", source, 0)

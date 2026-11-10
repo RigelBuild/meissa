@@ -28,8 +28,14 @@ func tsRepo(t *testing.T, source string) string {
 	return root
 }
 func TestTSOnlyOffUsesOptions(t *testing.T) {
-	root := tsRepo(t, "function f(x: boolean) {\n"+strings.Repeat("if (x) { console.log(x); }\n", 16)+
-		strings.Repeat("console.log(x);\n", 40)+"}\n")
+	root := tsRepo(t, "function f(x: boolean) {\nif (x) { console.log(x); }\n"+
+		"if (x) { console.log(x); }\nconsole.log(x);\nconsole.warn(x);\n}\n")
+	config := strings.ReplaceAll(strings.ReplaceAll(tsBiomeConfig, `"maxAllowedComplexity":15`,
+		`"maxAllowedComplexity":1`), `"maxLines":50`, `"maxLines":3`)
+	err := os.WriteFile(filepath.Join(root, "biome.json"), []byte(config), 0o600)
+	if err != nil {
+		t.Fatal(err)
+	}
 	binary, err := exec.LookPath("biome")
 	if err != nil {
 		t.Fatal(err)
@@ -41,6 +47,9 @@ func TestTSOnlyOffUsesOptions(t *testing.T) {
 	seen := map[string]bool{}
 	for _, d := range report.Diagnostics {
 		seen[d.Category] = true
+		if d.Category == "lint/complexity/noExcessiveLinesPerFunction" && !strings.Contains(d.Message, "3") {
+			t.Fatalf("missing configured limit: %q", d.Message)
+		}
 	}
 	if len(seen) != 2 {
 		t.Fatalf("disabled rules did not both report: %#v", report.Diagnostics)
