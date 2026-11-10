@@ -22,7 +22,7 @@ The TOML file requires an `exclude` array. `[[sections]]` entries assign page pr
 
 `packages.readme_depth` is the maximum number of path segments for a README.md or AGENTS.md in the catch-all. `packages.allow` lists exact paths or directory prefixes ending in `/`. `packages.nested` lists top-level directories whose first two path segments form one package ID, joined with a hyphen.
 
-The check exits 1 for page or route collision errors and for broken relative links. It runs on Markdown files and does not need a site generator.
+The check exits 1 for page or route collision errors and for broken relative links. It exits 2 for invalid arguments and for page read errors. It runs on Markdown files and does not need a site generator.
 
 ## Library
 
