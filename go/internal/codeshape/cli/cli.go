@@ -72,8 +72,12 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 		return writeUpdated(root, config, allow, base, snapshot, seed, stdout, stderr, suppressions)
 	}
 	findings := append(codeshape.Judge(config, allow, base, snapshot), suppressions...)
+	return printGateFindings(stdout, stderr, findings)
+}
+
+func printGateFindings(stdout, stderr io.Writer, findings []codeshape.Finding) int {
 	codeshape.SortFindings(findings)
-	err = writeFindings(stdout, findings)
+	err := writeFindings(stdout, findings)
 	if err != nil {
 		writeOutput(stderr, "code-shape-gate: write output: %v\n", err)
 		return 2

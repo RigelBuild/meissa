@@ -79,39 +79,16 @@ func TSMetrics(ctx context.Context, root string, cfg codeshape.Config) (
 	if err != nil {
 		return nil, nil, fmt.Errorf("collect TypeScript paths: %w", err)
 	}
-	sources := make(map[string][]byte)
-	for _, path := range paths {
-		if !isTypeScriptPath(path) || !codeshape.CountedPath(path, cfg) {
-			continue
-		}
-		source, err := codeshape.ReadRepositoryFile(root, filepath.FromSlash(path))
-		if err != nil {
-			return nil, nil, fmt.Errorf("read TypeScript source %q: %w", path, err)
-		}
-		sources[path] = source
+	sources, err := readTSSources(root, paths, cfg)
+	if err != nil {
+		return nil, nil, err
 	}
 	if len(sources) == 0 {
 		return codeshape.NewFunctionMeasurements(), nil, nil
 	}
-	binary, err := exec.LookPath("biome")
-	if err != nil {
-		return nil, nil, fmt.Errorf("find biome: %w", err)
-	}
-	err = codeshape.CheckToolVersion(ctx, binary, codeshape.BiomeVersion)
-	if err != nil {
-		return nil, nil, fmt.Errorf("check biome: %w", err)
-	}
-	var sourcePaths []string
-	for path := range sources {
-		sourcePaths = append(sourcePaths, path)
-	}
-	sort.Strings(sourcePaths)
-	report, err := runBiome(ctx, binary, root, sourcePaths)
+	binary, report, sourcePaths, err := prepareBiome(ctx, root, sources)
 	if err != nil {
 		return nil, nil, err
-	}
-	if report.Summary.DiagnosticsNotPrinted != 0 {
-		return nil, nil, fmt.Errorf("%w: %d were not printed", errBiomeTruncated, report.Summary.DiagnosticsNotPrinted)
 	}
 	skips, err := biomeSkippedPaths(ctx, binary, root, sourcePaths, report, sources)
 	if err != nil {
@@ -138,6 +115,43 @@ func TSMetrics(ctx context.Context, root string, cfg codeshape.Config) (
 		return nil, nil, err
 	}
 	return values, skips, nil
+}
+
+func prepareBiome(ctx context.Context, root string, sources map[string][]byte) (string, biomeReport, []string, error) {
+	binary, err := exec.LookPath("biome")
+	if err != nil {
+		return "", biomeReport{}, nil, fmt.Errorf("find biome: %w", err)
+	}
+	err = codeshape.CheckToolVersion(ctx, binary, codeshape.BiomeVersion)
+	if err != nil {
+		return "", biomeReport{}, nil, fmt.Errorf("check biome: %w", err)
+	}
+	var paths []string
+	for path := range sources {
+		paths = append(paths, path)
+	}
+	sort.Strings(paths)
+	report, err := runBiome(ctx, binary, root, paths)
+	if err == nil && report.Summary.DiagnosticsNotPrinted != 0 {
+		return "", biomeReport{}, nil, fmt.Errorf("%w: %d were not printed",
+			errBiomeTruncated, report.Summary.DiagnosticsNotPrinted)
+	}
+	return binary, report, paths, err
+}
+
+func readTSSources(root string, paths []string, cfg codeshape.Config) (map[string][]byte, error) {
+	sources := make(map[string][]byte)
+	for _, path := range paths {
+		if !isTypeScriptPath(path) || !codeshape.CountedPath(path, cfg) {
+			continue
+		}
+		source, err := codeshape.ReadRepositoryFile(root, filepath.FromSlash(path))
+		if err != nil {
+			return nil, fmt.Errorf("read TypeScript source %q: %w", path, err)
+		}
+		sources[path] = source
+	}
+	return sources, nil
 }
 
 func biomeSkippedPaths(ctx context.Context, binary, root string, paths []string, report biomeReport,
