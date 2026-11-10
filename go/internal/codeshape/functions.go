@@ -18,7 +18,8 @@ type Skip struct {
 
 // UnmeasuredFunctions holds diagnostic maxima for an unparseable source file.
 type UnmeasuredFunctions struct {
-	Values map[Metric]int
+	Values  map[Metric]int
+	Ignored bool
 }
 
 var errFunctionID = errors.New("invalid function allowlist id")

@@ -73,6 +73,12 @@ func biomeOverrideDrift(path string, config map[string]any, cfg codeshape.Config
 
 func biomeDriftFindings(path string, config map[string]any, cfg codeshape.Config, require bool) []codeshape.Finding {
 	findings := []codeshape.Finding{}
+	linter, _ := config["linter"].(map[string]any)
+	ruleGroups, _ := linter["rules"].(map[string]any)
+	if linter["enabled"] == false || ruleGroups["complexity"] == "off" {
+		findings = append(findings, codeshape.Finding{Path: path, Metric: codeshape.MetricTSLines,
+			Value: 0, Limit: 1, Fix: "enable Biome complexity rules"})
+	}
 	rules := nestedMap(config, "linter", "rules", "complexity")
 	for _, check := range []struct {
 		name, option string

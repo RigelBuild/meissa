@@ -86,11 +86,11 @@ func TSMetrics(ctx context.Context, root string, cfg codeshape.Config) (
 	if len(sources) == 0 {
 		return codeshape.NewFunctionMeasurements(), nil, nil
 	}
-	binary, report, sourcePaths, err := prepareBiome(ctx, root, sources)
+	_, report, sourcePaths, err := prepareBiome(ctx, root, sources)
 	if err != nil {
 		return nil, nil, err
 	}
-	skips, err := biomeSkippedPaths(ctx, binary, root, sourcePaths, report, sources)
+	skips, err := biomeSkippedPaths(root, paths, sourcePaths, report, sources)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -100,7 +100,7 @@ func TSMetrics(ctx context.Context, root string, cfg codeshape.Config) (
 		functions, tree, err := parseTSFunctions(path, source)
 		if err != nil {
 			skips = append(skips, codeshape.Skip{Path: path, Reason: err.Error(),
-				Unmeasured: &codeshape.UnmeasuredFunctions{Values: map[codeshape.Metric]int{}}})
+				Unmeasured: &codeshape.UnmeasuredFunctions{Values: map[codeshape.Metric]int{}, Ignored: false}})
 			delete(sources, path)
 			continue
 		}
@@ -153,26 +153,6 @@ func readTSSources(root string, paths []string, cfg codeshape.Config) (map[strin
 		sources[path] = source
 	}
 	return sources, nil
-}
-
-func biomeSkippedPaths(ctx context.Context, binary, root string, paths []string, report biomeReport,
-	sources map[string][]byte,
-) ([]codeshape.Skip, error) {
-	skips := []codeshape.Skip{}
-	if report.Summary.Changed+report.Summary.Unchanged == len(paths) {
-		return skips, nil
-	}
-	for _, path := range paths {
-		single, err := runBiome(ctx, binary, root, []string{path})
-		if err != nil {
-			return nil, err
-		}
-		if single.Summary.Changed+single.Summary.Unchanged == 0 {
-			delete(sources, path)
-			skips = append(skips, codeshape.Skip{Path: path, Reason: "ignored by Biome", Unmeasured: nil})
-		}
-	}
-	return skips, nil
 }
 
 func applyBiomeIssues(report biomeReport, files map[string][]tsFunction, sources map[string][]byte,
