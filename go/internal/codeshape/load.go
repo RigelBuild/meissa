@@ -5,6 +5,7 @@ package codeshape
 
 import (
 	"embed"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -14,6 +15,12 @@ import (
 	"cuelang.org/go/cue/load"
 )
 
+var (
+	errExpectedCUEInstance = errors.New("expected one CUE instance")
+	errInvalidThresholds   = errors.New("config thresholds must be fileLimit 500 and dirLimit 10")
+	errInvalidExtension    = errors.New("invalid source extension")
+)
+
 //go:embed schema.cue
 var schemaFiles embed.FS
 
@@ -21,8 +28,10 @@ var schemaFiles embed.FS
 type Metric string
 
 const (
+	// MetricFiles identifies file-size measurements.
 	MetricFiles Metric = "files"
-	MetricDirs  Metric = "dirs"
+	// MetricDirs identifies directory-width measurements.
+	MetricDirs Metric = "dirs"
 )
 
 // Config contains the repository's file and directory thresholds.
@@ -46,13 +55,22 @@ type FunctionEntry struct {
 	Reason string `json:"reason"`
 }
 
-// Allowlist contains T1 file and directory entries plus the future function map.
+// Allowlist contains file, directory, and function ratchet entries.
 // Present distinguishes a loaded base allowlist from head-only mode.
 type Allowlist struct {
 	Files     map[string]Entry                      `json:"files,omitempty"`
 	Dirs      map[string]Entry                      `json:"dirs,omitempty"`
 	Functions map[string]map[string][]FunctionEntry `json:"functions,omitempty"`
 	Present   bool                                  `json:"-"`
+}
+
+func emptyAllowlist() Allowlist {
+	return Allowlist{
+		Files:     map[string]Entry{},
+		Dirs:      map[string]Entry{},
+		Functions: map[string]map[string][]FunctionEntry{},
+		Present:   false,
+	}
 }
 
 // Snapshot contains current measurements. T1 leaves Functions empty.
@@ -81,7 +99,8 @@ func schemaValue(ctx *cue.Context) (cue.Value, error) {
 		return cue.Value{}, fmt.Errorf("read embedded schema: %w", err)
 	}
 	value := ctx.CompileBytes(data)
-	if err := value.Err(); err != nil {
+	err = value.Err()
+	if err != nil {
 		return cue.Value{}, fmt.Errorf("compile embedded schema: %w", err)
 	}
 	return value, nil
@@ -102,14 +121,17 @@ func Load(root string) (Config, Allowlist, error) {
 	}
 	configSchema := schema.LookupPath(cue.MakePath(cue.Def("Config")))
 	configValue = configValue.Unify(configSchema)
-	if err := configValue.Err(); err != nil {
+	err = configValue.Err()
+	if err != nil {
 		return Config{}, Allowlist{}, fmt.Errorf("validate config.cue: %w", err)
 	}
 	var config Config
-	if err := configValue.Decode(&config); err != nil {
+	err = configValue.Decode(&config)
+	if err != nil {
 		return Config{}, Allowlist{}, fmt.Errorf("decode config.cue: %w", err)
 	}
-	if err := validateConfig(config); err != nil {
+	err = validateConfig(config)
+	if err != nil {
 		return Config{}, Allowlist{}, err
 	}
 
@@ -117,7 +139,7 @@ func Load(root string) (Config, Allowlist, error) {
 	if err != nil {
 		return Config{}, Allowlist{}, err
 	}
-	allowlist, err := decodeAllowlist(ctx, schema, allowValue, "allowlist.cue")
+	allowlist, err := decodeAllowlist(schema, allowValue, "allowlist.cue")
 	if err != nil {
 		return Config{}, Allowlist{}, err
 	}
@@ -127,39 +149,61 @@ func Load(root string) (Config, Allowlist, error) {
 
 func loadCUEFile(ctx *cue.Context, dir, name string) (cue.Value, error) {
 	instances := load.Instances([]string{name}, &load.Config{
-		Dir:     dir,
-		Package: "_",
-		Env:     []string{},
+		Context:             nil,
+		ModuleRoot:          "",
+		Module:              "",
+		AcceptLegacyModules: false,
+		Package:             "_",
+		Dir:                 dir,
+		Tags:                nil,
+		TagVars:             nil,
+		AllCUEFiles:         false,
+		Tests:               false,
+		Tools:               false,
+		SkipImports:         false,
+		DataFiles:           false,
+		ParseFile:           nil,
+		Overlay:             nil,
+		FS:                  nil,
+		FromFSPath:          nil,
+		Stdin:               nil,
+		Registry:            nil,
+		Env:                 []string{},
 	})
 	if len(instances) != 1 {
-		return cue.Value{}, fmt.Errorf("load %s: expected one CUE instance, got %d", name, len(instances))
+		return cue.Value{}, fmt.Errorf("load %s: %w, got %d", name, errExpectedCUEInstance, len(instances))
 	}
-	if err := instances[0].Err; err != nil {
+	err := instances[0].Err
+	if err != nil {
 		return cue.Value{}, fmt.Errorf("load %s: %w", name, err)
 	}
 	value := ctx.BuildInstance(instances[0])
-	if err := value.Err(); err != nil {
-		return cue.Value{}, fmt.Errorf("evaluate %s: %w", name, err)
+	buildErr := value.Err()
+	if buildErr != nil {
+		return cue.Value{}, fmt.Errorf("evaluate %s: %w", name, buildErr)
 	}
 	return value, nil
 }
 
 func decodeAllowlistBytes(ctx *cue.Context, schema cue.Value, data []byte, name string) (Allowlist, error) {
 	value := ctx.CompileBytes(data)
-	if err := value.Err(); err != nil {
+	err := value.Err()
+	if err != nil {
 		return Allowlist{}, fmt.Errorf("parse %s: %w", name, err)
 	}
-	return decodeAllowlist(ctx, schema, value, name)
+	return decodeAllowlist(schema, value, name)
 }
 
-func decodeAllowlist(ctx *cue.Context, schema, value cue.Value, name string) (Allowlist, error) {
+func decodeAllowlist(schema, value cue.Value, name string) (Allowlist, error) {
 	allowSchema := schema.LookupPath(cue.MakePath(cue.Def("Allowlist")))
 	value = value.Unify(allowSchema)
-	if err := value.Err(); err != nil {
+	err := value.Err()
+	if err != nil {
 		return Allowlist{}, fmt.Errorf("validate %s: %w", name, err)
 	}
 	var allowlist Allowlist
-	if err := value.Decode(&allowlist); err != nil {
+	err = value.Decode(&allowlist)
+	if err != nil {
 		return Allowlist{}, fmt.Errorf("decode %s: %w", name, err)
 	}
 	if allowlist.Files == nil {
@@ -176,19 +220,20 @@ func decodeAllowlist(ctx *cue.Context, schema, value cue.Value, name string) (Al
 
 func validateConfig(config Config) error {
 	if config.FileLimit != 500 || config.DirLimit != 10 {
-		return fmt.Errorf("config thresholds must be fileLimit 500 and dirLimit 10")
+		return errInvalidThresholds
 	}
 	for _, extension := range config.Extensions {
 		if !strings.HasPrefix(extension, ".") || strings.ContainsAny(extension, "/\\") {
-			return fmt.Errorf("invalid source extension %q", extension)
+			return fmt.Errorf("%w %q", errInvalidExtension, extension)
 		}
 	}
 	for _, pattern := range config.Exclude {
-		for _, segment := range strings.Split(pattern, "/") {
+		for segment := range strings.SplitSeq(pattern, "/") {
 			if segment == "**" {
 				continue
 			}
-			if _, err := filepath.Match(segment, ""); err != nil {
+			_, err := filepath.Match(segment, "")
+			if err != nil {
 				return fmt.Errorf("invalid exclude glob %q: %w", pattern, err)
 			}
 		}

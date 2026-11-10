@@ -15,17 +15,20 @@ import (
 func newFixtureRepo(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()
-	command := exec.Command("git", "init", "-q")
+	command := exec.CommandContext(t.Context(), "git", "init", "-q")
 	command.Dir = root
-	if output, err := command.CombinedOutput(); err != nil {
+	output, err := command.CombinedOutput()
+	if err != nil {
 		t.Fatalf("git init: %v: %s", err, output)
 	}
-	command = exec.Command("git", "-C", root, "config", "user.email", "test@example.invalid")
-	if output, err := command.CombinedOutput(); err != nil {
+	command = exec.CommandContext(t.Context(), "git", "-C", root, "config", "user.email", "test@example.invalid")
+	output, err = command.CombinedOutput()
+	if err != nil {
 		t.Fatalf("git config: %v: %s", err, output)
 	}
-	command = exec.Command("git", "-C", root, "config", "user.name", "test")
-	if output, err := command.CombinedOutput(); err != nil {
+	command = exec.CommandContext(t.Context(), "git", "-C", root, "config", "user.name", "test")
+	output, err = command.CombinedOutput()
+	if err != nil {
 		t.Fatalf("git config: %v: %s", err, output)
 	}
 	return root
@@ -34,22 +37,26 @@ func newFixtureRepo(t *testing.T) string {
 func trackedFile(t *testing.T, root, path, content string) {
 	t.Helper()
 	fullPath := filepath.Join(root, filepath.FromSlash(path))
-	if err := os.MkdirAll(filepath.Dir(fullPath), 0o755); err != nil {
+	err := os.MkdirAll(filepath.Dir(fullPath), 0o755)
+	if err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(fullPath, []byte(content), 0o644); err != nil {
+	err = os.WriteFile(fullPath, []byte(content), 0o644)
+	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func commitFiles(t *testing.T, root string) {
 	t.Helper()
-	command := exec.Command("git", "-C", root, "add", "--all")
-	if output, err := command.CombinedOutput(); err != nil {
+	command := exec.CommandContext(t.Context(), "git", "-C", root, "add", "--all")
+	output, err := command.CombinedOutput()
+	if err != nil {
 		t.Fatalf("git add: %v: %s", err, output)
 	}
-	command = exec.Command("git", "-C", root, "commit", "-qm", "fixture")
-	if output, err := command.CombinedOutput(); err != nil {
+	command = exec.CommandContext(t.Context(), "git", "-C", root, "commit", "-qm", "fixture")
+	output, err = command.CombinedOutput()
+	if err != nil {
 		t.Fatalf("git commit: %v: %s", err, output)
 	}
 }
@@ -66,7 +73,7 @@ func TestInventory(t *testing.T) {
 		if snapshot.Files["large.go"] != 501 {
 			t.Fatalf("file lines = %d, want 501", snapshot.Files["large.go"])
 		}
-		findings := Judge(testConfig(), Allowlist{}, Allowlist{}, snapshot)
+		findings := Judge(testConfig(), emptyAllowlist(), emptyAllowlist(), snapshot)
 		if !hasFinding(findings, "large.go", MetricFiles, 501, 500, "split this file") {
 			t.Fatalf("missing one-over finding: %#v", findings)
 		}
@@ -155,7 +162,7 @@ func TestInventoryDirectoryWidth(t *testing.T) {
 		if snapshot.Dirs["wide"] != 11 {
 			t.Fatalf("directory files = %d, want 11", snapshot.Dirs["wide"])
 		}
-		findings := Judge(testConfig(), Allowlist{}, Allowlist{}, snapshot)
+		findings := Judge(testConfig(), emptyAllowlist(), emptyAllowlist(), snapshot)
 		if !hasFinding(findings, "wide", MetricDirs, 11, 10, "split the directory") {
 			t.Fatalf("missing 11-file directory finding: %#v", findings)
 		}
@@ -170,12 +177,12 @@ func TestInventoryDirectoryWidth(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if findings := Judge(testConfig(), Allowlist{}, Allowlist{}, snapshot); len(findings) != 0 {
+		if findings := Judge(testConfig(), emptyAllowlist(), emptyAllowlist(), snapshot); len(findings) != 0 {
 			t.Fatalf("10-file directory findings = %#v", findings)
 		}
 	})
 }
 
 func testConfig() Config {
-	return Config{FileLimit: 500, DirLimit: 10, Extensions: []string{".go", ".cue"}}
+	return Config{FileLimit: 500, DirLimit: 10, Extensions: []string{".go", ".cue"}, Exclude: []string{}}
 }

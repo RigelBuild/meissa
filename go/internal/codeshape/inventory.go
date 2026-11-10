@@ -6,11 +6,13 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
@@ -22,9 +24,25 @@ func Inventory(ctx context.Context, root string, cfg Config) (Snapshot, error) {
 	if err != nil {
 		return Snapshot{}, fmt.Errorf("git ls-files: %w", err)
 	}
+	repository, err := os.OpenRoot(root)
+	if err != nil {
+		return Snapshot{}, fmt.Errorf("open repository root: %w", err)
+	}
+	snapshot, inventoryErr := inventoryPaths(repository, output, cfg)
+	closeErr := repository.Close()
+	if closeErr != nil {
+		closeErr = fmt.Errorf("close repository root: %w", closeErr)
+	}
+	if inventoryErr != nil || closeErr != nil {
+		return Snapshot{}, errors.Join(inventoryErr, closeErr)
+	}
+	return snapshot, nil
+}
+
+func inventoryPaths(repository *os.Root, output []byte, cfg Config) (Snapshot, error) {
 	files := map[string]int{}
 	dirs := map[string]int{}
-	for _, rawPath := range bytes.Split(output, []byte{0}) {
+	for rawPath := range bytes.SplitSeq(output, []byte{0}) {
 		if len(rawPath) == 0 {
 			continue
 		}
@@ -37,18 +55,20 @@ func Inventory(ctx context.Context, root string, cfg Config) (Snapshot, error) {
 		if !countedPath(trackedPath, cfg) {
 			continue
 		}
-		fullPath := filepath.Join(root, filepath.FromSlash(trackedPath))
-		file, err := os.Open(fullPath)
+		file, err := repository.Open(filepath.FromSlash(trackedPath))
 		if err != nil {
 			return Snapshot{}, fmt.Errorf("open tracked file %q: %w", trackedPath, err)
 		}
 		lines, generated, countErr := physicalLines(file)
 		closeErr := file.Close()
 		if countErr != nil {
-			return Snapshot{}, fmt.Errorf("count lines in %q: %w", trackedPath, countErr)
+			countErr = fmt.Errorf("count lines in %q: %w", trackedPath, countErr)
 		}
 		if closeErr != nil {
-			return Snapshot{}, fmt.Errorf("close tracked file %q: %w", trackedPath, closeErr)
+			closeErr = fmt.Errorf("close tracked file %q: %w", trackedPath, closeErr)
+		}
+		if countErr != nil || closeErr != nil {
+			return Snapshot{}, errors.Join(countErr, closeErr)
 		}
 		if !generated {
 			files[trackedPath] = lines
@@ -62,20 +82,13 @@ func Inventory(ctx context.Context, root string, cfg Config) (Snapshot, error) {
 }
 
 func countedPath(path string, cfg Config) bool {
-	for _, segment := range strings.Split(path, "/") {
+	for segment := range strings.SplitSeq(path, "/") {
 		if segment == "testdata" || segment == "fixtures" {
 			return false
 		}
 	}
 	extension := filepath.Ext(path)
-	found := false
-	for _, allowed := range cfg.Extensions {
-		if extension == allowed {
-			found = true
-			break
-		}
-	}
-	if !found {
+	if !slices.Contains(cfg.Extensions, extension) {
 		return false
 	}
 	return !matchesAny(path, cfg.Exclude)
@@ -122,12 +135,19 @@ func physicalLines(reader io.Reader) (int, bool, error) {
 	generated := false
 	for scanner.Scan() {
 		count++
-		if count <= 5 && (strings.Contains(scanner.Text(), "Code generated") && strings.Contains(scanner.Text(), "DO NOT EDIT.") || strings.Contains(scanner.Text(), "@generated")) {
+		line := scanner.Text()
+		if count <= 5 && generatedLine(line) {
 			generated = true
 		}
 	}
-	if err := scanner.Err(); err != nil {
-		return 0, false, err
+	err := scanner.Err()
+	if err != nil {
+		return 0, false, fmt.Errorf("scan source lines: %w", err)
 	}
 	return count, generated, nil
+}
+
+func generatedLine(line string) bool {
+	return strings.Contains(line, "@generated") ||
+		strings.Contains(line, "Code generated") && strings.Contains(line, "DO NOT EDIT.")
 }

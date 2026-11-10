@@ -4,8 +4,10 @@ package codeshape
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -13,40 +15,55 @@ import (
 	"strings"
 )
 
+var errCannotRaiseAllowlist = errors.New("--write cannot add or raise allowlist entries")
+
 // Main runs the code-shape-gate CLI contract without exiting the process.
 func Main(ctx context.Context, args []string, env func(string) string, stdout, stderr io.Writer) int {
 	if len(args) == 1 && (args[0] == "--help" || args[0] == "-h") {
-		fmt.Fprintln(stdout, "usage: code-shape-gate [--write] [--seed] <root>")
+		if !writeOutput(stdout, "usage: code-shape-gate [--write] [--seed] <root>\n") {
+			return 2
+		}
 		return 0
 	}
 	writeMode, seed, root, ok := parseArgs(args)
 	if !ok {
-		fmt.Fprintln(stderr, "usage: code-shape-gate [--write] [--seed] <root>")
+		if !writeOutput(stderr, "usage: code-shape-gate [--write] [--seed] <root>\n") {
+			return 2
+		}
 		return 2
 	}
 	config, allow, err := Load(root)
 	if err != nil {
-		fmt.Fprintf(stderr, "code-shape-gate: %v\n", err)
+		if !writeOutput(stderr, "code-shape-gate: %v\n", err) {
+			return 2
+		}
 		return 2
 	}
 	var base Allowlist
 	if baseRef := env("GATE_BASE"); baseRef != "" {
 		base, err = loadBaseAllowlist(ctx, root, baseRef)
 		if err != nil {
-			fmt.Fprintf(stderr, "code-shape-gate: %v\n", err)
+			if !writeOutput(stderr, "code-shape-gate: %v\n", err) {
+				return 2
+			}
 			return 2
 		}
 	}
 	snapshot, err := Inventory(ctx, root, config)
 	if err != nil {
-		fmt.Fprintf(stderr, "code-shape-gate: %v\n", err)
+		if !writeOutput(stderr, "code-shape-gate: %v\n", err) {
+			return 2
+		}
 		return 2
 	}
 	findings := Judge(config, allow, base, snapshot)
 	if baseFindings := judgeBaseEntries(allow, base); len(baseFindings) > 0 {
 		sortFindings(baseFindings)
-		if err := writeFindings(stdout, baseFindings); err != nil {
-			fmt.Fprintf(stderr, "code-shape-gate: write output: %v\n", err)
+		err = writeFindings(stdout, baseFindings)
+		if err != nil {
+			if !writeOutput(stderr, "code-shape-gate: write output: %v\n", err) {
+				return 2
+			}
 			return 2
 		}
 		return 1
@@ -54,8 +71,11 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 	if writeMode {
 		return writeUpdated(root, config, allow, base, snapshot, seed, stdout, stderr)
 	}
-	if err := writeFindings(stdout, findings); err != nil {
-		fmt.Fprintf(stderr, "code-shape-gate: write output: %v\n", err)
+	err = writeFindings(stdout, findings)
+	if err != nil {
+		if !writeOutput(stderr, "code-shape-gate: write output: %v\n", err) {
+			return 2
+		}
 		return 2
 	}
 	if len(findings) > 0 {
@@ -64,15 +84,27 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 	return 0
 }
 
-func writeUpdated(root string, config Config, allow, base Allowlist, snapshot Snapshot, seed bool, stdout, stderr io.Writer) int {
+func writeUpdated(
+	root string,
+	config Config,
+	allow, base Allowlist,
+	snapshot Snapshot,
+	seed bool,
+	stdout, stderr io.Writer,
+) int {
 	updated, changed, err := rewriteAllowlist(config, allow, snapshot, seed)
 	if err != nil {
-		fmt.Fprintf(stderr, "code-shape-gate: %v\n", err)
+		if !writeOutput(stderr, "code-shape-gate: %v\n", err) {
+			return 2
+		}
 		return 2
 	}
 	findings := Judge(config, updated, base, snapshot)
-	if err := writeFindings(stdout, findings); err != nil {
-		fmt.Fprintf(stderr, "code-shape-gate: write output: %v\n", err)
+	err = writeFindings(stdout, findings)
+	if err != nil {
+		if !writeOutput(stderr, "code-shape-gate: write output: %v\n", err) {
+			return 2
+		}
 		return 2
 	}
 	if len(findings) > 0 {
@@ -80,15 +112,19 @@ func writeUpdated(root string, config Config, allow, base Allowlist, snapshot Sn
 	}
 	if changed {
 		path := filepath.Join(root, "tools", "code-shape-gate", "allowlist.cue")
-		if err := os.WriteFile(path, Render(updated), 0o644); err != nil {
-			fmt.Fprintf(stderr, "code-shape-gate: write allowlist: %v\n", err)
+		err = os.WriteFile(path, Render(updated), 0o644) //nolint:gosec // Repository config is intentionally world-readable.
+		if err != nil {
+			if !writeOutput(stderr, "code-shape-gate: write allowlist: %v\n", err) {
+				return 2
+			}
 			return 2
 		}
 	}
 	return 0
 }
 
-func parseArgs(args []string) (writeMode, seed bool, root string, ok bool) {
+func parseArgs(args []string) (bool, bool, string, bool) {
+	var writeMode, seed bool
 	for len(args) > 0 && strings.HasPrefix(args[0], "--") {
 		switch args[0] {
 		case "--write":
@@ -113,12 +149,19 @@ func parseArgs(args []string) (writeMode, seed bool, root string, ok bool) {
 }
 
 func loadBaseAllowlist(ctx context.Context, root, ref string) (Allowlist, error) {
-	command := exec.CommandContext(ctx, "git", "show", ref+":tools/code-shape-gate/allowlist.cue")
+	//nolint:gosec // The ref is one argument to a fixed git command, not shell code.
+	command := exec.CommandContext(
+		ctx,
+		"git",
+		"show",
+		"--end-of-options",
+		ref+":tools/code-shape-gate/allowlist.cue",
+	)
 	command.Dir = root
 	data, err := command.Output()
 	if err != nil {
 		if isMissingBasePath(err) {
-			return Allowlist{}, nil
+			return emptyAllowlist(), nil
 		}
 		return Allowlist{}, fmt.Errorf("read base allowlist at %q: %w", ref, err)
 	}
@@ -136,8 +179,8 @@ func loadBaseAllowlist(ctx context.Context, root, ref string) (Allowlist, error)
 }
 
 func isMissingBasePath(err error) bool {
-	exitError, ok := err.(*exec.ExitError)
-	return ok && strings.Contains(string(exitError.Stderr), "does not exist")
+	var exitError *exec.ExitError
+	return errors.As(err, &exitError) && strings.Contains(string(exitError.Stderr), "does not exist")
 }
 
 func rewriteAllowlist(cfg Config, allow Allowlist, snapshot Snapshot, seed bool) (Allowlist, bool, error) {
@@ -147,20 +190,28 @@ func rewriteAllowlist(cfg Config, allow Allowlist, snapshot Snapshot, seed bool)
 		Functions: allow.Functions,
 		Present:   true,
 	}
-	copyEntries(updated.Files, allow.Files)
-	copyEntries(updated.Dirs, allow.Dirs)
+	maps.Copy(updated.Files, allow.Files)
+	maps.Copy(updated.Dirs, allow.Dirs)
 	changedFiles, fileErrors := rewriteEntries(updated.Files, snapshot.Files, cfg.FileLimit, MetricFiles, seed)
 	changedDirs, dirErrors := rewriteEntries(updated.Dirs, snapshot.Dirs, cfg.DirLimit, MetricDirs, seed)
-	errs := append(fileErrors, dirErrors...)
+	errs := make([]string, 0, len(fileErrors)+len(dirErrors))
+	errs = append(errs, fileErrors...)
+	errs = append(errs, dirErrors...)
 	changed := changedFiles || changedDirs
 	sort.Strings(errs)
 	if len(errs) > 0 {
-		return allow, false, fmt.Errorf("--write cannot add or raise allowlist entries: %s", strings.Join(errs, "; "))
+		return allow, false, fmt.Errorf("%w: %s", errCannotRaiseAllowlist, strings.Join(errs, "; "))
 	}
 	return updated, changed, nil
 }
 
-func rewriteEntries(entries map[string]Entry, values map[string]int, limit int, metric Metric, seed bool) (bool, []string) {
+func rewriteEntries(
+	entries map[string]Entry,
+	values map[string]int,
+	limit int,
+	metric Metric,
+	seed bool,
+) (bool, []string) {
 	changed := false
 	for path, entry := range entries {
 		value, exists := values[path]
@@ -186,22 +237,36 @@ func rewriteEntries(entries map[string]Entry, values map[string]int, limit int, 
 			entries[path] = Entry{Value: value, Reason: "seeded at rollout, burn down"}
 			changed = true
 		} else {
-			errs = append(errs, fmt.Sprintf("%s %s value %d needs --seed to add or raise the allowlist", displayPath(metric, path), metric, value))
+			errMessage := fmt.Sprintf(
+				"%s %s value %d needs --seed to add or raise the allowlist",
+				displayPath(metric, path),
+				metric,
+				value,
+			)
+			errs = append(errs, errMessage)
 		}
 	}
 	return changed, errs
 }
 
-func copyEntries(dst, src map[string]Entry) {
-	for path, entry := range src {
-		dst[path] = entry
-	}
+func writeOutput(output io.Writer, format string, args ...any) bool {
+	_, err := fmt.Fprintf(output, format, args...)
+	return err == nil
 }
 
 func writeFindings(output io.Writer, findings []Finding) error {
 	for _, finding := range findings {
-		if _, err := fmt.Fprintf(output, "%s %s value=%d limit=%d fix=%s\n", finding.Path, finding.Metric, finding.Value, finding.Limit, finding.Fix); err != nil {
-			return err
+		_, err := fmt.Fprintf(
+			output,
+			"%s %s value=%d limit=%d fix=%s\n",
+			finding.Path,
+			finding.Metric,
+			finding.Value,
+			finding.Limit,
+			finding.Fix,
+		)
+		if err != nil {
+			return fmt.Errorf("write finding: %w", err)
 		}
 	}
 	return nil
