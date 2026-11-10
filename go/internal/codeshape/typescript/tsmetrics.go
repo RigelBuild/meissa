@@ -312,15 +312,7 @@ func assignTSFunctionIDs(functions []tsFunction, lang *gotreesitter.Language, so
 				break
 			}
 		}
-		classID := ""
-		for parent := functions[i].node.Parent(); parent != nil; parent = parent.Parent() {
-			if parent.Type(lang) == "class_declaration" || parent.Type(lang) == "class" {
-				if name := parent.ChildByFieldName("name", lang); name != nil {
-					classID = name.Text(source) + "/"
-				}
-				break
-			}
-		}
+		classID := tsClassPrefix(functions[i].node, lang, source, parentID)
 		base := parentID + classID + functions[i].id
 		counts[base]++
 		functions[i].id = base
@@ -328,6 +320,23 @@ func assignTSFunctionIDs(functions []tsFunction, lang *gotreesitter.Language, so
 			functions[i].id += fmt.Sprintf("#%d", counts[base])
 		}
 	}
+}
+
+func tsClassPrefix(node *gotreesitter.Node, lang *gotreesitter.Language, source []byte, parentID string) string {
+	for parent := node.Parent(); parent != nil; parent = parent.Parent() {
+		if parent.Type(lang) != "class_declaration" && parent.Type(lang) != "class" {
+			continue
+		}
+		name := parent.ChildByFieldName("name", lang)
+		if name != nil {
+			classID := name.Text(source) + "/"
+			if !strings.Contains("/"+parentID, "/"+classID) {
+				return classID
+			}
+		}
+		break
+	}
+	return ""
 }
 
 func collectTSFunctions(

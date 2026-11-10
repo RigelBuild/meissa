@@ -111,6 +111,17 @@ func TestTSStructuralIdentity(t *testing.T) {
 	}
 }
 
+func TestClassChildIdentity(t *testing.T) {
+	functions, tree, err := parseTSFunctions("x.ts", []byte(`class A { run() { xs.map(() => 1) } }`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tree.Release()
+	if len(functions) != 2 || functions[1].id != "A/run/anonymous" {
+		t.Fatalf("functions=%v", functions)
+	}
+}
+
 func TestTSManyOffenders(t *testing.T) {
 	var source strings.Builder
 	for i := range 25 {
