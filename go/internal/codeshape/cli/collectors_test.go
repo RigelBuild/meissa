@@ -25,6 +25,14 @@ func runGoGate(t *testing.T, root string) (int, string, string) {
 	code := Main(t.Context(), []string{root}, func(string) string { return "" }, &out, &errout)
 	return code, out.String(), errout.String()
 }
+func TestSkipOnlyModuleIsValid(t *testing.T) {
+	root := goTestRepo(t, "//go:build integration\n\npackage p\nfunc F() {}\n")
+	code, out, stderr := runGoGate(t, root)
+	if code != 0 || out != "" || !strings.Contains(stderr, "code-shape-gate: skip x.go: not in default Go build\n") {
+		t.Fatalf("code=%d out=%q stderr=%q", code, out, stderr)
+	}
+}
+
 func TestGoLimitsCLI(t *testing.T) {
 	var source strings.Builder
 	source.WriteString("package p\nfunc Cognitive(x int) {\n")
