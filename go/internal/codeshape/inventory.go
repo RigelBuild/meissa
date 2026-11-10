@@ -77,7 +77,7 @@ func inventoryPaths(repository *os.Root, output []byte, cfg Config) (Snapshot, e
 			files[trackedPath] = lines
 		}
 	}
-	return Snapshot{Files: files, Dirs: dirs}, nil
+	return Snapshot{Files: files, Dirs: dirs, Functions: nil}, nil
 }
 
 func countedPath(path string, cfg Config) bool {

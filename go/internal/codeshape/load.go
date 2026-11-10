@@ -22,28 +22,21 @@ var (
 	errInvalidExtension  = errors.New("invalid source extension")
 	errImportsForbidden  = errors.New("imports are not permitted")
 	errDuplicateRoot     = errors.New("duplicate root directory entries")
+	errUnsupportedMetric = errors.New("unsupported function metric")
+	errFunctionLimits    = errors.New("function limits must be positive")
 )
 
 //go:embed schema.cue
 var schemaFiles embed.FS
 
-// Metric identifies one measured code-shape dimension.
-type Metric string
-
-const (
-	// MetricFiles identifies file-size measurements.
-	MetricFiles Metric = "files"
-	// MetricDirs identifies directory-width measurements.
-	MetricDirs Metric = "dirs"
-)
-
-// Config contains the repository's file and directory thresholds.
+// Config contains the repository's file, directory, and function thresholds.
 type Config struct {
 	FileLimit  int                 `json:"fileLimit"`
 	DirLimit   int                 `json:"dirLimit"`
 	Extensions []string            `json:"extensions"`
 	Exclude    []string            `json:"exclude"`
 	DirLimits  map[string]DirLimit `json:"dirLimits"`
+	Functions  FunctionLimits      `json:"functions"`
 }
 
 // DirLimit records a directory width exception and its reason.
@@ -54,30 +47,34 @@ type DirLimit struct {
 
 // Entry records a measured value and its burn-down reason.
 type Entry struct {
+	ID     string `json:"id,omitempty"`
 	Value  int    `json:"value"`
 	Reason string `json:"reason"`
 }
 
-// Allowlist contains file and directory ratchet entries.
+// Allowlist contains file, directory, and function ratchet entries.
 // Present distinguishes a loaded base allowlist from head-only mode.
 type Allowlist struct {
-	Files   map[string]Entry `json:"files,omitempty"`
-	Dirs    map[string]Entry `json:"dirs,omitempty"`
-	Present bool             `json:"-"`
+	Files     map[string]Entry              `json:"files,omitempty"`
+	Dirs      map[string]Entry              `json:"dirs,omitempty"`
+	Functions map[Metric]map[string][]Entry `json:"functions,omitempty"`
+	Present   bool                          `json:"-"`
 }
 
 func emptyAllowlist() Allowlist {
 	return Allowlist{
-		Files:   map[string]Entry{},
-		Dirs:    map[string]Entry{},
-		Present: false,
+		Files:     map[string]Entry{},
+		Dirs:      map[string]Entry{},
+		Functions: map[Metric]map[string][]Entry{},
+		Present:   false,
 	}
 }
 
 // Snapshot contains current measurements.
 type Snapshot struct {
-	Files map[string]int
-	Dirs  map[string]int
+	Files     map[string]int
+	Dirs      map[string]int
+	Functions map[Metric]map[string][]Entry
 }
 
 // Finding describes one enforced size or ratchet violation.
@@ -207,6 +204,18 @@ func decodeAllowlist(schema, value cue.Value, name string) (Allowlist, error) {
 	if allowlist.Dirs == nil {
 		allowlist.Dirs = map[string]Entry{}
 	}
+	if allowlist.Functions == nil {
+		allowlist.Functions = map[Metric]map[string][]Entry{}
+	}
+	for metric, paths := range allowlist.Functions {
+		if !isFunctionMetric(metric) {
+			return Allowlist{}, fmt.Errorf("%s: %w %q", name, errUnsupportedMetric, metric)
+		}
+		err := validateFunctionEntryIDs(paths)
+		if err != nil {
+			return Allowlist{}, fmt.Errorf("%s: %w", name, err)
+		}
+	}
 	if entry, exists := allowlist.Dirs["."]; exists {
 		if _, duplicate := allowlist.Dirs[""]; duplicate {
 			return Allowlist{}, fmt.Errorf("%s: %w", name, errDuplicateRoot)
@@ -220,6 +229,10 @@ func decodeAllowlist(schema, value cue.Value, name string) (Allowlist, error) {
 func validateConfig(config Config) error {
 	if config.FileLimit != 500 || config.DirLimit != 10 {
 		return errInvalidThresholds
+	}
+	if config.Functions.Go.Cognitive <= 0 || config.Functions.Go.Lines <= 0 || config.Functions.Go.Statements <= 0 ||
+		config.Functions.TS.Cognitive <= 0 || config.Functions.TS.Lines <= 0 {
+		return errFunctionLimits
 	}
 	for _, extension := range config.Extensions {
 		if !strings.HasPrefix(extension, ".") || strings.ContainsAny(extension, "/\\") {

@@ -247,5 +247,7 @@ func testConfig() Config {
 	return Config{
 		FileLimit: 500, DirLimit: 10, Extensions: []string{".go", ".cue"},
 		Exclude: []string{}, DirLimits: map[string]DirLimit{},
+		Functions: FunctionLimits{Go: GoFunctionLimits{Cognitive: 0, Lines: 0, Statements: 0},
+			TS: TSFunctionLimits{Cognitive: 0, Lines: 0}},
 	}
 }

@@ -44,6 +44,26 @@ func TestLoad(t *testing.T) {
 	})
 }
 
+func TestLoadFunctionEntries(t *testing.T) {
+	for _, tc := range []struct {
+		name, reason string
+		valid        bool
+	}{{"valid", "split by concern", true}, {"short", "two words", false}} {
+		t.Run(tc.name, func(t *testing.T) {
+			root := newFixtureRepo(t)
+			allow := `functions: "go-lines": "f.go": [{id: "work", value: 70, reason: "` + tc.reason + `"}]`
+			writeConfigFiles(t, root, validConfig, allow)
+			cfg, entries, err := Load(root)
+			if (err == nil) != tc.valid {
+				t.Fatalf("Load error = %v", err)
+			}
+			if tc.valid && (cfg.Functions.Go.Lines != 60 || entries.Functions[MetricGoLines]["f.go"][0].ID != "work") {
+				t.Fatalf("decoded config=%#v entries=%#v", cfg, entries)
+			}
+		})
+	}
+}
+
 func TestLoadDirectoryLimits(t *testing.T) {
 	for _, config := range []string{
 		`dirLimits: "wide": {limit: 10, reason: "record decisions together"}`,
@@ -203,7 +223,8 @@ func TestMainWriteUpdates(t *testing.T) {
 	})
 }
 
-const validConfig = "fileLimit: 500\ndirLimit: 10\nextensions: [\".go\", \".cue\"]\nexclude: []\n"
+const validConfig = "fileLimit: 500\ndirLimit: 10\nextensions: [\".go\", \".cue\"]\nexclude: []\n" +
+	"functions: {go: {cognitive: 20, lines: 60, statements: 40}, ts: {cognitive: 15, lines: 50}}\n"
 
 func writeConfigFiles(t *testing.T, root, config, allowlist string) {
 	t.Helper()

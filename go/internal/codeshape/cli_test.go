@@ -96,8 +96,8 @@ func TestWriteUpdatedRejectsEscapingAllowlist(t *testing.T) {
 		t.Fatal(err)
 	}
 	allow := emptyAllowlist()
-	allow.Files["gone.go"] = Entry{Value: 501, Reason: "split by concern"}
-	snapshot := Snapshot{Files: map[string]int{}, Dirs: map[string]int{}}
+	allow.Files["gone.go"] = Entry{ID: "", Value: 501, Reason: "split by concern"}
+	snapshot := Snapshot{Files: map[string]int{}, Dirs: map[string]int{}, Functions: nil}
 	var stdout, stderr strings.Builder
 	code := writeUpdated(root, testConfig(), allow, emptyAllowlist(), snapshot, false, &stdout, &stderr)
 	data, err := os.ReadFile(outside)
@@ -143,7 +143,7 @@ func TestMainPrintsBaseAndMeasuredFindings(t *testing.T) {
 }
 
 func TestSeedPreservesReason(t *testing.T) {
-	entries := map[string]Entry{"large.go": {Value: 501, Reason: "keep curated reason"}}
+	entries := map[string]Entry{"large.go": {ID: "", Value: 501, Reason: "keep curated reason"}}
 	_, errs := rewriteEntries(entries, map[string]int{"large.go": 502}, testConfig(), MetricFiles, true)
 	if len(errs) != 0 || entries["large.go"].Reason != "keep curated reason" || entries["large.go"].Value != 502 {
 		t.Fatalf("entries=%#v errors=%v", entries, errs)

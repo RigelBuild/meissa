@@ -49,6 +49,39 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
 	}
+	functions, err := GoMetrics(ctx, root, config)
+	if err != nil {
+		writeOutput(stderr, "code-shape-gate: %v\n", err)
+		return 2
+	}
+	tsFunctions, err := TSMetrics(ctx, root, config)
+	if err != nil {
+		writeOutput(stderr, "code-shape-gate: %v\n", err)
+		return 2
+	}
+	functions[MetricTSCognitive] = tsFunctions[MetricTSCognitive]
+	functions[MetricTSLines] = tsFunctions[MetricTSLines]
+	snapshot.Functions = functions
+	suppressions, err := goSuppressionFindings(ctx, root, config)
+	if err != nil {
+		writeOutput(stderr, "code-shape-gate: %v\n", err)
+		return 2
+	}
+	tsFindings, err := tsPolicyFindings(ctx, root, config)
+	if err != nil {
+		writeOutput(stderr, "code-shape-gate: %v\n", err)
+		return 2
+	}
+	suppressions = append(suppressions, tsFindings...)
+	sortFindings(suppressions)
+	if len(suppressions) > 0 {
+		err := writeFindings(stdout, suppressions)
+		if err != nil {
+			writeOutput(stderr, "code-shape-gate: write output: %v\n", err)
+			return 2
+		}
+		return 1
+	}
 	if writeMode {
 		return writeUpdated(root, config, allow, base, snapshot, seed, stdout, stderr)
 	}
@@ -170,18 +203,23 @@ func gitBaseError(ref string, err error) error {
 
 func rewriteAllowlist(cfg Config, allow Allowlist, snapshot Snapshot, seed bool) (Allowlist, bool, error) {
 	updated := Allowlist{
-		Files:   make(map[string]Entry, len(allow.Files)),
-		Dirs:    make(map[string]Entry, len(allow.Dirs)),
-		Present: true,
+		Files:     make(map[string]Entry, len(allow.Files)),
+		Dirs:      make(map[string]Entry, len(allow.Dirs)),
+		Functions: make(FunctionMeasurements),
+		Present:   true,
 	}
 	maps.Copy(updated.Files, allow.Files)
 	maps.Copy(updated.Dirs, allow.Dirs)
 	changedFiles, fileErrors := rewriteEntries(updated.Files, snapshot.Files, cfg, MetricFiles, seed)
 	changedDirs, dirErrors := rewriteEntries(updated.Dirs, snapshot.Dirs, cfg, MetricDirs, seed)
+	changedFunctions, functionErrors := rewriteFunctionEntries(
+		updated.Functions, allow.Functions, snapshot.Functions, cfg, seed,
+	)
 	errs := make([]string, 0, len(fileErrors)+len(dirErrors))
 	errs = append(errs, fileErrors...)
 	errs = append(errs, dirErrors...)
-	changed := changedFiles || changedDirs
+	errs = append(errs, functionErrors...)
+	changed := changedFiles || changedDirs || changedFunctions
 	sort.Strings(errs)
 	if len(errs) > 0 {
 		return allow, false, fmt.Errorf("%w: %s", errCannotRaiseAllowlist, strings.Join(errs, "; "))
