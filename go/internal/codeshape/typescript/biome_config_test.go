@@ -16,7 +16,8 @@ import (
 func TestGateBiomeConfig(t *testing.T) {
 	limits := codeshape.FunctionLimits{Go: codeshape.GoFunctionLimits{Cognitive: 20, Lines: 60, Statements: 40},
 		TS: codeshape.TSFunctionLimits{Cognitive: 15, Lines: 50}}
-	name, err := writeGateBiomeConfig(t.TempDir(), limits, json.RawMessage(`{"unsafeParameterDecoratorsEnabled":true}`))
+	name, err := writeGateBiomeConfig(t.TempDir(), limits,
+		json.RawMessage(`{"unsafeParameterDecoratorsEnabled":true}`), 1048576)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -57,5 +58,17 @@ func TestGateBiomeIgnoresRepositoryLimit(t *testing.T) {
 	entries := values[codeshape.MetricTSLines]["x.ts"]
 	if len(entries) != 1 || entries[0].Value <= 50 {
 		t.Fatalf("entries=%v", entries)
+	}
+}
+
+func TestGateBiomeMeasuresLargeFile(t *testing.T) {
+	root := tsRepo(t, "function large() {\n"+strings.Repeat(" ", 1100000)+"\n}\n")
+	cfg, _, err := shapeconfig.Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	values, _, err := TSMetrics(t.Context(), root, cfg)
+	if err != nil || len(values[codeshape.MetricTSLines]["x.ts"]) != 1 {
+		t.Fatalf("values=%v err=%v", values, err)
 	}
 }

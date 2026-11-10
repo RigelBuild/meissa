@@ -18,10 +18,12 @@ import (
 	"github.com/RigelBuild/meissa/go/internal/codeshape"
 )
 
-func writeGateBiomeConfig(dir string, limits codeshape.FunctionLimits, parser json.RawMessage) (string, error) {
+func writeGateBiomeConfig(dir string, limits codeshape.FunctionLimits, parser json.RawMessage, maxSize int) (
+	string, error,
+) {
 	config := map[string]any{
 		"vcs":   map[string]any{"enabled": false},
-		"files": map[string]any{"includes": []string{"**"}},
+		"files": map[string]any{"includes": []string{"**"}, "maxSize": maxSize},
 		"linter": map[string]any{"rules": map[string]any{"recommended": false, "complexity": map[string]any{
 			"noExcessiveLinesPerFunction": map[string]any{
 				"level": "warn", "options": map[string]int{"maxLines": limits.TS.Lines}},

@@ -57,6 +57,8 @@ The gate runs Biome with its own generated configuration and the gate's limits. 
 
 Skips are printed on stderr. A Go file outside the default build that contains functions, or a file Biome cannot parse, is an unmeasured finding. If the TypeScript function collector cannot parse a file and Biome reports an over-limit function, the gate reports a file-level finding. Existing function allowlist entries for unmeasured files are preserved on `--write`. Skips that leave no functions unmeasured are notices only. Use the gate's `exclude` to opt out.
 
+Biome does not process files under `node_modules`. Exclude tracked paths in those directories from the gate.
+
 Findings use the format `<path> <metric> value=<value> limit=<limit> fix=<cause>`. An `unmeasured` finding uses value and limit 0; its fix describes the cause.
 
 ```cue

@@ -43,6 +43,7 @@ var (
 	errBiomePosition        = errors.New("invalid biome source position")
 	errBiomeOutsideSource   = errors.New("biome position outside source")
 	errBiomeOutsideFunction = errors.New("biome position outside any function")
+	errBiomeUnprocessed     = errors.New("biome did not process all requested paths; add unprocessed paths to exclude")
 )
 
 type biomeReport struct {
@@ -138,7 +139,11 @@ func prepareBiome(ctx context.Context, root string, cfg codeshape.Config, source
 	if err != nil {
 		return biomeReport{}, fmt.Errorf("create Biome config directory: %w", err)
 	}
-	report, runErr := runGateBiome(ctx, binary, root, dir, paths, cfg.Functions)
+	maxSize := 1024 * 1024
+	for _, source := range sources {
+		maxSize = max(maxSize, len(source)+1024)
+	}
+	report, runErr := runGateBiome(ctx, binary, root, dir, paths, cfg.Functions, maxSize)
 	removeErr := os.RemoveAll(dir)
 	err = errors.Join(runErr, removeErr)
 	if err != nil {
@@ -147,14 +152,16 @@ func prepareBiome(ctx context.Context, root string, cfg codeshape.Config, source
 	return report, nil
 }
 
-func runGateBiome(ctx context.Context, binary, root, dir string, paths []string, limits codeshape.FunctionLimits) (
+func runGateBiome(ctx context.Context, binary, root, dir string, paths []string,
+	limits codeshape.FunctionLimits, maxSize int,
+) (
 	biomeReport, error,
 ) {
 	parser, err := rootBiomeParser(root)
 	if err != nil {
 		return biomeReport{}, err
 	}
-	_, err = writeGateBiomeConfig(dir, limits, parser)
+	_, err = writeGateBiomeConfig(dir, limits, parser, maxSize)
 	if err != nil {
 		return biomeReport{}, err
 	}
@@ -167,7 +174,7 @@ func runGateBiome(ctx context.Context, binary, root, dir string, paths []string,
 			errBiomeTruncated, report.Summary.DiagnosticsNotPrinted)
 	}
 	if report.Summary.Changed+report.Summary.Unchanged != len(paths) {
-		return biomeReport{}, fmt.Errorf("processed count differs from requested paths: %w", errBiomeMissingOutput)
+		return biomeReport{}, fmt.Errorf("requested paths %v: %w", paths, errBiomeUnprocessed)
 	}
 	return report, nil
 }
