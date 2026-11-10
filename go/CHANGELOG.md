@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.0](https://github.com/RigelBuild/meissa/compare/go/v0.1.0...go/v0.2.0) (2026-11-10)
+
+
+### Features
+
+* **go:** add code-shape-gate with file, directory and ratchet checks (RIG-8435) ([#58](https://github.com/RigelBuild/meissa/issues/58)) ([a96be0d](https://github.com/RigelBuild/meissa/commit/a96be0de9a0ff9ef9c4cf436f9eb25caa439a6a7))
+* **renovate:** port the Go analysis hash refresh to Go (RIG-8122) ([#59](https://github.com/RigelBuild/meissa/issues/59)) ([ab7ebe8](https://github.com/RigelBuild/meissa/commit/ab7ebe85f49ea92effba92938a97dfe628847176))
+
+
+### Bug Fixes
+
+* **nix:** expect toolchain-built tools in go-analysis check (RIG-8435) ([#64](https://github.com/RigelBuild/meissa/issues/64)) ([e8fead0](https://github.com/RigelBuild/meissa/commit/e8fead0a14449cda407c3f296b90cf0632c6bf5c))
+* **renovate:** report interrupts from every refresh step (RIG-8122) ([#63](https://github.com/RigelBuild/meissa/issues/63)) ([ca8aa97](https://github.com/RigelBuild/meissa/commit/ca8aa97b116dd2ded02120dc72e9c739379872fa))
+
 ## 0.1.0 (2026-11-09)
 
 
