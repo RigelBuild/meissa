@@ -62,10 +62,11 @@ func trackedBiomeDrift(root string, paths []string, cfg codeshape.Config) ([]cod
 func biomeOverrideDrift(path string, config map[string]any, cfg codeshape.Config) []codeshape.Finding {
 	findings := []codeshape.Finding{}
 	overrides, _ := config["overrides"].([]any)
-	for _, raw := range overrides {
+	for index, raw := range overrides {
 		override, ok := raw.(map[string]any)
 		if ok {
-			findings = append(findings, biomeDriftFindings(path, override, cfg, false)...)
+			overridePath := fmt.Sprintf("%s#overrides[%d]", path, index)
+			findings = append(findings, biomeDriftFindings(overridePath, override, cfg, false)...)
 		}
 	}
 	return findings

@@ -67,4 +67,11 @@ func TestTrackedBiomeDrift(t *testing.T) {
 	if err != nil || len(findings) != 2 {
 		t.Fatalf("findings=%#v err=%v", findings, err)
 	}
+	paths := map[string]bool{}
+	for _, finding := range findings {
+		paths[finding.Path] = true
+	}
+	if !paths["biome.json#overrides[0]"] || !paths["nested/biome.jsonc"] {
+		t.Fatalf("wrong drift paths: %#v", findings)
+	}
 }
