@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package codeshape
+package typescript
 
 import (
 	"fmt"
@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/RigelBuild/meissa/go/internal/codeshape"
 )
 
 const tsBiomeConfig = `{"linter":{"rules":{"complexity":{"noExcessiveCognitiveComplexity":` +
@@ -52,12 +54,12 @@ func TestTSIgnoredFileIsSkipped(t *testing.T) {
 	}
 	trackedFile(t, root, "ignored.ts", "function ignored() {}\n")
 	commitFiles(t, root)
-	cfg, _, err := Load(root)
+	cfg, _, err := codeshape.Load(root)
 	if err != nil {
 		t.Fatal(err)
 	}
 	values, skips, err := TSMetrics(t.Context(), root, cfg)
-	if err != nil || len(skips) != 1 || skips[0].Path != "ignored.ts" || len(values[MetricTSLines]["ignored.ts"]) != 0 {
+	if err != nil || len(skips) != 1 || skips[0].Path != "ignored.ts" || len(values[codeshape.MetricTSLines]["ignored.ts"]) != 0 {
 		t.Fatalf("values=%v skips=%v err=%v", values, skips, err)
 	}
 }
@@ -103,7 +105,7 @@ func TestTSManyOffenders(t *testing.T) {
 		fmt.Fprintf(&source, "function f%d() {\n%s}\n", i, strings.Repeat("console.log(1);\n", 51))
 	}
 	root := tsRepo(t, source.String())
-	cfg, _, err := Load(root)
+	cfg, _, err := codeshape.Load(root)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +114,7 @@ func TestTSManyOffenders(t *testing.T) {
 		t.Fatal(err)
 	}
 	count := 0
-	for _, e := range values[MetricTSLines]["x.ts"] {
+	for _, e := range values[codeshape.MetricTSLines]["x.ts"] {
 		if e.Value > 50 {
 			count++
 		}

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package codeshape
+package typescript
 
 import (
 	"context"
@@ -9,17 +9,19 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/RigelBuild/meissa/go/internal/codeshape"
 )
 
-func tsPolicyFindings(ctx context.Context, root string, cfg Config) ([]Finding, error) {
-	paths, err := trackedPaths(ctx, root)
+func PolicyFindings(ctx context.Context, root string, cfg codeshape.Config) ([]codeshape.Finding, error) {
+	paths, err := codeshape.TrackedPaths(ctx, root)
 	if err != nil {
 		return nil, err
 	}
-	findings := []Finding{}
+	findings := []codeshape.Finding{}
 	hasTS := false
 	for _, path := range paths {
-		if !isTypeScriptPath(path) || !countedPath(path, cfg) {
+		if !isTypeScriptPath(path) || !codeshape.CountedPath(path, cfg) {
 			continue
 		}
 		hasTS = true
@@ -35,7 +37,7 @@ func tsPolicyFindings(ctx context.Context, root string, cfg Config) ([]Finding, 
 			directive, _, _ := strings.Cut(line[pos:], ":")
 			for name, metric := range biomeRuleMetrics() {
 				if strings.Contains(directive, strings.TrimPrefix(name, "lint/")) {
-					findings = append(findings, Finding{
+					findings = append(findings, codeshape.Finding{
 						Path: path + ":" + strconv.Itoa(i+1), Metric: metric, Value: i + 1, Limit: 0,
 						Fix: "remove biome-ignore suppression",
 					})
@@ -56,17 +58,17 @@ func tsPolicyFindings(ctx context.Context, root string, cfg Config) ([]Finding, 
 	rules := nestedMap(config, "linter", "rules", "complexity")
 	for _, check := range []struct {
 		name, option string
-		metric       Metric
+		metric       codeshape.Metric
 	}{
-		{"noExcessiveCognitiveComplexity", "maxAllowedComplexity", MetricTSCognitive},
-		{"noExcessiveLinesPerFunction", "maxLines", MetricTSLines},
+		{"noExcessiveCognitiveComplexity", "maxAllowedComplexity", codeshape.MetricTSCognitive},
+		{"noExcessiveLinesPerFunction", "maxLines", codeshape.MetricTSLines},
 	} {
 		rule, _ := rules[check.name].(map[string]any)
 		options, _ := rule["options"].(map[string]any)
-		if value, ok := options[check.option]; ok && numericValue(value) != cfg.Functions.limitFor(check.metric) {
-			findings = append(findings, Finding{
+		if value, ok := options[check.option]; ok && numericValue(value) != cfg.Functions.LimitFor(check.metric) {
+			findings = append(findings, codeshape.Finding{
 				Path: "biome.json", Metric: check.metric, Value: numericValue(value),
-				Limit: cfg.Functions.limitFor(check.metric), Fix: "match biome rule option to gate config",
+				Limit: cfg.Functions.LimitFor(check.metric), Fix: "match biome rule option to gate config",
 			})
 		}
 	}

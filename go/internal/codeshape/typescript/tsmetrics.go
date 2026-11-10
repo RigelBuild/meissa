@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package codeshape
+package typescript
 
 import (
 	"bytes"
@@ -17,6 +17,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/RigelBuild/meissa/go/internal/codeshape"
 	"github.com/odvcencio/gotreesitter"
 	"github.com/odvcencio/gotreesitter/grammars/tsx"
 	"github.com/odvcencio/gotreesitter/grammars/typescript"
@@ -25,10 +26,10 @@ import (
 
 const maxBiomeDiagnostics = 1_000_000
 
-func biomeRuleMetrics() map[string]Metric {
-	return map[string]Metric{
-		"lint/complexity/noExcessiveCognitiveComplexity": MetricTSCognitive,
-		"lint/complexity/noExcessiveLinesPerFunction":    MetricTSLines,
+func biomeRuleMetrics() map[string]codeshape.Metric {
+	return map[string]codeshape.Metric{
+		"lint/complexity/noExcessiveCognitiveComplexity": codeshape.MetricTSCognitive,
+		"lint/complexity/noExcessiveLinesPerFunction":    codeshape.MetricTSLines,
 	}
 }
 
@@ -71,14 +72,14 @@ type tsFunction struct {
 }
 
 // TSMetrics measures Biome's function complexity and line count rules.
-func TSMetrics(ctx context.Context, root string, cfg Config) (map[Metric]map[string][]Entry, []Skip, error) {
-	paths, err := trackedPaths(ctx, root)
+func TSMetrics(ctx context.Context, root string, cfg codeshape.Config) (map[codeshape.Metric]map[string][]codeshape.Entry, []codeshape.Skip, error) {
+	paths, err := codeshape.TrackedPaths(ctx, root)
 	if err != nil {
 		return nil, nil, err
 	}
 	sources := make(map[string][]byte)
 	for _, path := range paths {
-		if !isTypeScriptPath(path) || !countedPath(path, cfg) {
+		if !isTypeScriptPath(path) || !codeshape.CountedPath(path, cfg) {
 			continue
 		}
 		//nolint:gosec // G304: path from the repo's tracked file list
@@ -89,7 +90,7 @@ func TSMetrics(ctx context.Context, root string, cfg Config) (map[Metric]map[str
 		sources[path] = source
 	}
 	if len(sources) == 0 {
-		return newFunctionMeasurements(), nil, nil
+		return codeshape.NewFunctionMeasurements(), nil, nil
 	}
 	binary, err := exec.LookPath("biome")
 	if err != nil {
@@ -107,7 +108,7 @@ func TSMetrics(ctx context.Context, root string, cfg Config) (map[Metric]map[str
 	if report.Summary.DiagnosticsNotPrinted != 0 {
 		return nil, nil, fmt.Errorf("%w: %d were not printed", errBiomeTruncated, report.Summary.DiagnosticsNotPrinted)
 	}
-	skips := []Skip{}
+	skips := []codeshape.Skip{}
 	if report.Summary.Changed+report.Summary.Unchanged != len(sourcePaths) {
 		for _, path := range sourcePaths {
 			single, singleErr := runBiome(ctx, binary, root, []string{path})
@@ -116,24 +117,24 @@ func TSMetrics(ctx context.Context, root string, cfg Config) (map[Metric]map[str
 			}
 			if single.Summary.Changed+single.Summary.Unchanged == 0 {
 				delete(sources, path)
-				skips = append(skips, Skip{Path: path, Reason: "ignored by Biome"})
+				skips = append(skips, codeshape.Skip{Path: path, Reason: "ignored by Biome"})
 			}
 		}
 	}
-	values := newFunctionMeasurements()
+	values := codeshape.NewFunctionMeasurements()
 	files := make(map[string][]tsFunction, len(sources))
 	for path, source := range sources {
 		functions, tree, err := parseTSFunctions(path, source)
 		if err != nil {
-			skips = append(skips, Skip{Path: path, Reason: err.Error()})
+			skips = append(skips, codeshape.Skip{Path: path, Reason: err.Error()})
 			delete(sources, path)
 			continue
 		}
 		defer tree.Release()
 		files[path] = functions
 		for _, function := range functions {
-			appendFunctionValue(values, MetricTSCognitive, path, function.id, 0)
-			appendFunctionValue(values, MetricTSLines, path, function.id, 0)
+			codeshape.AppendFunctionValue(values, codeshape.MetricTSCognitive, path, function.id, 0)
+			codeshape.AppendFunctionValue(values, codeshape.MetricTSLines, path, function.id, 0)
 		}
 	}
 	metrics := biomeRuleMetrics()
@@ -144,7 +145,7 @@ func TSMetrics(ctx context.Context, root string, cfg Config) (map[Metric]map[str
 		}
 		path := filepath.ToSlash(diagnostic.Location.Path)
 		functions, exists := files[path]
-		if _, included := sources[path]; !included && slices.ContainsFunc(skips, func(skip Skip) bool { return skip.Path == path }) {
+		if _, included := sources[path]; !included && slices.ContainsFunc(skips, func(skip codeshape.Skip) bool { return skip.Path == path }) {
 			continue
 		}
 		if !exists {
@@ -160,7 +161,7 @@ func TSMetrics(ctx context.Context, root string, cfg Config) (map[Metric]map[str
 		if err != nil {
 			return nil, nil, err
 		}
-		appendFunctionValue(values, metric, path, function.id, value)
+		codeshape.AppendFunctionValue(values, metric, path, function.id, value)
 	}
 	return values, skips, nil
 }
@@ -239,11 +240,11 @@ func numericValue(value any) int {
 	}
 }
 
-func biomeValue(message string, metric Metric) (int, error) {
+func biomeValue(message string, metric codeshape.Metric) (int, error) {
 	fields := strings.Fields(message)
 	for index, field := range fields {
-		if index+1 < len(fields) && (metric == MetricTSCognitive && field == "of" ||
-			metric == MetricTSLines && field == "lines") {
+		if index+1 < len(fields) && (metric == codeshape.MetricTSCognitive && field == "of" ||
+			metric == codeshape.MetricTSLines && field == "lines") {
 			value, err := strconv.Atoi(strings.Trim(fields[index+1], ".()"))
 			if err != nil {
 				return 0, fmt.Errorf("parse biome value: %w", err)

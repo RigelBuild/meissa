@@ -3,14 +3,8 @@
 package codeshape
 
 import (
-	"context"
-
 	"cuelang.org/go/cue/cuecontext"
 )
-
-func TSPolicyFindings(ctx context.Context, root string, cfg Config) ([]Finding, error) {
-	return tsPolicyFindings(ctx, root, cfg)
-}
 
 func EmptyAllowlist() Allowlist { return emptyAllowlist() }
 

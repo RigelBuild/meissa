@@ -16,6 +16,7 @@ import (
 
 	"github.com/RigelBuild/meissa/go/internal/codeshape"
 	"github.com/RigelBuild/meissa/go/internal/codeshape/golang"
+	"github.com/RigelBuild/meissa/go/internal/codeshape/typescript"
 )
 
 var errCannotRaiseAllowlist = errors.New("--write cannot add or raise allowlist entries")
@@ -66,7 +67,7 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 			return 2
 		}
 	}
-	tsFunctions, tsSkips, err := codeshape.TSMetrics(ctx, root, config)
+	tsFunctions, tsSkips, err := typescript.TSMetrics(ctx, root, config)
 	if err != nil {
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
@@ -84,7 +85,7 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
 	}
-	tsFindings, err := codeshape.TSPolicyFindings(ctx, root, config)
+	tsFindings, err := typescript.PolicyFindings(ctx, root, config)
 	if err != nil {
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
