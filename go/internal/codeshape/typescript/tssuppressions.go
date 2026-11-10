@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -45,14 +46,14 @@ func trackedBiomeDrift(root string, paths []string, cfg codeshape.Config) ([]cod
 	findings := []codeshape.Finding{}
 	for _, path := range paths {
 		base := filepath.Base(path)
-		if base != "biome.json" && base != "biome.jsonc" {
+		if !slices.Contains(biomeConfigNames(), base) {
 			continue
 		}
 		config, err := readBiomeConfig(root, path)
 		if err != nil {
 			return nil, err
 		}
-		require := path == "biome.json" || path == "biome.jsonc"
+		require := path == base
 		findings = append(findings, biomeDriftFindings(path, config, cfg, require)...)
 		findings = append(findings, biomeOverrideDrift(path, config, cfg)...)
 	}

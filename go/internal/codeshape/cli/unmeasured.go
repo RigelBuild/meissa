@@ -18,7 +18,7 @@ func handleTSSkips(output io.Writer, skips []codeshape.Skip, cfg codeshape.Confi
 	for _, skip := range skips {
 		if skip.Unmeasured != nil {
 			paths = append(paths, skip.Path)
-			if skip.Unmeasured.Ignored {
+			if skip.Unmeasured.BiomeParseFailed {
 				findings = append(findings, codeshape.Finding{Path: skip.Path, Metric: codeshape.MetricUnmeasured,
 					Value: 0, Limit: 0, Fix: skip.Reason + "; exclude it or fix the parse"})
 			}

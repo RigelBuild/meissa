@@ -18,6 +18,10 @@ import (
 	"github.com/RigelBuild/meissa/go/internal/codeshape"
 )
 
+func biomeConfigNames() []string {
+	return []string{"biome.json", "biome.jsonc", ".biome.json", ".biome.jsonc"}
+}
+
 func writeGateBiomeConfig(dir string, limits codeshape.FunctionLimits, parser json.RawMessage, maxSize int) (
 	string, error,
 ) {
@@ -47,7 +51,7 @@ func writeGateBiomeConfig(dir string, limits codeshape.FunctionLimits, parser js
 }
 
 func rootBiomeParser(root string) (json.RawMessage, error) {
-	for _, name := range []string{"biome.json", "biome.jsonc", ".biome.json", ".biome.jsonc"} {
+	for _, name := range biomeConfigNames() {
 		config, err := readBiomeConfig(root, name)
 		if errors.Is(err, fs.ErrNotExist) {
 			continue

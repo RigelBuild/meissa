@@ -210,7 +210,7 @@ func parseGoSources(root, module string, paths []string, cfg codeshape.Config) (
 		if !matches {
 			var unmeasured *codeshape.UnmeasuredFunctions
 			if len(goFunctions(file, set)) > 0 {
-				unmeasured = &codeshape.UnmeasuredFunctions{Values: nil, Ignored: true}
+				unmeasured = &codeshape.UnmeasuredFunctions{Values: nil, BiomeParseFailed: false}
 			}
 			skips = append(skips, codeshape.Skip{Path: path, Reason: "not in default Go build", Unmeasured: unmeasured})
 			continue

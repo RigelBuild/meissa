@@ -75,3 +75,18 @@ func TestTrackedBiomeDrift(t *testing.T) {
 		t.Fatalf("wrong drift paths: %#v", findings)
 	}
 }
+
+func TestDotBiomeConfigDrift(t *testing.T) {
+	root := newFixtureRepo(t)
+	trackedFile(t, root, "x.ts", "function f() {}\n")
+	trackedFile(t, root, ".biome.json", `{"linter":{"enabled":false}}`)
+	commitFiles(t, root)
+	cfg := codeshape.Config{FileLimit: 500, DirLimit: 10, Extensions: []string{".ts"}, Exclude: []string{},
+		DirLimits: map[string]codeshape.DirLimit{}, Functions: codeshape.FunctionLimits{
+			Go: codeshape.GoFunctionLimits{Cognitive: 20, Lines: 60, Statements: 40},
+			TS: codeshape.TSFunctionLimits{Cognitive: 15, Lines: 50}}}
+	findings, err := PolicyFindings(t.Context(), root, cfg)
+	if err != nil || len(findings) == 0 || findings[0].Path != ".biome.json" {
+		t.Fatalf("findings=%v err=%v", findings, err)
+	}
+}

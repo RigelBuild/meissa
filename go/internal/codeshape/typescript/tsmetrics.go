@@ -101,7 +101,7 @@ func TSMetrics(ctx context.Context, root string, cfg codeshape.Config) (
 		functions, tree, err := parseTSFunctions(path, source)
 		if err != nil {
 			skips = append(skips, codeshape.Skip{Path: path, Reason: err.Error(),
-				Unmeasured: &codeshape.UnmeasuredFunctions{Values: map[codeshape.Metric]int{}, Ignored: false}})
+				Unmeasured: &codeshape.UnmeasuredFunctions{Values: map[codeshape.Metric]int{}, BiomeParseFailed: false}})
 			delete(sources, path)
 			continue
 		}

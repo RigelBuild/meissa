@@ -15,7 +15,7 @@ func TestUnmeasuredSkipFinding(t *testing.T) {
 	skips := []codeshape.Skip{
 		{Path: "plain.ts", Reason: "no functions", Unmeasured: nil},
 		{Path: "bad.ts", Reason: "parse error", Unmeasured: &codeshape.UnmeasuredFunctions{
-			Values: map[codeshape.Metric]int{codeshape.MetricTSLines: 70}, Ignored: false}},
+			Values: map[codeshape.Metric]int{codeshape.MetricTSLines: 70}, BiomeParseFailed: false}},
 	}
 	var output strings.Builder
 	findings, paths, err := handleTSSkips(&output, skips, testConfig())
