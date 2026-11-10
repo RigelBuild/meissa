@@ -70,12 +70,21 @@ func tsDirectiveFindings(path string, source []byte) []codeshape.Finding {
 			continue
 		}
 		directive, _, _ := strings.Cut(line[pos:], ":")
+		fields := strings.Fields(directive)
+		if len(fields) < 2 || (fields[0] != "biome-ignore" && fields[0] != "biome-ignore-all" &&
+			fields[0] != "biome-ignore-start") {
+			continue
+		}
 		for name, metric := range biomeRuleMetrics() {
-			if strings.Contains(directive, strings.TrimPrefix(name, "lint/")) {
-				findings = append(findings, codeshape.Finding{
-					Path: path + ":" + strconv.Itoa(i+1), Metric: metric, Value: i + 1, Limit: 0,
-					Fix: "remove biome-ignore suppression",
-				})
+			for _, category := range fields[1:] {
+				category = strings.Trim(category, ",")
+				if category == "lint" || category == "lint/complexity" || category == name {
+					findings = append(findings, codeshape.Finding{
+						Path: path + ":" + strconv.Itoa(i+1), Metric: metric, Value: 1, Limit: 0,
+						Fix: "remove biome-ignore suppression",
+					})
+					break
+				}
 			}
 		}
 	}

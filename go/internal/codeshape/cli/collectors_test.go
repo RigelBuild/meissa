@@ -106,6 +106,23 @@ func tsRepo(t *testing.T, source string) string {
 	commitFiles(t, root)
 	return root
 }
+
+func TestSuppressionCoexistsWithJudgeAndSeed(t *testing.T) {
+	root := tsRepo(t, "// biome-ignore lint: reason\nfunction f() {}\n")
+	trackedFile(t, root, "large.go", strings.Repeat("line\n", 501))
+	commitFiles(t, root)
+	code, out, stderr := runGoGate(t, root)
+	if code != 1 || !strings.Contains(out, "x.ts:1") || !strings.Contains(out, "large.go") {
+		t.Fatalf("code=%d out=%q stderr=%q", code, out, stderr)
+	}
+	var stdout, errout strings.Builder
+	code = Main(t.Context(), []string{"--write", "--seed", root}, func(string) string { return "" }, &stdout, &errout)
+	allow, err := os.ReadFile(filepath.Join(root, "tools/code-shape-gate/allowlist.cue"))
+	if code != 1 || err != nil || !strings.Contains(string(allow), "large.go") ||
+		!strings.Contains(stdout.String(), "x.ts:1") {
+		t.Fatalf("code=%d out=%q stderr=%q allow=%q err=%v", code, stdout.String(), errout.String(), allow, err)
+	}
+}
 func TestTSCognitiveLimit(t *testing.T) {
 	root := tsRepo(t, "function f(x: boolean) {\n"+strings.Repeat("if (x) { console.log(x); }\n", 16)+"}\n")
 	code, out, errout := runGoGate(t, root)

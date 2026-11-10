@@ -64,18 +64,11 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
 	}
-	if len(suppressions) > 0 {
-		err := writeFindings(stdout, suppressions)
-		if err != nil {
-			writeOutput(stderr, "code-shape-gate: write output: %v\n", err)
-			return 2
-		}
-		return 1
-	}
 	if writeMode {
-		return writeUpdated(root, config, allow, base, snapshot, seed, stdout, stderr)
+		return writeUpdated(root, config, allow, base, snapshot, seed, stdout, stderr, suppressions)
 	}
-	findings := codeshape.Judge(config, allow, base, snapshot)
+	findings := append(codeshape.Judge(config, allow, base, snapshot), suppressions...)
+	codeshape.SortFindings(findings)
 	err = writeFindings(stdout, findings)
 	if err != nil {
 		writeOutput(stderr, "code-shape-gate: write output: %v\n", err)
@@ -133,6 +126,7 @@ func writeUpdated(
 	snapshot codeshape.Snapshot,
 	seed bool,
 	stdout, stderr io.Writer,
+	policy ...[]codeshape.Finding,
 ) int {
 	updated, changed, err := rewriteAllowlist(config, allow, snapshot, seed)
 	if err != nil {
@@ -140,15 +134,17 @@ func writeUpdated(
 		return 2
 	}
 	findings := codeshape.Judge(config, updated, base, snapshot)
+	ratchetFailures := len(findings) > 0
+	if len(policy) > 0 {
+		findings = append(findings, policy[0]...)
+	}
+	codeshape.SortFindings(findings)
 	err = writeFindings(stdout, findings)
 	if err != nil {
 		writeOutput(stderr, "code-shape-gate: write output: %v\n", err)
 		return 2
 	}
-	if len(findings) > 0 {
-		return 1
-	}
-	if changed {
+	if changed && !ratchetFailures {
 		repository, openErr := os.OpenRoot(root)
 		if openErr != nil {
 			writeOutput(stderr, "code-shape-gate: open repository: %v\n", openErr)
@@ -161,6 +157,9 @@ func writeUpdated(
 			writeOutput(stderr, "code-shape-gate: write allowlist: %v\n", err)
 			return 2
 		}
+	}
+	if len(findings) > 0 {
+		return 1
 	}
 	return 0
 }
