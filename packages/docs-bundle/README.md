@@ -2,6 +2,14 @@
 
 Shared helpers for collecting Markdown pages into a docs site, rewriting links, and checking publish rules before a build. The package does not fetch source repositories or invoke a site generator.
 
+## Install
+
+```sh
+bun add -d @rigelbuild/docs-bundle
+```
+
+The package ships TypeScript source and runs on Bun.
+
 ## Check a repository
 
 ```sh
