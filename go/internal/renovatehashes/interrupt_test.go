@@ -25,6 +25,8 @@ func TestRefreshInterruptions(t *testing.T) {
 	t.Run("classifies canceled exec child as SIGINT", testRefreshClassifiesCanceledExecChild)
 	t.Run("reports SIGINT when derivation path resolution is interrupted", testResolveDrvPathCancellation)
 	t.Run("reports SIGINT when nilaway git init is interrupted", testRefreshNilawayInitCancellation)
+	t.Run("reports SIGINT when nilaway git fetch is interrupted", testRefreshNilawayFetchCancellation)
+	t.Run("reports SIGINT when nilaway git log is interrupted", testRefreshNilawayLogCancellation)
 	t.Run("reports SIGINT when Git root lookup is interrupted", testMainGitRootCancellation)
 	t.Run(
 		"keeps the original failure when build fails before context cancellation",
@@ -169,6 +171,15 @@ func testResolveDrvPathCancellation(t *testing.T) {
 }
 
 func testRefreshNilawayInitCancellation(t *testing.T) {
+	testRefreshNilawayCommandCancellation(t, "init")
+}
+
+func testRefreshNilawayFetchCancellation(t *testing.T) {
+	testRefreshNilawayCommandCancellation(t, "fetch")
+}
+
+func testRefreshNilawayCommandCancellation(t *testing.T, command string) {
+	t.Helper()
 	root, runner := newFixture(t)
 	initial := readFixture(t, root, pinFile)
 	changed := replaceField(t, initial, defaultEntries()[0], "rev", "0123456789abcdef0123456789abcdef01234567")
@@ -177,8 +188,24 @@ func testRefreshNilawayInitCancellation(t *testing.T) {
 
 	ctx, cancel := context.WithCancelCause(t.Context())
 	defer cancel(nil)
-	cancelOnInit := cancelDuringNilawayInitRunner{fixtureRunner: runner, cancel: cancel}
-	_, err := refresh(ctx, root, defaultEntries()[:2], cancelOnInit, envValue("main"))
+	cancelOnCommand := cancelDuringNilawayInitRunner{fixtureRunner: runner, cancel: cancel, command: command}
+	_, err := refresh(ctx, root, defaultEntries()[:2], cancelOnCommand, envValue("main"))
+	if !errors.Is(err, ErrRefreshSIGINT) || strings.Count(err.Error(), "interrupted by SIGINT") != 1 {
+		t.Fatalf("refresh error = %v; want SIGINT and one interruption headline", err)
+	}
+}
+
+func testRefreshNilawayLogCancellation(t *testing.T) {
+	root, runner := newFixture(t)
+	initial := readFixture(t, root, pinFile)
+	changed := replaceField(t, initial, defaultEntries()[0], "rev", "0123456789abcdef0123456789abcdef01234567")
+	writeFixture(t, root, pinFile, changed)
+	runner.base[pinFile] = initial
+
+	ctx, cancel := context.WithCancelCause(t.Context())
+	defer cancel(nil)
+	cancelOnLog := cancelDuringNilawayLogRunner{fixtureRunner: runner, cancel: cancel}
+	_, err := refresh(ctx, root, defaultEntries()[:2], cancelOnLog, envValue("main"))
 	if !errors.Is(err, ErrRefreshSIGINT) || strings.Count(err.Error(), "interrupted by SIGINT") != 1 {
 		t.Fatalf("refresh error = %v; want SIGINT and one interruption headline", err)
 	}
@@ -200,7 +227,8 @@ func testMainGitRootCancellation(t *testing.T) {
 type cancelDuringNilawayInitRunner struct {
 	*fixtureRunner
 
-	cancel context.CancelCauseFunc
+	cancel  context.CancelCauseFunc
+	command string
 }
 
 func (r cancelDuringNilawayInitRunner) Run(
@@ -208,11 +236,30 @@ func (r cancelDuringNilawayInitRunner) Run(
 	name string,
 	args ...string,
 ) (string, string, int, error) {
-	if name == "git" && len(args) >= 3 && args[0] == "-C" && args[2] == "init" {
+	if name == "git" && len(args) >= 3 && args[0] == "-C" && args[2] == r.command {
 		r.cancel(ErrRefreshSIGINT)
 		return "", "", -1, fmt.Errorf("run git: %w", context.Cause(ctx))
 	}
 	return r.fixtureRunner.Run(ctx, name, args...)
+}
+
+type cancelDuringNilawayLogRunner struct {
+	*fixtureRunner
+
+	cancel context.CancelCauseFunc
+}
+
+func (r cancelDuringNilawayLogRunner) runWithEnv(
+	ctx context.Context,
+	extraEnv map[string]string,
+	name string,
+	args ...string,
+) (string, string, int, error) {
+	if name == "git" && len(args) >= 3 && args[0] == "-C" && args[2] == "log" {
+		r.cancel(ErrRefreshSIGINT)
+		return "", "", 1, nil
+	}
+	return r.fixtureRunner.runWithEnv(ctx, extraEnv, name, args...)
 }
 
 type cancelDuringGitRootRunner struct {
