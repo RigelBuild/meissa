@@ -110,11 +110,9 @@ func collectMeasurements(
 	if err != nil {
 		return nil, nil, fmt.Errorf("collect Go metrics: %w", err)
 	}
-	for _, skip := range skips {
-		_, err := fmt.Fprintf(stderr, "code-shape-gate: skip %s: %s\n", skip.Path, skip.Reason)
-		if err != nil {
-			return nil, nil, fmt.Errorf("write skip: %w", err)
-		}
+	goFindings, goPaths, err := handleGoSkips(stderr, skips)
+	if err != nil {
+		return nil, nil, err
 	}
 	tsFunctions, tsSkips, err := typescript.TSMetrics(ctx, root, config)
 	if err != nil {
@@ -136,9 +134,10 @@ func collectMeasurements(
 		return nil, nil, fmt.Errorf("collect TypeScript policy: %w", err)
 	}
 	suppressions = append(suppressions, tsFindings...)
+	suppressions = append(suppressions, goFindings...)
 	suppressions = append(suppressions, unmeasuredFindings...)
 	codeshape.SortFindings(suppressions)
-	return suppressions, unmeasuredPaths, nil
+	return suppressions, append(unmeasuredPaths, goPaths...), nil
 }
 
 func writeUpdated(

@@ -198,10 +198,6 @@ func parseGoSources(root, module string, paths []string, cfg codeshape.Config) (
 		if err != nil {
 			return nil, nil, fmt.Errorf("check Go build constraints %q: %w", path, err)
 		}
-		if !matches {
-			skips = append(skips, codeshape.Skip{Path: path, Reason: "not in default Go build", Unmeasured: nil})
-			continue
-		}
 		source, err := codeshape.ReadRepositoryFile(root, filepath.FromSlash(path))
 		if err != nil {
 			return nil, nil, fmt.Errorf("read Go source %q: %w", path, err)
@@ -210,6 +206,14 @@ func parseGoSources(root, module string, paths []string, cfg codeshape.Config) (
 		file, err := parser.ParseFile(set, path, source, parser.ParseComments|parser.AllErrors)
 		if err != nil {
 			return nil, nil, fmt.Errorf("parse Go source %q: %w", path, err)
+		}
+		if !matches {
+			var unmeasured *codeshape.UnmeasuredFunctions
+			if len(goFunctions(file, set)) > 0 {
+				unmeasured = &codeshape.UnmeasuredFunctions{Values: nil, Ignored: true}
+			}
+			skips = append(skips, codeshape.Skip{Path: path, Reason: "not in default Go build", Unmeasured: unmeasured})
+			continue
 		}
 		functions := goFunctions(file, set)
 		for index := range functions {

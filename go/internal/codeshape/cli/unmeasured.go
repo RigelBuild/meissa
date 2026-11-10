@@ -62,3 +62,20 @@ func restoreUnmeasured(allow *codeshape.Allowlist, preserved codeshape.FunctionM
 		maps.Copy(allow.Functions[metric], paths)
 	}
 }
+
+func handleGoSkips(output io.Writer, skips []codeshape.Skip) ([]codeshape.Finding, []string, error) {
+	var findings []codeshape.Finding
+	var paths []string
+	for _, skip := range skips {
+		_, err := fmt.Fprintf(output, "code-shape-gate: skip %s: %s\n", skip.Path, skip.Reason)
+		if err != nil {
+			return nil, nil, fmt.Errorf("write skip: %w", err)
+		}
+		if skip.Unmeasured != nil {
+			paths = append(paths, skip.Path)
+			findings = append(findings, codeshape.Finding{Path: skip.Path, Metric: codeshape.MetricGoLines,
+				Value: 1, Limit: 0, Fix: "add to code-shape exclude or include it in the default Go build"})
+		}
+	}
+	return findings, paths, nil
+}
