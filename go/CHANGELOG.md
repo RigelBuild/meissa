@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Measure Go and TypeScript function complexity and size, with ratcheted allowlists.
+- Report unmeasured functions and Biome scope drift instead of silently passing them.
+
 ## [0.2.0](https://github.com/RigelBuild/meissa/compare/go/v0.1.0...go/v0.2.0) (2026-11-10)
 
 
