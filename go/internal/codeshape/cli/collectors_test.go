@@ -75,7 +75,8 @@ func TestGoMissingBinary(t *testing.T) {
 func fakeGoLint(t *testing.T, output string) {
 	t.Helper()
 	dir := t.TempDir()
-	script := "#!/bin/sh\nprintf '%s' '" + output + "'\nexit 1\n"
+	script := "#!/bin/sh\nif [ \"$1\" = --version ]; then echo 'golangci-lint has version 2.15.0'; exit 0; fi\n" +
+		"printf '%s' '" + output + "'\nexit 1\n"
 	err := os.WriteFile(filepath.Join(dir, "golangci-lint"), []byte(script), 0o755)
 	if err != nil {
 		t.Fatal(err)
@@ -184,7 +185,9 @@ func TestTSMissingBinary(t *testing.T) {
 func TestTSTruncatedJSON(t *testing.T) {
 	root := tsRepo(t, "function f() {}\n")
 	dir := t.TempDir()
-	err := os.WriteFile(filepath.Join(dir, "biome"), []byte("#!/bin/sh\nprintf '{\"summary\":'\n"), 0755)
+	script := "#!/bin/sh\nif [ \"$1\" = --version ]; then echo 'Version: 2.5.15'; exit 0; fi\n" +
+		"printf '{\"summary\":'\n"
+	err := os.WriteFile(filepath.Join(dir, "biome"), []byte(script), 0755)
 	if err != nil {
 		t.Fatal(err)
 	}

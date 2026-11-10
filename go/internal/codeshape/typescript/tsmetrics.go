@@ -97,6 +97,10 @@ func TSMetrics(ctx context.Context, root string, cfg codeshape.Config) (
 	if err != nil {
 		return nil, nil, fmt.Errorf("find biome: %w", err)
 	}
+	err = codeshape.CheckToolVersion(ctx, binary, codeshape.BiomeVersion)
+	if err != nil {
+		return nil, nil, fmt.Errorf("check biome: %w", err)
+	}
 	var sourcePaths []string
 	for path := range sources {
 		sourcePaths = append(sourcePaths, path)

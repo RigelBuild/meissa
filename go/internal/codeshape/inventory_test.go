@@ -221,3 +221,14 @@ func testConfig() Config {
 			TS: TSFunctionLimits{Cognitive: 0, Lines: 0}},
 	}
 }
+func TestToolVersionMismatch(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "tool")
+	err := os.WriteFile(path, []byte("#!/bin/sh\necho 'Version: 1.0.0'\n"), 0700)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = CheckToolVersion(t.Context(), path, BiomeVersion)
+	if err == nil || !strings.Contains(err.Error(), "unsupported tool version") {
+		t.Fatalf("error = %v", err)
+	}
+}

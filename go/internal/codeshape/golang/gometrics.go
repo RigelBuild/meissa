@@ -88,6 +88,10 @@ func GoMetrics(ctx context.Context, root string, cfg codeshape.Config) (
 	if err != nil {
 		return nil, nil, fmt.Errorf("find golangci-lint: %w", err)
 	}
+	err = codeshape.CheckToolVersion(ctx, binary, codeshape.GolangciVersion)
+	if err != nil {
+		return nil, nil, fmt.Errorf("check golangci-lint: %w", err)
+	}
 	measurements := codeshape.NewFunctionMeasurements()
 	skips := []codeshape.Skip{}
 	for _, module := range modules {
