@@ -51,11 +51,13 @@ Optional `dirLimits` maps directory globs to `{limit: 50, reason: "record decisi
 
 The gate also measures Go cognitive complexity, function lines and statements, and TypeScript cognitive complexity and function lines. The optional `functions` field uses the fixed Go limits 20, 60 and 40, and TypeScript limits 15 and 50. Existing configurations may omit it. Function collection requires `golangci-lint` and `biome` on PATH. The gate reports counted extensions without a collector on stderr.
 
-Function allowlist entries are keyed by metric, path and function ID. Go IDs use function and receiver names, with closure ordinals within their enclosing function. TypeScript IDs use enclosing functions, classes and test titles where available. Suppression directives and mismatched Biome rule options are findings. Skips are printed on stderr. If Biome reports a measured rule in a TypeScript file the function collector cannot parse, the gate reports a file-level finding and preserves its existing function allowlist entries on `--write`.
+Function allowlist entries are keyed by metric, path and function ID. Go IDs use function and receiver names, with closure ordinals within their enclosing function. TypeScript IDs use enclosing functions, classes and test titles where available. Suppression directives and mismatched Biome rule options are findings.
 
-Skips that leave no functions unmeasured are notices only. A counted Go file outside the default build that contains functions is a finding. Counted TypeScript files Biome ignores are also findings. Use the gate's `exclude` to opt out.
+The gate runs Biome with its own generated configuration and the gate's limits. It copies the root Biome configuration's `javascript.parser` options. The repository's Biome rule settings are checked for consistency, but do not control measurement. The two measured rules may use `warn` or `error` levels in the repository configuration.
 
-The two measured Biome rules may use `warn` or `error` levels. Both report gate findings when a function exceeds its limit.
+Skips are printed on stderr. A Go file outside the default build that contains functions, or a file Biome cannot parse, is an unmeasured finding. If the TypeScript function collector cannot parse a file and Biome reports an over-limit function, the gate reports a file-level finding. Existing function allowlist entries for unmeasured files are preserved on `--write`. Skips that leave no functions unmeasured are notices only. Use the gate's `exclude` to opt out.
+
+Findings use the format `<path> <metric> value=<value> limit=<limit> fix=<cause>`. An `unmeasured` finding uses value and limit 0; its fix describes the cause.
 
 ```cue
 functions: "go-lines": "src/example.go": [{id: "Example", value: 70, reason: "split by concern"}]
