@@ -5,6 +5,7 @@ package typescript
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/RigelBuild/meissa/go/internal/codeshape"
 )
@@ -41,7 +42,8 @@ func validateBiomeErrors(report biomeReport) error {
 		if diagnostic.Severity != "error" {
 			continue
 		}
-		if _, ok := metrics[diagnostic.Category]; !ok {
+		if _, ok := metrics[diagnostic.Category]; !ok && diagnostic.Category != "parse" &&
+			!strings.HasPrefix(diagnostic.Category, "parse/") {
 			return fmt.Errorf("biome reported %s: %w", diagnostic.Category, errBiomeReported)
 		}
 		count++
@@ -50,4 +52,26 @@ func validateBiomeErrors(report biomeReport) error {
 		return fmt.Errorf("biome reported %d errors with %d diagnostics: %w", report.Summary.Errors, count, errBiomeReported)
 	}
 	return nil
+}
+
+func biomeParseSkips(report biomeReport, sources map[string][]byte) ([]codeshape.Skip, error) {
+	var skips []codeshape.Skip
+	seen := map[string]bool{}
+	for _, diagnostic := range report.Diagnostics {
+		if diagnostic.Category != "parse" && !strings.HasPrefix(diagnostic.Category, "parse/") {
+			continue
+		}
+		path := filepath.ToSlash(diagnostic.Location.Path)
+		if seen[path] {
+			continue
+		}
+		seen[path] = true
+		if _, ok := sources[path]; !ok {
+			return nil, fmt.Errorf("%w %q", errBiomeUnknownSource, path)
+		}
+		delete(sources, path)
+		skips = append(skips, codeshape.Skip{Path: path, Reason: "Biome parse error: " + diagnostic.Message,
+			Unmeasured: &codeshape.UnmeasuredFunctions{Values: map[codeshape.Metric]int{}, Ignored: true}})
+	}
+	return skips, nil
 }

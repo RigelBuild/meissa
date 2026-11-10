@@ -90,7 +90,10 @@ func TSMetrics(ctx context.Context, root string, cfg codeshape.Config) (
 	if err != nil {
 		return nil, nil, err
 	}
-	var skips []codeshape.Skip
+	skips, err := biomeParseSkips(report, sources)
+	if err != nil {
+		return nil, nil, err
+	}
 	values := codeshape.NewFunctionMeasurements()
 	files := make(map[string][]tsFunction, len(sources))
 	for path, source := range sources {

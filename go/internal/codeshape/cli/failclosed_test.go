@@ -42,6 +42,14 @@ func TestBiomeFailClosed(t *testing.T) {
 	}
 }
 
+func TestBiomeParseFailureIsFinding(t *testing.T) {
+	root := tsRepo(t, "function broken( {\n")
+	code, out, stderr := runGoGate(t, root)
+	if code != 1 || !strings.Contains(out, "Biome parse error") {
+		t.Fatalf("code=%d out=%q stderr=%q", code, out, stderr)
+	}
+}
+
 func TestGoLintFailClosed(t *testing.T) {
 	for _, tc := range []struct {
 		name, output string
