@@ -19,8 +19,8 @@ func handleTSSkips(output io.Writer, skips []codeshape.Skip, cfg codeshape.Confi
 		if skip.Unmeasured != nil {
 			paths = append(paths, skip.Path)
 			if skip.Unmeasured.Ignored {
-				findings = append(findings, codeshape.Finding{Path: skip.Path, Metric: codeshape.MetricTSLines,
-					Value: 1, Limit: 0, Fix: skip.Reason + "; exclude it or fix the parse"})
+				findings = append(findings, codeshape.Finding{Path: skip.Path, Metric: codeshape.MetricUnmeasured,
+					Value: 0, Limit: 0, Fix: skip.Reason + "; exclude it or fix the parse"})
 			}
 			for metric, value := range skip.Unmeasured.Values {
 				findings = append(findings, codeshape.Finding{Path: skip.Path, Metric: metric, Value: value,
@@ -73,8 +73,8 @@ func handleGoSkips(output io.Writer, skips []codeshape.Skip) ([]codeshape.Findin
 		}
 		if skip.Unmeasured != nil {
 			paths = append(paths, skip.Path)
-			findings = append(findings, codeshape.Finding{Path: skip.Path, Metric: codeshape.MetricGoLines,
-				Value: 1, Limit: 0, Fix: "add to code-shape exclude or include it in the default Go build"})
+			findings = append(findings, codeshape.Finding{Path: skip.Path, Metric: codeshape.MetricUnmeasured,
+				Value: 0, Limit: 0, Fix: skip.Reason + "; exclude it or include it in the default Go build"})
 		}
 	}
 	return findings, paths, nil

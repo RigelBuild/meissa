@@ -14,6 +14,7 @@ const (
 	MetricGoStatements Metric = "go-statements"
 	MetricTSCognitive  Metric = "ts-cognitive"
 	MetricTSLines      Metric = "ts-lines"
+	MetricUnmeasured   Metric = "unmeasured"
 )
 
 // FunctionMeasurements maps each metric and source path to individual functions.

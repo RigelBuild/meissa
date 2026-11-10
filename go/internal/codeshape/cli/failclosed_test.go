@@ -45,7 +45,7 @@ func TestBiomeFailClosed(t *testing.T) {
 func TestBiomeParseFailureIsFinding(t *testing.T) {
 	root := tsRepo(t, "function broken( {\n")
 	code, out, stderr := runGoGate(t, root)
-	if code != 1 || !strings.Contains(out, "Biome parse error") {
+	if code != 1 || !strings.Contains(out, "unmeasured value=0 limit=0") || !strings.Contains(out, "Biome parse error") {
 		t.Fatalf("code=%d out=%q stderr=%q", code, out, stderr)
 	}
 }

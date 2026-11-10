@@ -56,7 +56,7 @@ func (limits FunctionLimits) LimitFor(metric Metric) int {
 		return limits.TS.Cognitive
 	case MetricTSLines:
 		return limits.TS.Lines
-	case MetricFiles, MetricDirs:
+	case MetricFiles, MetricDirs, MetricUnmeasured:
 		return 0
 	default:
 		return 0
