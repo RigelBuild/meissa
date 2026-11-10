@@ -11,6 +11,19 @@ import (
 	"github.com/RigelBuild/meissa/go/internal/codeshape"
 )
 
+func TestLoadLegacyConfig(t *testing.T) {
+	root := newFixtureRepo(t)
+	writeConfigFiles(t, root, "fileLimit: 500\ndirLimit: 10\nextensions: [\".go\"]\nexclude: []\n", "files: {}\n")
+	cfg, _, err := Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Functions.Go.Cognitive != 20 || cfg.Functions.Go.Lines != 60 || cfg.Functions.Go.Statements != 40 ||
+		cfg.Functions.TS.Cognitive != 15 || cfg.Functions.TS.Lines != 50 {
+		t.Fatalf("unexpected defaults: %#v", cfg.Functions)
+	}
+}
+
 func TestLoad(t *testing.T) {
 	t.Run("valid CUE configuration and allowlist", func(t *testing.T) {
 		root := newFixtureRepo(t)

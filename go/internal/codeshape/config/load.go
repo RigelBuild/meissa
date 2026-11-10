@@ -90,6 +90,12 @@ func loadFromRoot(repository *os.Root) (codeshape.Config, codeshape.Allowlist, e
 	if err != nil {
 		return codeshape.Config{}, codeshape.Allowlist{}, fmt.Errorf("decode config.cue: %w", err)
 	}
+	if !configValue.LookupPath(cue.ParsePath("functions")).Exists() {
+		config.Functions = codeshape.FunctionLimits{
+			Go: codeshape.GoFunctionLimits{Cognitive: 20, Lines: 60, Statements: 40},
+			TS: codeshape.TSFunctionLimits{Cognitive: 15, Lines: 50},
+		}
+	}
 	err = validateConfig(config)
 	if err != nil {
 		return codeshape.Config{}, codeshape.Allowlist{}, err
