@@ -8,8 +8,6 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -38,7 +36,7 @@ func SuppressionFindings(ctx context.Context, root string, cfg codeshape.Config)
 		if !eligible[path] {
 			continue
 		}
-		source, err := os.ReadFile(filepath.Join(root, path)) //nolint:gosec // G304: path from the repo's tracked file list
+		source, err := codeshape.ReadRepositoryFile(root, path)
 		if err != nil {
 			return nil, fmt.Errorf("read Go source %q: %w", path, err)
 		}

@@ -221,8 +221,7 @@ func parseGoSources(root, module string, paths []string, cfg codeshape.Config) (
 			skips = append(skips, codeshape.Skip{Path: path, Reason: "not in default Go build"})
 			continue
 		}
-		//nolint:gosec // G304: path from the repo's tracked file list
-		source, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(path)))
+		source, err := codeshape.ReadRepositoryFile(root, filepath.FromSlash(path))
 		if err != nil {
 			return nil, nil, fmt.Errorf("read Go source %q: %w", path, err)
 		}

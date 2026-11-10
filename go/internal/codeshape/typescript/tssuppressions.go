@@ -7,8 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -28,7 +26,7 @@ func PolicyFindings(ctx context.Context, root string, cfg codeshape.Config) ([]c
 			continue
 		}
 		hasTS = true
-		source, err := os.ReadFile(filepath.Join(root, path)) //nolint:gosec // G304: path from the repo's tracked file list
+		source, err := codeshape.ReadRepositoryFile(root, path)
 		if err != nil {
 			return nil, fmt.Errorf("read TypeScript source %q: %w", path, err)
 		}

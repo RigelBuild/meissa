@@ -12,6 +12,23 @@ import (
 	"testing"
 )
 
+func TestReadRepositoryFileRejectsEscapingSymlink(t *testing.T) {
+	root := t.TempDir()
+	outside := filepath.Join(t.TempDir(), "outside")
+	err := os.WriteFile(outside, []byte("outside"), 0600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = os.Symlink(outside, filepath.Join(root, "escape"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = ReadRepositoryFile(root, "escape")
+	if err == nil {
+		t.Fatal("read escaped repository root")
+	}
+}
+
 func newFixtureRepo(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()

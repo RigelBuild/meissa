@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"slices"
@@ -85,8 +84,7 @@ func TSMetrics(ctx context.Context, root string, cfg codeshape.Config) (
 		if !isTypeScriptPath(path) || !codeshape.CountedPath(path, cfg) {
 			continue
 		}
-		//nolint:gosec // G304: path from the repo's tracked file list
-		source, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(path)))
+		source, err := codeshape.ReadRepositoryFile(root, filepath.FromSlash(path))
 		if err != nil {
 			return nil, nil, fmt.Errorf("read TypeScript source %q: %w", path, err)
 		}
@@ -231,7 +229,7 @@ func runBiome(ctx context.Context, binary, root string, paths []string) (biomeRe
 }
 
 func readBiomeConfig(root, path string) (map[string]any, error) {
-	data, err := os.ReadFile(filepath.Join(root, path)) //nolint:gosec // G304: read repo config
+	data, err := codeshape.ReadRepositoryFile(root, path)
 	if err != nil {
 		return nil, fmt.Errorf("read %s: %w", path, err)
 	}

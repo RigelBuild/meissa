@@ -3,10 +3,26 @@
 // Package codeshape defines code-shape measurements and judgments.
 package codeshape
 
-import "context"
+import (
+	"context"
+	"errors"
+	"fmt"
+	"os"
+)
 
 // TrackedPaths lists tracked repository paths.
 func TrackedPaths(ctx context.Context, root string) ([]string, error) { return trackedPaths(ctx, root) }
+
+// ReadRepositoryFile reads a path confined to the repository root.
+func ReadRepositoryFile(root, path string) ([]byte, error) {
+	repository, err := os.OpenRoot(root)
+	if err != nil {
+		return nil, fmt.Errorf("open repository root: %w", err)
+	}
+	data, readErr := repository.ReadFile(path)
+	closeErr := repository.Close()
+	return data, errors.Join(readErr, closeErr)
+}
 
 // CountedPath reports whether the configuration includes a path.
 func CountedPath(path string, cfg Config) bool { return countedPath(path, cfg) }
