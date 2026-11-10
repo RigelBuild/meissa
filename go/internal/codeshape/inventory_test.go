@@ -148,6 +148,20 @@ func TestInventoryGeneratedAndExcluded(t *testing.T) {
 	})
 }
 
+func TestPhysicalLinesLongLine(t *testing.T) {
+	content := strings.Repeat("x", 65_530) + "@generated\nsecond\n"
+	lines, generated, err := physicalLines(strings.NewReader(content))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if lines != 2 || !generated {
+		t.Fatalf("lines=%d generated=%v, want 2 lines and generated", lines, generated)
+	}
+	lines, generated, err = physicalLines(strings.NewReader(strings.Repeat("x", 70_000)))
+	if err != nil || lines != 1 || generated {
+		t.Fatalf("unterminated line: lines=%d generated=%v error=%v", lines, generated, err)
+	}
+}
 func TestInventoryDirectoryWidth(t *testing.T) {
 	t.Run("directory width counts all tracked file types at eleven", func(t *testing.T) {
 		root := newFixtureRepo(t)

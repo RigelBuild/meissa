@@ -61,6 +61,47 @@ func TestLoadDirectoryLimits(t *testing.T) {
 	}
 }
 
+func TestLoadRejectsImports(t *testing.T) {
+	root := newFixtureRepo(t)
+	writeConfigFiles(t, root, "import \"strings\"\n"+validConfig+"\nx: strings.ToUpper(\"x\")\n", "files: {}\n")
+	_, _, err := Load(root)
+	if err == nil || !strings.Contains(err.Error(), "imports are not permitted") {
+		t.Fatalf("Load import error = %v", err)
+	}
+}
+
+func TestLoadRejectsEscapingConfig(t *testing.T) {
+	root := newFixtureRepo(t)
+	writeConfigFiles(t, root, validConfig, "files: {}\n")
+	outside := filepath.Join(t.TempDir(), "config.cue")
+	err := os.WriteFile(outside, []byte(validConfig), 0o600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(root, "tools/code-shape-gate/config.cue")
+	err = os.Remove(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = os.Symlink(outside, path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _, err = Load(root)
+	if err == nil {
+		t.Fatal("Load accepted a config symlink outside the repository")
+	}
+}
+
+func TestLoadRootDirectoryEntry(t *testing.T) {
+	root := newFixtureRepo(t)
+	writeConfigFiles(t, root, validConfig, `dirs: ".": {value: 11, reason: "split root files"}`)
+	_, allow, err := Load(root)
+	if err != nil || allow.Dirs[""].Value != 11 {
+		t.Fatalf("root entry = %#v, error = %v", allow.Dirs, err)
+	}
+}
+
 func TestLoadMissingFiles(t *testing.T) {
 	root := newFixtureRepo(t)
 	writeConfigFiles(t, root, validConfig, "files: {}\n")

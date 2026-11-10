@@ -10,9 +10,10 @@ import (
 	"maps"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"sort"
 	"strings"
+
+	"cuelang.org/go/cue/cuecontext"
 )
 
 var errCannotRaiseAllowlist = errors.New("--write cannot add or raise allowlist entries")
@@ -27,55 +28,34 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 	}
 	writeMode, seed, root, ok := parseArgs(args)
 	if !ok {
-		if !writeOutput(stderr, "usage: code-shape-gate [--write] [--seed] <root>\n") {
-			return 2
-		}
+		writeOutput(stderr, "usage: code-shape-gate [--write] [--seed] <root>\n")
 		return 2
 	}
 	config, allow, err := Load(root)
 	if err != nil {
-		if !writeOutput(stderr, "code-shape-gate: %v\n", err) {
-			return 2
-		}
+		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
 	}
 	var base Allowlist
 	if baseRef := env("GATE_BASE"); baseRef != "" {
 		base, err = loadBaseAllowlist(ctx, root, baseRef)
 		if err != nil {
-			if !writeOutput(stderr, "code-shape-gate: %v\n", err) {
-				return 2
-			}
+			writeOutput(stderr, "code-shape-gate: %v\n", err)
 			return 2
 		}
 	}
 	snapshot, err := Inventory(ctx, root, config)
 	if err != nil {
-		if !writeOutput(stderr, "code-shape-gate: %v\n", err) {
-			return 2
-		}
+		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
-	}
-	findings := Judge(config, allow, base, snapshot)
-	if baseFindings := judgeBaseEntries(allow, base); len(baseFindings) > 0 {
-		sortFindings(baseFindings)
-		err = writeFindings(stdout, baseFindings)
-		if err != nil {
-			if !writeOutput(stderr, "code-shape-gate: write output: %v\n", err) {
-				return 2
-			}
-			return 2
-		}
-		return 1
 	}
 	if writeMode {
 		return writeUpdated(root, config, allow, base, snapshot, seed, stdout, stderr)
 	}
+	findings := Judge(config, allow, base, snapshot)
 	err = writeFindings(stdout, findings)
 	if err != nil {
-		if !writeOutput(stderr, "code-shape-gate: write output: %v\n", err) {
-			return 2
-		}
+		writeOutput(stderr, "code-shape-gate: write output: %v\n", err)
 		return 2
 	}
 	if len(findings) > 0 {
@@ -94,29 +74,29 @@ func writeUpdated(
 ) int {
 	updated, changed, err := rewriteAllowlist(config, allow, snapshot, seed)
 	if err != nil {
-		if !writeOutput(stderr, "code-shape-gate: %v\n", err) {
-			return 2
-		}
+		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
 	}
 	findings := Judge(config, updated, base, snapshot)
 	err = writeFindings(stdout, findings)
 	if err != nil {
-		if !writeOutput(stderr, "code-shape-gate: write output: %v\n", err) {
-			return 2
-		}
+		writeOutput(stderr, "code-shape-gate: write output: %v\n", err)
 		return 2
 	}
 	if len(findings) > 0 {
 		return 1
 	}
 	if changed {
-		path := filepath.Join(root, "tools", "code-shape-gate", "allowlist.cue")
-		err = os.WriteFile(path, Render(updated), 0o644) //nolint:gosec // Repository config is intentionally world-readable.
+		repository, openErr := os.OpenRoot(root)
+		if openErr != nil {
+			writeOutput(stderr, "code-shape-gate: open repository: %v\n", openErr)
+			return 2
+		}
+		err = repository.WriteFile("tools/code-shape-gate/allowlist.cue", Render(updated), 0o644)
+		closeErr := repository.Close()
+		err = errors.Join(err, closeErr)
 		if err != nil {
-			if !writeOutput(stderr, "code-shape-gate: write allowlist: %v\n", err) {
-				return 2
-			}
+			writeOutput(stderr, "code-shape-gate: write allowlist: %v\n", err)
 			return 2
 		}
 	}
@@ -149,23 +129,25 @@ func parseArgs(args []string) (bool, bool, string, bool) {
 }
 
 func loadBaseAllowlist(ctx context.Context, root, ref string) (Allowlist, error) {
-	//nolint:gosec // The ref is one argument to a fixed git command, not shell code.
-	command := exec.CommandContext(
-		ctx,
-		"git",
-		"show",
-		"--end-of-options",
-		ref+":tools/code-shape-gate/allowlist.cue",
-	)
+	// ls-tree validates the ref and returns no paths for a missing allowlist.
+	//nolint:gosec // The ref is an argument to a fixed git command.
+	command := exec.CommandContext(ctx, "git", "ls-tree", "--name-only", ref, "--", "tools/code-shape-gate/allowlist.cue")
 	command.Dir = root
 	data, err := command.Output()
 	if err != nil {
-		if isMissingBasePath(err) {
-			return emptyAllowlist(), nil
-		}
-		return Allowlist{}, fmt.Errorf("read base allowlist at %q: %w", ref, err)
+		return Allowlist{}, gitBaseError(ref, err)
 	}
-	cueContext := newCueContext()
+	if len(data) == 0 {
+		return emptyAllowlist(), nil
+	}
+	//nolint:gosec // The ref is an argument to a fixed git command.
+	command = exec.CommandContext(ctx, "git", "show", "--end-of-options", ref+":tools/code-shape-gate/allowlist.cue")
+	command.Dir = root
+	data, err = command.Output()
+	if err != nil {
+		return Allowlist{}, gitBaseError(ref, err)
+	}
+	cueContext := cuecontext.New()
 	schema, err := schemaValue(cueContext)
 	if err != nil {
 		return Allowlist{}, err
@@ -178,17 +160,19 @@ func loadBaseAllowlist(ctx context.Context, root, ref string) (Allowlist, error)
 	return allowlist, nil
 }
 
-func isMissingBasePath(err error) bool {
-	var exitError *exec.ExitError
-	return errors.As(err, &exitError) && strings.Contains(string(exitError.Stderr), "does not exist")
+func gitBaseError(ref string, err error) error {
+	exitError, ok := errors.AsType[*exec.ExitError](err)
+	if ok {
+		return fmt.Errorf("read base allowlist at %q: %w: %s", ref, err, strings.TrimSpace(string(exitError.Stderr)))
+	}
+	return fmt.Errorf("read base allowlist at %q: %w", ref, err)
 }
 
 func rewriteAllowlist(cfg Config, allow Allowlist, snapshot Snapshot, seed bool) (Allowlist, bool, error) {
 	updated := Allowlist{
-		Files:     make(map[string]Entry, len(allow.Files)),
-		Dirs:      make(map[string]Entry, len(allow.Dirs)),
-		Functions: allow.Functions,
-		Present:   true,
+		Files:   make(map[string]Entry, len(allow.Files)),
+		Dirs:    make(map[string]Entry, len(allow.Dirs)),
+		Present: true,
 	}
 	maps.Copy(updated.Files, allow.Files)
 	maps.Copy(updated.Dirs, allow.Dirs)
@@ -236,7 +220,11 @@ func rewriteEntries(
 			continue
 		}
 		if seed {
-			entries[path] = Entry{Value: value, Reason: "seeded at rollout, burn down"}
+			if !exists {
+				entry.Reason = "seeded at rollout, burn down"
+			}
+			entry.Value = value
+			entries[path] = entry
 			changed = true
 		} else {
 			errMessage := fmt.Sprintf(

@@ -7,18 +7,21 @@ import (
 	"embed"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
 	"cuelang.org/go/cue"
+	"cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/cuecontext"
-	"cuelang.org/go/cue/load"
+	"cuelang.org/go/cue/parser"
 )
 
 var (
-	errExpectedCUEInstance = errors.New("expected one CUE instance")
-	errInvalidThresholds   = errors.New("config thresholds must be fileLimit 500 and dirLimit 10")
-	errInvalidExtension    = errors.New("invalid source extension")
+	errInvalidThresholds = errors.New("config thresholds must be fileLimit 500 and dirLimit 10")
+	errInvalidExtension  = errors.New("invalid source extension")
+	errImportsForbidden  = errors.New("imports are not permitted")
+	errDuplicateRoot     = errors.New("duplicate root directory entries")
 )
 
 //go:embed schema.cue
@@ -55,36 +58,26 @@ type Entry struct {
 	Reason string `json:"reason"`
 }
 
-// FunctionEntry reserves the allowlist shape for the T2 function collectors.
-type FunctionEntry struct {
-	ID     string `json:"id"`
-	Value  int    `json:"value"`
-	Reason string `json:"reason"`
-}
-
-// Allowlist contains file, directory, and function ratchet entries.
+// Allowlist contains file and directory ratchet entries.
 // Present distinguishes a loaded base allowlist from head-only mode.
 type Allowlist struct {
-	Files     map[string]Entry                      `json:"files,omitempty"`
-	Dirs      map[string]Entry                      `json:"dirs,omitempty"`
-	Functions map[string]map[string][]FunctionEntry `json:"functions,omitempty"`
-	Present   bool                                  `json:"-"`
+	Files   map[string]Entry `json:"files,omitempty"`
+	Dirs    map[string]Entry `json:"dirs,omitempty"`
+	Present bool             `json:"-"`
 }
 
 func emptyAllowlist() Allowlist {
 	return Allowlist{
-		Files:     map[string]Entry{},
-		Dirs:      map[string]Entry{},
-		Functions: map[string]map[string][]FunctionEntry{},
-		Present:   false,
+		Files:   map[string]Entry{},
+		Dirs:    map[string]Entry{},
+		Present: false,
 	}
 }
 
-// Snapshot contains current measurements. T1 leaves Functions empty.
+// Snapshot contains current measurements.
 type Snapshot struct {
-	Files     map[string]int
-	Dirs      map[string]int
-	Functions map[Metric]map[string][]Entry
+	Files map[string]int
+	Dirs  map[string]int
 }
 
 // Finding describes one enforced size or ratchet violation.
@@ -94,10 +87,6 @@ type Finding struct {
 	Value  int
 	Limit  int
 	Fix    string
-}
-
-func newCueContext() *cue.Context {
-	return cuecontext.New()
 }
 
 func schemaValue(ctx *cue.Context) (cue.Value, error) {
@@ -115,14 +104,26 @@ func schemaValue(ctx *cue.Context) (cue.Value, error) {
 
 // Load reads and validates the repository's CUE configuration and allowlist.
 func Load(root string) (Config, Allowlist, error) {
-	configDir := filepath.Join(root, "tools", "code-shape-gate")
+	repository, err := os.OpenRoot(root)
+	if err != nil {
+		return Config{}, Allowlist{}, fmt.Errorf("open repository root: %w", err)
+	}
+	config, allowlist, loadErr := loadFromRoot(repository)
+	closeErr := repository.Close()
+	if closeErr != nil {
+		closeErr = fmt.Errorf("close repository root: %w", closeErr)
+	}
+	return config, allowlist, errors.Join(loadErr, closeErr)
+}
+
+func loadFromRoot(repository *os.Root) (Config, Allowlist, error) {
 	ctx := cuecontext.New()
 	schema, err := schemaValue(ctx)
 	if err != nil {
 		return Config{}, Allowlist{}, err
 	}
 
-	configValue, err := loadCUEFile(ctx, configDir, "config.cue")
+	configValue, err := loadCUEFile(ctx, repository, "tools/code-shape-gate/config.cue")
 	if err != nil {
 		return Config{}, Allowlist{}, err
 	}
@@ -142,7 +143,7 @@ func Load(root string) (Config, Allowlist, error) {
 		return Config{}, Allowlist{}, err
 	}
 
-	allowValue, err := loadCUEFile(ctx, configDir, "allowlist.cue")
+	allowValue, err := loadCUEFile(ctx, repository, "tools/code-shape-gate/allowlist.cue")
 	if err != nil {
 		return Config{}, Allowlist{}, err
 	}
@@ -154,49 +155,36 @@ func Load(root string) (Config, Allowlist, error) {
 	return config, allowlist, nil
 }
 
-func loadCUEFile(ctx *cue.Context, dir, name string) (cue.Value, error) {
-	instances := load.Instances([]string{name}, &load.Config{
-		Context:             nil,
-		ModuleRoot:          "",
-		Module:              "",
-		AcceptLegacyModules: false,
-		Package:             "_",
-		Dir:                 dir,
-		Tags:                nil,
-		TagVars:             nil,
-		AllCUEFiles:         false,
-		Tests:               false,
-		Tools:               false,
-		SkipImports:         false,
-		DataFiles:           false,
-		ParseFile:           nil,
-		Overlay:             nil,
-		FS:                  nil,
-		FromFSPath:          nil,
-		Stdin:               nil,
-		Registry:            nil,
-		Env:                 []string{},
-	})
-	if len(instances) != 1 {
-		return cue.Value{}, fmt.Errorf("load %s: %w, got %d", name, errExpectedCUEInstance, len(instances))
-	}
-	err := instances[0].Err
+func loadCUEFile(ctx *cue.Context, repository *os.Root, name string) (cue.Value, error) {
+	data, err := repository.ReadFile(name)
 	if err != nil {
-		return cue.Value{}, fmt.Errorf("load %s: %w", name, err)
+		return cue.Value{}, fmt.Errorf("read %s: %w", name, err)
 	}
-	value := ctx.BuildInstance(instances[0])
-	buildErr := value.Err()
-	if buildErr != nil {
-		return cue.Value{}, fmt.Errorf("evaluate %s: %w", name, buildErr)
+	return compileCUEFile(ctx, data, name)
+}
+
+func compileCUEFile(ctx *cue.Context, data []byte, name string) (cue.Value, error) {
+	file, err := parser.ParseFile(name, data)
+	if err != nil {
+		return cue.Value{}, fmt.Errorf("parse %s: %w", name, err)
+	}
+	for _, declaration := range file.Decls {
+		if _, ok := declaration.(*ast.ImportDecl); ok {
+			return cue.Value{}, fmt.Errorf("%s: %w", name, errImportsForbidden)
+		}
+	}
+	value := ctx.BuildFile(file)
+	err = value.Err()
+	if err != nil {
+		return cue.Value{}, fmt.Errorf("evaluate %s: %w", name, err)
 	}
 	return value, nil
 }
 
 func decodeAllowlistBytes(ctx *cue.Context, schema cue.Value, data []byte, name string) (Allowlist, error) {
-	value := ctx.CompileBytes(data)
-	err := value.Err()
+	value, err := compileCUEFile(ctx, data, name)
 	if err != nil {
-		return Allowlist{}, fmt.Errorf("parse %s: %w", name, err)
+		return Allowlist{}, err
 	}
 	return decodeAllowlist(schema, value, name)
 }
@@ -219,8 +207,12 @@ func decodeAllowlist(schema, value cue.Value, name string) (Allowlist, error) {
 	if allowlist.Dirs == nil {
 		allowlist.Dirs = map[string]Entry{}
 	}
-	if allowlist.Functions == nil {
-		allowlist.Functions = map[string]map[string][]FunctionEntry{}
+	if entry, exists := allowlist.Dirs["."]; exists {
+		if _, duplicate := allowlist.Dirs[""]; duplicate {
+			return Allowlist{}, fmt.Errorf("%s: %w", name, errDuplicateRoot)
+		}
+		allowlist.Dirs[""] = entry
+		delete(allowlist.Dirs, ".")
 	}
 	return allowlist, nil
 }

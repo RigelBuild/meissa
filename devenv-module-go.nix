@@ -12,6 +12,9 @@ in
   };
 
   config.packages = builtins.attrValues goAnalysis ++ [ (import ./go/package.nix {
-    inherit (pkgs) buildGo127Module lib;
+    inherit lib;
+    buildGo127Module = pkgs.buildGoModule.override {
+      go = config.meissa.go.toolchain;
+    };
   }) ];
 }

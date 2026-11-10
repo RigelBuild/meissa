@@ -39,11 +39,7 @@ func Judge(cfg Config, allow, baseAllow Allowlist, snap Snapshot) []Finding {
 }
 
 func judgeMetric(cfg Config, values map[string]int, entries map[string]Entry, metric Metric) []Finding {
-	paths := make([]string, 0, len(values))
-	for path := range values {
-		paths = append(paths, path)
-	}
-	sort.Strings(paths)
+	paths := sortedEntryPaths(values)
 	findings := make([]Finding, 0)
 	for _, path := range paths {
 		value := values[path]
@@ -129,40 +125,10 @@ func judgeBaseEntries(allow, base Allowlist) []Finding {
 			}
 		}
 	}
-	return append(findings, judgeBaseFunctions(allow, base)...)
-}
-
-func judgeBaseFunctions(allow, base Allowlist) []Finding {
-	findings := []Finding{}
-	for metric, paths := range allow.Functions {
-		for path, entries := range paths {
-			for _, entry := range entries {
-				found, previous := findFunction(base.Functions[metric][path], entry.ID)
-				if !found || entry.Value > previous {
-					findings = append(findings, Finding{
-						Path:   path + ":" + entry.ID,
-						Metric: Metric(metric),
-						Value:  entry.Value,
-						Limit:  previous,
-						Fix:    "do not add or raise allowlist entries in pull requests",
-					})
-				}
-			}
-		}
-	}
 	return findings
 }
 
-func findFunction(entries []FunctionEntry, id string) (bool, int) {
-	for _, entry := range entries {
-		if entry.ID == id {
-			return true, entry.Value
-		}
-	}
-	return false, 0
-}
-
-func sortedEntryPaths(entries map[string]Entry) []string {
+func sortedEntryPaths[V any](entries map[string]V) []string {
 	paths := make([]string, 0, len(entries))
 	for path := range entries {
 		paths = append(paths, path)

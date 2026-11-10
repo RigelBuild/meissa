@@ -77,11 +77,7 @@ func inventoryPaths(repository *os.Root, output []byte, cfg Config) (Snapshot, e
 			files[trackedPath] = lines
 		}
 	}
-	return Snapshot{
-		Files:     files,
-		Dirs:      dirs,
-		Functions: map[Metric]map[string][]Entry{},
-	}, nil
+	return Snapshot{Files: files, Dirs: dirs}, nil
 }
 
 func countedPath(path string, cfg Config) bool {
@@ -132,25 +128,60 @@ func matchGlobParts(pattern, path []string) bool {
 	return matchGlobParts(pattern[1:], path[1:])
 }
 
-func physicalLines(reader io.Reader) (int, bool, error) {
-	scanner := bufio.NewScanner(reader)
+func physicalLines(source io.Reader) (int, bool, error) {
+	const bufferSize = 4096
+	const markerOverlap = len("Code generated") - 1
+	reader := bufio.NewReaderSize(source, bufferSize)
+	var window [bufferSize + markerOverlap]byte
+	var carry [markerOverlap]byte
+	var carryLen int
+	var hasGeneratedMarker, hasCodeGenerated, hasDoNotEdit bool
+	lineHasBytes := false
 	count := 0
 	generated := false
-	for scanner.Scan() {
-		count++
-		line := scanner.Text()
-		if count <= 5 && generatedLine(line) {
-			generated = true
+	observe := func(chunk []byte) {
+		if count >= 5 {
+			return
+		}
+		combined := copy(window[:], carry[:carryLen])
+		combined += copy(window[combined:], chunk)
+		line := window[:combined]
+		hasGeneratedMarker = hasGeneratedMarker || bytes.Contains(line, []byte("@generated"))
+		hasCodeGenerated = hasCodeGenerated || bytes.Contains(line, []byte("Code generated"))
+		hasDoNotEdit = hasDoNotEdit || bytes.Contains(line, []byte("DO NOT EDIT."))
+		carryLen = min(len(line), len(carry))
+		copy(carry[:], line[len(line)-carryLen:])
+	}
+	for {
+		chunk, readErr := reader.ReadSlice('\n')
+		lineHasBytes = lineHasBytes || len(chunk) > 0
+		body := chunk
+		if readErr == nil {
+			body = body[:len(body)-1]
+		}
+		if (readErr == nil || errors.Is(readErr, io.EOF)) && len(body) > 0 && body[len(body)-1] == '\r' {
+			body = body[:len(body)-1]
+		}
+		observe(body)
+		if readErr == nil || errors.Is(readErr, io.EOF) {
+			if lineHasBytes || readErr == nil {
+				count++
+				if count <= 5 && (hasGeneratedMarker || hasCodeGenerated && hasDoNotEdit) {
+					generated = true
+				}
+			}
+			carryLen = 0
+			lineHasBytes = false
+			hasGeneratedMarker = false
+			hasCodeGenerated = false
+			hasDoNotEdit = false
+		}
+		if errors.Is(readErr, io.EOF) {
+			break
+		}
+		if readErr != nil && !errors.Is(readErr, bufio.ErrBufferFull) {
+			return 0, false, fmt.Errorf("scan source lines: %w", readErr)
 		}
 	}
-	err := scanner.Err()
-	if err != nil {
-		return 0, false, fmt.Errorf("scan source lines: %w", err)
-	}
 	return count, generated, nil
-}
-
-func generatedLine(line string) bool {
-	return strings.Contains(line, "@generated") ||
-		strings.Contains(line, "Code generated") && strings.Contains(line, "DO NOT EDIT.")
 }

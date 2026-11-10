@@ -252,7 +252,11 @@ func testRefreshNilawayFetchFailure(t *testing.T) {
 func testRefreshPackageHash(t *testing.T) {
 	root, runner := newFixture(t)
 	initial := readFixture(t, root, defaultEntries()[2].File)
-	changed := strings.Replace(initial, `sha256-52zI++kDGPe4ytAL76eoTFy/FRg0d6fD+TH+m3dR/s8=`, "sha256-previous", 1)
+	current := regexp.MustCompile(`vendorHash = "([^"]+)"`).FindStringSubmatch(initial)
+	if current == nil {
+		t.Fatal("fixture package has no vendorHash")
+	}
+	changed := strings.Replace(initial, current[1], "sha256-previous", 1)
 	writeFixture(t, root, defaultEntries()[2].File, changed)
 	runner.base[defaultEntries()[2].File] = initial
 	_, err := refresh(t.Context(), root, defaultEntries()[2:], runner, envValue("main"))
@@ -271,9 +275,10 @@ func testRefreshPackageHash(t *testing.T) {
 
 func testRefreshModuleHash(t *testing.T) {
 	root, runner := newFixture(t)
-	changedModule := strings.Replace(readFixture(t, root, moduleFile), "v2.2.4", "v2.2.5", 1)
+	baseModule := readFixture(t, root, moduleFile)
+	changedModule := baseModule + "\n// fixture change\n"
 	writeFixture(t, root, moduleFile, changedModule)
-	runner.base[moduleFile] = strings.Replace(changedModule, "v2.2.5", "v2.2.4", 1)
+	runner.base[moduleFile] = baseModule
 	_, err := refresh(t.Context(), root, defaultEntries()[2:], runner, envValue("main"))
 	if err != nil {
 		t.Fatal(err)
