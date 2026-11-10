@@ -46,6 +46,10 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
 	}
+	err = reportUnmeasuredExtensions(stderr, config.Extensions)
+	if err != nil {
+		return 2
+	}
 	var base codeshape.Allowlist
 	if baseRef := env("GATE_BASE"); baseRef != "" {
 		base, err = loadBaseAllowlist(ctx, root, baseRef)
@@ -78,6 +82,20 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 		return 1
 	}
 	return 0
+}
+
+func reportUnmeasuredExtensions(output io.Writer, extensions []string) error {
+	for _, extension := range extensions {
+		switch extension {
+		case ".go", ".ts", ".tsx", ".mts", ".cts":
+			continue
+		}
+		_, err := fmt.Fprintf(output, "code-shape-gate: no function collector for %s\n", extension)
+		if err != nil {
+			return fmt.Errorf("write unmeasured extension: %w", err)
+		}
+	}
+	return nil
 }
 
 func collectMeasurements(

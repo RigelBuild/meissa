@@ -13,6 +13,15 @@ import (
 	"testing"
 )
 
+func TestUnmeasuredExtensions(t *testing.T) {
+	var output strings.Builder
+	err := reportUnmeasuredExtensions(&output, []string{".go", ".ts", ".js", ".cue"})
+	if err != nil || output.String() != "code-shape-gate: no function collector for .js\n"+
+		"code-shape-gate: no function collector for .cue\n" {
+		t.Fatalf("output=%q err=%v", output.String(), err)
+	}
+}
+
 func TestMainBaseModes(t *testing.T) {
 	for _, tc := range []struct {
 		name, base, head, ref string
