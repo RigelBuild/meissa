@@ -44,6 +44,23 @@ func TestLoad(t *testing.T) {
 	})
 }
 
+func TestLoadDirectoryLimits(t *testing.T) {
+	for _, config := range []string{
+		`dirLimits: "wide": {limit: 10, reason: "record decisions together"}`,
+		`dirLimits: "wide": {limit: 0, reason: "record decisions together"}`,
+		`dirLimits: "wide": {limit: 50, reason: "two words"}`,
+	} {
+		t.Run(config, func(t *testing.T) {
+			root := newFixtureRepo(t)
+			writeConfigFiles(t, root, validConfig+config+"\n", "files: {}\n")
+			_, _, err := Load(root)
+			if err == nil {
+				t.Fatalf("Load accepted invalid config %s", config)
+			}
+		})
+	}
+}
+
 func TestLoadMissingFiles(t *testing.T) {
 	root := newFixtureRepo(t)
 	writeConfigFiles(t, root, validConfig, "files: {}\n")

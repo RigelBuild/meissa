@@ -36,10 +36,17 @@ const (
 
 // Config contains the repository's file and directory thresholds.
 type Config struct {
-	FileLimit  int      `json:"fileLimit"`
-	DirLimit   int      `json:"dirLimit"`
-	Extensions []string `json:"extensions"`
-	Exclude    []string `json:"exclude"`
+	FileLimit  int                 `json:"fileLimit"`
+	DirLimit   int                 `json:"dirLimit"`
+	Extensions []string            `json:"extensions"`
+	Exclude    []string            `json:"exclude"`
+	DirLimits  map[string]DirLimit `json:"dirLimits"`
+}
+
+// DirLimit records a directory width exception and its reason.
+type DirLimit struct {
+	Limit  int    `json:"limit"`
+	Reason string `json:"reason"`
 }
 
 // Entry records a measured value and its burn-down reason.

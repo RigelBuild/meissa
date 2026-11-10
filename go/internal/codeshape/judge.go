@@ -29,7 +29,7 @@ func Judge(cfg Config, allow, baseAllow Allowlist, snap Snapshot) []Finding {
 				Path:   displayDir(path),
 				Metric: MetricDirs,
 				Value:  0,
-				Limit:  cfg.DirLimit,
+				Limit:  cfg.limitFor(MetricDirs, path),
 				Fix:    "remove the stale allowlist entry",
 			})
 		}
@@ -39,10 +39,6 @@ func Judge(cfg Config, allow, baseAllow Allowlist, snap Snapshot) []Finding {
 }
 
 func judgeMetric(cfg Config, values map[string]int, entries map[string]Entry, metric Metric) []Finding {
-	limit := cfg.FileLimit
-	if metric == MetricDirs {
-		limit = cfg.DirLimit
-	}
 	paths := make([]string, 0, len(values))
 	for path := range values {
 		paths = append(paths, path)
@@ -51,6 +47,7 @@ func judgeMetric(cfg Config, values map[string]int, entries map[string]Entry, me
 	findings := make([]Finding, 0)
 	for _, path := range paths {
 		value := values[path]
+		limit := cfg.limitFor(metric, path)
 		entry, listed := entries[path]
 		if !listed {
 			if value > limit {
@@ -59,7 +56,7 @@ func judgeMetric(cfg Config, values map[string]int, entries map[string]Entry, me
 					Metric: metric,
 					Value:  value,
 					Limit:  limit,
-					Fix:    fixFor(metric),
+					Fix:    fixForPath(cfg, metric, path),
 				})
 			}
 			continue
@@ -85,6 +82,29 @@ func judgeMetric(cfg Config, values map[string]int, entries map[string]Entry, me
 		}
 	}
 	return findings
+}
+
+func (cfg Config) limitFor(metric Metric, path string) int {
+	if metric != MetricDirs {
+		return cfg.FileLimit
+	}
+	limit := 0
+	for pattern, entry := range cfg.DirLimits {
+		if matchGlob(pattern, path) && (limit == 0 || entry.Limit < limit) {
+			limit = entry.Limit
+		}
+	}
+	if limit == 0 {
+		return cfg.DirLimit
+	}
+	return limit
+}
+
+func fixForPath(cfg Config, metric Metric, path string) string {
+	if metric == MetricDirs && cfg.limitFor(metric, path) != cfg.DirLimit {
+		return "reorganize the record's decisions"
+	}
+	return fixFor(metric)
 }
 
 func judgeBaseEntries(allow, base Allowlist) []Finding {

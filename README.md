@@ -45,7 +45,9 @@ The policy is the shared `[MD0nn]` rule set from `rumdl/base.toml` in this repo.
 
 ## Code shape gate
 
-`code-shape-gate` checks tracked source-file line counts and direct tracked-file counts per directory. Add `tools/code-shape-gate/config.cue` with `fileLimit`, `dirLimit`, counted `extensions`, and path `exclude` globs. The limits are 500 physical lines per file and 10 direct files per directory. File counts omit tracked files under `testdata` or `fixtures`, generated headers in the first five lines, and configured excludes. Directory counts include every tracked file.
+`code-shape-gate` checks tracked source-file line counts and direct tracked-file counts per directory. Add `tools/code-shape-gate/config.cue` with `fileLimit`, `dirLimit`, counted `extensions`, and path `exclude` globs. The default limits are 500 physical lines per file and 10 direct files per directory. File counts omit tracked files under `testdata` or `fixtures`, generated headers in the first five lines, and configured excludes. Directory counts include every tracked file except configured excludes.
+
+Optional `dirLimits` maps directory globs to `{limit: 50, reason: "record decisions together"}`. Limits must exceed 10 and reasons must contain at least three words. When multiple globs match, the smallest limit wins.
 
 Add `tools/code-shape-gate/allowlist.cue` with `files` and `dirs` maps. Each entry has a measured `value` and a `reason` of at least three words:
 

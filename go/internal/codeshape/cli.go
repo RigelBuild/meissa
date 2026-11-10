@@ -192,8 +192,8 @@ func rewriteAllowlist(cfg Config, allow Allowlist, snapshot Snapshot, seed bool)
 	}
 	maps.Copy(updated.Files, allow.Files)
 	maps.Copy(updated.Dirs, allow.Dirs)
-	changedFiles, fileErrors := rewriteEntries(updated.Files, snapshot.Files, cfg.FileLimit, MetricFiles, seed)
-	changedDirs, dirErrors := rewriteEntries(updated.Dirs, snapshot.Dirs, cfg.DirLimit, MetricDirs, seed)
+	changedFiles, fileErrors := rewriteEntries(updated.Files, snapshot.Files, cfg, MetricFiles, seed)
+	changedDirs, dirErrors := rewriteEntries(updated.Dirs, snapshot.Dirs, cfg, MetricDirs, seed)
 	errs := make([]string, 0, len(fileErrors)+len(dirErrors))
 	errs = append(errs, fileErrors...)
 	errs = append(errs, dirErrors...)
@@ -208,12 +208,13 @@ func rewriteAllowlist(cfg Config, allow Allowlist, snapshot Snapshot, seed bool)
 func rewriteEntries(
 	entries map[string]Entry,
 	values map[string]int,
-	limit int,
+	cfg Config,
 	metric Metric,
 	seed bool,
 ) (bool, []string) {
 	changed := false
 	for path, entry := range entries {
+		limit := cfg.limitFor(metric, path)
 		value, exists := values[path]
 		if !exists || value <= limit {
 			delete(entries, path)
@@ -226,6 +227,7 @@ func rewriteEntries(
 	}
 	var errs []string
 	for path, value := range values {
+		limit := cfg.limitFor(metric, path)
 		if value <= limit {
 			continue
 		}

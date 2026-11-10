@@ -132,7 +132,7 @@ func TestInventoryGeneratedAndExcluded(t *testing.T) {
 			t.Fatalf("generated=%v error=%v", generated, err)
 		}
 	})
-	t.Run("exclude glob skips file length only", func(t *testing.T) {
+	t.Run("exclude glob skips file length and directory width", func(t *testing.T) {
 		root := newFixtureRepo(t)
 		trackedFile(t, root, "pkg/large.go", strings.Repeat("line\n", 501))
 		commitFiles(t, root)
@@ -142,7 +142,7 @@ func TestInventoryGeneratedAndExcluded(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if _, exists := snapshot.Files["pkg/large.go"]; exists || snapshot.Dirs["pkg"] != 1 {
+		if _, exists := snapshot.Files["pkg/large.go"]; exists || snapshot.Dirs["pkg"] != 0 {
 			t.Fatalf("exclude applied incorrectly: %#v", snapshot)
 		}
 	})
@@ -183,6 +183,55 @@ func TestInventoryDirectoryWidth(t *testing.T) {
 	})
 }
 
+func TestConfiguredDirectoryWidths(t *testing.T) {
+	for _, tc := range []struct {
+		name, config, want string
+		count              int
+	}{
+		{
+			name: "within limit", config: `dirLimits: "wide": {limit: 50, reason: "record decisions together"}`,
+			count: 30, want: "",
+		},
+		{
+			name: "over limit", config: `dirLimits: "wide": {limit: 50, reason: "record decisions together"}`,
+			count: 51, want: "wide dirs value=51 limit=50 fix=reorganize the record's decisions\n",
+		},
+		{
+			name: "overlapping limits",
+			config: `dirLimits: {"wide": {limit: 50, reason: "record decisions together"}, ` +
+				`"w*": {limit: 20, reason: "record decisions together"}}`,
+			count: 21, want: "wide dirs value=21 limit=20 fix=reorganize the record's decisions\n",
+		},
+		{name: "excluded files", config: `exclude: ["wide/**"]`, count: 300, want: ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			root := newFixtureRepo(t)
+			config := strings.Replace(validConfig, "exclude: []", tc.config, 1)
+			if !strings.Contains(tc.config, "exclude:") {
+				config += "\nexclude: []\n"
+			}
+			writeConfigFiles(t, root, config, "files: {}\ndirs: {}\n")
+			for index := range tc.count {
+				trackedFile(t, root, fmt.Sprintf("wide/file-%03d.txt", index), "text\n")
+			}
+			commitFiles(t, root)
+			var stdout, stderr strings.Builder
+			status := Main(t.Context(), []string{root}, func(string) string { return "" }, &stdout, &stderr)
+			wantStatus := 0
+			if tc.want != "" {
+				wantStatus = 1
+			}
+			if status != wantStatus || stdout.String() != tc.want {
+				t.Fatalf("status=%d stdout=%q stderr=%q, want status=%d stdout=%q",
+					status, stdout.String(), stderr.String(), wantStatus, tc.want)
+			}
+		})
+	}
+}
+
 func testConfig() Config {
-	return Config{FileLimit: 500, DirLimit: 10, Extensions: []string{".go", ".cue"}, Exclude: []string{}}
+	return Config{
+		FileLimit: 500, DirLimit: 10, Extensions: []string{".go", ".cue"},
+		Exclude: []string{}, DirLimits: map[string]DirLimit{},
+	}
 }

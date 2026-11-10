@@ -22,3 +22,4 @@
 ### Added
 
 - Added a Renovate hash refresh command for Go source and vendor hashes, including the Go tools package vendor hash.
+- `code-shape-gate` supports per-glob directory limits and excludes matching files from directory width counts.

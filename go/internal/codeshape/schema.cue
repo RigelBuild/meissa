@@ -14,6 +14,8 @@
 	dirLimit: int & >0
 	extensions: [...string]
 	exclude: [...string]
+	// When multiple globs match, the smallest limit wins.
+	dirLimits?: [string]: {limit: int & >10, reason: string & =~"^\\S+(\\s+\\S+){2,}$"}
 })
 
 #Allowlist: close({

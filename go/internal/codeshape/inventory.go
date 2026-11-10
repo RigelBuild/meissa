@@ -47,6 +47,9 @@ func inventoryPaths(repository *os.Root, output []byte, cfg Config) (Snapshot, e
 			continue
 		}
 		trackedPath := filepath.ToSlash(string(rawPath))
+		if matchesAny(trackedPath, cfg.Exclude) {
+			continue
+		}
 		parent := filepath.ToSlash(filepath.Dir(filepath.FromSlash(trackedPath)))
 		if parent == "." {
 			parent = ""
