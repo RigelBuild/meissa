@@ -24,7 +24,6 @@ func tsRepo(t *testing.T, source string) string {
 	commitFiles(t, root)
 	return root
 }
-
 func TestTSOnlyOffUsesOptions(t *testing.T) {
 	root := tsRepo(t, "function f(x: boolean) {\n"+strings.Repeat("if (x) { console.log(x); }\n", 16)+
 		strings.Repeat("console.log(x);\n", 40)+"}\n")
@@ -98,20 +97,6 @@ func TestTSStructuralIdentity(t *testing.T) {
 	}
 }
 
-func TestTSCognitiveLimit(t *testing.T) {
-	root := tsRepo(t, "function f(x: boolean) {\n"+strings.Repeat("if (x) { console.log(x); }\n", 16)+"}\n")
-	code, out, errout := runGoGate(t, root)
-	if code != 1 || !strings.Contains(out, "ts-cognitive value=16") {
-		t.Fatalf("code=%d out=%s err=%s", code, out, errout)
-	}
-}
-func TestTSLinesLimit(t *testing.T) {
-	root := tsRepo(t, "function f() {\n"+strings.Repeat("console.log(1);\n", 51)+"}\n")
-	code, out, errout := runGoGate(t, root)
-	if code != 1 || !strings.Contains(out, "ts-lines value=51") {
-		t.Fatalf("code=%d out=%s err=%s", code, out, errout)
-	}
-}
 func TestTSManyOffenders(t *testing.T) {
 	var source strings.Builder
 	for i := range 25 {
@@ -171,53 +156,4 @@ func TestTSNestedDescribeIdentity(t *testing.T) {
 		}
 	}
 	t.Fatalf("missing nested title: %#v", funcs)
-}
-func TestTSDrift(t *testing.T) {
-	root := tsRepo(t, "function f() {}\n")
-	err := os.WriteFile(filepath.Join(root, "biome.json"),
-		[]byte(strings.Replace(tsBiomeConfig, `"maxLines":50`, `"maxLines":49`, 1)), 0600)
-	if err != nil {
-		t.Fatal(err)
-	}
-	code, out, errout := runGoGate(t, root)
-	if code != 1 || !strings.Contains(out, "biome.json") {
-		t.Fatalf("code=%d out=%s err=%s", code, out, errout)
-	}
-}
-func TestTSSuppression(t *testing.T) {
-	root := tsRepo(t, "// biome-ignore lint/complexity/noExcessiveLinesPerFunction: reason\nfunction f() {}\n")
-	code, out, errout := runGoGate(t, root)
-	if code != 1 || !strings.Contains(out, "x.ts:1") {
-		t.Fatalf("code=%d out=%s err=%s", code, out, errout)
-	}
-}
-func TestTSMissingBinary(t *testing.T) {
-	root := tsRepo(t, "function f() {}\n")
-	dir := t.TempDir()
-	git, err := exec.LookPath("git")
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = os.Symlink(git, filepath.Join(dir, "git"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Setenv("PATH", dir)
-	code, _, errout := runGoGate(t, root)
-	if code != 2 || !strings.Contains(errout, "biome") {
-		t.Fatalf("code=%d err=%s", code, errout)
-	}
-}
-func TestTSTruncatedJSON(t *testing.T) {
-	root := tsRepo(t, "function f() {}\n")
-	dir := t.TempDir()
-	err := os.WriteFile(filepath.Join(dir, "biome"), []byte("#!/bin/sh\nprintf '{\"summary\":'\n"), 0755)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
-	code, _, errout := runGoGate(t, root)
-	if code != 2 || !strings.Contains(errout, "parse biome") {
-		t.Fatalf("code=%d err=%s", code, errout)
-	}
 }

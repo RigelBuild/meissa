@@ -36,9 +36,9 @@
 	exclude: [...string]
 	// When multiple globs match, the smallest limit wins.
 	dirLimits?: [string]: {limit: int & >10, reason: string & =~"^\\S+(\\s+\\S+){2,}$"}
-    functions?: close({
-        go: close({cognitive: int & >0, lines: int & >0, statements: int & >0})
-        ts: close({cognitive: int & >0, lines: int & >0})
-    })
+	functions: close({
+		go: close({cognitive: 20, lines: 60, statements: 40})
+		ts: close({cognitive: 15, lines: 50})
+	})
 })
 

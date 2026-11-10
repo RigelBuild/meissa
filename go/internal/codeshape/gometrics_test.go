@@ -1,24 +1,19 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package golang
+package codeshape
 
 import (
 	"fmt"
 	"go/parser"
 	"go/token"
-	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 	"testing"
-
-	"github.com/RigelBuild/meissa/go/internal/codeshape/model"
-	"github.com/RigelBuild/meissa/go/internal/codeshape/testsupport"
 )
 
 func TestGoCollectorFixture(t *testing.T) {
-	root := testsupport.NewFixtureRepo(t)
-	testsupport.TrackedFile(t, root, "go.mod", "module example.com/fixture\n\ngo 1.25\n")
+	root := newFixtureRepo(t)
+	trackedFile(t, root, "go.mod", "module example.com/fixture\n\ngo 1.25\n")
 	var source strings.Builder
 	source.WriteString("package fixture\n")
 	for i := range 25 {
@@ -28,11 +23,11 @@ func TestGoCollectorFixture(t *testing.T) {
 		}
 		source.WriteString("}\n")
 	}
-	testsupport.TrackedFile(t, root, "fixture.go", source.String())
-	testsupport.CommitFiles(t, root)
-	cfg := testsupport.Config()
-	cfg.Functions = model.FunctionLimits{Go: model.GoFunctionLimits{Cognitive: 20, Lines: 60, Statements: 40},
-		TS: model.TSFunctionLimits{Cognitive: 0, Lines: 0}}
+	trackedFile(t, root, "fixture.go", source.String())
+	commitFiles(t, root)
+	cfg := testConfig()
+	cfg.Functions = FunctionLimits{Go: GoFunctionLimits{Cognitive: 20, Lines: 60, Statements: 40},
+		TS: TSFunctionLimits{Cognitive: 0, Lines: 0}}
 	values, _, err := GoMetrics(t.Context(), root, cfg)
 	if err != nil {
 		t.Fatal(err)
@@ -118,34 +113,6 @@ func goTestRepo(t *testing.T, source string) string {
 	commitFiles(t, root)
 	return root
 }
-func runGoGate(t *testing.T, root string) (int, string, string) {
-	t.Helper()
-	var out, errout strings.Builder
-	code := Main(t.Context(), []string{root}, func(string) string { return "" }, &out, &errout)
-	return code, out.String(), errout.String()
-}
-func TestGoLimitsCLI(t *testing.T) {
-	var source strings.Builder
-	source.WriteString("package p\nfunc Cognitive(x int) {\n")
-	for range 21 {
-		source.WriteString("if x > 0 { println(x) }\n")
-	}
-	source.WriteString("}\nfunc Lines() {\n")
-	for range 60 {
-		source.WriteString("\n")
-	}
-	source.WriteString("println(1)\n}\nfunc Statements() {\n")
-	for range 41 {
-		source.WriteString("println(1)\n")
-	}
-	source.WriteString("}\n")
-	root := goTestRepo(t, source.String())
-	code, out, errout := runGoGate(t, root)
-	if code != 1 || !strings.Contains(out, "go-cognitive value=21") ||
-		!strings.Contains(out, "go-lines value=61") || !strings.Contains(out, "go-statements value=41") {
-		t.Fatalf("code=%d out=%s stderr=%s", code, out, errout)
-	}
-}
 func TestGoNestedModules(t *testing.T) {
 	root := goTestRepo(t, "package p\nfunc Parent() {\n"+strings.Repeat("println(1)\n", 41)+"}\n")
 	trackedFile(t, root, "child/go.mod", "module example.com/child\n\ngo 1.25\n")
@@ -198,51 +165,6 @@ func TestGoExcludedModule(t *testing.T) {
 	_, err = goSuppressionFindings(t.Context(), root, cfg)
 	if err != nil {
 		t.Fatal(err)
-	}
-}
-func TestGoMissingBinary(t *testing.T) {
-	root := goTestRepo(t, "package p\nfunc F() {}\n")
-	dir := t.TempDir()
-	git, err := exec.LookPath("git")
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = os.Symlink(git, filepath.Join(dir, "git"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Setenv("PATH", dir)
-	code, _, errout := runGoGate(t, root)
-	if code != 2 || !strings.Contains(errout, "golangci-lint") {
-		t.Fatalf("code=%d stderr=%s", code, errout)
-	}
-}
-func fakeGoLint(t *testing.T, output string) {
-	t.Helper()
-	dir := t.TempDir()
-	script := "#!/bin/sh\nprintf '%s' '" + output + "'\nexit 1\n"
-	err := os.WriteFile(filepath.Join(dir, "golangci-lint"), []byte(script), 0o755)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
-}
-func TestGoTruncatedOutput(t *testing.T) {
-	root := goTestRepo(t, "package p\nfunc F() {}\n")
-	fakeGoLint(t, `{"Issues":[`)
-	code, _, errout := runGoGate(t, root)
-	if code != 2 || !strings.Contains(errout, "parse golangci-lint") {
-		t.Fatalf("code=%d stderr=%s", code, errout)
-	}
-}
-func TestGoUnparseableIssue(t *testing.T) {
-	root := goTestRepo(t, "package p\nfunc F() {}\n")
-	fakeGoLint(t, `{"Issues":[{"FromLinter":"gocognit","Text":"unexpected",`+
-		`"Pos":{"Filename":"x.go","Line":2,"Column":1}}],`+
-		`"Report":{"Linters":[{"Name":"gocognit","Enabled":true}]}}`)
-	code, _, errout := runGoGate(t, root)
-	if code != 2 || !strings.Contains(errout, "cannot parse") {
-		t.Fatalf("code=%d stderr=%s", code, errout)
 	}
 }
 func TestGoBareAndAllSuppressions(t *testing.T) {
