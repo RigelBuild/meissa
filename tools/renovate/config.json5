@@ -3,7 +3,8 @@
   // No Renovate schedule: the workflow's daily cron is the cadence, so a late
   // GitHub cron start still opens PRs.
   extends: ["github>RigelBuild/meissa//tools/renovate/preset.json5"],
-  enabledManagers: ["custom.regex", "bun", "npm"],
+  enabledManagers: ["custom.regex", "bun", "npm", "gomod"],
+  postUpdateOptions: ["gomodTidy"],
   customManagers: [
     {
       customType: "regex",
@@ -38,8 +39,7 @@
   ],
   packageRules: [
     {
-      // Mirrors bunfig.toml minimumReleaseAgeExcludes so Renovate and bun install agree;
-      // config.test.ts keeps the two lists equal.
+      // Mirrors bunfig.toml minimumReleaseAgeExcludes; the Go policy test keeps the lists equal.
       matchPackageNames: ["@types/bun", "bun-types"],
       minimumReleaseAge: null,
     },
@@ -67,10 +67,14 @@
       minimumReleaseAge: null,
       dependencyDashboardApproval: true,
     },
+    {
+      matchPackageNames: ["github.com/odvcencio/gotreesitter"],
+      automerge: false,
+    },
   ],
   postUpgradeTasks: {
-    commands: ["bun tools/renovate/refresh-go-analysis-hashes.ts"],
-    fileFilters: ["tools/toolchain/go-analysis-pins.nix"],
+    commands: ["go -C go run ./cmd/refresh-nix-hashes"],
+    fileFilters: ["tools/toolchain/go-analysis-pins.nix", "go/package.nix"],
     executionMode: "branch",
   },
 }

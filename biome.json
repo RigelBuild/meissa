@@ -6,7 +6,6 @@
 		"includes": [
 			"**",
 			"!rumdl-extends.test.ts",
-			"!tools/renovate/config.test.ts",
 			"!go/commentscan/testdata",
 			"!go/ledger/testdata"
 		]
