@@ -1,10 +1,5 @@
 # Changelog
 
-## Unreleased
-
-- Measure Go and TypeScript function complexity and size, with ratcheted allowlists.
-- Report unmeasured functions and Biome scope drift instead of silently passing them.
-
 ## [0.2.0](https://github.com/RigelBuild/meissa/compare/go/v0.1.0...go/v0.2.0) (2026-11-10)
 
 
@@ -41,6 +36,7 @@
 ### Added
 
 - `code-shape-gate` measures Go and TypeScript functions, reports skipped files and unmeasured extensions, and detects suppression and Biome policy drift.
+- Report unmeasured functions and Biome scope drift instead of silently passing them.
 
 
 - Added a Renovate hash refresh command for Go source and vendor hashes, including the Go tools package vendor hash.
