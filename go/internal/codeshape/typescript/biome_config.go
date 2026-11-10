@@ -69,7 +69,7 @@ func runBiome(ctx context.Context, binary, root, configDir string, paths []strin
 	args := make([]string, 0, 5+len(paths))
 	args = append(args, "lint", "--reporter=json", "--max-diagnostics="+strconv.Itoa(maxBiomeDiagnostics),
 		"--only=complexity/noExcessiveCognitiveComplexity", "--only=complexity/noExcessiveLinesPerFunction",
-		"--no-errors-on-unmatched", "--config-path", configDir)
+		"--no-errors-on-unmatched", "--config-path", configDir, "--")
 	args = append(args, paths...)
 	command := exec.CommandContext(ctx, binary, args...) //nolint:gosec // G204: execute the biome linter
 	command.Dir = root

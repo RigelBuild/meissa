@@ -41,6 +41,16 @@ func TestSkippedGoFunctionsAreFindings(t *testing.T) {
 	}
 }
 
+func TestBiomeDashPrefixedFilename(t *testing.T) {
+	root := tsRepo(t, "function healthy() {}\n")
+	trackedFile(t, root, "--only=x.ts", "function large() {\n"+strings.Repeat("console.log(1);\n", 51)+"}\n")
+	commitFiles(t, root)
+	code, out, stderr := runGoGate(t, root)
+	if code != 1 || !strings.Contains(out, "--only=x.ts#large ts-lines") {
+		t.Fatalf("code=%d out=%q stderr=%q", code, out, stderr)
+	}
+}
+
 func TestGoLimitsCLI(t *testing.T) {
 	var source strings.Builder
 	source.WriteString("package p\nfunc Cognitive(x int) {\n")
