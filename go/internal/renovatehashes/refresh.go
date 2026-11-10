@@ -25,10 +25,25 @@ func refresh(
 	getenv func(string) string,
 ) ([]Entry, error) {
 	selected, err := refreshSteps(ctx, root, entries, run, getenv)
-	if err != nil && ctx.Err() != nil {
-		return nil, failf("interrupted by %s", context.Cause(ctx))
+	if err == nil {
+		return selected, nil
 	}
-	return selected, err
+	var interruptCause error
+	switch {
+	case errors.Is(err, ErrRefreshSIGINT):
+		interruptCause = ErrRefreshSIGINT
+	case errors.Is(err, ErrRefreshSIGTERM):
+		interruptCause = ErrRefreshSIGTERM
+	case errors.Is(err, context.Canceled):
+		interruptCause = context.Cause(ctx)
+		if interruptCause == nil {
+			interruptCause = context.Canceled
+		}
+	default:
+		return selected, err
+	}
+	interruptErr := failf("interrupted by %s", interruptCause)
+	return nil, errors.Join(interruptErr, err)
 }
 
 func refreshSteps(
