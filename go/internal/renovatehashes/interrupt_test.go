@@ -24,6 +24,8 @@ func TestRefreshInterruptions(t *testing.T) {
 	t.Run("reports SIGINT when base-ref lookup is interrupted", testRefreshInterruptedBeforeSelection)
 	t.Run("classifies canceled exec child as SIGINT", testRefreshClassifiesCanceledExecChild)
 	t.Run("reports SIGINT when derivation path resolution is interrupted", testResolveDrvPathCancellation)
+	t.Run("reports SIGINT when nilaway git init is interrupted", testRefreshNilawayInitCancellation)
+	t.Run("reports SIGINT when Git root lookup is interrupted", testMainGitRootCancellation)
 	t.Run(
 		"keeps the original failure when build fails before context cancellation",
 		testRefreshBuildFailureBeforeCancellation,
@@ -152,23 +154,91 @@ func testRefreshClassifiesCanceledExecChild(t *testing.T) {
 }
 
 func testResolveDrvPathCancellation(t *testing.T) {
+	root, runner := newFixture(t)
+	initial := readFixture(t, root, pinFile)
+	changed := replaceField(t, initial, defaultEntries()[0], "rev", "0123456789abcdef0123456789abcdef01234567")
+	writeFixture(t, root, pinFile, changed)
+	runner.base[pinFile] = initial
 	ctx, cancel := context.WithCancelCause(t.Context())
 	defer cancel(nil)
-
-	cancelOnEval := cancelDuringNixEvalRunner{cancel: cancel}
-	_, err := resolveDrvPath(ctx, defaultEntries()[0], "src", cancelOnEval)
-	if !errors.Is(err, ErrRefreshSIGINT) || !strings.Contains(err.Error(), "interrupted by SIGINT") {
-		t.Fatalf("resolveDrvPath error = %v; want SIGINT interruption", err)
+	cancelOnEval := cancelDuringNixEvalRunner{fixtureRunner: runner, cancel: cancel}
+	_, err := refresh(ctx, root, defaultEntries()[:2], cancelOnEval, envValue("main"))
+	if !errors.Is(err, ErrRefreshSIGINT) || strings.Count(err.Error(), "interrupted by SIGINT") != 1 {
+		t.Fatalf("refresh error = %v; want one SIGINT interruption headline", err)
 	}
 }
 
-type cancelDuringNixEvalRunner struct {
+func testRefreshNilawayInitCancellation(t *testing.T) {
+	root, runner := newFixture(t)
+	initial := readFixture(t, root, pinFile)
+	changed := replaceField(t, initial, defaultEntries()[0], "rev", "0123456789abcdef0123456789abcdef01234567")
+	writeFixture(t, root, pinFile, changed)
+	runner.base[pinFile] = initial
+
+	ctx, cancel := context.WithCancelCause(t.Context())
+	defer cancel(nil)
+	cancelOnInit := cancelDuringNilawayInitRunner{fixtureRunner: runner, cancel: cancel}
+	_, err := refresh(ctx, root, defaultEntries()[:2], cancelOnInit, envValue("main"))
+	if !errors.Is(err, ErrRefreshSIGINT) || strings.Count(err.Error(), "interrupted by SIGINT") != 1 {
+		t.Fatalf("refresh error = %v; want SIGINT and one interruption headline", err)
+	}
+}
+
+func testMainGitRootCancellation(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	defer cancel(nil)
+	stderr := new(strings.Builder)
+	code := mainWithRunner(ctx, nil, envValue("main"), new(strings.Builder), stderr,
+		cancelDuringGitRootRunner{cancel: cancel},
+	)
+	if code != 1 || !strings.Contains(stderr.String(), "interrupted by SIGINT") ||
+		strings.Contains(stderr.String(), "could not find Git root") {
+		t.Fatalf("Main = %d, stderr %q; want interruption without Git root failure", code, stderr.String())
+	}
+}
+
+type cancelDuringNilawayInitRunner struct {
+	*fixtureRunner
+
 	cancel context.CancelCauseFunc
 }
 
-func (r cancelDuringNixEvalRunner) Run(ctx context.Context, _ string, _ ...string) (string, string, int, error) {
-	r.cancel(ErrRefreshSIGINT)
-	return "", "", -1, fmt.Errorf("run nix: %w", context.Cause(ctx))
+func (r cancelDuringNilawayInitRunner) Run(
+	ctx context.Context,
+	name string,
+	args ...string,
+) (string, string, int, error) {
+	if name == "git" && len(args) >= 3 && args[0] == "-C" && args[2] == "init" {
+		r.cancel(ErrRefreshSIGINT)
+		return "", "", -1, fmt.Errorf("run git: %w", context.Cause(ctx))
+	}
+	return r.fixtureRunner.Run(ctx, name, args...)
+}
+
+type cancelDuringGitRootRunner struct {
+	cancel context.CancelCauseFunc
+}
+
+func (r cancelDuringGitRootRunner) Run(ctx context.Context, name string, args ...string) (string, string, int, error) {
+	if name == "git" && len(args) == 2 && args[0] == "rev-parse" && args[1] == "--show-toplevel" {
+		r.cancel(ErrRefreshSIGINT)
+		return "", "", -1, fmt.Errorf("run git: %w", context.Cause(ctx))
+	}
+	return "", "unexpected command", 127, nil
+}
+
+type cancelDuringNixEvalRunner struct {
+	*fixtureRunner
+
+	cancel context.CancelCauseFunc
+}
+
+func (r cancelDuringNixEvalRunner) Run(ctx context.Context, name string, args ...string) (string, string, int, error) {
+	if name == "nix" && len(args) > 0 && args[0] == "eval" {
+		r.cancel(ErrRefreshSIGINT)
+		return "", "", -1, fmt.Errorf("run nix: %w", context.Cause(ctx))
+	}
+	return r.fixtureRunner.Run(ctx, name, args...)
 }
 
 type execRunnerCancellationRunner struct {

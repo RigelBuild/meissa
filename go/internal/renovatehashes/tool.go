@@ -161,6 +161,14 @@ func golangciLintTag(version string) (string, error) {
 	return "v" + version, nil
 }
 
+func cancellationError(ctx context.Context, err error) error {
+	cause := context.Cause(ctx)
+	if errors.Is(err, cause) {
+		return withPrefix(err)
+	}
+	return withPrefix(cause)
+}
+
 func nilawayVersionDate(ctx context.Context, rev, fetchURL string, run Runner) (string, error) {
 	if !regexp.MustCompile(`^[a-f0-9]{40}$`).MatchString(rev) {
 		return "", failf("invalid nilaway revision %s", rev)
@@ -176,14 +184,14 @@ func nilawayVersionDate(ctx context.Context, rev, fetchURL string, run Runner) (
 	_, stderr, exit, err := run.Run(ctx, "git", "-C", directory, "init", "-q")
 	if err != nil || exit != 0 {
 		if ctx.Err() != nil {
-			return "", failf("interrupted by %s", context.Cause(ctx))
+			return "", cancellationError(ctx, err)
 		}
 		return "", failf("nilaway revision fetch failed: %s", commandOutput(err, stderr))
 	}
 	_, stderr, exit, err = run.Run(ctx, "git", "-C", directory, "fetch", "--depth=1", fetchURL, rev)
 	if err != nil {
 		if ctx.Err() != nil {
-			return "", failf("interrupted by %s", context.Cause(ctx))
+			return "", cancellationError(ctx, err)
 		}
 		return "", withPrefix(err)
 	}
@@ -195,7 +203,7 @@ func nilawayVersionDate(ctx context.Context, rev, fetchURL string, run Runner) (
 	date := strings.TrimSpace(stdout)
 	if err != nil || exit != 0 || !regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`).MatchString(date) {
 		if ctx.Err() != nil {
-			return "", failf("interrupted by %s", context.Cause(ctx))
+			return "", cancellationError(ctx, err)
 		}
 		return "", failf("nilaway commit date lookup failed")
 	}
@@ -241,8 +249,7 @@ func resolveDrvPath(ctx context.Context, entry Entry, attr string, run Runner) (
 	)
 	if err != nil || exit != 0 {
 		if ctx.Err() != nil {
-			cause := context.Cause(ctx)
-			return "", errors.Join(failf("interrupted by %s", cause), cause)
+			return "", cancellationError(ctx, err)
 		}
 		return "", failf("could not resolve %s.%s: %s", entry.Name, attr, commandOutput(err, stderr))
 	}
