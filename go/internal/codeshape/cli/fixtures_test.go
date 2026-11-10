@@ -3,7 +3,7 @@
 package cli
 
 import (
-	. "github.com/RigelBuild/meissa/go/internal/codeshape"
+	"github.com/RigelBuild/meissa/go/internal/codeshape"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -58,12 +58,12 @@ func commitFiles(t *testing.T, root string) {
 		t.Fatalf("git commit: %v: %s", err, output)
 	}
 }
-func testConfig() Config {
-	return Config{
+func testConfig() codeshape.Config {
+	return codeshape.Config{
 		FileLimit: 500, DirLimit: 10, Extensions: []string{".go", ".cue"},
-		Exclude: []string{}, DirLimits: map[string]DirLimit{},
-		Functions: FunctionLimits{Go: GoFunctionLimits{Cognitive: 0, Lines: 0, Statements: 0},
-			TS: TSFunctionLimits{Cognitive: 0, Lines: 0}},
+		Exclude: []string{}, DirLimits: map[string]codeshape.DirLimit{},
+		Functions: codeshape.FunctionLimits{Go: codeshape.GoFunctionLimits{Cognitive: 0, Lines: 0, Statements: 0},
+			TS: codeshape.TSFunctionLimits{Cognitive: 0, Lines: 0}},
 	}
 }
 
@@ -84,11 +84,11 @@ func writeConfigFiles(t *testing.T, root, config, allowlist string) {
 		}
 	}
 }
-func functionEntry(entries []Entry, id string) (Entry, bool) {
+func functionEntry(entries []codeshape.Entry, id string) (codeshape.Entry, bool) {
 	for _, entry := range entries {
 		if entry.ID == id {
 			return entry, true
 		}
 	}
-	return Entry{ID: "", Value: 0, Reason: ""}, false
+	return codeshape.Entry{ID: "", Value: 0, Reason: ""}, false
 }

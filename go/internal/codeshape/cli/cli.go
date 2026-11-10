@@ -14,7 +14,7 @@ import (
 	"sort"
 	"strings"
 
-	. "github.com/RigelBuild/meissa/go/internal/codeshape"
+	"github.com/RigelBuild/meissa/go/internal/codeshape"
 )
 
 var errCannotRaiseAllowlist = errors.New("--write cannot add or raise allowlist entries")
@@ -37,12 +37,12 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
 	}
-	config, allow, err := Load(root)
+	config, allow, err := codeshape.Load(root)
 	if err != nil {
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
 	}
-	var base Allowlist
+	var base codeshape.Allowlist
 	if baseRef := env("GATE_BASE"); baseRef != "" {
 		base, err = loadBaseAllowlist(ctx, root, baseRef)
 		if err != nil {
@@ -50,12 +50,12 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 			return 2
 		}
 	}
-	snapshot, err := Inventory(ctx, root, config)
+	snapshot, err := codeshape.Inventory(ctx, root, config)
 	if err != nil {
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
 	}
-	functions, skips, err := GoMetrics(ctx, root, config)
+	functions, skips, err := codeshape.GoMetrics(ctx, root, config)
 	if err != nil {
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
@@ -65,7 +65,7 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 			return 2
 		}
 	}
-	tsFunctions, tsSkips, err := TSMetrics(ctx, root, config)
+	tsFunctions, tsSkips, err := codeshape.TSMetrics(ctx, root, config)
 	if err != nil {
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
@@ -75,21 +75,21 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 			return 2
 		}
 	}
-	functions[MetricTSCognitive] = tsFunctions[MetricTSCognitive]
-	functions[MetricTSLines] = tsFunctions[MetricTSLines]
+	functions[codeshape.MetricTSCognitive] = tsFunctions[codeshape.MetricTSCognitive]
+	functions[codeshape.MetricTSLines] = tsFunctions[codeshape.MetricTSLines]
 	snapshot.Functions = functions
-	suppressions, err := GoSuppressionFindings(ctx, root, config)
+	suppressions, err := codeshape.GoSuppressionFindings(ctx, root, config)
 	if err != nil {
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
 	}
-	tsFindings, err := TSPolicyFindings(ctx, root, config)
+	tsFindings, err := codeshape.TSPolicyFindings(ctx, root, config)
 	if err != nil {
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
 	}
 	suppressions = append(suppressions, tsFindings...)
-	SortFindings(suppressions)
+	codeshape.SortFindings(suppressions)
 	if len(suppressions) > 0 {
 		err := writeFindings(stdout, suppressions)
 		if err != nil {
@@ -101,7 +101,7 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 	if writeMode {
 		return writeUpdated(root, config, allow, base, snapshot, seed, stdout, stderr)
 	}
-	findings := Judge(config, allow, base, snapshot)
+	findings := codeshape.Judge(config, allow, base, snapshot)
 	err = writeFindings(stdout, findings)
 	if err != nil {
 		writeOutput(stderr, "code-shape-gate: write output: %v\n", err)
@@ -115,9 +115,9 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 
 func writeUpdated(
 	root string,
-	config Config,
-	allow, base Allowlist,
-	snapshot Snapshot,
+	config codeshape.Config,
+	allow, base codeshape.Allowlist,
+	snapshot codeshape.Snapshot,
 	seed bool,
 	stdout, stderr io.Writer,
 ) int {
@@ -126,7 +126,7 @@ func writeUpdated(
 		writeOutput(stderr, "code-shape-gate: %v\n", err)
 		return 2
 	}
-	findings := Judge(config, updated, base, snapshot)
+	findings := codeshape.Judge(config, updated, base, snapshot)
 	err = writeFindings(stdout, findings)
 	if err != nil {
 		writeOutput(stderr, "code-shape-gate: write output: %v\n", err)
@@ -141,7 +141,7 @@ func writeUpdated(
 			writeOutput(stderr, "code-shape-gate: open repository: %v\n", openErr)
 			return 2
 		}
-		err = repository.WriteFile("tools/code-shape-gate/allowlist.cue", Render(updated), 0o644)
+		err = repository.WriteFile("tools/code-shape-gate/allowlist.cue", codeshape.Render(updated), 0o644)
 		closeErr := repository.Close()
 		err = errors.Join(err, closeErr)
 		if err != nil {
@@ -177,28 +177,28 @@ func parseArgs(args []string) (bool, bool, string, bool) {
 	return writeMode, seed, args[0], true
 }
 
-func loadBaseAllowlist(ctx context.Context, root, ref string) (Allowlist, error) {
+func loadBaseAllowlist(ctx context.Context, root, ref string) (codeshape.Allowlist, error) {
 	// ls-tree validates the ref and returns no paths for a missing allowlist.
 	//nolint:gosec // The ref is an argument to a fixed git command.
 	command := exec.CommandContext(ctx, "git", "ls-tree", "--name-only", ref, "--", "tools/code-shape-gate/allowlist.cue")
 	command.Dir = root
 	data, err := command.Output()
 	if err != nil {
-		return Allowlist{}, gitBaseError(ref, err)
+		return codeshape.Allowlist{}, gitBaseError(ref, err)
 	}
 	if len(data) == 0 {
-		return EmptyAllowlist(), nil
+		return codeshape.EmptyAllowlist(), nil
 	}
 	//nolint:gosec // The ref is an argument to a fixed git command.
 	command = exec.CommandContext(ctx, "git", "show", "--end-of-options", ref+":tools/code-shape-gate/allowlist.cue")
 	command.Dir = root
 	data, err = command.Output()
 	if err != nil {
-		return Allowlist{}, gitBaseError(ref, err)
+		return codeshape.Allowlist{}, gitBaseError(ref, err)
 	}
-	allowlist, err := DecodeBaseAllowlist(data)
+	allowlist, err := codeshape.DecodeBaseAllowlist(data)
 	if err != nil {
-		return Allowlist{}, err
+		return codeshape.Allowlist{}, err
 	}
 	allowlist.Present = true
 	return allowlist, nil
@@ -212,20 +212,18 @@ func gitBaseError(ref string, err error) error {
 	return fmt.Errorf("read base allowlist at %q: %w", ref, err)
 }
 
-func rewriteAllowlist(cfg Config, allow Allowlist, snapshot Snapshot, seed bool) (Allowlist, bool, error) {
-	updated := Allowlist{
-		Files:     make(map[string]Entry, len(allow.Files)),
-		Dirs:      make(map[string]Entry, len(allow.Dirs)),
-		Functions: make(FunctionMeasurements),
+func rewriteAllowlist(cfg codeshape.Config, allow codeshape.Allowlist, snapshot codeshape.Snapshot, seed bool) (codeshape.Allowlist, bool, error) {
+	updated := codeshape.Allowlist{
+		Files:     make(map[string]codeshape.Entry, len(allow.Files)),
+		Dirs:      make(map[string]codeshape.Entry, len(allow.Dirs)),
+		Functions: make(codeshape.FunctionMeasurements),
 		Present:   true,
 	}
 	maps.Copy(updated.Files, allow.Files)
 	maps.Copy(updated.Dirs, allow.Dirs)
-	changedFiles, fileErrors := rewriteEntries(updated.Files, snapshot.Files, cfg, MetricFiles, seed)
-	changedDirs, dirErrors := rewriteEntries(updated.Dirs, snapshot.Dirs, cfg, MetricDirs, seed)
-	changedFunctions, functionErrors := RewriteFunctionEntries(
-		updated.Functions, allow.Functions, snapshot.Functions, cfg, seed,
-	)
+	changedFiles, fileErrors := rewriteEntries(updated.Files, snapshot.Files, cfg, codeshape.MetricFiles, seed)
+	changedDirs, dirErrors := rewriteEntries(updated.Dirs, snapshot.Dirs, cfg, codeshape.MetricDirs, seed)
+	changedFunctions, functionErrors := codeshape.RewriteFunctionEntries(updated.Functions, allow.Functions, snapshot.Functions, cfg, seed)
 	errs := make([]string, 0, len(fileErrors)+len(dirErrors))
 	errs = append(errs, fileErrors...)
 	errs = append(errs, dirErrors...)
@@ -239,10 +237,10 @@ func rewriteAllowlist(cfg Config, allow Allowlist, snapshot Snapshot, seed bool)
 }
 
 func rewriteEntries(
-	entries map[string]Entry,
+	entries map[string]codeshape.Entry,
 	values map[string]int,
-	cfg Config,
-	metric Metric,
+	cfg codeshape.Config,
+	metric codeshape.Metric,
 	seed bool,
 ) (bool, []string) {
 	changed := false
@@ -278,7 +276,7 @@ func rewriteEntries(
 		} else {
 			errMessage := fmt.Sprintf(
 				"%s %s value %d needs --seed to add or raise the allowlist",
-				DisplayPath(metric, path),
+				codeshape.DisplayPath(metric, path),
 				metric,
 				value,
 			)
@@ -293,7 +291,7 @@ func writeOutput(output io.Writer, format string, args ...any) bool {
 	return err == nil
 }
 
-func writeFindings(output io.Writer, findings []Finding) error {
+func writeFindings(output io.Writer, findings []codeshape.Finding) error {
 	for _, finding := range findings {
 		_, err := fmt.Fprintf(
 			output,

@@ -4,7 +4,7 @@ package cli
 
 import (
 	"fmt"
-	. "github.com/RigelBuild/meissa/go/internal/codeshape"
+	"github.com/RigelBuild/meissa/go/internal/codeshape"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -113,11 +113,11 @@ func TestWriteUpdatedRejectsEscapingAllowlist(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	allow := EmptyAllowlist()
-	allow.Files["gone.go"] = Entry{ID: "", Value: 501, Reason: "split by concern"}
-	snapshot := Snapshot{Files: map[string]int{}, Dirs: map[string]int{}, Functions: nil}
+	allow := codeshape.EmptyAllowlist()
+	allow.Files["gone.go"] = codeshape.Entry{ID: "", Value: 501, Reason: "split by concern"}
+	snapshot := codeshape.Snapshot{Files: map[string]int{}, Dirs: map[string]int{}, Functions: nil}
 	var stdout, stderr strings.Builder
-	code := writeUpdated(root, testConfig(), allow, EmptyAllowlist(), snapshot, false, &stdout, &stderr)
+	code := writeUpdated(root, testConfig(), allow, codeshape.EmptyAllowlist(), snapshot, false, &stdout, &stderr)
 	data, err := os.ReadFile(outside)
 	if code != 2 || err != nil || string(data) != "unchanged" {
 		t.Fatalf("code=%d outside=%q error=%v stderr=%q", code, data, err, stderr.String())
@@ -161,8 +161,8 @@ func TestMainPrintsBaseAndMeasuredFindings(t *testing.T) {
 }
 
 func TestSeedPreservesReason(t *testing.T) {
-	entries := map[string]Entry{"large.go": {ID: "", Value: 501, Reason: "keep curated reason"}}
-	_, errs := rewriteEntries(entries, map[string]int{"large.go": 502}, testConfig(), MetricFiles, true)
+	entries := map[string]codeshape.Entry{"large.go": {ID: "", Value: 501, Reason: "keep curated reason"}}
+	_, errs := rewriteEntries(entries, map[string]int{"large.go": 502}, testConfig(), codeshape.MetricFiles, true)
 	if len(errs) != 0 || entries["large.go"].Reason != "keep curated reason" || entries["large.go"].Value != 502 {
 		t.Fatalf("entries=%#v errors=%v", entries, errs)
 	}
@@ -234,7 +234,7 @@ func TestMainModes(t *testing.T) {
 		if code != 0 {
 			t.Fatalf("Main = %d, stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 		}
-		_, allowlist, err := Load(root)
+		_, allowlist, err := codeshape.Load(root)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -255,7 +255,7 @@ func TestMainWriteUpdates(t *testing.T) {
 		if code != 0 {
 			t.Fatalf("Main = %d, stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 		}
-		_, allowlist, err := Load(root)
+		_, allowlist, err := codeshape.Load(root)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -273,7 +273,7 @@ func TestMainWriteUpdates(t *testing.T) {
 		if code != 0 {
 			t.Fatalf("Main = %d, stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 		}
-		_, allowlist, err := Load(root)
+		_, allowlist, err := codeshape.Load(root)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -301,22 +301,22 @@ func TestMainWriteUpdates(t *testing.T) {
 func TestRewriteFunctionEntries(t *testing.T) {
 	cfg := testConfig()
 	cfg.Functions.Go.Lines = 60
-	allow := Allowlist{Files: nil, Dirs: nil, Present: false, Functions: FunctionMeasurements{MetricGoLines: {"f.go": {
+	allow := codeshape.Allowlist{Files: nil, Dirs: nil, Present: false, Functions: codeshape.FunctionMeasurements{codeshape.MetricGoLines: {"f.go": {
 		{ID: "lower", Value: 80, Reason: "split by concern"},
 		{ID: "remove", Value: 70, Reason: "split by concern"},
 	}}}}
-	values := FunctionMeasurements{MetricGoLines: {"f.go": {
+	values := codeshape.FunctionMeasurements{codeshape.MetricGoLines: {"f.go": {
 		{ID: "lower", Value: 70, Reason: ""}, {ID: "new", Value: 61, Reason: ""},
 	}}}
-	_, _, err := rewriteAllowlist(cfg, allow, Snapshot{Files: nil, Dirs: nil, Functions: values}, false)
+	_, _, err := rewriteAllowlist(cfg, allow, codeshape.Snapshot{Files: nil, Dirs: nil, Functions: values}, false)
 	if err == nil {
 		t.Fatal("write accepted a new offender")
 	}
-	updated, changed, err := rewriteAllowlist(cfg, allow, Snapshot{Files: nil, Dirs: nil, Functions: values}, true)
+	updated, changed, err := rewriteAllowlist(cfg, allow, codeshape.Snapshot{Files: nil, Dirs: nil, Functions: values}, true)
 	if err != nil || !changed {
 		t.Fatalf("seed: changed=%v err=%v", changed, err)
 	}
-	got := updated.Functions[MetricGoLines]["f.go"]
+	got := updated.Functions[codeshape.MetricGoLines]["f.go"]
 	if len(got) != 2 {
 		t.Fatalf("seed entries: %#v", got)
 	}
