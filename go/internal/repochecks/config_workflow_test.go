@@ -47,14 +47,14 @@ func TestRenovatePolicyScheduledWorkflow(t *testing.T) {
 				t.Fatalf("PATH setup/assert order is invalid: %v", pair)
 			}
 		}
-	assertRun(t, steps[devenv],
-		"echo \"$(nix build --no-link --print-out-paths --inputs-from . nixpkgs#devenv)/bin\" >> \"$GITHUB_PATH\"")
+		assertRun(t, steps[devenv],
+			"echo \"$(nix build --no-link --print-out-paths --inputs-from . nixpkgs#devenv)/bin\" >> \"$GITHUB_PATH\"")
 		assertRun(t, steps[devenvAssert], "command -v devenv")
-	assertRun(t, steps[node],
-		"echo \"$(nix build --no-link --print-out-paths --inputs-from . nixpkgs#nodejs)/bin\" >> \"$GITHUB_PATH\"")
+		assertRun(t, steps[node],
+			"echo \"$(nix build --no-link --print-out-paths --inputs-from . nixpkgs#nodejs)/bin\" >> \"$GITHUB_PATH\"")
 		assertRun(t, steps[nodeAssert], "node --version")
-	assertRun(t, steps[goToolchain],
-		"echo \"$(nix build --no-link --print-out-paths --inputs-from . nixpkgs#go_1_27)/bin\" >> \"$GITHUB_PATH\"")
+		assertRun(t, steps[goToolchain],
+			"echo \"$(nix build --no-link --print-out-paths --inputs-from . nixpkgs#go_1_27)/bin\" >> \"$GITHUB_PATH\"")
 		assertRun(t, steps[goAssert], "go version")
 	})
 }
