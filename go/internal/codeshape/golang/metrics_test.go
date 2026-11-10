@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package codeshape
+package golang
 
 import (
 	"fmt"
@@ -11,11 +11,14 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/RigelBuild/meissa/go/internal/codeshape/model"
+	"github.com/RigelBuild/meissa/go/internal/codeshape/testsupport"
 )
 
 func TestGoCollectorFixture(t *testing.T) {
-	root := newFixtureRepo(t)
-	trackedFile(t, root, "go.mod", "module example.com/fixture\n\ngo 1.25\n")
+	root := testsupport.NewFixtureRepo(t)
+	testsupport.TrackedFile(t, root, "go.mod", "module example.com/fixture\n\ngo 1.25\n")
 	var source strings.Builder
 	source.WriteString("package fixture\n")
 	for i := range 25 {
@@ -25,11 +28,11 @@ func TestGoCollectorFixture(t *testing.T) {
 		}
 		source.WriteString("}\n")
 	}
-	trackedFile(t, root, "fixture.go", source.String())
-	commitFiles(t, root)
-	cfg := testConfig()
-	cfg.Functions = FunctionLimits{Go: GoFunctionLimits{Cognitive: 20, Lines: 60, Statements: 40},
-		TS: TSFunctionLimits{Cognitive: 0, Lines: 0}}
+	testsupport.TrackedFile(t, root, "fixture.go", source.String())
+	testsupport.CommitFiles(t, root)
+	cfg := testsupport.Config()
+	cfg.Functions = model.FunctionLimits{Go: model.GoFunctionLimits{Cognitive: 20, Lines: 60, Statements: 40},
+		TS: model.TSFunctionLimits{Cognitive: 0, Lines: 0}}
 	values, _, err := GoMetrics(t.Context(), root, cfg)
 	if err != nil {
 		t.Fatal(err)

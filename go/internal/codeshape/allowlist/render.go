@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package codeshape
+package allowlist
 
 import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/RigelBuild/meissa/go/internal/codeshape/model"
 )
 
-// Render serializes the T1 file and directory entries in stable key order.
-func Render(allow Allowlist) []byte {
+// Render serializes the allowlist in stable key order.
+func Render(allow model.Allowlist) []byte {
 	var output strings.Builder
 	writeEntries(&output, "files", allow.Files)
 	writeEntries(&output, "dirs", allow.Dirs)
@@ -20,7 +22,7 @@ func Render(allow Allowlist) []byte {
 	return []byte(output.String())
 }
 
-func writeEntries(output *strings.Builder, name string, entries map[string]Entry) {
+func writeEntries(output *strings.Builder, name string, entries map[string]model.Entry) {
 	if len(entries) == 0 {
 		return
 	}
@@ -38,16 +40,16 @@ func writeEntries(output *strings.Builder, name string, entries map[string]Entry
 	output.WriteString("}\n")
 }
 
-func writeFunctionEntries(output *strings.Builder, functions map[Metric]map[string][]Entry) {
-	for _, metric := range functionMetrics() {
+func writeFunctionEntries(output *strings.Builder, functions model.FunctionMeasurements) {
+	for _, metric := range model.FunctionMetrics() {
 		paths := functions[metric]
 		if len(paths) == 0 {
 			continue
 		}
 		output.WriteString("functions: " + strconv.Quote(string(metric)) + ": {\n")
-		for _, path := range sortedEntryPaths(paths) {
+		for _, path := range sortedPaths(paths) {
 			output.WriteString("\t" + strconv.Quote(path) + ": [\n")
-			for _, entry := range sortedFunctionEntries(paths[path]) {
+			for _, entry := range model.SortedFunctionEntries(paths[path]) {
 				output.WriteString("\t\t{id: " + strconv.Quote(entry.ID) + ", value: " + strconv.Itoa(entry.Value) +
 					", reason: " + strconv.Quote(entry.Reason) + "},\n")
 			}
@@ -55,4 +57,13 @@ func writeFunctionEntries(output *strings.Builder, functions map[Metric]map[stri
 		}
 		output.WriteString("}\n")
 	}
+}
+
+func sortedPaths[V any](entries map[string]V) []string {
+	paths := make([]string, 0, len(entries))
+	for path := range entries {
+		paths = append(paths, path)
+	}
+	sort.Strings(paths)
+	return paths
 }
