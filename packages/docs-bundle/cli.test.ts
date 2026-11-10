@@ -68,4 +68,12 @@ describe("docs-bundle check", () => {
 		expect(result.exitCode).toBe(1);
 		expect(result.stderr).toContain("docs-bundle: 2 page(s)");
 	});
+
+	test("exits 2 when the required config is missing", async () => {
+		const root = await makeRepo();
+		await rm(join(root, "docs-bundle.toml"));
+		const result = await check(root);
+		expect(result.exitCode).toBe(2);
+		expect(result.stderr).toContain("docs-bundle: configuration error");
+	});
 });
