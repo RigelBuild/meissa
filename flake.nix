@@ -69,7 +69,11 @@
             ];
           };
           packages = evaluated.config.packages;
-          expectedPackages = [ pkgs.hello self.packages.${system}.tools ] ++ builtins.attrValues goAnalysis;
+          tools = import ./go/package.nix {
+            inherit (pkgs) lib;
+            buildGo127Module = pkgs.buildGoModule.override { go = pkgs.go; };
+          };
+          expectedPackages = [ pkgs.hello tools ] ++ builtins.attrValues goAnalysis;
           hasExpectedPackages = builtins.length packages == 6
             && builtins.all (package: builtins.elem package packages) expectedPackages
             && builtins.all (tool: builtins.elem tool packages) (builtins.attrValues goAnalysis);
