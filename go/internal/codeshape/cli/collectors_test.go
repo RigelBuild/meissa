@@ -146,6 +146,17 @@ func TestTSLinesLimit(t *testing.T) {
 		t.Fatalf("code=%d out=%s err=%s", code, out, errout)
 	}
 }
+
+func TestBiomeMeasuredErrors(t *testing.T) {
+	source := "function f(x: boolean) {\n" + strings.Repeat("if (x) { console.log(x); }\n", 51) + "}\n"
+	root := tsRepo(t, source)
+	trackedFile(t, root, "biome.json", strings.ReplaceAll(tsBiomeConfig, `"warn"`, `"error"`))
+	commitFiles(t, root)
+	code, out, stderr := runGoGate(t, root)
+	if code != 1 || !strings.Contains(out, "ts-lines") || !strings.Contains(out, "ts-cognitive") {
+		t.Fatalf("code=%d out=%q stderr=%q", code, out, stderr)
+	}
+}
 func TestTSDrift(t *testing.T) {
 	root := tsRepo(t, "function f() {}\n")
 	err := os.WriteFile(filepath.Join(root, "biome.json"),

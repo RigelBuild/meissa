@@ -210,7 +210,8 @@ func runBiome(ctx context.Context, binary, root string, paths []string) (biomeRe
 	command.Stdout = &stdout
 	command.Stderr = &stderr
 	runErr := command.Run()
-	if runErr != nil {
+	var exitErr *exec.ExitError
+	if runErr != nil && (!errors.As(runErr, &exitErr) || exitErr.ExitCode() != 1) {
 		return biomeReport{}, fmt.Errorf("biome lint failed: %w: %s", runErr, strings.TrimSpace(stderr.String()))
 	}
 	var report biomeReport
@@ -221,8 +222,9 @@ func runBiome(ctx context.Context, binary, root string, paths []string) (biomeRe
 	if report.Summary == nil || report.Diagnostics == nil {
 		return biomeReport{}, errBiomeMissingOutput
 	}
-	if report.Summary.Errors > 0 {
-		return biomeReport{}, fmt.Errorf("biome reported %d errors: %w", report.Summary.Errors, errBiomeReported)
+	err = validateBiomeErrors(report)
+	if err != nil {
+		return biomeReport{}, err
 	}
 	return report, nil
 }

@@ -3,6 +3,7 @@
 package typescript
 
 import (
+	"fmt"
 	"path/filepath"
 
 	"github.com/RigelBuild/meissa/go/internal/codeshape"
@@ -31,4 +32,22 @@ func isTypeScriptPath(path string) bool {
 	default:
 		return false
 	}
+}
+
+func validateBiomeErrors(report biomeReport) error {
+	count := 0
+	metrics := biomeRuleMetrics()
+	for _, diagnostic := range report.Diagnostics {
+		if diagnostic.Severity != "error" {
+			continue
+		}
+		if _, ok := metrics[diagnostic.Category]; !ok {
+			return fmt.Errorf("biome reported %s: %w", diagnostic.Category, errBiomeReported)
+		}
+		count++
+	}
+	if count != report.Summary.Errors {
+		return fmt.Errorf("biome reported %d errors with %d diagnostics: %w", report.Summary.Errors, count, errBiomeReported)
+	}
+	return nil
 }

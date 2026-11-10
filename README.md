@@ -53,6 +53,8 @@ The gate also measures Go cognitive complexity, function lines and statements, a
 
 Function allowlist entries are keyed by metric, path and function ID. Go IDs use function and receiver names, with closure ordinals within their enclosing function. TypeScript IDs use enclosing functions, classes and test titles where available. Suppression directives and mismatched Biome rule options are findings. Skips are printed on stderr. If Biome reports a measured rule in a TypeScript file the function collector cannot parse, the gate reports a file-level finding and preserves its existing function allowlist entries on `--write`.
 
+The two measured Biome rules may use `warn` or `error` levels. Both report gate findings when a function exceeds its limit.
+
 ```cue
 functions: "go-lines": "src/example.go": [{id: "Example", value: 70, reason: "split by concern"}]
 ```
