@@ -6,9 +6,9 @@ package typescript
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"slices"
@@ -86,10 +86,11 @@ func TSMetrics(ctx context.Context, root string, cfg codeshape.Config) (
 	if len(sources) == 0 {
 		return codeshape.NewFunctionMeasurements(), nil, nil
 	}
-	report, skips, err := prepareBiome(ctx, root, paths, sources)
+	report, err := prepareBiome(ctx, root, cfg, sources)
 	if err != nil {
 		return nil, nil, err
 	}
+	var skips []codeshape.Skip
 	values := codeshape.NewFunctionMeasurements()
 	files := make(map[string][]tsFunction, len(sources))
 	for path, source := range sources {
@@ -114,37 +115,58 @@ func TSMetrics(ctx context.Context, root string, cfg codeshape.Config) (
 	return values, skips, nil
 }
 
-func prepareBiome(ctx context.Context, root string, tracked []string, sources map[string][]byte) (
-	biomeReport, []codeshape.Skip, error,
+func prepareBiome(ctx context.Context, root string, cfg codeshape.Config, sources map[string][]byte) (
+	biomeReport, error,
 ) {
 	binary, err := exec.LookPath("biome")
 	if err != nil {
-		return biomeReport{}, nil, fmt.Errorf("find biome: %w", err)
+		return biomeReport{}, fmt.Errorf("find biome: %w", err)
 	}
 	err = codeshape.CheckToolVersion(ctx, binary, codeshape.BiomeVersion)
 	if err != nil {
-		return biomeReport{}, nil, fmt.Errorf("check biome: %w", err)
+		return biomeReport{}, fmt.Errorf("check biome: %w", err)
 	}
 	var paths []string
 	for path := range sources {
 		paths = append(paths, path)
 	}
 	sort.Strings(paths)
-	skips, included, ignored, err := biomeSkippedPaths(root, tracked, paths, sources)
+	dir, err := os.MkdirTemp("", "code-shape-biome-*")
 	if err != nil {
-		return biomeReport{}, nil, err
+		return biomeReport{}, fmt.Errorf("create Biome config directory: %w", err)
 	}
-	report, err := runBiomePartition(ctx, binary, root, included, len(included))
+	report, runErr := runGateBiome(ctx, binary, root, dir, paths, cfg.Functions)
+	removeErr := os.RemoveAll(dir)
+	err = errors.Join(runErr, removeErr)
 	if err != nil {
-		return biomeReport{}, nil, err
+		return biomeReport{}, err
 	}
-	if len(ignored) > 0 {
-		_, err = runBiomePartition(ctx, binary, root, ignored, 0)
-		if err != nil {
-			return biomeReport{}, nil, err
-		}
+	return report, nil
+}
+
+func runGateBiome(ctx context.Context, binary, root, dir string, paths []string, limits codeshape.FunctionLimits) (
+	biomeReport, error,
+) {
+	parser, err := rootBiomeParser(root)
+	if err != nil {
+		return biomeReport{}, err
 	}
-	return report, skips, nil
+	_, err = writeGateBiomeConfig(dir, limits, parser)
+	if err != nil {
+		return biomeReport{}, err
+	}
+	report, err := runBiome(ctx, binary, root, dir, paths)
+	if err != nil {
+		return biomeReport{}, err
+	}
+	if report.Summary.DiagnosticsNotPrinted != 0 {
+		return biomeReport{}, fmt.Errorf("%w: %d were not printed",
+			errBiomeTruncated, report.Summary.DiagnosticsNotPrinted)
+	}
+	if report.Summary.Changed+report.Summary.Unchanged != len(paths) {
+		return biomeReport{}, fmt.Errorf("processed count differs from requested paths: %w", errBiomeMissingOutput)
+	}
+	return report, nil
 }
 
 func readTSSources(root string, paths []string, cfg codeshape.Config) (map[string][]byte, error) {
@@ -203,37 +225,6 @@ func applyBiomeIssues(report biomeReport, files map[string][]tsFunction, sources
 		codeshape.AppendFunctionValue(values, metric, path, function.id, value)
 	}
 	return nil
-}
-
-func runBiome(ctx context.Context, binary, root string, paths []string) (biomeReport, error) {
-	args := make([]string, 0, 5+len(paths))
-	args = append(args, "lint", "--reporter=json", "--max-diagnostics="+strconv.Itoa(maxBiomeDiagnostics),
-		"--only=complexity/noExcessiveCognitiveComplexity", "--only=complexity/noExcessiveLinesPerFunction",
-		"--no-errors-on-unmatched")
-	args = append(args, paths...)
-	command := exec.CommandContext(ctx, binary, args...) //nolint:gosec // G204: execute the biome linter
-	command.Dir = root
-	var stdout, stderr bytes.Buffer
-	command.Stdout = &stdout
-	command.Stderr = &stderr
-	runErr := command.Run()
-	var exitErr *exec.ExitError
-	if runErr != nil && (!errors.As(runErr, &exitErr) || exitErr.ExitCode() != 1) {
-		return biomeReport{}, fmt.Errorf("biome lint failed: %w: %s", runErr, strings.TrimSpace(stderr.String()))
-	}
-	var report biomeReport
-	err := json.Unmarshal(stdout.Bytes(), &report)
-	if err != nil {
-		return biomeReport{}, fmt.Errorf("parse biome output: %w", err)
-	}
-	if report.Summary == nil || report.Diagnostics == nil {
-		return biomeReport{}, errBiomeMissingOutput
-	}
-	err = validateBiomeErrors(report)
-	if err != nil {
-		return biomeReport{}, err
-	}
-	return report, nil
 }
 
 func readBiomeConfig(root, path string) (map[string]any, error) {

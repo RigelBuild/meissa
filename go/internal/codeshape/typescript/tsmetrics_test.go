@@ -40,7 +40,7 @@ func TestTSOnlyOffUsesOptions(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	report, err := runBiome(t.Context(), binary, root, []string{"x.ts"})
+	report, err := runBiome(t.Context(), binary, root, root, []string{"x.ts"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,7 +56,7 @@ func TestTSOnlyOffUsesOptions(t *testing.T) {
 	}
 }
 
-func TestTSIgnoredFileIsSkipped(t *testing.T) {
+func TestTSRepositoryIgnoredFileIsMeasured(t *testing.T) {
 	root := tsRepo(t, "function f() {}\n")
 	config := strings.Replace(tsBiomeConfig, `{`, `{"files":{"includes":["**", "!ignored.ts"]},`, 1)
 	err := os.WriteFile(filepath.Join(root, "biome.json"), []byte(config), 0600)
@@ -70,36 +70,8 @@ func TestTSIgnoredFileIsSkipped(t *testing.T) {
 		t.Fatal(err)
 	}
 	values, skips, err := TSMetrics(t.Context(), root, cfg)
-	if err != nil || len(skips) != 1 || skips[0].Path != "ignored.ts" ||
-		len(values[codeshape.MetricTSLines]["ignored.ts"]) != 0 {
+	if err != nil || len(skips) != 0 || len(values[codeshape.MetricTSLines]["ignored.ts"]) != 1 {
 		t.Fatalf("values=%v skips=%v err=%v", values, skips, err)
-	}
-}
-
-func TestBiomeOppositeScopeMismatchesFailClosed(t *testing.T) {
-	root := tsRepo(t, "function f() {}\n")
-	config := strings.Replace(tsBiomeConfig, `{`, `{"files":{"includes":["**", "!ignored.ts"]},`, 1)
-	trackedFile(t, root, "biome.json", config)
-	trackedFile(t, root, "ignored.ts", "function ignored() {}\n")
-	commitFiles(t, root)
-	binary, err := exec.LookPath("biome")
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, tc := range []struct {
-		name     string
-		paths    []string
-		expected int
-	}{
-		{"predicted processed", []string{"ignored.ts"}, 1},
-		{"predicted ignored", []string{"x.ts"}, 0},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			_, err := runBiomePartition(t.Context(), binary, root, tc.paths, tc.expected)
-			if err == nil {
-				t.Fatal("scope mismatch passed")
-			}
-		})
 	}
 }
 
