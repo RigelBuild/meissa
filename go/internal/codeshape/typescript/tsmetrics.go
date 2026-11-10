@@ -99,7 +99,8 @@ func TSMetrics(ctx context.Context, root string, cfg codeshape.Config) (
 	for path, source := range sources {
 		functions, tree, err := parseTSFunctions(path, source)
 		if err != nil {
-			skips = append(skips, codeshape.Skip{Path: path, Reason: err.Error()})
+			skips = append(skips, codeshape.Skip{Path: path, Reason: err.Error(),
+				Unmeasured: &codeshape.UnmeasuredFunctions{Values: map[codeshape.Metric]int{}}})
 			delete(sources, path)
 			continue
 		}
@@ -168,7 +169,7 @@ func biomeSkippedPaths(ctx context.Context, binary, root string, paths []string,
 		}
 		if single.Summary.Changed+single.Summary.Unchanged == 0 {
 			delete(sources, path)
-			skips = append(skips, codeshape.Skip{Path: path, Reason: "ignored by Biome"})
+			skips = append(skips, codeshape.Skip{Path: path, Reason: "ignored by Biome", Unmeasured: nil})
 		}
 	}
 	return skips, nil
@@ -185,6 +186,15 @@ func applyBiomeIssues(report biomeReport, files map[string][]tsFunction, sources
 		}
 		path := filepath.ToSlash(diagnostic.Location.Path)
 		functions, exists := files[path]
+		if !exists {
+			recorded, err := recordUnparseableIssue(skips, path, metric, diagnostic.Message)
+			if err != nil {
+				return err
+			}
+			if recorded {
+				continue
+			}
+		}
 		if _, included := sources[path]; !included && slices.ContainsFunc(skips, func(skip codeshape.Skip) bool {
 			return skip.Path == path
 		}) {
@@ -206,15 +216,6 @@ func applyBiomeIssues(report biomeReport, files map[string][]tsFunction, sources
 		codeshape.AppendFunctionValue(values, metric, path, function.id, value)
 	}
 	return nil
-}
-
-func isTypeScriptPath(path string) bool {
-	switch filepath.Ext(path) {
-	case ".ts", ".tsx", ".mts", ".cts":
-		return true
-	default:
-		return false
-	}
 }
 
 func runBiome(ctx context.Context, binary, root string, paths []string) (biomeReport, error) {

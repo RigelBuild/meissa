@@ -51,7 +51,7 @@ Optional `dirLimits` maps directory globs to `{limit: 50, reason: "record decisi
 
 The gate also measures Go cognitive complexity, function lines and statements, and TypeScript cognitive complexity and function lines. The optional `functions` field uses the fixed Go limits 20, 60 and 40, and TypeScript limits 15 and 50. Existing configurations may omit it. Function collection requires `golangci-lint` and `biome` on PATH. The gate reports counted extensions without a collector on stderr.
 
-Function allowlist entries are keyed by metric, path and function ID. Go IDs use function and receiver names, with closure ordinals within their enclosing function. TypeScript IDs use enclosing functions, classes and test titles where available. Suppression directives and mismatched Biome rule options are findings. Files that cannot be measured are reported as skips on stderr; skips do not change the exit code.
+Function allowlist entries are keyed by metric, path and function ID. Go IDs use function and receiver names, with closure ordinals within their enclosing function. TypeScript IDs use enclosing functions, classes and test titles where available. Suppression directives and mismatched Biome rule options are findings. Skips are printed on stderr. If Biome reports a measured rule in a TypeScript file the function collector cannot parse, the gate reports a file-level finding and preserves its existing function allowlist entries on `--write`.
 
 ```cue
 functions: "go-lines": "src/example.go": [{id: "Example", value: 70, reason: "split by concern"}]

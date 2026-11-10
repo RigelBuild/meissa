@@ -11,8 +11,14 @@ import (
 
 // Skip records a source file that could not be measured.
 type Skip struct {
-	Path   string
-	Reason string
+	Path       string
+	Reason     string
+	Unmeasured *UnmeasuredFunctions
+}
+
+// UnmeasuredFunctions holds diagnostic maxima for an unparseable source file.
+type UnmeasuredFunctions struct {
+	Values map[Metric]int
 }
 
 var errFunctionID = errors.New("invalid function allowlist id")

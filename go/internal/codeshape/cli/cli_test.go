@@ -127,7 +127,7 @@ func TestWriteUpdatedRejectsEscapingAllowlist(t *testing.T) {
 	allow.Files["gone.go"] = codeshape.Entry{ID: "", Value: 501, Reason: "split by concern"}
 	snapshot := codeshape.Snapshot{Files: map[string]int{}, Dirs: map[string]int{}, Functions: nil}
 	var stdout, stderr strings.Builder
-	code := writeUpdated(root, testConfig(), allow, codeshape.EmptyAllowlist(), snapshot, false, &stdout, &stderr)
+	code := writeUpdated(root, testConfig(), allow, codeshape.EmptyAllowlist(), snapshot, false, &stdout, &stderr, nil)
 	data, err := os.ReadFile(outside)
 	if code != 2 || err != nil || string(data) != "unchanged" {
 		t.Fatalf("code=%d outside=%q error=%v stderr=%q", code, data, err, stderr.String())

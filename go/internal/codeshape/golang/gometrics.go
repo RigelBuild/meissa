@@ -199,7 +199,7 @@ func parseGoSources(root, module string, paths []string, cfg codeshape.Config) (
 			return nil, nil, fmt.Errorf("check Go build constraints %q: %w", path, err)
 		}
 		if !matches {
-			skips = append(skips, codeshape.Skip{Path: path, Reason: "not in default Go build"})
+			skips = append(skips, codeshape.Skip{Path: path, Reason: "not in default Go build", Unmeasured: nil})
 			continue
 		}
 		source, err := codeshape.ReadRepositoryFile(root, filepath.FromSlash(path))
