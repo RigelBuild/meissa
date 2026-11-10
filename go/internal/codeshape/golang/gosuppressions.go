@@ -58,7 +58,7 @@ func goCommentFindings(path string, groups []*ast.CommentGroup, set *token.FileS
 			for metric := range goDirectiveMetrics(comment.Text) {
 				line := set.Position(comment.Pos()).Line
 				findings = append(findings, codeshape.Finding{
-					Path: path + ":" + strconv.Itoa(line), Metric: metric, Value: line, Limit: 0,
+					Path: path + ":" + strconv.Itoa(line), Metric: metric, Value: 1, Limit: 0,
 					Fix: "remove complexity nolint suppression",
 				})
 			}

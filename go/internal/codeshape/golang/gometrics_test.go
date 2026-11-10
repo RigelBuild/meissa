@@ -179,7 +179,7 @@ func TestGoBareAndAllSuppressions(t *testing.T) {
 		for _, metric := range []codeshape.Metric{codeshape.MetricGoCognitive, codeshape.MetricGoLines} {
 			found := false
 			for _, finding := range findings {
-				if finding.Path == fmt.Sprintf("x.go:%d", line) && finding.Value == line && finding.Metric == metric {
+				if finding.Path == fmt.Sprintf("x.go:%d", line) && finding.Value == 1 && finding.Metric == metric {
 					found = true
 				}
 			}
