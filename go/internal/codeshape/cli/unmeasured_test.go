@@ -40,3 +40,18 @@ func TestUnparseableTypeScriptKeepsAllowlist(t *testing.T) {
 		t.Fatalf("code=%d out=%q stderr=%q allow=%q err=%v", code, out.String(), stderr.String(), data, err)
 	}
 }
+
+func TestUnparseableFileCannotRaiseBaseEntry(t *testing.T) {
+	root := tsRepo(t, "export type * from './other';\n")
+	base := "functions: {\"ts-lines\": {\"x.ts\": [{id: \"f\", value: 60, reason: \"split this function\"}]}}\n"
+	trackedFile(t, root, "tools/code-shape-gate/allowlist.cue", base)
+	commitFiles(t, root)
+	trackedFile(t, root, "tools/code-shape-gate/allowlist.cue", strings.Replace(base, "60", "80", 1))
+	for _, args := range [][]string{{root}, {"--write", root}} {
+		var out, stderr strings.Builder
+		code := Main(t.Context(), args, func(string) string { return "HEAD" }, &out, &stderr)
+		if code != 1 || !strings.Contains(out.String(), "do not add or raise allowlist entries") {
+			t.Fatalf("args=%v code=%d out=%q stderr=%q", args, code, out.String(), stderr.String())
+		}
+	}
+}

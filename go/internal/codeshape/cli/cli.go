@@ -69,10 +69,15 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 		return 2
 	}
 	preserved := separateUnmeasured(&allow, unmeasured)
+	baseFindings := codeshape.JudgeBaseEntries(codeshape.Allowlist{
+		Files: nil, Dirs: nil, Functions: preserved, Present: true,
+	}, base)
 	if writeMode {
-		return writeUpdated(root, config, allow, base, snapshot, seed, stdout, stderr, preserved, suppressions)
+		return writeUpdated(root, config, allow, base, snapshot, seed, stdout, stderr,
+			preserved, suppressions, baseFindings)
 	}
 	findings := append(codeshape.Judge(config, allow, base, snapshot), suppressions...)
+	findings = append(findings, baseFindings...)
 	return printGateFindings(stdout, stderr, findings)
 }
 
@@ -147,7 +152,7 @@ func writeUpdated(
 	snapshot codeshape.Snapshot,
 	seed bool,
 	stdout, stderr io.Writer,
-	preserved codeshape.FunctionMeasurements, policy []codeshape.Finding,
+	preserved codeshape.FunctionMeasurements, policy, baseFindings []codeshape.Finding,
 ) int {
 	updated, changed, err := rewriteAllowlist(config, allow, snapshot, seed)
 	if err != nil {
@@ -155,8 +160,9 @@ func writeUpdated(
 		return 2
 	}
 	findings := codeshape.Judge(config, updated, base, snapshot)
-	ratchetFailures := len(findings) > 0
+	ratchetFailures := len(findings) > 0 || len(baseFindings) > 0
 	findings = append(findings, policy...)
+	findings = append(findings, baseFindings...)
 	codeshape.SortFindings(findings)
 	err = writeFindings(stdout, findings)
 	if err != nil {

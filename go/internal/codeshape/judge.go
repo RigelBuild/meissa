@@ -12,7 +12,7 @@ func Judge(cfg Config, allow, baseAllow Allowlist, snap Snapshot) []Finding {
 	findings = append(findings, judgeMetric(cfg, snap.Files, allow.Files, MetricFiles)...)
 	findings = append(findings, judgeMetric(cfg, snap.Dirs, allow.Dirs, MetricDirs)...)
 	findings = append(findings, judgeFunctions(cfg, snap.Functions, allow.Functions)...)
-	findings = append(findings, judgeBaseEntries(allow, baseAllow)...)
+	findings = append(findings, JudgeBaseEntries(allow, baseAllow)...)
 	for _, path := range SortedEntryPaths(allow.Files) {
 		if _, exists := snap.Files[path]; !exists {
 			findings = append(findings, Finding{
@@ -128,7 +128,8 @@ func judgeFunctions(cfg Config, values, entries map[Metric]map[string][]Entry) [
 	return findings
 }
 
-func judgeBaseEntries(allow, base Allowlist) []Finding {
+// JudgeBaseEntries rejects new or raised allowlist entries against the base.
+func JudgeBaseEntries(allow, base Allowlist) []Finding {
 	if !base.Present {
 		return nil
 	}
