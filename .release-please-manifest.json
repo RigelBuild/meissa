@@ -1,5 +1,5 @@
 {
-	"packages/docs-bundle": "1.1.0",
+	"packages/docs-bundle": "1.2.0",
 	"packages/design-ledger-gate": "2.0.1",
 	"packages/dl-claim": "1.1.2",
 	"packages/dl-list": "1.0.1",
@@ -8,5 +8,5 @@
 	"packages/length-gate": "1.0.2",
 	"packages/biome-config": "1.0.1",
 	"packages/tsconfig": "1.0.0",
-	"go": "0.1.0"
+	"go": "0.2.0"
 }
