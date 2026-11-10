@@ -24,6 +24,20 @@ func refresh(
 	run Runner,
 	getenv func(string) string,
 ) ([]Entry, error) {
+	selected, err := refreshSteps(ctx, root, entries, run, getenv)
+	if err != nil && ctx.Err() != nil {
+		return nil, failf("interrupted by %s", context.Cause(ctx))
+	}
+	return selected, err
+}
+
+func refreshSteps(
+	ctx context.Context,
+	root string,
+	entries []Entry,
+	run Runner,
+	getenv func(string) string,
+) ([]Entry, error) {
 	if run == nil {
 		run = execRunner{root: root}
 	}
@@ -42,9 +56,6 @@ func refresh(
 	for _, entry := range selected {
 		text, err := refreshTool(ctx, root, entry, current[entry.File], originals[entry.File].mode, run, getenv)
 		if err != nil {
-			if ctx.Err() != nil {
-				err = failf("interrupted by %s", context.Cause(ctx))
-			}
 			return nil, errors.Join(err, restoreFiles(root, originals))
 		}
 		writeErr := writeText(root, entry.File, text, originals[entry.File].mode)

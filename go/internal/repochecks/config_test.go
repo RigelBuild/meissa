@@ -242,7 +242,7 @@ func assertGoAnalyzerPinVersions(t *testing.T, pins []byte, analysis []json5Reco
 	nilawayRevision := nixField(t, nilawayBlock, "rev")
 	if golangciMatches[0][1] != golangciTag || nilawayMatches[0][1] != nilawayRevision {
 		t.Fatal("manager values do not match current pin values")
-}
+	}
 }
 
 func testGoAnalyzerRefreshPolicy(t *testing.T, config json5Record) {

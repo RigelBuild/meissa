@@ -82,14 +82,14 @@ func (r execRunner) runWithEnv(
 	var stderr strings.Builder
 	command.Stdout = &stdout
 	command.Stderr = &stderr
-runErr := command.Run()
-if runErr != nil {
-	if exitError, ok := errors.AsType[*exec.ExitError](runErr); ok {
-		return stdout.String(), stderr.String(), exitError.ExitCode(), nil
+	runErr := command.Run()
+	if runErr != nil {
+		if exitError, ok := errors.AsType[*exec.ExitError](runErr); ok {
+			return stdout.String(), stderr.String(), exitError.ExitCode(), nil
+		}
+		return stdout.String(), stderr.String(), -1, fmt.Errorf("run %s: %w", name, runErr)
 	}
-	return stdout.String(), stderr.String(), -1, fmt.Errorf("run %s: %w", name, runErr)
-}
-return stdout.String(), stderr.String(), 0, nil
+	return stdout.String(), stderr.String(), 0, nil
 }
 
 func withPrefix(err error) error {

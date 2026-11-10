@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestMain(t *testing.T) {
+func TestMainUsage(t *testing.T) {
 	t.Run("writes prefixed Git root error", func(t *testing.T) {
 		stdout := new(strings.Builder)
 		stderr := new(strings.Builder)

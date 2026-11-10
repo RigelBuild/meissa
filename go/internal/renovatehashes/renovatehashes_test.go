@@ -55,6 +55,7 @@ func TestRefresh(t *testing.T) {
 	t.Run("reports SIGINT and restores the original pins", func(t *testing.T) {
 		testRefreshInterrupted(t, "SIGINT")
 	})
+	t.Run("reports SIGINT when base-ref lookup is interrupted", testRefreshInterruptedBeforeSelection)
 	t.Run("fails when a selected pin block is missing", testRefreshMissingPinBlock)
 	t.Run("fails with a diagnostic and restores the changed pin on missing got hash", testRefreshMissingGotHash)
 	t.Run("fails with the stable prefix on nilaway fetch errors and restores pins", testRefreshNilawayFetchFailure)
@@ -197,6 +198,29 @@ func testRefreshInterrupted(t *testing.T, signalName string) {
 	}
 }
 
+func testRefreshInterruptedBeforeSelection(t *testing.T) {
+	t.Helper()
+	root, runner := newFixture(t)
+	initial := readFixture(t, root, pinFile)
+	changed := strings.Replace(initial, `sha256-m9PoJHescRuT9DiKsb6LL+lQlc7RKAWDiRyf8pNMffA=`, "sha256-previous", 1)
+	writeFixture(t, root, pinFile, changed)
+	ctx, cancel := context.WithCancelCause(t.Context())
+	defer cancel(nil)
+	runner.cancel = cancel
+	runner.cancelCause = ErrRefreshSIGINT
+	runner.cancelOnBaseReference = true
+	stdout := new(strings.Builder)
+	stderr := new(strings.Builder)
+	code := mainWithRunner(ctx, nil, envValue("main"), stdout, stderr, runner)
+	want := "renovate-go-analysis: interrupted by SIGINT"
+	if code != 1 || !strings.Contains(stderr.String(), want) {
+		t.Fatalf("Main = %d, stderr %q; want %q", code, stderr.String(), want)
+	}
+	if got := readFixture(t, root, pinFile); got != changed {
+		t.Fatal("interrupted refresh changed the pin file")
+	}
+}
+
 func testRefreshMissingPinBlock(t *testing.T) {
 	root, runner := newFixture(t)
 	initial := readFixture(t, root, pinFile)
@@ -323,25 +347,26 @@ func newFixture(t *testing.T) (string, *fixtureRunner) {
 	}
 	writeFixture(t, root, moduleFile, string(moduleData))
 	return root, &fixtureRunner{
-		root:            root,
-		base:            map[string]string{
+		root: root,
+		base: map[string]string{
 			pinFile:                  readFixture(t, root, pinFile),
 			defaultEntries()[2].File: readFixture(t, root, defaultEntries()[2].File),
 			moduleFile:               readFixture(t, root, moduleFile),
 		},
-		originAvailable: true,
-		failFetch:       false,
-		noGot:           false,
-		cancel:          nil,
-		cancelCause:     nil,
-		buildCount:      0,
-		calls:           []string{},
-		gitDiffRefs:     []string{},
-		evalExpressions: []string{},
-		lastEntry:       Entry{Name: "", File: "", SourceAttr: mo.None[string](), VendorAttr: ""},
-		lastAttr:        "",
-		lastDrv:         "",
-		cancelOnBuild:  false,
+		originAvailable:       true,
+		failFetch:             false,
+		noGot:                 false,
+		cancel:                nil,
+		cancelCause:           nil,
+		buildCount:            0,
+		calls:                 []string{},
+		gitDiffRefs:           []string{},
+		evalExpressions:       []string{},
+		lastEntry:             Entry{Name: "", File: "", SourceAttr: mo.None[string](), VendorAttr: ""},
+		lastAttr:              "",
+		lastDrv:               "",
+		cancelOnBaseReference: false,
+		cancelOnBuild:         false,
 	}
 }
 
@@ -411,21 +436,22 @@ func replaceField(t *testing.T, text string, entry Entry, field, value string) s
 }
 
 type fixtureRunner struct {
-	root            string
-	base            map[string]string
-	originAvailable bool
-	failFetch       bool
-	noGot           bool
-	cancelOnBuild   bool
-	cancel          context.CancelCauseFunc
-	cancelCause     error
-	buildCount      int
-	calls           []string
-	gitDiffRefs     []string
-	evalExpressions []string
-	lastEntry       Entry
-	lastAttr        string
-	lastDrv         string
+	root                  string
+	base                  map[string]string
+	originAvailable       bool
+	failFetch             bool
+	noGot                 bool
+	cancelOnBaseReference bool
+	cancelOnBuild         bool
+	cancel                context.CancelCauseFunc
+	cancelCause           error
+	buildCount            int
+	calls                 []string
+	gitDiffRefs           []string
+	evalExpressions       []string
+	lastEntry             Entry
+	lastAttr              string
+	lastDrv               string
 }
 
 func (r *fixtureRunner) Run(ctx context.Context, name string, args ...string) (string, string, int, error) {
@@ -455,37 +481,16 @@ func (r *fixtureRunner) runWithEnv(
 	}
 	return r.Run(ctx, name, args...)
 }
-
 func (r *fixtureRunner) runGit(args []string) (string, string, int, error) {
 	switch {
 	case len(args) >= 2 && args[0] == "rev-parse" && args[1] == "--show-toplevel":
 		return r.root, "", 0, nil
 	case len(args) >= 4 && args[0] == "rev-parse" && args[1] == "--verify":
-		if r.originAvailable {
-			return "origin/main\n", "", 0, nil
-		}
-		return "", "", 1, nil
+		return r.runGitBaseReference()
 	case len(args) >= 5 && args[0] == "diff" && args[1] == "--quiet":
-		ref, relative := args[2], args[len(args)-1]
-		r.gitDiffRefs = append(r.gitDiffRefs, ref)
-		current, err := os.ReadFile(filepath.Join(r.root, filepath.FromSlash(relative)))
-		if err != nil {
-			return "", err.Error(), 1, fmt.Errorf("read fixture for git diff: %w", err)
-		}
-		if string(current) == r.base[relative] {
-			return "", "", 0, nil
-		}
-		return "", "", 1, nil
+		return r.runGitDiff(args)
 	case len(args) == 2 && args[0] == "show":
-		refPath := strings.SplitN(args[1], ":", 2)
-		if len(refPath) != 2 {
-			return "", "invalid git show argument", 1, nil
-		}
-		text, ok := r.base[refPath[1]]
-		if !ok {
-			return "", "path not in base", 1, nil
-		}
-		return text, "", 0, nil
+		return r.runGitShow(args)
 	case len(args) >= 3 && args[0] == "-C" && args[2] == "init":
 		return "", "", 0, nil
 	case len(args) >= 3 && args[0] == "-C" && args[2] == "fetch":
@@ -496,6 +501,42 @@ func (r *fixtureRunner) runGit(args []string) (string, string, int, error) {
 	default:
 		return "", "unexpected git command", 127, nil
 	}
+}
+
+func (r *fixtureRunner) runGitBaseReference() (string, string, int, error) {
+	if r.cancelOnBaseReference {
+		r.cancel(r.cancelCause)
+		return "", "fixture git call interrupted", 1, fmt.Errorf("%w", context.Canceled)
+	}
+	if r.originAvailable {
+		return "origin/main\n", "", 0, nil
+	}
+	return "", "", 1, nil
+}
+
+func (r *fixtureRunner) runGitDiff(args []string) (string, string, int, error) {
+	ref, relative := args[2], args[len(args)-1]
+	r.gitDiffRefs = append(r.gitDiffRefs, ref)
+	current, err := os.ReadFile(filepath.Join(r.root, filepath.FromSlash(relative)))
+	if err != nil {
+		return "", err.Error(), 1, fmt.Errorf("read fixture for git diff: %w", err)
+	}
+	if string(current) == r.base[relative] {
+		return "", "", 0, nil
+	}
+	return "", "", 1, nil
+}
+
+func (r *fixtureRunner) runGitShow(args []string) (string, string, int, error) {
+	refPath := strings.SplitN(args[1], ":", 2)
+	if len(refPath) != 2 {
+		return "", "invalid git show argument", 1, nil
+	}
+	text, ok := r.base[refPath[1]]
+	if !ok {
+		return "", "path not in base", 1, nil
+	}
+	return text, "", 0, nil
 }
 
 func (r *fixtureRunner) runNix(args []string) (string, string, int, error) {
@@ -546,8 +587,9 @@ func (r *fixtureRunner) recordNixEval(entry Entry, expression string) {
 func (r *fixtureRunner) runNixBuild() (string, string, int, error) {
 	r.buildCount++
 	if r.cancelOnBuild {
-		r.cancel(r.cancelCause)
-		return "", "interrupted by SIGTERM", 1, nil
+		cause := r.cancelCause
+		r.cancel(cause)
+		return "", "interrupted by " + cause.Error(), 1, nil
 	}
 	if r.noGot {
 		return "", "error: build failed without a hash mismatch\n", 1, nil
