@@ -1,0 +1,74 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0056.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Why a coding agent doesn't split into a brain and hands"
+    },
+    {
+      "kind": "link-target",
+      "value": "design.md"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 The pattern"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 The one principle"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:1."
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:2."
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Coding fails both conditions"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 The rest of the market"
+    },
+    {
+      "kind": "code-span",
+      "value": "ffmpeg"
+    },
+    {
+      "kind": "code-span",
+      "value": "sbatch"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 The honest steelman, and why it isn't a split"
+    },
+    {
+      "kind": "code-span",
+      "value": "build.rs"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 The two rescues collapse into simpler mechanisms"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 And the shared filesystem goes with it"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 What we built instead"
+    },
+    {
+      "kind": "link-target",
+      "value": "design.md"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

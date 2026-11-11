@@ -1,0 +1,12 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/jsx.ts",
+  "corpus": "go/commentscan/testdata/corpus/jsx/finding1-string-comment-after-newline.tsx",
+  "scan": {
+    "residues": [
+      "const x = <a href=\"a&b",
+      "/* c */ d\" />;"
+    ],
+    "ambiguous": false
+  }
+}

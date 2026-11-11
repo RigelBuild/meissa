@@ -1,0 +1,218 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/meissa-0008.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 @rigelbuild/design-ledger-gate"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Configuration"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[json]\n{\n  \"designsRoot\": \"docs/designs\",\n  \"surfaceDepth\": 0,\n  \"governedRoots\": [\"ui\", \"server\"],\n  \"historicalChain\": [],\n  \"exemptBranches\": [\n    { \"prefix\": \"renovate/\", \"author\": \"rigelbuild-renovate[bot]\" },\n    { \"prefix\": \"trunk-merge/\", \"author\": \"app/trunk-io\" }\n  ],\n  \"surfaces\": [\"alpha\"],\n  \"citationAmbiguousPaths\": [\"shared/README.md\"],\n\t\"legs\": {\n\t\t\"citations\": false,\n\t\t\"errata\": false,\n\t\t\"recordLinks\": false,\n\t\t\"mainIds\": false,\n\t\t\"claimCheck\": false\n\t},\n  \"counter\": {\n    \"url\": \"https://example.invalid/counter\",\n    \"partition\": \"public-docs\"\n  },\n  \"remediationDoc\": \"docs/design-ledger-policy.md\"\n}"
+    },
+    {
+      "kind": "code-span",
+      "value": "surfaceDepth"
+    },
+    {
+      "kind": "code-span",
+      "value": "designsRoot/<area>/"
+    },
+    {
+      "kind": "code-span",
+      "value": "designsRoot/decisions/<area>/"
+    },
+    {
+      "kind": "code-span",
+      "value": "governedRoots"
+    },
+    {
+      "kind": "code-span",
+      "value": "designsRoot/<surface>/decisions/<area>/"
+    },
+    {
+      "kind": "code-span",
+      "value": "README.md"
+    },
+    {
+      "kind": "code-span",
+      "value": "governedRoots"
+    },
+    {
+      "kind": "code-span",
+      "value": "historicalChain"
+    },
+    {
+      "kind": "code-span",
+      "value": "exemptBranches"
+    },
+    {
+      "kind": "code-span",
+      "value": "citationAmbiguousPaths"
+    },
+    {
+      "kind": "code-span",
+      "value": "legs"
+    },
+    {
+      "kind": "code-span",
+      "value": "remediationDoc"
+    },
+    {
+      "kind": "code-span",
+      "value": "exemptBranches"
+    },
+    {
+      "kind": "code-span",
+      "value": "renovate/"
+    },
+    {
+      "kind": "code-span",
+      "value": "rigelbuild-renovate[bot]"
+    },
+    {
+      "kind": "code-span",
+      "value": "trunk-merge/"
+    },
+    {
+      "kind": "code-span",
+      "value": "trunk-io[bot]"
+    },
+    {
+      "kind": "code-span",
+      "value": "[]"
+    },
+    {
+      "kind": "code-span",
+      "value": "app/<slug>"
+    },
+    {
+      "kind": "code-span",
+      "value": "<slug>[bot]"
+    },
+    {
+      "kind": "code-span",
+      "value": "citationAmbiguousPaths"
+    },
+    {
+      "kind": "code-span",
+      "value": "surfaces"
+    },
+    {
+      "kind": "code-span",
+      "value": "Status:"
+    },
+    {
+      "kind": "code-span",
+      "value": "Historical"
+    },
+    {
+      "kind": "code-span",
+      "value": "Superseded by <path>"
+    },
+    {
+      "kind": "code-span",
+      "value": "errata"
+    },
+    {
+      "kind": "code-span",
+      "value": "## Errata"
+    },
+    {
+      "kind": "code-span",
+      "value": "### E<n> — YYYY-MM-DD (<who>)"
+    },
+    {
+      "kind": "code-span",
+      "value": "Errata: E1, E2"
+    },
+    {
+      "kind": "code-span",
+      "value": "path.md:N"
+    },
+    {
+      "kind": "code-span",
+      "value": "path.md:N-M"
+    },
+    {
+      "kind": "code-span",
+      "value": "mainIds"
+    },
+    {
+      "kind": "code-span",
+      "value": "legs.claimCheck"
+    },
+    {
+      "kind": "code-span",
+      "value": "counter.url"
+    },
+    {
+      "kind": "code-span",
+      "value": "counter.partition"
+    },
+    {
+      "kind": "code-span",
+      "value": "<owner>:<branch>"
+    },
+    {
+      "kind": "code-span",
+      "value": "exemptBranches"
+    },
+    {
+      "kind": "code-span",
+      "value": "dl-claim --rebind"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 CLI"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[sh]\ndesign-ledger-gate --config ./design-ledger-gate.json"
+    },
+    {
+      "kind": "code-span",
+      "value": "GATE_ROOT"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Exit codes"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "0"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "1"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "2"
+    },
+    {
+      "kind": "code-span",
+      "value": "designsRoot"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

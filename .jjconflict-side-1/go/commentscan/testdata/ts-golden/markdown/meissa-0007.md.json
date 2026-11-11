@@ -1,0 +1,130 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/meissa-0007.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Changelog"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 [2.0.1](https://github.com/RigelBuild/meissa/compare/design-ledger-gate@v2.0.0...design-ledger-gate@v2.0.1) (2026-10-17)"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Bug Fixes"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:*"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/issues/31"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/commit/a06f0f0d4604417fdd74c6949fdb7db9f227185e"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 [2.0.0](https://github.com/RigelBuild/meissa/compare/design-ledger-gate@v1.0.1...design-ledger-gate@v2.0.0) (2026-10-15)"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 ⚠ BREAKING CHANGES"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:*"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Features"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:*"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/issues/20"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/commit/307a90d4c102ddf5cf6d136a504dfa52e9f7110c"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Bug Fixes"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:*"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/issues/21"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/commit/3ff623c64209018bca3f4dfe04300a545c2b5058"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 [1.0.1](https://github.com/RigelBuild/meissa/compare/design-ledger-gate@v1.0.0...design-ledger-gate@v1.0.1) (2026-10-11)"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Bug Fixes"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:*"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/issues/15"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/commit/3d13515504d1c58d50a314d4cf2d5ed58a2a3570"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 1.0.0 (2026-10-10)"
+    },
+    {
+      "kind": "heading",
+      "value": "H3 Features"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:*"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/issues/8"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/commit/745ec654d79bcf4558a2a99f2cd1fb9a411a1610"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:*"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/issues/9"
+    },
+    {
+      "kind": "link-target",
+      "value": "https://github.com/RigelBuild/meissa/commit/52ccbfcc9e3059da2bd08e5e225622641619fd69"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

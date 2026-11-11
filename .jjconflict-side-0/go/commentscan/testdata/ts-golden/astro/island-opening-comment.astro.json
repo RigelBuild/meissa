@@ -1,0 +1,15 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/astro.ts",
+  "corpus": "go/commentscan/testdata/corpus/astro/island-opening-comment.astro",
+  "scan": {
+    "residues": [
+      "<script>",
+      "",
+      "run();",
+      "</script>",
+      ""
+    ],
+    "ambiguous": false
+  }
+}

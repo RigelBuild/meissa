@@ -1,0 +1,7 @@
+{
+  "revision": "b3549997fcaab879d39b9dd98d633747183fe00c",
+  "index": "| ID | Decision | Status | Record |\n|---|---|---|---|\n| [DL-030](DL-030.md) | d DL-030 | Active (Matt, 2026-10-07) | [../../meta/public-docs-repo.md#approach](../../meta/public-docs-repo.md#approach) |\n| [DL-100](DL-100.md) | d DL-100 | Active (Matt, 2026-10-07) | [../../meta/public-docs-repo.md#approach](../../meta/public-docs-repo.md#approach) |\n| [DL-297](DL-297.md) | a \\| b | Active (Matt, 2026-10-07) | [../../meta/public-docs-repo.md#approach](../../meta/public-docs-repo.md#approach) |\n",
+  "backslashPipe": "| ID | Decision | Status | Record |\n|---|---|---|---|\n| [DL-297](DL-297.md) | a \\\\\\| b | Active (Matt, 2026-10-07) | [../../meta/public-docs-repo.md#approach](../../meta/public-docs-repo.md#approach) |\n",
+  "codeSpan": "| ID | Decision | Status | Record |\n|---|---|---|---|\n| [DL-297](DL-297.md) | use `C:\\tmp` path | Active (Matt, 2026-10-07) | [../../meta/public-docs-repo.md#approach](../../meta/public-docs-repo.md#approach) |\n",
+  "loneSurrogate": "\ud800"
+}

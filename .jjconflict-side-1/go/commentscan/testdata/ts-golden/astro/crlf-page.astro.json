@@ -1,0 +1,20 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/astro.ts",
+  "corpus": "go/commentscan/testdata/corpus/astro/crlf-page.astro",
+  "scan": {
+    "residues": [
+      "---",
+      "// @ts-expect-error legacy shape",
+      "const title = \"Home\";",
+      "---",
+      "<h1>{title}</h1>",
+      "<style>",
+      "",
+      "  h1 { color: red; }",
+      "</style>",
+      ""
+    ],
+    "ambiguous": false
+  }
+}

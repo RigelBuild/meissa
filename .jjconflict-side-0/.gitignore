@@ -1,0 +1,8 @@
+.devenv/
+.direnv/
+.rumdl_cache/
+result
+result-*
+node_modules/
+.moon/cache/
+.ref-gate-test-*/
