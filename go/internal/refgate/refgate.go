@@ -520,11 +520,13 @@ func isCarvedOut(config Config, path string) bool {
 	return false
 }
 
+// jsonString encodes value like TypeScript's JSON.stringify of the decoded text:
+// invalid UTF-8 becomes a raw U+FFFD, not a \ufffd escape.
 func jsonString(value string) (string, error) {
 	var buffer bytes.Buffer
 	encoder := json.NewEncoder(&buffer)
 	encoder.SetEscapeHTML(false)
-	err := encoder.Encode(value)
+	err := encoder.Encode(replaceInvalidUTF8([]byte(value)))
 	if err != nil {
 		return "", fmt.Errorf("encode JSON string: %w", err)
 	}
@@ -618,11 +620,16 @@ func rootPath(ctx context.Context, configured string) (string, error) {
 	return strings.TrimSpace(string(output)), nil
 }
 
-// decodeGitGrepOutput applies WHATWG UTF-8 decoding to git grep's byte output.
+// decodeGitGrepOutput decodes git grep's byte output as TextDecoder does, after stripping a leading BOM.
 func decodeGitGrepOutput(output []byte) string {
 	if bytes.HasPrefix(output, []byte{0xef, 0xbb, 0xbf}) {
 		output = output[3:]
 	}
+	return replaceInvalidUTF8(output)
+}
+
+// replaceInvalidUTF8 applies WHATWG UTF-8 decoding: each maximal invalid subpart becomes one U+FFFD.
+func replaceInvalidUTF8(output []byte) string {
 	if utf8.Valid(output) {
 		return string(output)
 	}
