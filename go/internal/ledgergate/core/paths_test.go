@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+//nolint:exhaustruct_v5,lll // Partial decision fixtures keep each case focused.
 package core
 
 import (
 	"testing"
 
 	"github.com/samber/mo"
+
+	"github.com/RigelBuild/meissa/go/ledger"
 )
 
 func TestResolveRecordRelative(t *testing.T) {
@@ -32,7 +35,7 @@ func TestClassifyDesignPath(t *testing.T) {
 	cases := map[string]DesignPathKind{
 		decisionDir + "/README.md":           PathDecisionsReadme,
 		decisionDir + "/ui/DL-001.md":        PathDecision,
-		decisionDir + "/ui/nested/DL-001.md": PathMisplaced,
+		decisionDir + "/ui/nested/DL-001.md": PathDecision,
 		decisionDir + "/ui/notes.txt":        PathMisplaced,
 		decisionDir + "/DL-001.md":           PathMisplaced,
 		decisionDir + "/foo.md":              PathMisplaced,
@@ -141,6 +144,7 @@ func TestDepthOneDecisionMayCiteRecordOnAnotherSurface(t *testing.T) {
 		t.Fatalf("violations = %+v, want no area mismatch", got)
 	}
 }
+
 func TestStrayPathsReported(t *testing.T) {
 	corpus := BuildDecisionCorpus(nil, []StrayPath{
 		{Path: "docs/designs/DECISIONS.md", Kind: PathLegacyLedger},
@@ -152,5 +156,241 @@ func TestStrayPathsReported(t *testing.T) {
 	}
 	if countMessage(got, "misplaced design file") != 1 {
 		t.Errorf("misplaced stray count wrong: %+v", got)
+	}
+}
+
+func TestN1DecisionLocation(t *testing.T) {
+	cfg := testConfig
+	cfg.ArchiveRoots = []string{"docs/archive"}
+	cases := []struct {
+		name    string
+		file    string
+		wantOK  bool
+		wantLoc Location
+	}{
+		{"flat decision", decisionDir + "/ui/DL-001.md", true, Location{Surface: "", Area: "ui", Sub: ""}},
+		{"nested decision", decisionDir + "/ui/record/DL-001.md", true, Location{Surface: "", Area: "ui", Sub: "record"}},
+		{
+			"deeper than one sub-area", decisionDir + "/ui/record/deep/DL-001.md", false,
+			Location{Surface: "", Area: "", Sub: ""},
+		},
+		{"non-decision file", "docs/designs/ui/record/design.md", false, Location{Surface: "", Area: "", Sub: ""}},
+		{
+			"archive root path", "docs/archive/ui/decisions/ui/record/DL-900.md", false,
+			Location{Surface: "", Area: "", Sub: ""},
+		},
+	}
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			got, ok := DecisionLocation(test.file, cfg)
+			if ok != test.wantOK {
+				t.Fatalf("DecisionLocation(%q) ok = %v, want %v", test.file, ok, test.wantOK)
+			}
+			if ok && got != test.wantLoc {
+				t.Fatalf("DecisionLocation(%q) = %+v, want %+v", test.file, got, test.wantLoc)
+			}
+		})
+	}
+}
+
+func TestClassifyDesignPathRejectsDeeperThanOneSubArea(t *testing.T) {
+	file := decisionDir + "/ui/nested/deep/DL-001.md"
+	if got := ClassifyDesignPath(file, testConfig); got != PathMisplaced {
+		t.Fatalf("ClassifyDesignPath(%q) = %q, want misplaced", file, got)
+	}
+}
+
+func TestN1DecisionLocationDepthOne(t *testing.T) {
+	got, ok := DecisionLocation("docs/designs/platform/decisions/ui/record/DL-001.md", depthOneConfig)
+	if !ok || got != (Location{Surface: "platform", Area: "ui", Sub: "record"}) {
+		t.Fatalf("nested DecisionLocation = %+v ok=%v", got, ok)
+	}
+	flat, ok := DecisionLocation("docs/designs/platform/decisions/ui/DL-001.md", depthOneConfig)
+	if !ok || flat != (Location{Surface: "platform", Area: "ui", Sub: ""}) {
+		t.Fatalf("flat DecisionLocation = %+v ok=%v", flat, ok)
+	}
+}
+
+func TestN1RequireSubAreaFailsFlatFileAndDefaultPasses(t *testing.T) {
+	flat := decisionOptions{path: decisionDir + "/ui/DL-001.md", record: "../../ui/record/design.md"}
+	strict := testConfig
+	strict.RequireSubArea = true
+	if got := evaluateCorpus(corpusOf(flat), nil, noChange, nil, strict, mo.None[PullRequestDetails]()); !hasMessage(got, "must sit in a record sub-area (requireSubArea)") {
+		t.Fatalf("flat file under requireSubArea not reported: %+v", got)
+	}
+	if got := evalDefault(corpusOf(flat), nil); hasMessage(got, "requireSubArea") {
+		t.Fatalf("flat file under default flagged: %+v", got)
+	}
+}
+
+func TestDecisionSubAreaMustBeRecordSlug(t *testing.T) {
+	good := decisionFile(decisionOptions{path: decisionDir + "/ui/record/DL-001.md", record: "../../ui/record/design.md"})
+	if got := evaluateCorpus(BuildDecisionCorpus([]File{good}, nil), nil, noChange, nil, testConfig, mo.None[PullRequestDetails]()); hasMessage(got, "must be the Record slug") {
+		t.Fatalf("matching sub-area flagged: %+v", got)
+	}
+	bad := decisionFile(decisionOptions{path: decisionDir + "/ui/other/DL-001.md", record: "../../ui/record/design.md"})
+	got := evaluateCorpus(BuildDecisionCorpus([]File{bad}, nil), nil, noChange, nil, testConfig, mo.None[PullRequestDetails]())
+	if !hasMessage(got, "decision sub-area other must be the Record slug record") {
+		t.Fatalf("mismatched sub-area not reported: %+v", got)
+	}
+}
+
+func TestN1PlacementFromRecordAcceptsMultiRecordDecision(t *testing.T) {
+	got := evaluateCorpus(corpusOf(decisionOptions{
+		path:   decisionDir + "/ui/record/DL-001.md",
+		record: "../../ui/record/design.md",
+	}), []RecordHeader{
+		ParseRecordHeader("docs/designs/ui/record/design.md", "# Record\n\nBody.\n"),
+		ParseRecordHeader("docs/designs/ui/other/design.md", "# Record\n\nSee [DL-001](../../decisions/ui/record/DL-001.md).\n"),
+	}, noChange, nil, testConfig, mo.None[PullRequestDetails]())
+	if hasMessage(got, "must be the Record slug") {
+		t.Fatalf("canonical placement flagged with a second citer: %+v", got)
+	}
+}
+
+func TestN1PlacementJudgedFromCanonicalNotSecondCiter(t *testing.T) {
+	got := evaluateCorpus(corpusOf(decisionOptions{
+		path:   decisionDir + "/ui/other/DL-001.md",
+		record: "../../ui/record/design.md",
+	}), []RecordHeader{
+		ParseRecordHeader("docs/designs/ui/record/design.md", "# Record\n\nBody.\n"),
+		ParseRecordHeader("docs/designs/ui/other/design.md", "# Record\n\nSee [DL-001](../../decisions/ui/record/DL-001.md).\n"),
+	}, noChange, nil, testConfig, mo.None[PullRequestDetails]())
+	if !hasMessage(got, "decision sub-area other must be the Record slug record") {
+		t.Fatalf("placement under the second citer not reported: %+v", got)
+	}
+}
+
+func TestN1PlacementFailsWhenBasenameChangesWithoutMovingDecision(t *testing.T) {
+	got := evaluateCorpus(corpusOf(decisionOptions{
+		path:   decisionDir + "/ui/record/DL-001.md",
+		record: "../../ui/record/fork-releases.md",
+	}), nil, noChange, nil, testConfig, mo.None[PullRequestDetails]())
+	if !hasMessage(got, "decision sub-area record must be the Record slug fork-releases") {
+		t.Fatalf("basename-changing move not reported: %+v", got)
+	}
+}
+
+const depthOneDecision = "docs/designs/platform/decisions/ui/record/DL-001.md"
+
+func TestN1DepthOneNestedDecisionPassesWhenSubIsSlug(t *testing.T) {
+	got := evaluateCorpus(corpusOf(decisionOptions{path: depthOneDecision, record: "../../../ui/record/design.md"}), nil, noChange, nil, depthOneConfig, mo.None[PullRequestDetails]())
+	if len(got) != 0 {
+		t.Fatalf("depth-one nested decision with slug sub-area flagged: %+v", got)
+	}
+}
+
+func TestN1DepthOneSubAreaMismatchIsReported(t *testing.T) {
+	got := evaluateCorpus(corpusOf(decisionOptions{path: "docs/designs/platform/decisions/ui/other/DL-001.md", record: "../../../ui/record/design.md"}), nil, noChange, nil, depthOneConfig, mo.None[PullRequestDetails]())
+	if !hasMessage(got, "decision sub-area other must be the Record slug record") {
+		t.Fatalf("depth-one sub-area mismatch not reported: %+v", got)
+	}
+}
+
+func TestN1DepthOneRequireSubAreaFailsFlatFile(t *testing.T) {
+	cfg := depthOneConfig
+	cfg.RequireSubArea = true
+	got := evaluateCorpus(corpusOf(decisionOptions{
+		path:   "docs/designs/platform/decisions/ui/DL-001.md",
+		record: "../../ui/record/design.md",
+	}), nil, noChange, nil, cfg, mo.None[PullRequestDetails]())
+	if !hasMessage(got, "decision file must sit in a record sub-area (requireSubArea)") {
+		t.Fatalf("depth-one flat decision under requireSubArea not reported: %+v", got)
+	}
+}
+
+func TestN1PlacementFlatDesignRecordKeepsParentSlug(t *testing.T) {
+	if slug := ledger.RecordSlug("docs/designs/platform/oss-forks/fork-releases/design.md"); slug != "fork-releases" {
+		t.Fatalf("RecordSlug(design.md) = %q, want fork-releases", slug)
+	}
+	got := evaluateCorpus(corpusOf(decisionOptions{
+		path:   decisionDir + "/ui/record/DL-001.md",
+		record: "../../ui/record/design.md",
+	}), nil, noChange, nil, testConfig, mo.None[PullRequestDetails]())
+	if hasMessage(got, "must be the Record slug") {
+		t.Fatalf("decision under parent-directory slug flagged: %+v", got)
+	}
+}
+
+func TestN1TitleScopeMatrix(t *testing.T) {
+	untitled := decisionOptions{path: decisionDir + "/ui/record/DL-001.md", record: "../../ui/record/design.md"}
+	changedFile := Changed{Files: []string{untitled.path}, Body: mo.None[string](), HeadBranch: ""}
+	cases := []struct {
+		name    string
+		scope   string
+		changed Changed
+		fails   bool
+	}{
+		{"changed fails an untitled changed file", "changed", changedFile, true},
+		{"changed passes an untitled unchanged file", "changed", noChange, false},
+		{"all fails an untitled changed file", "all", changedFile, true},
+		{"all fails an untitled unchanged file", "all", noChange, true},
+		{"off passes an untitled changed file", "off", changedFile, false},
+		{"off passes an untitled unchanged file", "off", noChange, false},
+	}
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			cfg := testConfig
+			cfg.TitleScope = test.scope
+			got := evaluateCorpus(corpusOf(untitled), nil, test.changed, nil, cfg, mo.None[PullRequestDetails]())
+			if hasMessage(got, "decision needs a title") != test.fails {
+				t.Fatalf("scope %s violations = %+v, fails want %v", test.scope, got, test.fails)
+			}
+		})
+	}
+}
+
+func TestArchivedSupersessionFailsWhenArchiveRootsSet(t *testing.T) {
+	cfg := testConfig
+	cfg.ArchiveRoots = []string{"docs/archive"}
+	row, err := ledger.ParseDecisionFile(
+		"docs/archive/ui/decisions/ui/record/DL-900.md",
+		[]byte(decisionAt("docs/archive/ui/decisions/ui/record/DL-900.md", "../../../../../../designs/ui/record/design.md")),
+	)
+	if err != nil {
+		t.Fatalf("archived fixture did not parse: %v", err)
+	}
+	corpus := corpusOf(decisionOptions{id: "DL-001", status: "Superseded by DL-900 (Matt, 2026-07-22)"})
+	corpus.Archived = []ledger.DecisionRow{row}
+	got := evaluateCorpus(corpus, nil, noChange, nil, cfg, mo.None[PullRequestDetails]())
+	want := "DL-001: live decision cannot be superseded by or amend an archived decision (docs/archive/ui/decisions/ui/record/DL-900.md)"
+	if !hasMessage(got, want) {
+		t.Fatalf("violations = %+v, want %q", got, want)
+	}
+}
+
+func TestArchivedSupersessionPassesWithoutArchiveRoots(t *testing.T) {
+	corpus := corpusOf(decisionOptions{id: "DL-001", status: "Superseded by DL-900 (Matt, 2026-07-22)"})
+	got := evalDefault(corpus, nil)
+	if hasMessage(got, "cannot be superseded by or amend an archived decision") {
+		t.Fatalf("archived message fired with archiveRoots empty: %+v", got)
+	}
+	if !hasMessage(got, "DL-001: Superseded by DL-900, which is not a decision file") {
+		t.Fatalf("violations = %+v, want existing not-a-decision message", got)
+	}
+}
+
+func TestN1ArchiveRecordPassesOnlyWithArchiveRootsAndTarget(t *testing.T) {
+	archived := decisionOptions{
+		path: decisionDir + "/ui/record/DL-001.md", record: "../../../../archive/ui/record/design.md",
+	}
+	archiveRead := func(path string) (RecordContent, bool) {
+		return RecordContent{Headings: []string{"present"}, SizeBytes: 100}, path == "docs/archive/ui/record/design.md"
+	}
+	withRoots := testConfig
+	withRoots.ArchiveRoots = []string{"docs/archive"}
+	got := evaluateCorpus(corpusOf(archived), nil, noChange, archiveRead, withRoots, mo.None[PullRequestDetails]())
+	if hasMessage(got, "Record path must be under") {
+		t.Fatalf("archive record with archiveRoots and target flagged: %+v", got)
+	}
+	withoutRoots := testConfig
+	got = evaluateCorpus(corpusOf(archived), nil, noChange, archiveRead, withoutRoots, mo.None[PullRequestDetails]())
+	if !hasMessage(got, "Record path must be under docs/designs or an archive root") {
+		t.Fatalf("archive record without archiveRoots not reported: %+v", got)
+	}
+	missingTarget := func(string) (RecordContent, bool) { return RecordContent{}, false }
+	got = evaluateCorpus(corpusOf(archived), nil, noChange, missingTarget, withRoots, mo.None[PullRequestDetails]())
+	if !hasMessage(got, "Record path must be under docs/designs or an archive root") {
+		t.Fatalf("archive record with a missing target not reported: %+v", got)
 	}
 }

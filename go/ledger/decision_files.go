@@ -18,6 +18,12 @@ import (
 
 const keyCount = 4
 
+// maxKeyCount is the front-matter key count with the optional title.
+const maxKeyCount = 5
+
+// titleIndex is the front-matter index of the optional title key, after record.
+const titleIndex = 4
+
 var (
 	// JS `.` also stops at \r, U+2028 and U+2029; Go's stops only at \n.
 	keyLineRE = regexp.MustCompile(`^([A-Za-z_]+): ([^\r\n\x{2028}\x{2029}]*)$`)
@@ -43,6 +49,8 @@ type DecisionRow struct {
 	RecordRaw    string
 	RecordPath   string
 	RecordAnchor string
+	// Title is the optional one-line decision title; "" means no title.
+	Title string
 }
 
 // MalformedDecision describes a decision file that failed validation.
@@ -71,8 +79,10 @@ func keyAt(index int) string {
 		return "decision"
 	case 2:
 		return "status"
-	default:
+	case 3:
 		return "record"
+	default:
+		return "title"
 	}
 }
 
@@ -96,19 +106,19 @@ func parseFrontMatter(filePath string, src []byte) ([]string, error) {
 		return nil, malformedDecision(filePath, 1, "front-matter block is not closed with `---`")
 	}
 	block := lines[1:closeLine]
-	if len(block) != keyCount {
+	if len(block) != keyCount && (len(block) != maxKeyCount || !strings.HasPrefix(block[titleIndex], "title: ")) {
 		return nil, malformedDecision(
 			filePath,
 			2,
-			"front matter must hold exactly id, decision, status, record",
+			"front matter must hold id, decision, status, record and optional title",
 		)
 	}
 	return block, nil
 }
 
-func parseDecisionValues(filePath string, block []string) ([keyCount]string, error) {
-	var values [keyCount]string
-	for index := range keyCount {
+func parseDecisionValues(filePath string, block []string) ([maxKeyCount]string, error) {
+	var values [maxKeyCount]string
+	for index := range block {
 		key := keyAt(index)
 		lineNumber := index + 2
 		matches := keyLineRE.FindStringSubmatch(jstext.TrimRight(block[index]))
@@ -120,21 +130,12 @@ func parseDecisionValues(filePath string, block []string) ([keyCount]string, err
 			)
 		}
 		raw := matches[2]
-		if key == "decision" || key == "status" {
-			if !isQuotedJSONString(raw) {
-				return values, quotedValueError(filePath, lineNumber, key)
-			}
-			err := json.Unmarshal([]byte(raw), &values[index])
+		if key == "decision" || key == "status" || key == "title" {
+			value, err := parseQuotedDecisionValue(filePath, lineNumber, key, raw)
 			if err != nil {
-				return values, quotedValueError(filePath, lineNumber, key)
+				return values, err
 			}
-			if hasLineBreak(values[index]) {
-				return values, malformedDecision(
-					filePath,
-					lineNumber,
-					fmt.Sprintf("`%s` must be one line", key),
-				)
-			}
+			values[index] = value
 			continue
 		}
 		if raw == "" || isQuotedOrTagged(raw[0]) {
@@ -147,6 +148,37 @@ func parseDecisionValues(filePath string, block []string) ([keyCount]string, err
 		values[index] = raw
 	}
 	return values, nil
+}
+
+func parseQuotedDecisionValue(filePath string, line int, key, raw string) (string, error) {
+	if !isQuotedJSONString(raw) {
+		return "", quotedValueError(filePath, line, key)
+	}
+	var value string
+	var err error
+	err = json.Unmarshal([]byte(raw), &value)
+	if err != nil {
+		return "", quotedValueError(filePath, line, key)
+	}
+	if hasLineBreak(value) {
+		return "", malformedDecision(
+			filePath,
+			line,
+			fmt.Sprintf("`%s` must be one line", key),
+		)
+	}
+	err = validateDecisionTitle(filePath, line, key, value)
+	if err != nil {
+		return "", err
+	}
+	return value, nil
+}
+
+func validateDecisionTitle(filePath string, line int, key, title string) error {
+	if key == "title" {
+		return checkTitle(filePath, line, title)
+	}
+	return nil
 }
 
 func quotedValueError(filePath string, line int, key string) *MalformedDecision {
@@ -237,7 +269,7 @@ func matchesStatus(status string) bool {
 	return false
 }
 
-func decisionRow(filePath string, values [keyCount]string) (DecisionRow, error) {
+func decisionRow(filePath string, values [maxKeyCount]string) (DecisionRow, error) {
 	id := values[0]
 	if !idRE.MatchString(id) {
 		return DecisionRow{}, malformedDecision(
@@ -270,7 +302,12 @@ func decisionRow(filePath string, values [keyCount]string) (DecisionRow, error) 
 			),
 		)
 	}
-	return decisionRecord(filePath, id, decision, status, values[3])
+	row, err := decisionRecord(filePath, id, decision, status, values[3])
+	if err != nil {
+		return DecisionRow{}, err
+	}
+	row.Title = values[titleIndex]
+	return row, nil
 }
 
 func decisionRecord(filePath, id, decision, status, recordRaw string) (DecisionRow, error) {
@@ -295,8 +332,28 @@ func decisionRecord(filePath, id, decision, status, recordRaw string) (DecisionR
 	}
 	return DecisionRow{
 		Path: filePath, Line: 2, ID: id, Decision: decision, Status: status,
-		RecordRaw: recordRaw, RecordPath: recordPath, RecordAnchor: anchor,
+		RecordRaw: recordRaw, RecordPath: recordPath, RecordAnchor: anchor, Title: "",
 	}, nil
+}
+
+var (
+	titleTokenRE = regexp.MustCompile(`\b[A-Z][A-Z0-9]+-\d+\b|\b\d{4}-\d{2}-\d{2}\b`)
+)
+
+// checkTitle enforces the optional title rules: 8 to 60 characters, no id,
+// issue key or date, and no trailing period. Length counts decoded runes.
+func checkTitle(filePath string, line int, title string) error {
+	length := utf8.RuneCountInString(title)
+	if length < 8 || length > 60 {
+		return malformedDecision(filePath, line, "`title` must be 8 to 60 characters")
+	}
+	if titleTokenRE.MatchString(title) {
+		return malformedDecision(filePath, line, "`title` must not hold an id, issue key or date")
+	}
+	if strings.HasSuffix(title, ".") {
+		return malformedDecision(filePath, line, "`title` must not end with a period")
+	}
+	return nil
 }
 
 func numericID(id string) float64 {
@@ -308,4 +365,15 @@ func numericID(id string) float64 {
 		return 0
 	}
 	return number
+}
+
+// RecordSlug returns the lowercased record base name without .md. A design.md
+// record takes its parent directory name, so platform/oss-forks/fork-releases/design.md
+// gives fork-releases and product/rigel/README.md gives readme.
+func RecordSlug(recordPath string) string {
+	base := path.Base(recordPath)
+	if base == "design.md" {
+		base = path.Base(path.Dir(recordPath))
+	}
+	return strings.ToLower(strings.TrimSuffix(base, ".md"))
 }

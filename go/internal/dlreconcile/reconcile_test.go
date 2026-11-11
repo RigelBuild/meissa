@@ -371,7 +371,7 @@ func TestReconcileCLI(t *testing.T) {
 
 	t.Run("refuses a misplaced decision-tree file before posting", func(t *testing.T) {
 		root, configPath := fixtureRoot(t, depthZero(), map[string]string{
-			"docs/designs/decisions/ui/archive/DL-009.md": decisionFile("DL-009"),
+			"docs/designs/decisions/ui/archive/nested/DL-009.md": decisionFile("DL-009"),
 		})
 		var stderr bytes.Buffer
 		code := Main(context.Background(), []string{"--config", configPath}, env(gate(root)), io.Discard, &stderr)

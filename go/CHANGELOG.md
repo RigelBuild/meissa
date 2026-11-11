@@ -49,6 +49,7 @@
 - The Go Renovate hash refresher reports canceled child processes as signal interruptions.
 - `DL_CLAIM_TOKEN_FILE` now fails with exit 2 when it exists but cannot be read, for example on permission denied or a directory path. The TypeScript CLI ignored these errors and fell back to `DL_CLAIM_TOKEN`.
 - A failed base decision listing in the claim check reports `cannot read base decision listing`. The TypeScript CLI reported the claim-service message for it.
+- The decision front-matter count reason is now `front matter must hold id, decision, status, record and optional title`.
 
 ### Added
 
@@ -63,6 +64,7 @@
   Invalid globs now fail config load with exit 2. The npm version accepted them at load and failed only when matching.
   Gap: a leading `!` in `exclude` or a class glob, and a fractional `target`, are now rejected at load with exit 2. The npm version accepted both.
 - Added the `dl-claim`, `dl-list`, `dl-reconcile`, and `design-ledger-gate` Go binaries.
+- `design-ledger-gate` supports one-level decision sub-areas, an optional `title:` front-matter key, and the `requireSubArea`, `titleScope` and `archiveRoots` config keys. A Record outside the designs root and every archive root reports `Record path must be under <root> or an archive root`. A live decision cannot supersede or amend an archived one.
 
 ### Removed
 

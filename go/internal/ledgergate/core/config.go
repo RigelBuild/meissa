@@ -53,6 +53,12 @@ type Config struct {
 	Legs                   Legs
 	Counter                Counter
 	RemediationDoc         mo.Option[string]
+	// RequireSubArea makes a flat decision file a failure. Default false.
+	RequireSubArea bool
+	// TitleScope is "off" (default), "changed" or "all". It sets which decisions must carry a title.
+	TitleScope string
+	// ArchiveRoots lists the archive roots a Record may resolve into. Default empty.
+	ArchiveRoots []string
 }
 
 // contractError is a validation failure whose text is part of the TypeScript contract.
@@ -73,7 +79,7 @@ func contractf(format string, args ...any) error {
 var configKeys = []string{
 	"designsRoot", "surfaceDepth", "governedRoots", "surfaces", "historicalChain",
 	"exemptBranches", "citationAmbiguousPaths", "recordStatusScope", "legs",
-	"counter", "remediationDoc",
+	"counter", "remediationDoc", "requireSubArea", "titleScope", "archiveRoots",
 }
 
 // LoadConfig reads and validates one design-ledger config file. Error text is
@@ -120,11 +126,13 @@ func parseConfig(raw map[string]any) (Config, error) {
 		CitationAmbiguousPaths: []string{}, Legs: Legs{
 			Citations: false, Errata: false, RecordLinks: false, MainIDs: false, ClaimCheck: false,
 		},
-		Counter: Counter{URL: "", Partition: ""}, RemediationDoc: mo.None[string](),
+		Counter:        Counter{URL: "", Partition: ""},
+		RemediationDoc: mo.None[string](), RequireSubArea: false,
+		TitleScope: "off", ArchiveRoots: []string{},
 	}
-
 	for _, step := range []func(map[string]any, *Config) error{
 		parseRoots, parseSurfaces, parseHistoricalAndExempt, parseCitationsAndScope, parseLegsAndCounter,
+		parseSubAreaTitleAndArchive,
 	} {
 		err = step(raw, &cfg)
 		if err != nil {
@@ -132,6 +140,53 @@ func parseConfig(raw map[string]any) (Config, error) {
 		}
 	}
 	return cfg, nil
+}
+
+// parseSubAreaTitleAndArchive parses N1's optional config fields.
+func parseSubAreaTitleAndArchive(raw map[string]any, cfg *Config) error {
+	if value, present := raw["requireSubArea"]; present {
+		flag, ok := value.(bool)
+		if !ok {
+			return contractf("requireSubArea must be true or false")
+		}
+		cfg.RequireSubArea = flag
+	}
+	if value, present := raw["titleScope"]; present {
+		scope, ok := value.(string)
+		if !ok || (scope != "off" && scope != "changed" && scope != "all") {
+			return contractf("titleScope must be \"off\", \"changed\" or \"all\"")
+		}
+		cfg.TitleScope = scope
+	}
+	if value, present := raw["archiveRoots"]; present {
+		roots, err := readStringArray(value, "archiveRoots")
+		if err != nil {
+			return err
+		}
+		for _, root := range roots {
+			if !isRepoRelativePath(root) || path.Clean(root) != root {
+				return contractf("archiveRoots entries must be repository-relative normalized paths without ..")
+			}
+			if nestsUnder(root, cfg.DesignsRoot) || nestsUnder(cfg.DesignsRoot, root) {
+				return contractf("archiveRoots entry %s must not contain or sit under designsRoot", root)
+			}
+		}
+		for i, root := range roots {
+			for _, other := range roots[i+1:] {
+				if nestsUnder(root, other) || nestsUnder(other, root) {
+					return contractf("archiveRoots entries %s and %s must not overlap", root, other)
+				}
+			}
+		}
+		cfg.ArchiveRoots = roots
+	}
+	return nil
+}
+
+// nestsUnder reports whether path equals root or sits under it. The match is on
+// a path boundary, so docs/designs-old is not under docs/designs.
+func nestsUnder(path, root string) bool {
+	return path == root || strings.HasPrefix(path, root+"/")
 }
 
 func parseRoots(raw map[string]any, cfg *Config) error {

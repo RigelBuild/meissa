@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 package ledger
 
 import (
@@ -91,6 +93,7 @@ func TestParseDecisionFile(t *testing.T) {
 		RecordRaw:    "../../meta/public-docs-repo.md#approach",
 		RecordPath:   "docs/designs/meta/public-docs-repo.md",
 		RecordAnchor: "approach",
+		Title:        "",
 	}
 	if got != want {
 		t.Fatalf("ParseDecisionFile() = %#v, want %#v", got, want)
@@ -134,6 +137,7 @@ func TestParseDecisionFileStatusVariants(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			got := parseForTest(t, []byte(replaceGood(test.from, test.want)), testPath)
+
 			if !strings.HasPrefix(got.Status, strings.Split(test.want, " (")[0]) {
 				t.Fatalf("Status = %q, want prefix %q", got.Status, test.want)
 			}

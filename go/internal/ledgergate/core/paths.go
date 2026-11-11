@@ -36,6 +36,7 @@ var (
 	// JS `.` also stops at \r, U+2028 and U+2029; Go's stops only at \n.
 	decisionFileRE   = regexp.MustCompile(`^DL-[^\r\n\x{2028}\x{2029}]*\.md$`)
 	decisionNumberRE = regexp.MustCompile(`^DL-[0-9]+\.md$`)
+	subAreaRE        = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*$`)
 )
 
 // ClassifyDesignPath returns the layout kind of one repository path.
@@ -58,7 +59,7 @@ func ClassifyDesignPath(file string, cfg Config) DesignPathKind {
 		if len(decisionPath) == 1 && decisionPath[0] == "README.md" {
 			return PathDecisionsReadme
 		}
-		if len(decisionPath) == 2 && decisionPath[0] != "" && decisionFileRE.MatchString(base) {
+		if decisionFileRE.MatchString(base) && isDecisionDepth(decisionPath) {
 			return PathDecision
 		}
 		return PathMisplaced
@@ -70,6 +71,46 @@ func ClassifyDesignPath(file string, cfg Config) DesignPathKind {
 		return PathMisplaced
 	}
 	return PathOther
+}
+
+// Location is the surface, area and sub-area of one decision file.
+// Sub is "" for a flat file.
+type Location struct{ Surface, Area, Sub string }
+
+// DecisionLocation returns where a decision file sits. It reports false when
+// the path is not a decision file under the configured layout.
+func DecisionLocation(file string, cfg Config) (Location, bool) {
+	if ClassifyDesignPath(file, cfg) != PathDecision {
+		return Location{Surface: "", Area: "", Sub: ""}, false
+	}
+	root := cfg.DesignsRoot + "/"
+	parts := strings.Split(file[len(root):], "/")
+	surface := ""
+	if cfg.SurfaceDepth == 1 {
+		surface = parts[0]
+		parts = parts[1:]
+	}
+	// parts is now decisions/<area>/[<sub>/]<file>.
+	location := Location{Surface: surface, Area: parts[1], Sub: ""}
+	if len(parts) == 4 {
+		location.Sub = parts[2]
+	}
+	return location, true
+}
+
+// isDecisionDepth reports whether the path under decisions/ is a valid
+// decision depth: a flat `<area>/DL-*.md` or a one-level `<area>/<sub>/DL-*.md`.
+// The sub-area must match the lowercase slug shape; Evaluate checks it
+// against the Record slug. Deeper paths are misplaced.
+func isDecisionDepth(decisionPath []string) bool {
+	switch len(decisionPath) {
+	case 2:
+		return decisionPath[0] != ""
+	case 3:
+		return decisionPath[0] != "" && subAreaRE.MatchString(decisionPath[1])
+	default:
+		return false
+	}
 }
 
 // TouchesRecord reports whether a changed path is a governed design record.

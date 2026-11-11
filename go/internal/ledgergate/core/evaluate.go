@@ -111,16 +111,79 @@ func (e *evaluator) checkRow(row ledger.DecisionRow, byID map[string]ledger.Deci
 	if inRoot {
 		recordParts = strings.Split(afterRoot(row.RecordPath, root), "/")
 	}
-	decisionArea := partAt(strings.Split(afterRoot(row.Path, root), "/"), 1)
+	decisionParts := strings.Split(afterRoot(row.Path, root), "/")
+	decisionArea := partAt(decisionParts, 1)
 	recordArea := partAt(recordParts, 0)
 	areaMismatch := !inRoot ||
 		(e.cfg.SurfaceDepth == 0 && (recordArea == "" || recordArea != decisionArea))
-	if areaMismatch {
+	if areaMismatch && e.recordUnderArchive(row.RecordPath) {
+		areaMismatch = false
+	}
+	if !inRoot && !e.recordUnderArchive(row.RecordPath) {
+		e.add(row.Path, keyLineRecord,
+			fmt.Sprintf("%s: Record path must be under %s or an archive root (%s)", row.ID, root, row.RecordPath))
+	} else if areaMismatch {
 		e.add(row.Path, keyLineRecord,
 			fmt.Sprintf("%s: decision area must match its Record path (%s)", row.ID, row.RecordPath))
 	}
+	e.checkRowSubArea(row, decisionParts)
+	e.checkRowTitle(row)
 	e.checkRowRecordLink(row)
 	e.checkRowSupersession(row, byID)
+}
+
+// checkRowSubArea enforces the one-level sub-area rule. A decision under a
+// sub-area must name the Record slug. A flat decision fails only when
+// requireSubArea is set.
+func (e *evaluator) checkRowSubArea(row ledger.DecisionRow, decisionParts []string) {
+	// The sub-area sits two segments after decisions/ (<area>/<sub>/file).
+	// decisions/ is at SurfaceDepth, so the sub is at SurfaceDepth+2.
+	subIndex := e.cfg.SurfaceDepth + 2
+	hasSub := len(decisionParts) == subIndex+2
+	if len(decisionParts) > subIndex+2 {
+		return
+	}
+	if hasSub {
+		sub := decisionParts[subIndex]
+		slug := ledger.RecordSlug(row.RecordPath)
+		if sub != slug {
+			e.add(row.Path, keyLineRecord,
+				fmt.Sprintf("%s: decision sub-area %s must be the Record slug %s", row.ID, sub, slug))
+		}
+		return
+	}
+	if e.cfg.RequireSubArea {
+		e.add(row.Path, keyLineRecord,
+			row.ID+": decision file must sit in a record sub-area (requireSubArea)")
+	}
+}
+
+// recordUnderArchive reports whether a Record path sits under a configured
+// archive root and exists. The Record must resolve through readRecord.
+func (e *evaluator) recordUnderArchive(recordPath string) bool {
+	for _, archive := range e.cfg.ArchiveRoots {
+		if strings.HasPrefix(recordPath, archive+"/") {
+			_, found := e.readRecord(recordPath)
+			return found
+		}
+	}
+	return false
+}
+
+// checkRowTitle requires a title under titleScope. "changed" checks only
+// decisions whose file changed in this PR; "all" checks every decision. An
+// empty scope is the off default, so zero-value configs keep today's behavior.
+// A malformed title is a parser failure and fails in every scope.
+func (e *evaluator) checkRowTitle(row ledger.DecisionRow) {
+	scope := e.cfg.TitleScope
+	if row.Title != "" || scope == "" || scope == "off" {
+		return
+	}
+	if scope == "changed" && !slices.Contains(e.changed.Files, row.Path) {
+		return
+	}
+	e.add(row.Path, keyLineRecord,
+		fmt.Sprintf("%s: decision needs a title (titleScope %s)", row.ID, scope))
 }
 
 func (e *evaluator) checkRowRecordLink(row ledger.DecisionRow) {
@@ -148,10 +211,28 @@ func (e *evaluator) checkRowSupersession(row ledger.DecisionRow, byID map[string
 		e.add(row.Path, keyLineStatus, row.ID+": superseded by itself")
 		return
 	}
+	if archived, found := e.archivedRow(targetID); found {
+		e.add(row.Path, keyLineStatus,
+			fmt.Sprintf("%s: live decision cannot be superseded by or amend an archived decision (%s)", row.ID, archived.Path))
+		return
+	}
 	if _, known := byID[targetID]; !known {
 		e.add(row.Path, keyLineStatus,
 			fmt.Sprintf("%s: Superseded by %s, which is not a decision file", row.ID, targetID))
 	}
+}
+
+// archivedRow returns the archived decision with the given id, if any.
+func (e *evaluator) archivedRow(id string) (ledger.DecisionRow, bool) {
+	for _, row := range e.corpus.Archived {
+		if row.ID == id {
+			return row, true
+		}
+	}
+	return ledger.DecisionRow{
+		Path: "", Line: 0, ID: "", Decision: "", Status: "",
+		RecordRaw: "", RecordPath: "", RecordAnchor: "", Title: "",
+	}, false
 }
 
 // checkCycles walks each superseded row once per start and reports each cycle
