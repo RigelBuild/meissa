@@ -49,6 +49,22 @@ The policy is the shared `[MD0nn]` rule set from `rumdl/base.toml` in this repo.
 
 Optional `dirLimits` maps directory globs to `{limit: 50, reason: "record decisions together"}`. Limits must exceed 10 and reasons must contain at least three words. When multiple globs match, the smallest limit wins.
 
+The gate also measures Go cognitive complexity, function lines and statements, and TypeScript cognitive complexity and function lines. The optional `functions` field uses the fixed Go limits 20, 60 and 40, and TypeScript limits 15 and 50. Existing configurations may omit it. Function collection requires `golangci-lint` and `biome` on PATH. The gate reports counted extensions without a collector on stderr.
+
+Function allowlist entries are keyed by metric, path and function ID. Go IDs use function and receiver names, with closure ordinals within their enclosing function. TypeScript IDs use enclosing functions, classes and test titles where available. Suppression directives and mismatched Biome rule options are findings.
+
+The gate runs Biome with its own generated configuration and the gate's limits. It copies the root Biome configuration's `javascript.parser` options. The repository's Biome rule settings are checked for consistency, but do not control measurement. The two measured rules may use `warn` or `error` levels in the repository configuration.
+
+Skips are printed on stderr. A Go file outside the default build that contains functions, or a file Biome cannot parse, is an unmeasured finding. If the TypeScript function collector cannot parse a file and Biome reports an over-limit function, the gate reports a file-level finding. Existing function allowlist entries for unmeasured files are preserved on `--write`. Skips that leave no functions unmeasured are notices only. Use the gate's `exclude` to opt out.
+
+Biome does not process files under `node_modules`. Exclude tracked paths in those directories from the gate.
+
+Findings use the format `<path> <metric> value=<value> limit=<limit> fix=<cause>`. An `unmeasured` finding uses value and limit 0; its fix describes the cause.
+
+```cue
+functions: "go-lines": "src/example.go": [{id: "Example", value: 70, reason: "split by concern"}]
+```
+
 Add `tools/code-shape-gate/allowlist.cue` with `files` and `dirs` maps. Each entry has a measured `value` and a `reason` of at least three words:
 
 ```cue

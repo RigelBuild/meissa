@@ -47,7 +47,7 @@ func inventoryPaths(repository *os.Root, output []byte, cfg Config) (Snapshot, e
 			continue
 		}
 		trackedPath := filepath.ToSlash(string(rawPath))
-		if matchesAny(trackedPath, cfg.Exclude) {
+		if MatchesAny(trackedPath, cfg.Exclude) {
 			continue
 		}
 		parent := filepath.ToSlash(filepath.Dir(filepath.FromSlash(trackedPath)))
@@ -55,7 +55,7 @@ func inventoryPaths(repository *os.Root, output []byte, cfg Config) (Snapshot, e
 			parent = ""
 		}
 		dirs[parent]++
-		if !countedPath(trackedPath, cfg) {
+		if !CountedPath(trackedPath, cfg) {
 			continue
 		}
 		file, err := repository.Open(filepath.FromSlash(trackedPath))
@@ -77,10 +77,11 @@ func inventoryPaths(repository *os.Root, output []byte, cfg Config) (Snapshot, e
 			files[trackedPath] = lines
 		}
 	}
-	return Snapshot{Files: files, Dirs: dirs}, nil
+	return Snapshot{Files: files, Dirs: dirs, Functions: nil}, nil
 }
 
-func countedPath(path string, cfg Config) bool {
+// CountedPath reports whether the configuration includes a path.
+func CountedPath(path string, cfg Config) bool {
 	for segment := range strings.SplitSeq(path, "/") {
 		if segment == "testdata" || segment == "fixtures" {
 			return false
@@ -90,10 +91,11 @@ func countedPath(path string, cfg Config) bool {
 	if !slices.Contains(cfg.Extensions, extension) {
 		return false
 	}
-	return !matchesAny(path, cfg.Exclude)
+	return !MatchesAny(path, cfg.Exclude)
 }
 
-func matchesAny(path string, patterns []string) bool {
+// MatchesAny reports whether a path matches a pattern.
+func MatchesAny(path string, patterns []string) bool {
 	for _, pattern := range patterns {
 		if matchGlob(pattern, path) {
 			return true
@@ -155,26 +157,14 @@ func physicalLines(source io.Reader) (int, bool, error) {
 	for {
 		chunk, readErr := reader.ReadSlice('\n')
 		lineHasBytes = lineHasBytes || len(chunk) > 0
-		body := chunk
-		if readErr == nil {
-			body = body[:len(body)-1]
-		}
-		if (readErr == nil || errors.Is(readErr, io.EOF)) && len(body) > 0 && body[len(body)-1] == '\r' {
-			body = body[:len(body)-1]
-		}
-		observe(body)
-		if readErr == nil || errors.Is(readErr, io.EOF) {
-			if lineHasBytes || readErr == nil {
-				count++
-				if count <= 5 && (hasGeneratedMarker || hasCodeGenerated && hasDoNotEdit) {
-					generated = true
-				}
-			}
-			carryLen = 0
-			lineHasBytes = false
-			hasGeneratedMarker = false
-			hasCodeGenerated = false
-			hasDoNotEdit = false
+		observe(trimPhysicalLine(chunk, readErr))
+		complete := readErr == nil || errors.Is(readErr, io.EOF)
+		if complete {
+			increment := lineHasBytes || readErr == nil
+			count, generated = completePhysicalLine(count, generated, increment,
+				hasGeneratedMarker || hasCodeGenerated && hasDoNotEdit)
+			carryLen, lineHasBytes = 0, false
+			hasGeneratedMarker, hasCodeGenerated, hasDoNotEdit = false, false, false
 		}
 		if errors.Is(readErr, io.EOF) {
 			break
@@ -184,4 +174,38 @@ func physicalLines(source io.Reader) (int, bool, error) {
 		}
 	}
 	return count, generated, nil
+}
+
+func trimPhysicalLine(chunk []byte, readErr error) []byte {
+	body := chunk
+	if readErr == nil {
+		body = body[:len(body)-1]
+	}
+	if (readErr == nil || errors.Is(readErr, io.EOF)) && len(body) > 0 && body[len(body)-1] == '\r' {
+		body = body[:len(body)-1]
+	}
+	return body
+}
+
+func completePhysicalLine(count int, generated, increment, marker bool) (int, bool) {
+	if increment {
+		count++
+		generated = generated || count <= 5 && marker
+	}
+	return count, generated
+}
+
+// TrackedPaths lists tracked repository paths.
+func TrackedPaths(ctx context.Context, root string) ([]string, error) {
+	command := exec.CommandContext(ctx, "git", "ls-files", "-z")
+	command.Dir = root
+	output, err := command.Output()
+	if err != nil {
+		return nil, fmt.Errorf("list tracked files: %w", err)
+	}
+	paths := strings.Split(string(output), "\x00")
+	if len(paths) > 0 && paths[len(paths)-1] == "" {
+		paths = paths[:len(paths)-1]
+	}
+	return paths, nil
 }

@@ -7,9 +7,9 @@ import (
 	"context"
 	"os"
 
-	"github.com/RigelBuild/meissa/go/internal/codeshape"
+	"github.com/RigelBuild/meissa/go/internal/codeshape/cli"
 )
 
 func main() {
-	os.Exit(codeshape.Main(context.Background(), os.Args[1:], os.Getenv, os.Stdout, os.Stderr))
+	os.Exit(cli.Main(context.Background(), os.Args[1:], os.Getenv, os.Stdout, os.Stderr))
 }

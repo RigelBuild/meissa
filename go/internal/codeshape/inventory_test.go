@@ -12,6 +12,23 @@ import (
 	"testing"
 )
 
+func TestReadRepositoryFileRejectsEscapingSymlink(t *testing.T) {
+	root := t.TempDir()
+	outside := filepath.Join(t.TempDir(), "outside")
+	err := os.WriteFile(outside, []byte("outside"), 0600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = os.Symlink(outside, filepath.Join(root, "escape"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = ReadRepositoryFile(root, "escape")
+	if err == nil {
+		t.Fatal("read escaped repository root")
+	}
+}
+
 func newFixtureRepo(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()
@@ -60,7 +77,6 @@ func commitFiles(t *testing.T, root string) {
 		t.Fatalf("git commit: %v: %s", err, output)
 	}
 }
-
 func TestInventory(t *testing.T) {
 	t.Run("file one line over limit is measured", func(t *testing.T) {
 		root := newFixtureRepo(t)
@@ -73,7 +89,7 @@ func TestInventory(t *testing.T) {
 		if snapshot.Files["large.go"] != 501 {
 			t.Fatalf("file lines = %d, want 501", snapshot.Files["large.go"])
 		}
-		findings := Judge(testConfig(), emptyAllowlist(), emptyAllowlist(), snapshot)
+		findings := Judge(testConfig(), EmptyAllowlist(), EmptyAllowlist(), snapshot)
 		if !hasFinding(findings, "large.go", MetricFiles, 501, 500, "split this file") {
 			t.Fatalf("missing one-over finding: %#v", findings)
 		}
@@ -176,7 +192,7 @@ func TestInventoryDirectoryWidth(t *testing.T) {
 		if snapshot.Dirs["wide"] != 11 {
 			t.Fatalf("directory files = %d, want 11", snapshot.Dirs["wide"])
 		}
-		findings := Judge(testConfig(), emptyAllowlist(), emptyAllowlist(), snapshot)
+		findings := Judge(testConfig(), EmptyAllowlist(), EmptyAllowlist(), snapshot)
 		if !hasFinding(findings, "wide", MetricDirs, 11, 10, "split the directory") {
 			t.Fatalf("missing 11-file directory finding: %#v", findings)
 		}
@@ -191,61 +207,28 @@ func TestInventoryDirectoryWidth(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if findings := Judge(testConfig(), emptyAllowlist(), emptyAllowlist(), snapshot); len(findings) != 0 {
+		if findings := Judge(testConfig(), EmptyAllowlist(), EmptyAllowlist(), snapshot); len(findings) != 0 {
 			t.Fatalf("10-file directory findings = %#v", findings)
 		}
 	})
-}
-
-func TestConfiguredDirectoryWidths(t *testing.T) {
-	for _, tc := range []struct {
-		name, config, want string
-		count              int
-	}{
-		{
-			name: "within limit", config: `dirLimits: "wide": {limit: 50, reason: "record decisions together"}`,
-			count: 30, want: "",
-		},
-		{
-			name: "over limit", config: `dirLimits: "wide": {limit: 50, reason: "record decisions together"}`,
-			count: 51, want: "wide dirs value=51 limit=50 fix=reorganize the record's decisions\n",
-		},
-		{
-			name: "overlapping limits",
-			config: `dirLimits: {"wide": {limit: 50, reason: "record decisions together"}, ` +
-				`"w*": {limit: 20, reason: "record decisions together"}}`,
-			count: 21, want: "wide dirs value=21 limit=20 fix=reorganize the record's decisions\n",
-		},
-		{name: "excluded files", config: `exclude: ["wide/**"]`, count: 300, want: ""},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			root := newFixtureRepo(t)
-			config := strings.Replace(validConfig, "exclude: []", tc.config, 1)
-			if !strings.Contains(tc.config, "exclude:") {
-				config += "\nexclude: []\n"
-			}
-			writeConfigFiles(t, root, config, "files: {}\ndirs: {}\n")
-			for index := range tc.count {
-				trackedFile(t, root, fmt.Sprintf("wide/file-%03d.txt", index), "text\n")
-			}
-			commitFiles(t, root)
-			var stdout, stderr strings.Builder
-			status := Main(t.Context(), []string{root}, func(string) string { return "" }, &stdout, &stderr)
-			wantStatus := 0
-			if tc.want != "" {
-				wantStatus = 1
-			}
-			if status != wantStatus || stdout.String() != tc.want {
-				t.Fatalf("status=%d stdout=%q stderr=%q, want status=%d stdout=%q",
-					status, stdout.String(), stderr.String(), wantStatus, tc.want)
-			}
-		})
-	}
 }
 
 func testConfig() Config {
 	return Config{
 		FileLimit: 500, DirLimit: 10, Extensions: []string{".go", ".cue"},
 		Exclude: []string{}, DirLimits: map[string]DirLimit{},
+		Functions: FunctionLimits{Go: GoFunctionLimits{Cognitive: 0, Lines: 0, Statements: 0},
+			TS: TSFunctionLimits{Cognitive: 0, Lines: 0}},
+	}
+}
+func TestToolVersionMismatch(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "tool")
+	err := os.WriteFile(path, []byte("#!/bin/sh\necho 'Version: 1.0.0'\n"), 0700)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = CheckToolVersion(t.Context(), path, BiomeVersion)
+	if err == nil || !strings.Contains(err.Error(), "unsupported tool version") {
+		t.Fatalf("error = %v", err)
 	}
 }

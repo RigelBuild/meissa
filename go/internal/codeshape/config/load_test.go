@@ -1,13 +1,28 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-package codeshape
+package config
 
 import (
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/RigelBuild/meissa/go/internal/codeshape"
 )
+
+func TestLoadLegacyConfig(t *testing.T) {
+	root := newFixtureRepo(t)
+	writeConfigFiles(t, root, "fileLimit: 500\ndirLimit: 10\nextensions: [\".go\"]\nexclude: []\n", "files: {}\n")
+	cfg, _, err := Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Functions.Go.Cognitive != 20 || cfg.Functions.Go.Lines != 60 || cfg.Functions.Go.Statements != 40 ||
+		cfg.Functions.TS.Cognitive != 15 || cfg.Functions.TS.Lines != 50 {
+		t.Fatalf("unexpected defaults: %#v", cfg.Functions)
+	}
+}
 
 func TestLoad(t *testing.T) {
 	t.Run("valid CUE configuration and allowlist", func(t *testing.T) {
@@ -42,6 +57,26 @@ func TestLoad(t *testing.T) {
 			t.Fatal("Load accepted a reason with fewer than three words")
 		}
 	})
+}
+
+func TestLoadFunctionEntries(t *testing.T) {
+	for _, tc := range []struct {
+		name, reason string
+		valid        bool
+	}{{"valid", "split by concern", true}, {"short", "two words", false}} {
+		t.Run(tc.name, func(t *testing.T) {
+			root := newFixtureRepo(t)
+			allow := `functions: "go-lines": "f.go": [{id: "work", value: 70, reason: "` + tc.reason + `"}]`
+			writeConfigFiles(t, root, validConfig, allow)
+			cfg, entries, err := Load(root)
+			if (err == nil) != tc.valid {
+				t.Fatalf("Load error = %v", err)
+			}
+			if tc.valid && (cfg.Functions.Go.Lines != 60 || entries.Functions[codeshape.MetricGoLines]["f.go"][0].ID != "work") {
+				t.Fatalf("decoded config=%#v entries=%#v", cfg, entries)
+			}
+		})
+	}
 }
 
 func TestLoadDirectoryLimits(t *testing.T) {
@@ -115,95 +150,8 @@ func TestLoadMissingFiles(t *testing.T) {
 	}
 }
 
-func TestMainModes(t *testing.T) {
-	t.Run("write refuses to add without seed", func(t *testing.T) {
-		root := newFixtureRepo(t)
-		writeConfigFiles(t, root, validConfig, "files: {}\ndirs: {}\n")
-		trackedFile(t, root, "large.go", strings.Repeat("line\n", 501))
-		commitFiles(t, root)
-		var stdout, stderr strings.Builder
-		code := Main(t.Context(), []string{"--write", root}, func(string) string { return "" }, &stdout, &stderr)
-		if code != 2 || !strings.Contains(stderr.String(), "needs --seed") {
-			t.Fatalf("Main = %d, stdout=%q stderr=%q", code, stdout.String(), stderr.String())
-		}
-	})
-	t.Run("seed writes raised rollout entries", func(t *testing.T) {
-		root := newFixtureRepo(t)
-		writeConfigFiles(t, root, validConfig, "files: {}\ndirs: {}\n")
-		trackedFile(t, root, "large.go", strings.Repeat("line\n", 501))
-		commitFiles(t, root)
-		var stdout, stderr strings.Builder
-		code := Main(t.Context(), []string{"--write", "--seed", root}, func(string) string { return "" }, &stdout, &stderr)
-		if code != 0 {
-			t.Fatalf("Main = %d, stdout=%q stderr=%q", code, stdout.String(), stderr.String())
-		}
-		_, allowlist, err := Load(root)
-		if err != nil {
-			t.Fatal(err)
-		}
-		entry, exists := allowlist.Files["large.go"]
-		if !exists || entry.Value != 501 || entry.Reason != "seeded at rollout, burn down" {
-			t.Fatalf("seeded entry = %#v, exists=%v", entry, exists)
-		}
-	})
-}
-
-func TestMainWriteUpdates(t *testing.T) {
-	t.Run("write lowers entries", func(t *testing.T) {
-		root := newFixtureRepo(t)
-		writeConfigFiles(t, root, validConfig, "files: \"large.go\": {value: 502, reason: \"split by concern\"}\n")
-		trackedFile(t, root, "large.go", strings.Repeat("line\n", 501))
-		commitFiles(t, root)
-		var stdout, stderr strings.Builder
-		code := Main(t.Context(), []string{"--write", root}, func(string) string { return "" }, &stdout, &stderr)
-		if code != 0 {
-			t.Fatalf("Main = %d, stdout=%q stderr=%q", code, stdout.String(), stderr.String())
-		}
-		_, allowlist, err := Load(root)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if got := allowlist.Files["large.go"].Value; got != 501 {
-			t.Fatalf("lowered value = %d, want 501", got)
-		}
-	})
-	t.Run("write removes entries at limit", func(t *testing.T) {
-		root := newFixtureRepo(t)
-		writeConfigFiles(t, root, validConfig, "files: \"small.go\": {value: 501, reason: \"split by concern\"}\n")
-		trackedFile(t, root, "small.go", strings.Repeat("line\n", 500))
-		commitFiles(t, root)
-		var stdout, stderr strings.Builder
-		code := Main(t.Context(), []string{"--write", root}, func(string) string { return "" }, &stdout, &stderr)
-		if code != 0 {
-			t.Fatalf("Main = %d, stdout=%q stderr=%q", code, stdout.String(), stderr.String())
-		}
-		_, allowlist, err := Load(root)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if _, exists := allowlist.Files["small.go"]; exists {
-			t.Fatal("--write retained an entry now within the limit")
-		}
-	})
-	t.Run("base rejects a seeded added entry", func(t *testing.T) {
-		root := newFixtureRepo(t)
-		writeConfigFiles(t, root, validConfig, "files: {}\ndirs: {}\n")
-		trackedFile(t, root, "large.go", strings.Repeat("line\n", 501))
-		commitFiles(t, root)
-		var stdout, stderr strings.Builder
-		code := Main(t.Context(), []string{"--write", "--seed", root}, func(key string) string {
-			if key == "GATE_BASE" {
-				return "HEAD"
-			}
-			return ""
-		}, &stdout, &stderr)
-		if code != 1 || !strings.Contains(stdout.String(), "do not add or raise") {
-			t.Fatalf("Main = %d, stdout=%q stderr=%q", code, stdout.String(), stderr.String())
-		}
-	})
-}
-
-const validConfig = "fileLimit: 500\ndirLimit: 10\nextensions: [\".go\", \".cue\"]\nexclude: []\n"
+const validConfig = "fileLimit: 500\ndirLimit: 10\nextensions: [\".go\", \".cue\"]\nexclude: []\n" +
+	"functions: {go: {cognitive: 20, lines: 60, statements: 40}, ts: {cognitive: 15, lines: 50}}\n"
 
 func writeConfigFiles(t *testing.T, root, config, allowlist string) {
 	t.Helper()
