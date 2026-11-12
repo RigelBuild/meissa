@@ -238,7 +238,7 @@ func resolveDrvPath(ctx context.Context, entry Entry, attr string, run Runner) (
 	if _, hasSource := entry.SourceAttr.Get(); hasSource {
 		expression = "let flake = builtins.getFlake (toString ./.); " +
 			"pkgs = flake.inputs.nixpkgs.legacyPackages.x86_64-linux; " +
-			"tools = flake.lib.goAnalysis { inherit pkgs; goToolchain = pkgs.go; }; " +
+			"tools = flake.lib.goAnalysis { inherit pkgs; goToolchain = flake.packages.x86_64-linux.go; }; " +
 			"in tools." + entry.Name + "." + attr + ".drvPath"
 	} else {
 		expression = "let flake = builtins.getFlake (toString ./.); " +
@@ -295,7 +295,7 @@ func recomputeHash(
 	if _, hasSource := entry.SourceAttr.Get(); hasSource {
 		buildExpr = "let flake = builtins.getFlake (toString ./.); " +
 			"pkgs = flake.inputs.nixpkgs.legacyPackages.x86_64-linux; " +
-			"tools = flake.lib.goAnalysis { inherit pkgs; goToolchain = pkgs.go; }; " +
+			"tools = flake.lib.goAnalysis { inherit pkgs; goToolchain = flake.packages.x86_64-linux.go; }; " +
 			"in tools." + entry.Name
 	}
 	stdout, stderr, exit, err := run.Run(

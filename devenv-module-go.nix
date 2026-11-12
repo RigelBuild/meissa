@@ -13,7 +13,7 @@ in
 
   config.packages = builtins.attrValues goAnalysis ++ [ (import ./go/package.nix {
     inherit lib;
-    buildGo127Module = pkgs.buildGoModule.override {
+    buildGoModule = pkgs.buildGoModule.override {
       go = config.meissa.go.toolchain;
     };
   }) ];

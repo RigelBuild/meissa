@@ -32,7 +32,7 @@
           inherit go;
           tools = import ./go/package.nix {
             inherit (pkgs) lib;
-            buildGo127Module = pkgs.buildGoModule.override { inherit go; };
+            buildGoModule = pkgs.buildGoModule.override { inherit go; };
           };
           "rumdl-base-config" = import ./rumdl-base-config.nix { inherit pkgs; };
           hk = import ./tools/toolchain/hk.nix { inherit pkgs; };
@@ -57,7 +57,8 @@
       goAnalysisCheck = system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          goAnalysis = self.lib.goAnalysis { inherit pkgs; goToolchain = pkgs.go; };
+          go = self.packages.${system}.go;
+          goAnalysis = self.lib.goAnalysis { inherit pkgs; goToolchain = go; };
           evaluated = pkgs.lib.evalModules {
             modules = [
               ({ lib, ... }: {
@@ -68,13 +69,13 @@
               })
               ({ ... }: { _module.args.pkgs = pkgs; })
               self.devenvModules.go
-              ({ ... }: { meissa.go.toolchain = pkgs.go; packages = [ pkgs.hello ]; })
+              ({ ... }: { meissa.go.toolchain = go; packages = [ pkgs.hello ]; })
             ];
           };
           packages = evaluated.config.packages;
           tools = import ./go/package.nix {
             inherit (pkgs) lib;
-            buildGo127Module = pkgs.buildGoModule.override { go = pkgs.go; };
+            buildGoModule = pkgs.buildGoModule.override { inherit go; };
           };
           expectedPackages = [ pkgs.hello tools ] ++ builtins.attrValues goAnalysis;
           hasExpectedPackages = builtins.length packages == 6
