@@ -20,16 +20,19 @@
       packagesFor = system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          goAnalysis = self.lib.goAnalysis { inherit pkgs; goToolchain = pkgs.go_1_27; };
+          go = import ./tools/toolchain/go.nix { inherit pkgs; };
+          goAnalysis = self.lib.goAnalysis { inherit pkgs; goToolchain = go; };
         in {
           rumdl = pkgs.rumdl;
           biome = pkgs.biome;
           go-dev = pkgs.symlinkJoin {
             name = "meissa-go-dev";
-            paths = [ pkgs.go_1_27 ] ++ builtins.attrValues goAnalysis;
+            paths = [ go ] ++ builtins.attrValues goAnalysis;
           };
+          inherit go;
           tools = import ./go/package.nix {
-            inherit (pkgs) buildGo127Module lib;
+            inherit (pkgs) lib;
+            buildGo127Module = pkgs.buildGoModule.override { inherit go; };
           };
           "rumdl-base-config" = import ./rumdl-base-config.nix { inherit pkgs; };
           hk = import ./tools/toolchain/hk.nix { inherit pkgs; };
