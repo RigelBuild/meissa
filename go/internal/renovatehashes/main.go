@@ -23,6 +23,9 @@ func mainWithRunner(
 ) int {
 	root, stderrText, exit, err := runner.Run(ctx, "git", "rev-parse", "--show-toplevel")
 	if err != nil || exit != 0 {
+		if ctx.Err() != nil {
+			return reportFailure(stderr, failf("interrupted by %s", context.Cause(ctx)))
+		}
 		return reportFailure(stderr, failf("could not find Git root: %s", commandOutput(err, stderrText)))
 	}
 	root = strings.TrimSpace(root)

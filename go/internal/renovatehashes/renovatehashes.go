@@ -84,6 +84,9 @@ func (r execRunner) runWithEnv(
 	command.Stderr = &stderr
 	runErr := command.Run()
 	if runErr != nil {
+		if ctx.Err() != nil {
+			return stdout.String(), stderr.String(), -1, fmt.Errorf("run %s: %w", name, context.Cause(ctx))
+		}
 		if exitError, ok := errors.AsType[*exec.ExitError](runErr); ok {
 			return stdout.String(), stderr.String(), exitError.ExitCode(), nil
 		}
