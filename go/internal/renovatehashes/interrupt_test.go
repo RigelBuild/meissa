@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -392,7 +393,12 @@ func testRefreshNilawayFetchFailure(t *testing.T) {
 func testRefreshPackageHash(t *testing.T) {
 	root, runner := newFixture(t)
 	initial := readFixture(t, root, defaultEntries()[2].File)
-	changed := strings.Replace(initial, `sha256-gXUE5nvRY4WOvIP0ZM5WscVD6BCXFgjD0OQ+gx/XBFs=`, "sha256-previous", 1)
+	// Read the live vendorHash so the fixture survives dependency bumps.
+	current := regexp.MustCompile(`vendorHash = "(sha256-[^"]+)"`).FindStringSubmatch(initial)
+	if current == nil {
+		t.Fatal("package.nix has no vendorHash")
+	}
+	changed := strings.Replace(initial, current[1], "sha256-previous", 1)
 	writeFixture(t, root, defaultEntries()[2].File, changed)
 	runner.base[defaultEntries()[2].File] = initial
 	_, err := refresh(t.Context(), root, defaultEntries()[2:], runner, envValue("main"))

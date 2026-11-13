@@ -54,7 +54,7 @@ func TestRenovatePolicyScheduledWorkflow(t *testing.T) {
 			"echo \"$(nix build --no-link --print-out-paths --inputs-from . nixpkgs#nodejs)/bin\" >> \"$GITHUB_PATH\"")
 		assertRun(t, steps[nodeAssert], "node --version")
 		assertRun(t, steps[goToolchain],
-			"echo \"$(nix build --no-link --print-out-paths --inputs-from . nixpkgs#go_1_27)/bin\" >> \"$GITHUB_PATH\"")
+			"echo \"$(nix build --no-link --print-out-paths .#go)/bin\" >> \"$GITHUB_PATH\"")
 		assertRun(t, steps[goAssert], "go version")
 	})
 }

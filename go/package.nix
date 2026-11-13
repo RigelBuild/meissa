@@ -1,5 +1,5 @@
-{ buildGo127Module, lib }:
-buildGo127Module {
+{ buildGoModule, lib }:
+buildGoModule {
   pname = "meissa-tools";
   version = (lib.importJSON ../.release-please-manifest.json).go or "0.0.0";
   src = lib.fileset.toSource { root = ./.; fileset = ./.; };

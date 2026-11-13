@@ -12,7 +12,7 @@ The opt-in `devenvModules.go` module adds golangci-lint, govulncheck, go-license
 { inputs, pkgs, ... }:
 {
   imports = [ inputs.meissa.devenvModules.go ];
-  meissa.go.toolchain = pkgs.go;
+  meissa.go.toolchain = inputs.meissa.packages.${pkgs.stdenv.hostPlatform.system}.go;
 }
 ```
 
