@@ -4,37 +4,90 @@
 package comment
 
 import (
+	"fmt"
 	"strings"
+	"unicode"
 
 	"github.com/RigelBuild/meissa/go/internal/jstext"
-	"github.com/RigelBuild/meissa/go/internal/lengthgate/text"
 )
 
 // Ceiling is the longest comment block a change may grow to without a marker.
 const Ceiling = 4
 
-// MarkerResult reports what a source comment's first line says about LENGTH.
+const (
+	// MarkerKeyword is the word that opens a LENGTH marker.
+	MarkerKeyword = "LENGTH"
+	// MinReasonWords is the fewest words a marker reason may hold.
+	MinReasonWords = 3
+)
+
+// InvalidReason reports why a marker reason is too short.
+func InvalidReason(reason string) string {
+	if WordsInReason(reason) < MinReasonWords {
+		return fmt.Sprintf("reason must contain at least %d words", MinReasonWords)
+	}
+	return ""
+}
+
+// IsWordByte reports whether c is an ASCII letter, digit or underscore.
+func IsWordByte(c byte) bool {
+	return c == '_' || ('0' <= c && c <= '9') || ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z')
+}
+
+// MarkerResult reports whether a comment has a valid or malformed LENGTH marker.
 type MarkerResult struct {
-	Found  bool   // false means the line holds no marker
-	Reason string // set when Found and Error is ""
-	Error  string // set when Found and the marker is malformed
+	Found bool
+	Error string
 }
 
 // Marker reads a LENGTH marker from the first line of a comment block.
 func Marker(firstLine string) MarkerResult {
 	rest, ok := commentPrefixRest(firstLine)
 	if !ok {
-		return MarkerResult{Found: false, Reason: "", Error: ""}
+		return MarkerResult{}
 	}
 	afterColon, ok := cutMarkerKeyword(jstext.Trim(rest))
 	if !ok {
-		return MarkerResult{Found: false, Reason: "", Error: ""}
+		return MarkerResult{}
 	}
-	content := text.TrimCommentClose(afterColon)
-	if problem := text.InvalidReason(content); problem != "" {
-		return MarkerResult{Found: true, Reason: "", Error: problem}
+	content := TrimCommentClose(afterColon)
+	if problem := InvalidReason(content); problem != "" {
+		return MarkerResult{Found: true, Error: problem}
 	}
-	return MarkerResult{Found: true, Reason: content, Error: ""}
+	return MarkerResult{Found: true}
+}
+
+// WordsInReason counts reason words that hold a letter or digit.
+func WordsInReason(reason string) int {
+	count := 0
+	for _, word := range jstext.Fields(jstext.Trim(reason)) {
+		if HasLetterOrDigit(word) {
+			count++
+		}
+	}
+	return count
+}
+
+// HasLetterOrDigit reports whether value holds a Unicode letter or number.
+func HasLetterOrDigit(value string) bool {
+	for _, r := range value {
+		if unicode.IsLetter(r) || unicode.IsNumber(r) {
+			return true
+		}
+	}
+	return false
+}
+
+// TrimCommentClose removes a trailing comment closer and the surrounding spaces.
+func TrimCommentClose(value string) string {
+	value = jstext.TrimRight(value)
+	for _, suffix := range [...]string{"*/", "-->"} {
+		if cut, ok := strings.CutSuffix(value, suffix); ok {
+			value = cut
+			break
+		}
+	}
+	return jstext.Trim(value)
 }
 
 // commentPrefixRest drops one comment opener and the spaces after it.
@@ -60,10 +113,9 @@ func commentPrefixRest(line string) (string, bool) {
 	return jstext.TrimLeft(rest), true
 }
 
-// cutMarkerKeyword removes "LENGTH" and the colon after it, and reports false
-// when the content does not start that way.
+// cutMarkerKeyword removes LENGTH and its colon from the marker content.
 func cutMarkerKeyword(content string) (string, bool) {
-	rest, ok := strings.CutPrefix(content, text.Marker)
+	rest, ok := strings.CutPrefix(content, MarkerKeyword)
 	if !ok {
 		return "", false
 	}

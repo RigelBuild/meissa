@@ -116,4 +116,4 @@ Release Please opens one release pull request covering every changed package. Wh
 
 ## Local development
 
-Run `direnv allow .` once, then `direnv exec . rumdl check .`. Run the length-gate tests with `go -C go test ./internal/lengthgate/...`. CI runs `nix flake check` and `moon run :ci` (lint, markdown, the ref-gate self-check, and every package's typecheck and tests).
+Run `direnv allow .` once, then `direnv exec . rumdl check .`. Run the length-gate tests with `go -C go test ./internal/lengthgate/...`; `direnv exec . bun test` still runs the Bun workspace tests. CI runs `nix flake check` and `moon run :ci` (lint, markdown, the ref-gate self-check, and every package's typecheck and tests).

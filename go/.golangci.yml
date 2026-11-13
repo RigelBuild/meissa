@@ -28,9 +28,9 @@ linters:
     - exhaustruct
   settings:
     wrapcheck:
-      # errs holds messages the CLI prints as written; wrapping would change user-visible output.
+      # Messages the CLI prints verbatim are model.MessageError values; wrapping would change output.
       ignore-package-globs:
-        - github.com/RigelBuild/meissa/go/internal/lengthgate/errs
+        - github.com/RigelBuild/meissa/go/internal/lengthgate/model
   enable:
     - gomodguard_v2
   exclusions:

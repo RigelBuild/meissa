@@ -23,17 +23,47 @@ func writeTempConfig(t *testing.T, text string) string {
 	return path
 }
 
+// rejectionCase is one config that LoadConfig must reject, with the TypeScript error it must name.
+type rejectionCase struct {
+	name string
+	text string
+	want string
+}
+
+// expectRejected runs each case and fails unless LoadConfig rejects it with the wanted error text.
+func expectRejected(t *testing.T, cases []rejectionCase) {
+	t.Helper()
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := LoadConfig(writeTempConfig(t, tc.text))
+			if err == nil {
+				t.Fatalf("LoadConfig accepted %s", tc.text)
+			}
+			if !strings.Contains(err.Error(), tc.want) {
+				t.Fatalf("error = %q, want it to contain %q", err.Error(), tc.want)
+			}
+		})
+	}
+}
+
 // The error strings below are the TypeScript contract. Each case isolates one rule in config.ts.
-func TestLoadConfigRejectsWithTypeScriptErrors(t *testing.T) {
-	cases := []struct {
-		name string
-		text string
-		want string
-	}{
+func TestLoadConfigRejectsShape(t *testing.T) {
+	expectRejected(t, []rejectionCase{
 		{
 			name: "unknown root key",
 			text: `{"extensions": [".ts"], "exclude": [], "docs": [], "bogus": 1}`,
 			want: `Unknown key "bogus" in config`,
+		},
+		{
+			name: "first unknown root key in input order wins",
+			text: `{"extensions": [".ts"], "exclude": [], "docs": [], "zeta": 1, "alpha": 2}`,
+			want: `Unknown key "zeta" in config`,
+		},
+		{
+			name: "first unknown class key in input order wins",
+			text: `{"extensions": [], "exclude": [], "docs": [` +
+				`{"name": "spec", "include": [], "exclude": [], "target": 1, "markerAllowed": false, "zeta": 1, "alpha": 2}]}`,
+			want: `Unknown key "zeta" in docs[0]`,
 		},
 		{
 			name: "unknown key inside a document class",
@@ -50,6 +80,11 @@ func TestLoadConfigRejectsWithTypeScriptErrors(t *testing.T) {
 			name: "an extension entry must be a string",
 			text: `{"extensions": [1], "exclude": [], "docs": []}`,
 			want: "extensions[0] must be a string",
+		},
+		{
+			name: "an unscanned extension is rejected",
+			text: `{"extensions": [".md"], "exclude": [], "docs": []}`,
+			want: `extensions includes ".md" but no scanner supports it`,
 		},
 		{
 			name: "a document class must be an object",
@@ -79,11 +114,12 @@ func TestLoadConfigRejectsWithTypeScriptErrors(t *testing.T) {
 				`{"name": "spec", "include": [], "exclude": [], "target": 1, "markerAllowed": "no"}]}`,
 			want: "docs[0].markerAllowed must be a boolean",
 		},
-		{
-			name: "an unscanned extension is rejected",
-			text: `{"extensions": [".md"], "exclude": [], "docs": []}`,
-			want: `extensions includes ".md" but no scanner supports it`,
-		},
+	})
+}
+
+// TestLoadConfigRejectsGlobsAndTargets covers the rules checked at load for globs and class targets.
+func TestLoadConfigRejectsGlobsAndTargets(t *testing.T) {
+	expectRejected(t, []rejectionCase{
 		{
 			name: "an invalid exclude glob is rejected at load",
 			text: `{"extensions": [], "exclude": ["["], "docs": []}`,
@@ -95,18 +131,18 @@ func TestLoadConfigRejectsWithTypeScriptErrors(t *testing.T) {
 				`{"name": "spec", "include": ["["], "exclude": [], "target": 1, "markerAllowed": false}]}`,
 			want: "docs[0].include[0] is not a valid glob",
 		},
-	}
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			_, err := LoadConfig(writeTempConfig(t, tc.text))
-			if err == nil {
-				t.Fatalf("LoadConfig accepted %s", tc.text)
-			}
-			if !strings.Contains(err.Error(), tc.want) {
-				t.Fatalf("error = %q, want it to contain %q", err.Error(), tc.want)
-			}
-		})
-	}
+		{
+			name: "a leading ! negation is rejected at load, not read as a literal",
+			text: `{"extensions": [], "exclude": ["!docs/**"], "docs": []}`,
+			want: `exclude[0] uses unsupported leading negation: "!docs/**"`,
+		},
+		{
+			name: "a fractional class target is rejected at load",
+			text: `{"extensions": [], "exclude": [], "docs": [` +
+				`{"name": "spec", "include": [], "exclude": [], "target": 1500.5, "markerAllowed": false}]}`,
+			want: "docs[0].target must be an integer",
+		},
+	})
 }
 
 func TestLoadConfigMissingFileNamesPath(t *testing.T) {

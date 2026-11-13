@@ -7,22 +7,17 @@ import (
 
 	gast "github.com/yuin/goldmark/ast"
 
-	"github.com/RigelBuild/meissa/go/internal/lengthgate/text"
+	"github.com/RigelBuild/meissa/go/internal/lengthgate/comment"
 )
 
 // formatError is the one-line format a doc marker must follow.
 const formatError = "doc marker must be one HTML comment line: <!-- LENGTH §Section: reason -->"
 
-// MarkerResult is the outcome of scanning a document for its LENGTH marker. Line is the 1-based line of the
-// first marker when Found is true, and Lines lists the 1-based line of every marker in document order.
-// Callers use Lines to find the first marker that was added, as core.ts does.
+// MarkerResult holds marker locations and validation status.
 type MarkerResult struct {
-	Found   bool
-	Line    int
-	Lines   []int
-	Section string
-	Reason  string
-	Error   string
+	Found bool
+	Lines []int
+	Error string
 }
 
 // Marker finds the one LENGTH marker of a document. It returns Found false when none exists,
@@ -49,48 +44,36 @@ func markerLines(doc Doc) []int {
 func markerFromDoc(doc Doc) MarkerResult {
 	markers := markerBlocks(doc)
 	if len(markers) == 0 {
-		return MarkerResult{Found: false, Line: 0, Lines: nil, Section: "", Reason: "", Error: ""}
+		return MarkerResult{}
 	}
 	starts := lineStarts(doc.source)
 	markerLine := LineOf(starts, markers[0].offset)
 	if len(markers) > 1 {
-		return MarkerResult{
-			Found: true, Line: markerLine, Lines: nil, Section: "", Reason: "",
-			Error: "only one doc LENGTH marker is allowed",
-		}
+		return MarkerResult{Found: true, Error: "only one doc LENGTH marker is allowed"}
 	}
 	marker := markers[0]
 	headings := level2Headings(doc)
 	afterFrontMatter := markerLine > doc.frontMatterEnd
 	beforeFirstHeading := len(headings) > 0 && LineOf(starts, headings[0].offset) > markerLine
 	if !afterFrontMatter || !beforeFirstHeading {
-		return MarkerResult{
-			Found: true, Line: markerLine, Lines: nil, Section: "", Reason: "",
-			Error: "doc marker must be after front matter, before the first ## heading, and name an existing section",
-		}
+		return MarkerResult{Found: true, Error: "doc marker must be after front matter, before the first ## heading, and name an existing section"}
 	}
 	if strings.ContainsAny(marker.value, "\r\n") {
-		return MarkerResult{
-			Found: true, Line: markerLine, Lines: nil, Section: "", Reason: "",
-			Error: "doc LENGTH marker must be one line",
-		}
+		return MarkerResult{Found: true, Error: "doc LENGTH marker must be one line"}
 	}
 	body, ok := markerBody(marker.value)
 	if !ok {
-		return MarkerResult{Found: true, Line: markerLine, Lines: nil, Section: "", Reason: "", Error: formatError}
+		return MarkerResult{Found: true, Error: formatError}
 	}
 	names := headingNames(headings)
 	section, reason := splitSectionReason(body, names)
-	if reasonErr := text.InvalidReason(reason); reasonErr != "" {
-		return MarkerResult{Found: true, Line: markerLine, Lines: nil, Section: "", Reason: "", Error: reasonErr}
+	if reasonErr := comment.InvalidReason(reason); reasonErr != "" {
+		return MarkerResult{Found: true, Error: reasonErr}
 	}
 	if section == "" || !names[NormalizeHeading(section)] {
-		return MarkerResult{
-			Found: true, Line: markerLine, Lines: nil, Section: "", Reason: "",
-			Error: "doc marker section §" + section + " does not match an existing ## heading",
-		}
+		return MarkerResult{Found: true, Error: "doc marker section §" + section + " does not match an existing ## heading"}
 	}
-	return MarkerResult{Found: true, Line: markerLine, Lines: nil, Section: section, Reason: reason, Error: ""}
+	return MarkerResult{Found: true}
 }
 
 // markerBlock is one raw HTML block that begins with a LENGTH marker.
@@ -123,23 +106,22 @@ func hasLengthPrefix(value string) bool {
 		return false
 	}
 	rest = strings.TrimLeft(rest, " \t\r\n")
-	if !strings.HasPrefix(rest, text.Marker) {
+	if !strings.HasPrefix(rest, comment.MarkerKeyword) {
 		return false
 	}
-	after := rest[len(text.Marker):]
-	return after == "" || !text.IsWordByte(after[0])
+	after := rest[len(comment.MarkerKeyword):]
+	return after == "" || !comment.IsWordByte(after[0])
 }
 
-// markerBody returns the text between "§" and the closing "-->" of a single-line marker. The TypeScript
-// pattern is `^<!--\s*LENGTH\s+§([^:]+:.*?)\s*-->$`: at least one space must follow LENGTH, and the body
-// needs a colon preceded by a non-colon character. Otherwise the marker is malformed.
+// markerBody returns the text between "§" and the closing "-->" of a single-line marker.
+// A marker needs whitespace after LENGTH and a colon after a non-colon character; otherwise it is malformed.
 func markerBody(value string) (string, bool) {
 	rest, ok := strings.CutPrefix(value, "<!--")
 	if !ok {
 		return "", false
 	}
 	rest = strings.TrimLeft(rest, " \t")
-	rest, ok = strings.CutPrefix(rest, text.Marker)
+	rest, ok = strings.CutPrefix(rest, comment.MarkerKeyword)
 	if !ok {
 		return "", false
 	}
@@ -169,7 +151,7 @@ func splitSectionReason(body string, names map[string]bool) (string, string) {
 	colons := colonsDescending(body)
 	split := -1
 	for _, at := range colons {
-		if names[NormalizeHeading(body[:at])] && text.InvalidReason(strings.TrimSpace(body[at+1:])) == "" {
+		if names[NormalizeHeading(body[:at])] && comment.InvalidReason(strings.TrimSpace(body[at+1:])) == "" {
 			split = at
 			break
 		}

@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/RigelBuild/meissa/go/internal/jstext"
-	"github.com/RigelBuild/meissa/go/internal/lengthgate/text"
 	"github.com/RigelBuild/meissa/go/internal/linediff"
 )
 
@@ -14,14 +13,14 @@ import (
 // It returns "" when the stripped text holds no letter or digit.
 func fallbackKey(line string) string {
 	content := stripTokens(line)
-	if text.HasLetterOrDigit(content) {
+	if HasLetterOrDigit(content) {
 		return content
 	}
 	return ""
 }
 
-// stripTokens mirrors the TS fallback pattern: leading space, then one
-// or more tokens each followed by space. A line with no leading token is unchanged.
+// stripTokens removes leading comment tokens: spaces, then one or more tokens each followed by space.
+// A line with no leading token is returned unchanged.
 func stripTokens(line string) string {
 	rest := jstext.TrimLeft(line)
 	stripped := false
@@ -39,7 +38,7 @@ func stripTokens(line string) string {
 	return rest
 }
 
-// cutFallbackToken removes one leading token, trying the alternatives in TS order.
+// cutFallbackToken removes one leading token, trying the alternatives in a fixed order.
 func cutFallbackToken(s string) (string, bool) {
 	for _, token := range [...]string{"//", "#", "*", "--", ";", "/*", "*/"} {
 		if rest, ok := strings.CutPrefix(s, token); ok {

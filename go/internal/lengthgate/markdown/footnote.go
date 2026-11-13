@@ -15,13 +15,8 @@ type span struct{ start, stop int }
 // lineRange is a half-open range of 1-based line numbers.
 type lineRange struct{ from, to int }
 
-// orphanFootnoteTexts returns the visible text of each footnote definition that goldmark did not
-// turn into a node. goldmark builds a Footnote only when a reference to it exists, so an orphan
-// definition would vanish from the tree, while the TypeScript counts its text.
-//
-// A definition line starts with up to three spaces, then "[^label]:". Its text is the rest of that
-// line plus the following non-blank lines that no block covers. A line a block covers is already
-// counted by the walk, or is code, so it is never counted here. Front matter and errata are skipped.
+// orphanFootnoteTexts returns the text of each footnote definition goldmark left out of the tree.
+// Goldmark builds a Footnote only when something references it, so an unreferenced definition is counted here.
 func orphanFootnoteTexts(doc Doc, dropErrata bool) []string {
 	source := doc.source
 	starts := lineStarts(source)
@@ -73,9 +68,8 @@ func footnoteDefinitionEnd(line []byte) (int, bool) {
 	return colon + 1, true
 }
 
-// coveredSpans returns the source range of every line segment that a block node in the tree owns.
-// Inline nodes are skipped: goldmark panics when asked for their lines, and their text sits inside
-// a block's segments anyway.
+// coveredSpans returns the source range of every line segment a block node owns.
+// Inline nodes are skipped: goldmark panics on their lines, and their text sits in a block's segments.
 func coveredSpans(root gast.Node) []span {
 	var out []span
 	var visit func(gast.Node)

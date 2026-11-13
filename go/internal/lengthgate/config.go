@@ -6,12 +6,14 @@
 package lengthgate
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"maps"
+	"math"
 	"os"
 	"slices"
+	"strings"
 
 	"github.com/RigelBuild/meissa/go/commentscan"
 	"github.com/RigelBuild/meissa/go/internal/lengthgate/model"
@@ -33,7 +35,7 @@ func LoadConfig(path string) (model.Config, error) {
 	if err != nil {
 		return model.Config{}, err
 	}
-	err = rejectUnknownKeys(root, []string{"extensions", "exclude", "docs"}, "config")
+	raw, err := rootRawFields(data, []string{"extensions", "exclude", "docs"}, "config")
 	if err != nil {
 		return model.Config{}, err
 	}
@@ -51,6 +53,11 @@ func LoadConfig(path string) (model.Config, error) {
 	if !ok {
 		return model.Config{}, errors.New("docs must be an array of document classes")
 	}
+	var rawDocs []json.RawMessage
+	err = json.Unmarshal(raw["docs"], &rawDocs)
+	if err != nil {
+		return model.Config{}, err
+	}
 	exclude, err := readGlobArray(root["exclude"], "exclude")
 	if err != nil {
 		return model.Config{}, err
@@ -58,7 +65,7 @@ func LoadConfig(path string) (model.Config, error) {
 	classes := make([]model.DocClass, 0, len(docs))
 	for index, value := range docs {
 		var class model.DocClass
-		class, err = readDocClass(value, index)
+		class, err = readDocClass(value, index, rawDocs[index])
 		if err != nil {
 			return model.Config{}, err
 		}
@@ -75,14 +82,30 @@ func asRecord(value any, label string) (map[string]any, error) {
 	return record, nil
 }
 
-// rejectUnknownKeys fails on the first key, in sorted order, that is not allowed.
-func rejectUnknownKeys(record map[string]any, allowed []string, label string) error {
-	for _, key := range slices.Sorted(maps.Keys(record)) {
-		if !slices.Contains(allowed, key) {
-			return fmt.Errorf("Unknown key %q in %s", key, label)
-		}
+// rootRawFields checks the keys of the object at data's root, in input order, and returns each
+// value's raw bytes. The first key not in allowed is reported, so the error names what the user wrote first.
+func rootRawFields(data []byte, allowed []string, label string) (map[string]json.RawMessage, error) {
+	dec := json.NewDecoder(bytes.NewReader(data))
+	if _, err := dec.Token(); err != nil {
+		return nil, err
 	}
-	return nil
+	fields := map[string]json.RawMessage{}
+	for dec.More() {
+		tok, err := dec.Token()
+		if err != nil {
+			return nil, err
+		}
+		key, _ := tok.(string)
+		var value json.RawMessage
+		if err := dec.Decode(&value); err != nil {
+			return nil, err
+		}
+		if !slices.Contains(allowed, key) {
+			return nil, fmt.Errorf("Unknown key %q in %s", key, label)
+		}
+		fields[key] = value
+	}
+	return fields, nil
 }
 
 func readStringArray(value any, label string) ([]string, error) {
@@ -109,20 +132,24 @@ func readGlobArray(value any, label string) ([]string, error) {
 		return nil, err
 	}
 	for index, glob := range globs {
+		if strings.HasPrefix(glob, "!") {
+			return nil, fmt.Errorf("%s[%d] uses unsupported leading negation: %q", label, index, glob)
+		}
 		if !doublestar.ValidatePattern(glob) {
 			return nil, fmt.Errorf("%s[%d] is not a valid glob: %q", label, index, glob)
 		}
 	}
 	return globs, nil
+
 }
 
-func readDocClass(value any, index int) (model.DocClass, error) {
+func readDocClass(value any, index int, raw json.RawMessage) (model.DocClass, error) {
 	label := fmt.Sprintf("docs[%d]", index)
 	record, err := asRecord(value, label)
 	if err != nil {
 		return model.DocClass{}, err
 	}
-	err = rejectUnknownKeys(record, []string{"name", "include", "exclude", "target", "markerAllowed"}, label)
+	_, err = rootRawFields(raw, []string{"name", "include", "exclude", "target", "markerAllowed"}, label)
 	if err != nil {
 		return model.DocClass{}, err
 	}
@@ -131,8 +158,11 @@ func readDocClass(value any, index int) (model.DocClass, error) {
 		return model.DocClass{}, fmt.Errorf("%s.name must be a string", label)
 	}
 	target, ok := record["target"].(float64)
-	if !ok {
+	if !ok || math.IsNaN(target) || math.IsInf(target, 0) {
 		return model.DocClass{}, fmt.Errorf("%s.target must be a finite number", label)
+	}
+	if target != math.Trunc(target) {
+		return model.DocClass{}, fmt.Errorf("%s.target must be an integer", label)
 	}
 	markerAllowed, ok := record["markerAllowed"].(bool)
 	if !ok {

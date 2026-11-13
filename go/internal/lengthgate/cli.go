@@ -9,8 +9,8 @@ import (
 
 	"github.com/samber/mo"
 
-	"github.com/RigelBuild/meissa/go/internal/lengthgate/errs"
 	"github.com/RigelBuild/meissa/go/internal/lengthgate/gitdeps"
+	"github.com/RigelBuild/meissa/go/internal/lengthgate/model"
 )
 
 const usageLine = "Usage: length-gate --config <path> [--all] [--skip-class <name>]..."
@@ -40,13 +40,7 @@ func Main(ctx context.Context, args []string, lookup func(string) (string, bool)
 		return failWith(stderr, err)
 	}
 	gateEnv := gateEnvFrom(lookup, parsed)
-	// Merge mode compares the head with its first parent and ignores LENGTH_GATE_BASE and LENGTH_GATE_FETCH,
-	// as the TS does.
-	base := gateEnv.Base
-	if gateEnv.Merge {
-		base = mo.Some(gateEnv.Head + "^1")
-	}
-	deps := gitdeps.NewGitDeps(root, stdout, stderr, gateEnv.Head, base, gateEnv.Fetch)
+	deps := gitdeps.NewGitDeps(root, gateEnv.Head)
 	return RunOnce(ctx, deps, config, gateEnv, stdout, stderr)
 }
 
@@ -58,33 +52,33 @@ func parseArgs(args []string) (cliArgs, error) {
 		switch arg := args[index]; arg {
 		case "--config":
 			if hasConfig {
-				return cliArgs{}, errs.MessageError("--config may appear once")
+				return cliArgs{}, model.MessageError("--config may appear once")
 			}
 			value, ok := flagValue(args, index)
 			if !ok {
-				return cliArgs{}, errs.MessageError("--config requires a path")
+				return cliArgs{}, model.MessageError("--config requires a path")
 			}
 			parsed.configPath = value
 			hasConfig = true
 			index++
 		case "--all":
 			if parsed.all {
-				return cliArgs{}, errs.MessageError("--all may appear once")
+				return cliArgs{}, model.MessageError("--all may appear once")
 			}
 			parsed.all = true
 		case "--skip-class":
 			value, ok := flagValue(args, index)
 			if !ok {
-				return cliArgs{}, errs.MessageError("--skip-class requires a class name")
+				return cliArgs{}, model.MessageError("--skip-class requires a class name")
 			}
 			parsed.skipClasses = append(parsed.skipClasses, value)
 			index++
 		default:
-			return cliArgs{}, errs.Messagef("unknown argument %q", arg)
+			return cliArgs{}, model.Messagef("unknown argument %q", arg)
 		}
 	}
 	if !hasConfig {
-		return cliArgs{}, errs.MessageError("--config is required")
+		return cliArgs{}, model.MessageError("--config is required")
 	}
 	return parsed, nil
 }
@@ -101,8 +95,8 @@ func flagValue(args []string, index int) (string, bool) {
 	return value, true
 }
 
-// gateEnvFrom reads the LENGTH_GATE_* variables. A variable that is set counts as set even when empty,
-// as the TypeScript does, so only an absent variable falls back to its default.
+// gateEnvFrom reads the LENGTH_GATE_* variables. A set variable counts as set even when empty,
+// so only an absent variable falls back to its default.
 func gateEnvFrom(lookup func(string) (string, bool), parsed cliArgs) GateEnv {
 	head, ok := lookup("LENGTH_GATE_HEAD")
 	if !ok {

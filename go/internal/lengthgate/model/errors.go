@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-// Package errs holds the error values the length gate prints as written.
-package errs
+package model
 
 import "fmt"
 
-// MessageError is a failure whose text the CLI prints as written.
+// MessageError preserves diagnostics that the CLI prints verbatim.
 type MessageError string
 
 func (e MessageError) Error() string { return string(e) }
 
-// Messagef formats a failure message the CLI prints as written.
+// Messagef formats a diagnostic that the CLI prints verbatim.
 func Messagef(format string, args ...any) error {
 	return MessageError(fmt.Sprintf(format, args...))
 }

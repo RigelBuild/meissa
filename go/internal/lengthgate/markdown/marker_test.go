@@ -17,9 +17,6 @@ func TestMarkerAccepted(t *testing.T) {
 	if !got.Found || got.Error != "" {
 		t.Fatalf("Marker = %+v, want found and no error", got)
 	}
-	if got.Section != "Body" || got.Reason != "the reason is long enough here" {
-		t.Fatalf("Section/Reason = %q/%q", got.Section, got.Reason)
-	}
 }
 
 func TestMarkerNone(t *testing.T) {

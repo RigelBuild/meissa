@@ -10,77 +10,103 @@ import (
 	gextast "github.com/yuin/goldmark/extension/ast"
 
 	"github.com/RigelBuild/meissa/go/internal/jstext"
-	"github.com/RigelBuild/meissa/go/internal/lengthgate/text"
+	"github.com/RigelBuild/meissa/go/internal/lengthgate/comment"
 )
 
-// ProseWords counts prose words in markdown. A leading BOM is dropped, as the TypeScript does.
+// ProseWords counts prose words in markdown. A leading BOM is dropped before parsing.
 // With dropErrata, the "## Errata" section and everything under it is not counted.
 func ProseWords(markdown string, dropErrata bool) int {
 	doc := Parse([]byte(markdown))
 	count := 0
 	blocks := append(proseBlocks(doc, dropErrata), orphanFootnoteTexts(doc, dropErrata)...)
 	for _, token := range jstext.Fields(strings.Join(blocks, "\n")) {
-		if text.HasLetterOrDigit(token) {
+		if comment.HasLetterOrDigit(token) {
 			count++
 		}
 	}
 	return count
 }
 
-// proseBlocks returns the visible text of each prose block, in document order.
-// Code, tables, link definitions and front matter are skipped. An "## Errata" heading that is a
-// top-level child starts a skipped run, which ends at the next top-level heading of depth 1 or 2.
-// A footnote definition is judged by its own source line, so goldmark moving it to the end of the
-// document does not change whether Errata drops it.
+// proseBlocks returns the visible text of each prose block in document order. Code, tables, link
+// definitions and front matter are skipped. Errata runs are dropped when dropErrata is set.
 func proseBlocks(doc Doc, dropErrata bool) []string {
-	var blocks []string
-	inErrata := false
-	starts := lineStarts(doc.source)
-	errata := errataRanges(doc, starts, dropErrata)
-	var visit func(node gast.Node)
-	visit = func(node gast.Node) {
-		if h, ok := node.(*gast.Heading); ok && dropErrata && h.Parent() == doc.root {
-			if h.Level <= 2 {
-				inErrata = false
-			}
-			if h.Level == 2 && NormalizeHeading(inlineText(h, doc.source)) == "errata" {
-				inErrata = true
-				return
-			}
-		}
-		// Footnotes are judged by their own line below, so the tree gate skips the footnote list and its items.
-		_, isFootnoteList := node.(*gextast.FootnoteList)
-		_, isFootnote := node.(*gextast.Footnote)
-		if dropErrata && inErrata && !isFootnoteList && !isFootnote {
-			return
-		}
-		switch n := node.(type) {
-		case *gextast.FootnoteList:
-			// goldmark gathers every referenced footnote here. Each definition is counted below,
-			// by its own source line.
-		case *gextast.Footnote:
-			if !inRanges(errata, LineOf(starts, nodeOffset(n))) {
-				blocks = append(blocks, inlineText(n, doc.source))
-			}
-			return
-		case *gast.Heading, *gast.Paragraph, *gast.TextBlock:
-			blocks = append(blocks, inlineText(n, doc.source))
-			return
-		case *gast.HTMLBlock:
-			if body := strings.TrimSpace(HTMLText(htmlBlockText(n, doc.source))); body != "" {
-				blocks = append(blocks, body)
-			}
-			return
-		}
-		if isSkippedBlock(node) {
-			return
-		}
-		for child := node.FirstChild(); child != nil; child = child.NextSibling() {
-			visit(child)
-		}
+	walk := &proseWalker{doc: doc, dropErrata: dropErrata, starts: lineStarts(doc.source)}
+	walk.errata = errataRanges(doc, walk.starts, dropErrata)
+	walk.visit(doc.root)
+	return walk.blocks
+}
+
+// proseWalker holds the state of one proseBlocks walk.
+type proseWalker struct {
+	doc        Doc
+	dropErrata bool
+	inErrata   bool
+	starts     []int
+	errata     []lineRange
+	blocks     []string
+}
+
+// visit walks node, collecting the prose of each block it reaches.
+func (w *proseWalker) visit(node gast.Node) {
+	if w.enterHeading(node) {
+		return
 	}
-	visit(doc.root)
-	return blocks
+	// Footnotes are judged by their own line, so the tree skips the footnote list and its items.
+	_, isFootnoteList := node.(*gextast.FootnoteList)
+	_, isFootnote := node.(*gextast.Footnote)
+	if w.dropErrata && w.inErrata && !isFootnoteList && !isFootnote {
+		return
+	}
+	if w.collect(node) {
+		return
+	}
+	if isSkippedBlock(node) {
+		return
+	}
+	for child := node.FirstChild(); child != nil; child = child.NextSibling() {
+		w.visit(child)
+	}
+}
+
+// enterHeading updates errata state for a top-level heading. It reports whether the heading is the
+// "## Errata" line itself, which is not counted.
+func (w *proseWalker) enterHeading(node gast.Node) bool {
+	h, ok := node.(*gast.Heading)
+	if !ok || !w.dropErrata || h.Parent() != w.doc.root {
+		return false
+	}
+	if h.Level <= 2 {
+		w.inErrata = false
+	}
+	if h.Level == 2 && NormalizeHeading(inlineText(h, w.doc.source)) == "errata" {
+		w.inErrata = true
+		return true
+	}
+	return false
+}
+
+// collect appends the prose of a block node. It reports whether the node is fully handled, so its
+// children are not walked.
+func (w *proseWalker) collect(node gast.Node) bool {
+	switch n := node.(type) {
+	case *gextast.FootnoteList:
+		// goldmark gathers every referenced footnote here. Each definition is counted by its source line.
+		return false
+	case *gextast.Footnote:
+		if !inRanges(w.errata, LineOf(w.starts, nodeOffset(n))) {
+			w.blocks = append(w.blocks, inlineText(n, w.doc.source))
+		}
+		return true
+	case *gast.Heading, *gast.Paragraph, *gast.TextBlock:
+		w.blocks = append(w.blocks, inlineText(n, w.doc.source))
+		return true
+	case *gast.HTMLBlock:
+		if body := strings.TrimSpace(HTMLText(htmlBlockText(n, w.doc.source))); body != "" {
+			w.blocks = append(w.blocks, body)
+		}
+		return true
+	}
+	return false
 }
 
 // nodeOffset returns the byte offset of a block node's first line segment. A footnote definition has no
@@ -177,9 +203,8 @@ func decodeEntities(value string) string {
 	return html.UnescapeString(value)
 }
 
-// imageAltText returns an image's alt text: the visible text of its inline children, joined in order.
-// It replaces goldmark's deprecated Image.Text, which concatenated the children's raw text. Each child
-// now goes through inlineNodeText, so an entity or raw HTML in the alt counts as it does elsewhere.
+// imageAltText returns an image's alt text: the visible text of its inline children, in order.
+// Each child goes through inlineNodeText, so an entity or raw HTML in the alt counts as it does elsewhere.
 func imageAltText(image *gast.Image, source []byte) string {
 	var out strings.Builder
 	for child := image.FirstChild(); child != nil; child = child.NextSibling() {
@@ -201,8 +226,7 @@ func textValue(n *gast.Text, source []byte) string {
 	return value
 }
 
-// codeSpanText returns the text of a code span's children. Code is not entity-decoded, as the TypeScript
-// keeps code raw.
+// codeSpanText returns the text of a code span's children. Code is kept raw, not entity-decoded.
 func codeSpanText(n *gast.CodeSpan, source []byte) string {
 	var out strings.Builder
 	for child := n.FirstChild(); child != nil; child = child.NextSibling() {

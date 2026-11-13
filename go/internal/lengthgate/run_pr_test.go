@@ -16,7 +16,8 @@ import (
 	"github.com/RigelBuild/meissa/go/internal/lengthgate/gitdeps"
 )
 
-func TestRunOncePullRequestMode(t *testing.T) {
+// TestRunOncePullRequestArguments covers the base, head and merge-mode checks.
+func TestRunOncePullRequestArguments(t *testing.T) {
 	t.Run("a pull request without base or fetch exits 2", func(t *testing.T) {
 		repository := trackedRepository(t, map[string]string{"src/file.ts": "clean\n"})
 		result := pullRequest(t, repository, mo.None[string](), mo.None[string](), "HEAD", false)
@@ -31,7 +32,7 @@ func TestRunOncePullRequestMode(t *testing.T) {
 			Event: "push", Base: mo.None[string](), Fetch: mo.None[string](), Head: "HEAD",
 			Merge: false, All: false, SkipClasses: nil,
 		}
-		result := runGate(t, repository, env, commentConfig(), mo.None[string](), mo.None[string]())
+		result := runGate(t, repository, env, commentConfig())
 		if result.code != 0 || !strings.Contains(result.stdout.String(), "skip") {
 			t.Fatalf("exit = %d, stdout %q", result.code, result.stdout.String())
 		}
@@ -57,7 +58,10 @@ func TestRunOncePullRequestMode(t *testing.T) {
 			t.Fatalf("exit = %d, stderr %q", result.code, result.stderr.String())
 		}
 	})
+}
 
+// TestRunOncePullRequestDiffHardening covers odd files and repository config that must not hide a change.
+func TestRunOncePullRequestDiffHardening(t *testing.T) {
 	t.Run("empty, binary and non-ASCII files in a diff do not break the run", func(t *testing.T) {
 		repository := trackedRepository(t, map[string]string{"src/file.ts": "clean\n", "old.png": "\x00\x01binary"})
 		runGit(t, repository, "checkout", "-q", "-b", "feature")
@@ -89,6 +93,29 @@ func TestRunOncePullRequestMode(t *testing.T) {
 		}
 	})
 
+	t.Run("diff.suppressBlankEmpty cannot drop an added marker after a blank line", func(t *testing.T) {
+		repository := trackedRepository(t, map[string]string{"src/a.ts": "const a = 1;\n\nconst b = 2;\n"})
+		runGit(t, repository, "config", "diff.suppressBlankEmpty", "true")
+		runGit(t, repository, "checkout", "-q", "-b", "feature")
+		marked := "// LENGTH: frame header bit layout\n" + longComment()
+		writeRepositoryFile(t, repository, "src/a.ts", "const a = 1;\n\nconst b = 2;\n"+marked)
+		commitChange(t, repository, "add marked block")
+		result := pullRequest(t, repository, mo.Some("main"), mo.None[string](), "HEAD", false)
+		if result.code != 0 || result.stderr.Len() != 0 {
+			t.Fatalf("exit = %d, stderr %q", result.code, result.stderr.String())
+		}
+		writeRepositoryFile(t, repository, "src/empty.ts", "")
+		commitChange(t, repository, "add empty file")
+		deps := gitdeps.NewGitDeps(repository, "HEAD")
+		diff, err := deps.Diff(t.Context(), "main", "HEAD")
+		if err != nil || !strings.Contains(diff, "diff --git a/src/empty.ts") {
+			t.Fatalf("diff err=%v, want src/empty.ts in diff; got %q", err, diff)
+		}
+	})
+}
+
+// TestRunOncePullRequestSubmodules covers gitlinks, which have no text to judge.
+func TestRunOncePullRequestSubmodules(t *testing.T) {
 	t.Run("diff.submodule=diff cannot inline a submodule's files into the diff", func(t *testing.T) {
 		submodule := trackedRepository(t, map[string]string{"lib.ts": "clean\n"})
 		repository := trackedRepository(t, map[string]string{"src/file.ts": "clean\n"})
@@ -122,7 +149,7 @@ func TestRunOncePullRequestMode(t *testing.T) {
 		repository := trackedRepository(t, map[string]string{"lit1.ts": "clean\n"})
 		runGit(t, repository, "update-index", "--add", "--cacheinfo", "160000,1234567890123456789012345678901234567890,sub")
 		runGit(t, repository, "commit", "-q", "-m", "gitlink")
-		deps := gitdeps.NewGitDeps(repository, nil, nil, "HEAD", mo.None[string](), mo.None[string]())
+		deps := gitdeps.NewGitDeps(repository, "HEAD")
 		_, found, err := deps.ReadAt(t.Context(), "HEAD", "lit?.ts")
 		if err != nil || found {
 			t.Fatalf("lit?.ts found=%v err=%v, want not found", found, err)
@@ -149,27 +176,10 @@ func TestRunOncePullRequestMode(t *testing.T) {
 			t.Fatalf("exit = %d, stderr %q", result.code, result.stderr.String())
 		}
 	})
+}
 
-	t.Run("diff.suppressBlankEmpty cannot drop an added marker after a blank line", func(t *testing.T) {
-		repository := trackedRepository(t, map[string]string{"src/a.ts": "const a = 1;\n\nconst b = 2;\n"})
-		runGit(t, repository, "config", "diff.suppressBlankEmpty", "true")
-		runGit(t, repository, "checkout", "-q", "-b", "feature")
-		marked := "// LENGTH: frame header bit layout\n" + longComment()
-		writeRepositoryFile(t, repository, "src/a.ts", "const a = 1;\n\nconst b = 2;\n"+marked)
-		commitChange(t, repository, "add marked block")
-		result := pullRequest(t, repository, mo.Some("main"), mo.None[string](), "HEAD", false)
-		if result.code != 0 || result.stderr.Len() != 0 {
-			t.Fatalf("exit = %d, stderr %q", result.code, result.stderr.String())
-		}
-		writeRepositoryFile(t, repository, "src/empty.ts", "")
-		commitChange(t, repository, "add empty file")
-		deps := gitdeps.NewGitDeps(repository, nil, nil, "HEAD", mo.None[string](), mo.None[string]())
-		diff, err := deps.Diff(t.Context(), "main", "HEAD")
-		if err != nil || !strings.Contains(diff, "diff --git a/src/empty.ts") {
-			t.Fatalf("diff err=%v, want src/empty.ts in diff; got %q", err, diff)
-		}
-	})
-
+// TestRunOncePullRequestShallowFetch covers base discovery in a shallow clone.
+func TestRunOncePullRequestShallowFetch(t *testing.T) {
 	t.Run("fetches enough shallow history to find the merge base", func(t *testing.T) {
 		source := trackedRepository(t, map[string]string{"src/file.ts": "clean\n"})
 		makePullRequest(t, source, longComment())
@@ -206,7 +216,10 @@ func TestRunOncePullRequestMode(t *testing.T) {
 		}
 		runGit(t, shallow, "rev-parse", "--verify", "-q", "HEAD~399")
 	})
+}
 
+// TestRunOncePullRequestOutcomes covers the exit code and output for each kind of result.
+func TestRunOncePullRequestOutcomes(t *testing.T) {
 	t.Run("an empty diff exits 0 with nothing changed", func(t *testing.T) {
 		repository := trackedRepository(t, map[string]string{"src/file.ts": "clean\n"})
 		result := pullRequest(t, repository, mo.Some("main"), mo.None[string](), "main", false)
@@ -233,6 +246,10 @@ func TestRunOncePullRequestMode(t *testing.T) {
 		}
 	})
 
+}
+
+// TestRunOncePullRequestGitFailures covers base, head and object failures that exit 2 with the cause.
+func TestRunOncePullRequestGitFailures(t *testing.T) {
 	t.Run("an unresolved base exits 2 with the cause on stderr", func(t *testing.T) {
 		repository := trackedRepository(t, map[string]string{"src/file.ts": "clean\n"})
 		result := pullRequest(t, repository, mo.Some("missing-base"), mo.None[string](), "HEAD", false)
@@ -264,7 +281,7 @@ func TestRunOncePullRequestMode(t *testing.T) {
 	t.Run("a missing changed-file object exits 2 and names the file", func(t *testing.T) {
 		repository := trackedRepository(t, map[string]string{"src/file.ts": "clean\n"})
 		makePullRequest(t, repository, longComment())
-		deps := gitdeps.NewGitDeps(repository, nil, nil, "feature", mo.Some("main"), mo.None[string]())
+		deps := gitdeps.NewGitDeps(repository, "feature")
 		head, found, err := deps.Resolve(t.Context(), "feature")
 		if err != nil || !found {
 			t.Fatalf("fixture head did not resolve: found=%v err=%v", found, err)

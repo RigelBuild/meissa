@@ -35,7 +35,7 @@ func stripComments(html string) string {
 }
 
 // stripScriptStyle replaces each script or style element with a space.
-// An unclosed element runs to the end, as in the TypeScript pattern.
+// An unclosed element runs to the end of the document.
 func stripScriptStyle(html string) string {
 	lower := asciiLower(html)
 	var out strings.Builder
@@ -117,7 +117,7 @@ func stripTags(html string) string {
 	return out.String()
 }
 
-// stripHeadingID removes a trailing "\s+{#id}\s*" anchor, as the TypeScript pattern does.
+// stripHeadingID removes a trailing "\s+{#id}\s*" anchor.
 // The anchor opens at the first "{#" after the previous "}", like the regex's leftmost match.
 func stripHeadingID(heading string) string {
 	text := jstext.TrimRight(heading)

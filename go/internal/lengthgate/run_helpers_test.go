@@ -173,32 +173,20 @@ type runCase struct {
 	code           int
 }
 
-func runGate(
-	t *testing.T,
-	repository string,
-	env lengthgate.GateEnv,
-	config model.Config,
-	base, fetch mo.Option[string],
-) runCase {
+func runGate(t *testing.T, repository string, env lengthgate.GateEnv, config model.Config) runCase {
 	t.Helper()
 	var result runCase
-	deps := gitdeps.NewGitDeps(repository, nil, nil, env.Head, base, fetch)
+	deps := gitdeps.NewGitDeps(repository, env.Head)
 	result.code = lengthgate.RunOnce(t.Context(), deps, config, env, &result.stdout, &result.stderr)
 	return result
 }
 
-// pullRequest runs the gate with the base and fetch bound the way the CLI binds them.
 func pullRequest(t *testing.T, repository string, base, fetch mo.Option[string], head string, merge bool) runCase {
 	t.Helper()
 	env := lengthgate.GateEnv{
 		Event: "pull_request", Head: head, Merge: merge, Base: base, Fetch: fetch,
-		All: false, SkipClasses: nil,
 	}
-	bound := base
-	if merge {
-		bound = mo.Some(head + "^1")
-	}
-	return runGate(t, repository, env, commentConfig(), bound, fetch)
+	return runGate(t, repository, env, commentConfig())
 }
 
 // missingHeadObject hides the head blob, so the run fails as if the object were absent.

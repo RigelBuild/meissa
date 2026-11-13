@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-// Package markdown reads documents the way the TypeScript length gate reads them with micromark and mdast.
+// Package markdown parses documents with goldmark (GFM and footnotes) and walks their prose.
 package markdown
 
 import (
@@ -51,9 +51,8 @@ func blankFrontMatter(source []byte, end int) []byte {
 	return out
 }
 
-// frontMatterEnd applies the micromark rules to a BOM-free source. The opening fence is line 1,
-// exactly "---" plus optional spaces or tabs. The block closes at the next line of the same form.
-// A block with no closing fence is not front matter, so it is parsed as ordinary markdown.
+// frontMatterEnd returns the last line of front matter, or 0 when there is none.
+// The fences are "---" lines; a block with no closing fence is ordinary markdown.
 func frontMatterEnd(source []byte) int {
 	lines := bytes.Split(source, []byte("\n"))
 	if len(lines) == 0 || !isFence(lines[0]) {

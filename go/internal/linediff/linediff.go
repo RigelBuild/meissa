@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 // Package linediff aligns two line slices in the order jsdiff's diffArrays does.
-//
-// It ports jsdiff 9.0.0 (diff/base.js and diff/array.js), BSD-3-Clause,
-// Copyright (c) 2009-2015 Kevin Decker. Ties break the way upstream breaks them,
-// because length-gate pairs comment lines by this alignment.
+// It ports jsdiff 9.0.0, BSD-3-Clause, Copyright (c) 2009-2015 Kevin Decker.
 package linediff
 
 import (

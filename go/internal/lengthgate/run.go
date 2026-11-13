@@ -13,7 +13,6 @@ import (
 
 	"github.com/RigelBuild/meissa/go/commentscan"
 	"github.com/RigelBuild/meissa/go/internal/jstext"
-	"github.com/RigelBuild/meissa/go/internal/lengthgate/errs"
 	"github.com/RigelBuild/meissa/go/internal/lengthgate/format"
 	"github.com/RigelBuild/meissa/go/internal/lengthgate/gitdeps"
 	"github.com/RigelBuild/meissa/go/internal/lengthgate/judge"
@@ -67,7 +66,7 @@ func runAll(
 	}
 	paths, err := deps.ListFiles(ctx, headRevision)
 	if err != nil {
-		return 0, fmt.Errorf("list files at %s: %w", headRevision, err)
+		return 0, err
 	}
 	var findings []model.Finding
 	for _, path := range paths {
@@ -84,22 +83,22 @@ func runAll(
 func runRange(
 	ctx context.Context, deps gitdeps.Deps, cfg model.Config, env GateEnv, stdout, stderr io.Writer,
 ) (int, error) {
-	headRevision, err := pullRange(ctx, deps, env)
+	base, head, err := pullRange(ctx, deps, env)
 	if err != nil {
 		return 0, err
 	}
-	mergeBase, err := deps.MergeBase(ctx)
+	mergeBase, err := deps.MergeBase(ctx, base, head)
 	if err != nil {
-		return 0, fmt.Errorf("find merge base: %w", err)
+		return 0, err
 	}
-	rawDiff, err := deps.Diff(ctx, mergeBase, headRevision)
+	rawDiff, err := deps.Diff(ctx, mergeBase, head)
 	if err != nil {
-		return 0, fmt.Errorf("diff %s...%s: %w", mergeBase, headRevision, err)
+		return 0, err
 	}
 	if jstext.Trim(rawDiff) == "" {
 		return 0, writeLine(stdout, "length-gate: nothing changed")
 	}
-	findings, err := judgeDiff(ctx, deps, cfg, rawDiff, mergeBase, headRevision, stdout)
+	findings, err := judgeDiff(ctx, deps, cfg, rawDiff, mergeBase, head, stdout)
 	if err != nil {
 		return 0, err
 	}
@@ -112,7 +111,7 @@ func withSkippedClasses(cfg model.Config, names []string, all bool) (model.Confi
 		return cfg, nil
 	}
 	if !all {
-		return model.Config{}, errs.MessageError("--skip-class is allowed only with --all")
+		return model.Config{}, model.MessageError("--skip-class is allowed only with --all")
 	}
 	known := make(map[string]bool, len(cfg.Docs))
 	for _, class := range cfg.Docs {
@@ -120,7 +119,7 @@ func withSkippedClasses(cfg model.Config, names []string, all bool) (model.Confi
 	}
 	for _, name := range names {
 		if !known[name] {
-			return model.Config{}, errs.Messagef("unknown document class %q", name)
+			return model.Config{}, model.Messagef("unknown document class %q", name)
 		}
 	}
 	docs := make([]model.DocClass, 0, len(cfg.Docs))
@@ -134,63 +133,52 @@ func withSkippedClasses(cfg model.Config, names []string, all bool) (model.Confi
 }
 
 // pullRange validates the base for a pull request and resolves the head. It returns the head commit.
-func pullRange(ctx context.Context, deps gitdeps.Deps, env GateEnv) (string, error) {
+func pullRange(ctx context.Context, deps gitdeps.Deps, env GateEnv) (string, string, error) {
+	head, err := resolveRevision(ctx, deps, env.Head, "head")
+	if err != nil {
+		return "", "", err
+	}
 	if env.Merge {
-		return mergeRange(ctx, deps, env.Head)
-	}
-	err := checkBase(ctx, deps, env)
-	if err != nil {
-		return "", err
-	}
-	return resolveRevision(ctx, deps, env.Head, "head")
-}
-
-// checkBase checks that LENGTH_GATE_BASE resolves, or fetches the LENGTH_GATE_FETCH branch from origin.
-func checkBase(ctx context.Context, deps gitdeps.Deps, env GateEnv) error {
-	if base, ok := env.Base.Get(); ok {
-		_, err := resolveRevision(ctx, deps, base, "base")
-		return err
-	}
-	if _, ok := env.Fetch.Get(); ok {
-		err := deps.FetchBase(ctx)
+		_, hasSecondParent, err := deps.Resolve(ctx, head+"^2")
 		if err != nil {
-			return fmt.Errorf("fetch base branch: %w", err)
+			return "", "", err
 		}
-		return nil
+		if !hasSecondParent {
+			return "", "", model.MessageError("merge mode requires a head with at least two parents; no second parent found")
+		}
+		base, found, err := deps.Resolve(ctx, head+"^1")
+		if err != nil {
+			return "", "", err
+		}
+		if !found {
+			return "", "", model.MessageError("merge mode head has no first parent")
+		}
+		return base, head, nil
 	}
-	return errs.MessageError("pull_request requires LENGTH_GATE_BASE, LENGTH_GATE_FETCH or LENGTH_GATE_MERGE=1")
-}
-
-// mergeRange validates a merge commit and returns the merge as the head. Merge mode binds the first parent as the base.
-func mergeRange(ctx context.Context, deps gitdeps.Deps, head string) (string, error) {
-	headRevision, err := resolveRevision(ctx, deps, head, "head")
-	if err != nil {
-		return "", err
+	if revision, ok := env.Base.Get(); ok {
+		base, err := resolveRevision(ctx, deps, revision, "base")
+		if err != nil {
+			return "", "", err
+		}
+		return base, head, nil
 	}
-	_, hasSecondParent, err := deps.Resolve(ctx, headRevision+"^2")
-	if err != nil {
-		return "", fmt.Errorf("resolve second parent of %s: %w", headRevision, err)
+	if branch, ok := env.Fetch.Get(); ok {
+		base, err := deps.FetchBase(ctx, branch)
+		if err != nil {
+			return "", "", err
+		}
+		return base, head, nil
 	}
-	if !hasSecondParent {
-		return "", errs.MessageError("merge mode requires a head with at least two parents; no second parent found")
-	}
-	_, hasFirstParent, err := deps.Resolve(ctx, headRevision+"^1")
-	if err != nil {
-		return "", fmt.Errorf("resolve first parent of %s: %w", headRevision, err)
-	}
-	if !hasFirstParent {
-		return "", errs.MessageError("merge mode head has no first parent")
-	}
-	return headRevision, nil
+	return "", "", model.MessageError("pull_request requires LENGTH_GATE_BASE, LENGTH_GATE_FETCH or LENGTH_GATE_MERGE=1")
 }
 
 func resolveRevision(ctx context.Context, deps gitdeps.Deps, revision, label string) (string, error) {
 	sha, found, err := deps.Resolve(ctx, revision)
 	if err != nil {
-		return "", fmt.Errorf("resolve %s %s: %w", label, revision, err)
+		return "", err
 	}
 	if !found {
-		return "", errs.Messagef("%s revision %q does not resolve", label, revision)
+		return "", model.Messagef("%s revision %q does not resolve", label, revision)
 	}
 	return sha, nil
 }
@@ -272,10 +260,10 @@ func judgeChanged(
 func readRequired(ctx context.Context, deps gitdeps.Deps, revision, path, where string) (string, error) {
 	text, found, err := deps.ReadAt(ctx, revision, path)
 	if err != nil {
-		return "", fmt.Errorf("read %s at %s: %w", path, revision, err)
+		return "", err
 	}
 	if !found {
-		return "", errs.Messagef("cannot read changed file %q at %s", path, where)
+		return "", model.Messagef("cannot read changed file %q at %s", path, where)
 	}
 	return text, nil
 }

@@ -6,23 +6,21 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-
-	"github.com/RigelBuild/meissa/go/internal/lengthgate/text"
 )
 
-// TestFixedPolicy pins the constants the design record fixes, as the TypeScript suite does.
+// TestFixedPolicy pins the comment marker rules.
 func TestFixedPolicy(t *testing.T) {
-	if Ceiling != 4 || text.Marker != "LENGTH" || text.MinReasonWords != 3 {
-		t.Fatalf("policy = %d %q %d, want 4 LENGTH 3", Ceiling, text.Marker, text.MinReasonWords)
+	if Ceiling != 4 || MarkerKeyword != "LENGTH" || MinReasonWords != 3 {
+		t.Fatalf("policy = %d %q %d, want 4 LENGTH 3", Ceiling, MarkerKeyword, MinReasonWords)
 	}
 }
 
 // TestCommentMarker ports the TypeScript source comment marker cases.
 func TestCommentMarker(t *testing.T) {
-	t.Run("parses a marker reason", func(t *testing.T) {
+	t.Run("parses a marker", func(t *testing.T) {
 		got := Marker("// LENGTH: bit layout of the header")
-		if !got.Found || got.Error != "" || got.Reason != "bit layout of the header" {
-			t.Fatalf("Marker = %+v, want reason %q", got, "bit layout of the header")
+		if !got.Found || got.Error != "" {
+			t.Fatalf("Marker = %+v, want valid marker", got)
 		}
 	})
 

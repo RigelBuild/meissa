@@ -18,7 +18,7 @@ import (
 // File applies the comment and document ratchets to one changed file.
 // Before and after are the file text at the base and head revisions.
 func File(cfg model.Config, file commentscan.FileDiff, before, after string) ([]model.Finding, []model.Note) {
-	// A mode-only change does not touch the file's text, so the TypeScript skipped it.
+	// A mode-only change leaves the file's text alone, so there is nothing to judge.
 	if file.MetadataOnly && len(file.Hunks) == 0 && file.OldPath == file.NewPath {
 		return nil, nil
 	}
@@ -26,7 +26,7 @@ func File(cfg model.Config, file commentscan.FileDiff, before, after string) ([]
 		return nil, nil
 	}
 	ext := commentscan.ExtOf(file.Path)
-	scanComments := containsString(cfg.Extensions, ext)
+	scanComments := slices.Contains(cfg.Extensions, ext)
 	docClass := DocClassFor(file.Path, cfg.Docs)
 	if !scanComments && docClass == nil {
 		return nil, nil
@@ -52,8 +52,7 @@ func File(cfg model.Config, file commentscan.FileDiff, before, after string) ([]
 	return findings, notes
 }
 
-// judgeComments applies the comment ratchet. skip reports that the file is done: an unscannable head
-// returns its finding at once, and a generated file is not judged.
+// judgeComments applies the comment ratchet and returns findings, notes and a skip flag.
 func judgeComments(file commentscan.FileDiff, before, after, ext string) ([]model.Finding, []model.Note, bool) {
 	afterScan, ok := commentscan.CommentBlocks(after, ext)
 	if !ok || afterScan.Ambiguous {
@@ -62,15 +61,28 @@ func judgeComments(file commentscan.FileDiff, before, after, ext string) ([]mode
 	if isGeneratedHeader(after, afterScan.Blocks) {
 		return nil, nil, true
 	}
-	beforeBlocks := []commentscan.CommentBlock{}
-	if beforeScan, ok := commentscan.CommentBlocks(sameFileText(file, before), ext); ok && !beforeScan.Ambiguous {
-		beforeBlocks = beforeScan.Blocks
+	beforeBlocks := baseCommentBlocks(file, before, ext)
+	markers, findings, notes := liveCommentMarkers(file, afterScan.Blocks)
+	if fileExcess(afterScan.Blocks, markers) > fileExcess(beforeBlocks, nil) {
+		findings = append(findings, excessCommentFindings(file, before, after, afterScan.Blocks, beforeBlocks, markers)...)
 	}
+	return findings, notes, false
+}
+
+func baseCommentBlocks(file commentscan.FileDiff, before, ext string) []commentscan.CommentBlock {
+	beforeScan, ok := commentscan.CommentBlocks(sameFileText(file, before), ext)
+	if !ok || beforeScan.Ambiguous {
+		return nil
+	}
+	return beforeScan.Blocks
+}
+
+func liveCommentMarkers(file commentscan.FileDiff, blocks []commentscan.CommentBlock) (map[int]bool, []model.Finding, []model.Note) {
 	addedLines := changedHeadLines(file)
+	markers := map[int]bool{}
 	var findings []model.Finding
 	var notes []model.Note
-	liveMarkers := map[int]bool{}
-	for _, block := range afterScan.Blocks {
+	for _, block := range blocks {
 		if block.Doc || !addedLines[block.Start] {
 			continue
 		}
@@ -82,26 +94,31 @@ func judgeComments(file commentscan.FileDiff, before, after, ext string) ([]mode
 			findings = append(findings, model.BadMarkerFinding{Path: file.Path, Line: block.Start, Reason: marker.Error})
 			continue
 		}
-		liveMarkers[block.Start] = true
+		markers[block.Start] = true
 		if block.Lines <= comment.Ceiling {
 			notes = append(notes, model.Note{Path: file.Path, Line: block.Start})
 		}
 	}
-	if fileExcess(afterScan.Blocks, liveMarkers) > fileExcess(beforeBlocks, nil) {
-		lineMapping := comment.LineMap(before, after)
-		for _, block := range afterScan.Blocks {
-			if block.Doc || block.Lines <= comment.Ceiling || liveMarkers[block.Start] {
-				continue
-			}
-			baseLines := baseLinesFor(block, lineMapping, beforeBlocks)
-			if block.Lines > baseLines {
-				findings = append(findings, model.CommentFinding{
-					Path: file.Path, Line: block.Start, Lines: block.Lines, BaseLines: baseLines,
-				})
-			}
+	return markers, findings, notes
+}
+
+func excessCommentFindings(
+	file commentscan.FileDiff, before, after string, blocks, beforeBlocks []commentscan.CommentBlock, markers map[int]bool,
+) []model.Finding {
+	lineMapping := comment.LineMap(before, after)
+	var findings []model.Finding
+	for _, block := range blocks {
+		if block.Doc || block.Lines <= comment.Ceiling || markers[block.Start] {
+			continue
+		}
+		baseLines := baseLinesFor(block, lineMapping, beforeBlocks)
+		if block.Lines > baseLines {
+			findings = append(findings, model.CommentFinding{
+				Path: file.Path, Line: block.Start, Lines: block.Lines, BaseLines: baseLines,
+			})
 		}
 	}
-	return findings, notes, false
+	return findings
 }
 
 // sameFileText returns the base text when the file was not renamed, and "" for a new or renamed file.
@@ -136,8 +153,7 @@ func baseLinesFor(
 const generatedWindow = 5
 
 // isGeneratedHeader reports whether a doc block in the first five lines carries a generated-code marker.
-// It checks only the block's own lines, as the TypeScript does, so code that follows a short doc comment
-// is never read as a header.
+// Only the block's own lines are checked, so code after a short doc comment is never a header.
 func isGeneratedHeader(text string, blocks []commentscan.CommentBlock) bool {
 	lines := strings.Split(strings.ReplaceAll(strings.ReplaceAll(text, "\r\n", "\n"), "\r", "\n"), "\n")
 	for _, block := range blocks {
@@ -152,7 +168,7 @@ func isGeneratedHeader(text string, blocks []commentscan.CommentBlock) bool {
 	return false
 }
 
-// generatedPattern is the TypeScript GENERATED_HEADER expression, matched on a word boundary.
+// generatedPattern matches a generated-code marker on a word boundary.
 var generatedPattern = regexp.MustCompile(`Code generated\b.*DO NOT EDIT\.|@generated\b`)
 
 // generatedHeader reports whether line carries a generated-code marker.
@@ -207,11 +223,6 @@ func DocClassFor(filePath string, classes []model.DocClass) *model.DocClass {
 	return nil
 }
 
-// containsString reports whether values holds s.
-func containsString(values []string, s string) bool {
-	return slices.Contains(values, s)
-}
-
 // judgeDoc applies the document ratchet to one file in a document class.
 func judgeDoc(file commentscan.FileDiff, class model.DocClass, before, after string) ([]model.Finding, []model.Note) {
 	base := sameFileText(file, before)
@@ -251,9 +262,8 @@ func judgeDoc(file commentscan.FileDiff, class model.DocClass, before, after str
 	return findings, notes
 }
 
-// liveMarkerLine returns the line a doc marker finding is reported on, and whether the marker is live. As in
-// core.ts, the first marker line that was added is the live marker. Without one, the report falls back to the
-// first marker and the marker is not live.
+// liveMarkerLine returns the line a doc marker finding reports on, and whether that marker is live.
+// The first added marker line is live; without one, the report falls back to the first marker, which is not.
 func liveMarkerLine(marker markdown.MarkerResult, added map[int]bool) (int, bool) {
 	for _, line := range marker.Lines {
 		if added[line] {
