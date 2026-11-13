@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.0](https://github.com/RigelBuild/meissa/compare/go/v0.2.0...go/v0.3.0) (2026-11-13)
+
+
+### Features
+
+* **go:** Go and TypeScript function metrics in code-shape-gate (RIG-8435) ([#69](https://github.com/RigelBuild/meissa/issues/69)) ([90cac06](https://github.com/RigelBuild/meissa/commit/90cac0613420eb338da58982ff23e3476d2cca38))
+* **go:** port length-gate to Go (RIG-8128, RIG-8129, RIG-8130) ([#81](https://github.com/RigelBuild/meissa/issues/81)) ([de71450](https://github.com/RigelBuild/meissa/commit/de714507a453c41814ae9dec4d0f1c1fcbf26245))
+
+
+### Bug Fixes
+
+* **refgate:** encode invalid UTF-8 as a raw U+FFFD on every json encoder (RIG-9660) ([#80](https://github.com/RigelBuild/meissa/issues/80)) ([1ac6dca](https://github.com/RigelBuild/meissa/commit/1ac6dca01cf4cccfd520c5eb055649ad45b9619d))
+* **renovate:** classify interrupts by cause and keep restore errors (RIG-8122) ([#66](https://github.com/RigelBuild/meissa/issues/66)) ([a6a4e36](https://github.com/RigelBuild/meissa/commit/a6a4e36855d10f42894b9b5389bf9898ee9d0f00))
+
 ## [0.2.0](https://github.com/RigelBuild/meissa/compare/go/v0.1.0...go/v0.2.0) (2026-11-10)
 
 
