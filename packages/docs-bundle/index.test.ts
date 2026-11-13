@@ -413,6 +413,8 @@ describe("docs bundle helpers", () => {
 			"README.md",
 			"docs/start.MD",
 			".github/PULL_REQUEST_TEMPLATE.md",
+			"docs/snake_case.md",
+			"docs/my_dir/page.md",
 		]) {
 			expect(isGatherable(path)).toBe(true);
 		}
@@ -423,10 +425,29 @@ describe("docs bundle helpers", () => {
 			"dist/x.md",
 			"outputs/x.md",
 			".hidden/page.md",
+			"_partial.md",
+			"docs/_drafts/x.md",
+			"pkg/__tests__/x.md",
 			"src/code.ts",
 		]) {
 			expect(isGatherable(path)).toBe(false);
 		}
+	});
+	test("collectPages skips underscore-prefixed path segments", async () => {
+		const root = await fixture();
+		await mkdir(join(root, "_drafts"), { recursive: true });
+		await writeFile(join(root, "_partial.md"), "# Partial\n");
+		await writeFile(join(root, "_drafts", "draft.md"), "# Draft\n");
+		await writeFile(join(root, "index.md"), "# Index\n");
+		await writeFile(join(root, "snake_case.md"), "# Snake\n");
+		const pages = await collectPages(
+			{ ...source, root },
+			{ exclude: [], sections: [] },
+		);
+		expect(pages.map(({ sourcePath }) => sourcePath).sort()).toEqual([
+			"index.md",
+			"snake_case.md",
+		]);
 	});
 
 	test("uses defaults when config is absent and requires explicit config when required", async () => {

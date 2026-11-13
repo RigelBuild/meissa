@@ -16,7 +16,7 @@ The package ships TypeScript source and runs on Bun.
 docs-bundle check [--root .] [--config required|default]
 ```
 
-The default config mode is `required`. It expects `docs-bundle.toml` at the repository root. Use `--config default` when a source has no publish config; all gatherable Markdown files use `/<owner>/<repo>/<path>` routes.
+The default config mode is `required`. It expects `docs-bundle.toml` at the repository root. Use `--config default` when a source has no publish config; all gatherable Markdown files use `/<owner>/<repo>/<path>` routes. Collection skips files in dot- or underscore-prefixed path segments, except `.github/PULL_REQUEST_TEMPLATE.md`.
 
 The TOML file requires an `exclude` array. `[[sections]]` entries assign page prefixes or explicit files to site routes. An optional `[packages]` table configures package README routing and the allowed package pages.
 
