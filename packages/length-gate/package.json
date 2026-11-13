@@ -1,0 +1,46 @@
+{
+	"name": "@rigelbuild/length-gate",
+	"version": "1.0.2",
+	"type": "module",
+	"description": "Comment and document length ratchet CLI and pure core.",
+	"license": "MIT OR Apache-2.0",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/RigelBuild/meissa.git",
+		"directory": "packages/length-gate"
+	},
+	"bin": {
+		"length-gate": "index.ts"
+	},
+	"exports": {
+		".": "./index.ts"
+	},
+	"files": [
+		"package.json",
+		"index.ts",
+		"core.ts",
+		"config.ts",
+		"git.ts",
+		"run.ts",
+		"README.md",
+		"LICENSE-MIT",
+		"LICENSE-APACHE"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"dependencies": {
+		"@rigelbuild/comment-scan": "1.0.1",
+		"diff": "9.0.0",
+		"mdast-util-from-markdown": "2.1.0",
+		"mdast-util-frontmatter": "2.0.1",
+		"mdast-util-gfm": "3.1.0",
+		"micromark-extension-frontmatter": "2.0.0",
+		"micromark-extension-gfm": "3.0.0"
+	},
+	"devDependencies": {
+		"@types/bun": "1.4.4",
+		"@types/mdast": "4.0.4",
+		"typescript": "6.0.3"
+	}
+}

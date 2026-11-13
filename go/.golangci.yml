@@ -26,11 +26,6 @@ linters:
     - gomodguard
     - nlreturn
     - exhaustruct
-  settings:
-    wrapcheck:
-      # errs holds messages the CLI prints as written; wrapping would change user-visible output.
-      ignore-package-globs:
-        - github.com/RigelBuild/meissa/go/internal/lengthgate/errs
   enable:
     - gomodguard_v2
   exclusions:
