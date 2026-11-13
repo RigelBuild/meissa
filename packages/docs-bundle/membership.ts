@@ -1,5 +1,6 @@
 const PULL_REQUEST_TEMPLATE = ".github/PULL_REQUEST_TEMPLATE.md";
 
+/** Expects a repo-relative POSIX path; every segment is checked, so ancestors count. */
 export function isGatherable(path: string): boolean {
 	const normalized = path.replaceAll("\\", "/").replace(/^\.\//, "");
 	if (!/\.md$/i.test(normalized)) return false;
