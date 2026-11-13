@@ -1,5 +1,0 @@
-# yaml-language-server: $schema=https://moonrepo.dev/schemas/project.json
-layer: 'library'
-language: 'typescript'
-tags: ['bun']
-dependsOn: ['design-ledger-gate']

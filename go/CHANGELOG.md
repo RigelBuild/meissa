@@ -47,6 +47,8 @@
 
 - Added the `ref-gate` CLI to the Go tools package. It rejects the JavaScript-supported `v` regular-expression flag; existing patterns must use supported flags.
 - The Go Renovate hash refresher reports canceled child processes as signal interruptions.
+- `DL_CLAIM_TOKEN_FILE` now fails with exit 2 when it exists but cannot be read, for example on permission denied or a directory path. The TypeScript CLI ignored these errors and fell back to `DL_CLAIM_TOKEN`.
+- A failed base decision listing in the claim check reports `cannot read base decision listing`. The TypeScript CLI reported the claim-service message for it.
 
 ### Added
 
@@ -60,7 +62,9 @@
 - Added `length-gate`, the Go port of `@rigelbuild/length-gate` 1.0.2, with the same flags and environment variables.
   Invalid globs now fail config load with exit 2. The npm version accepted them at load and failed only when matching.
   Gap: a leading `!` in `exclude` or a class glob, and a fractional `target`, are now rejected at load with exit 2. The npm version accepted both.
+- Added the `dl-claim`, `dl-list`, `dl-reconcile`, and `design-ledger-gate` Go binaries.
 
 ### Removed
 
 - Removed the `@rigelbuild/length-gate` npm package. Its release-please config and manifest entries are deleted, and the binary ships in the Go tools package.
+- Removed the `@rigelbuild/design-ledger-gate`, `@rigelbuild/dl-claim`, `@rigelbuild/dl-list`, and `@rigelbuild/dl-reconcile` npm packages.
