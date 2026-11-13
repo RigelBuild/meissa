@@ -237,6 +237,10 @@ func TestFindViolations(t *testing.T) {
 	t.Run("JSON string golden for invalid UTF-8", func(t *testing.T) {
 		assertJSONGolden(t, string([]byte{'a', 0xff, 'b'}), `"a�b"`)
 	})
+	t.Run("JSON string golden for a truncated multi-byte sequence", func(t *testing.T) {
+		// TextDecoder replaces the maximal subpart e2 82 with one U+FFFD, then keeps '('.
+		assertJSONGolden(t, string([]byte{'a', 0xe2, 0x82, '('}), `"a�("`)
+	})
 	t.Run("JSON string golden for HTML characters", func(t *testing.T) {
 		assertJSONGolden(t, "<>&", `"<>&"`)
 	})
