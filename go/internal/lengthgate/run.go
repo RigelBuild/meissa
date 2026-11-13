@@ -132,44 +132,55 @@ func withSkippedClasses(cfg model.Config, names []string, all bool) (model.Confi
 	return cfg, nil
 }
 
-// pullRange validates the base for a pull request and resolves the head. It returns the head commit.
+// pullRange validates pull-request revisions and returns the resolved base and head commits.
 func pullRange(ctx context.Context, deps gitdeps.Deps, env GateEnv) (string, string, error) {
+	if !env.Merge {
+		return pullRangeFromBase(ctx, deps, env)
+	}
+
 	head, err := resolveRevision(ctx, deps, env.Head, "head")
 	if err != nil {
 		return "", "", err
 	}
-	if env.Merge {
-		_, hasSecondParent, err := deps.Resolve(ctx, head+"^2")
-		if err != nil {
-			return "", "", err
-		}
-		if !hasSecondParent {
-			return "", "", model.MessageError("merge mode requires a head with at least two parents; no second parent found")
-		}
-		base, found, err := deps.Resolve(ctx, head+"^1")
-		if err != nil {
-			return "", "", err
-		}
-		if !found {
-			return "", "", model.MessageError("merge mode head has no first parent")
-		}
-		return base, head, nil
+	_, hasSecondParent, err := deps.Resolve(ctx, head+"^2")
+	if err != nil {
+		return "", "", err
 	}
+	if !hasSecondParent {
+		return "", "", model.MessageError("merge mode requires a head with at least two parents; no second parent found")
+	}
+	base, found, err := deps.Resolve(ctx, head+"^1")
+	if err != nil {
+		return "", "", err
+	}
+	if !found {
+		return "", "", model.MessageError("merge mode head has no first parent")
+	}
+	return base, head, nil
+}
+
+func pullRangeFromBase(ctx context.Context, deps gitdeps.Deps, env GateEnv) (string, string, error) {
+	_, hasBase := env.Base.Get()
+	_, hasFetch := env.Fetch.Get()
+	if !hasBase && !hasFetch {
+		return "", "", model.MessageError("pull_request requires LENGTH_GATE_BASE, LENGTH_GATE_FETCH or LENGTH_GATE_MERGE=1")
+	}
+	var base string
+	var err error
 	if revision, ok := env.Base.Get(); ok {
-		base, err := resolveRevision(ctx, deps, revision, "base")
-		if err != nil {
-			return "", "", err
-		}
-		return base, head, nil
+		base, err = resolveRevision(ctx, deps, revision, "base")
+	} else {
+		branch, _ := env.Fetch.Get()
+		base, err = deps.FetchBase(ctx, branch)
 	}
-	if branch, ok := env.Fetch.Get(); ok {
-		base, err := deps.FetchBase(ctx, branch)
-		if err != nil {
-			return "", "", err
-		}
-		return base, head, nil
+	if err != nil {
+		return "", "", err
 	}
-	return "", "", model.MessageError("pull_request requires LENGTH_GATE_BASE, LENGTH_GATE_FETCH or LENGTH_GATE_MERGE=1")
+	head, err := resolveRevision(ctx, deps, env.Head, "head")
+	if err != nil {
+		return "", "", err
+	}
+	return base, head, nil
 }
 
 func resolveRevision(ctx context.Context, deps gitdeps.Deps, revision, label string) (string, error) {

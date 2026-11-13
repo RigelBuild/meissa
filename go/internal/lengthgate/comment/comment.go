@@ -23,7 +23,7 @@ const (
 
 // InvalidReason reports why a marker reason is too short.
 func InvalidReason(reason string) string {
-	if WordsInReason(reason) < MinReasonWords {
+	if wordsInReason(reason) < MinReasonWords {
 		return fmt.Sprintf("reason must contain at least %d words", MinReasonWords)
 	}
 	return ""
@@ -50,15 +50,15 @@ func Marker(firstLine string) MarkerResult {
 	if !ok {
 		return MarkerResult{Found: false, Error: ""}
 	}
-	content := TrimCommentClose(afterColon)
+	content := trimCommentClose(afterColon)
 	if problem := InvalidReason(content); problem != "" {
 		return MarkerResult{Found: true, Error: problem}
 	}
 	return MarkerResult{Found: true, Error: ""}
 }
 
-// WordsInReason counts reason words that hold a letter or digit.
-func WordsInReason(reason string) int {
+// wordsInReason counts reason words that hold a letter or digit.
+func wordsInReason(reason string) int {
 	count := 0
 	for _, word := range jstext.Fields(jstext.Trim(reason)) {
 		if HasLetterOrDigit(word) {
@@ -78,8 +78,8 @@ func HasLetterOrDigit(value string) bool {
 	return false
 }
 
-// TrimCommentClose removes a trailing comment closer and the surrounding spaces.
-func TrimCommentClose(value string) string {
+// trimCommentClose removes a trailing comment closer and the surrounding spaces.
+func trimCommentClose(value string) string {
 	value = jstext.TrimRight(value)
 	for _, suffix := range [...]string{"*/", "-->"} {
 		if cut, ok := strings.CutSuffix(value, suffix); ok {

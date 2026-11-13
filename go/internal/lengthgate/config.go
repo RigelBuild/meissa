@@ -56,7 +56,7 @@ func LoadConfig(path string) (model.Config, error) {
 	var rawDocs []json.RawMessage
 	err = json.Unmarshal(raw["docs"], &rawDocs)
 	if err != nil {
-		return model.Config{}, err
+		return model.Config{}, fmt.Errorf("Cannot load config %q: %w", path, err)
 	}
 	exclude, err := readGlobArray(root["exclude"], "exclude")
 	if err != nil {
@@ -88,19 +88,19 @@ func rootRawFields(data []byte, allowed []string, label string) (map[string]json
 	dec := json.NewDecoder(bytes.NewReader(data))
 	_, err := dec.Token()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("read %s keys: %w", label, err)
 	}
 	fields := map[string]json.RawMessage{}
 	for dec.More() {
 		tok, err := dec.Token()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("read %s keys: %w", label, err)
 		}
 		key, _ := tok.(string)
 		var value json.RawMessage
 		err = dec.Decode(&value)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("read %s keys: %w", label, err)
 		}
 		if !slices.Contains(allowed, key) {
 			return nil, fmt.Errorf("Unknown key %q in %s", key, label)

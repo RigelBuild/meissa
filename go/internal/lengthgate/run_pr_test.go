@@ -299,3 +299,84 @@ func TestRunOncePullRequestGitFailures(t *testing.T) {
 		}
 	})
 }
+
+// TestRunOncePullRequestStderr pins Git diagnostics and the fetch wrapper boundary.
+func TestRunOncePullRequestStderr(t *testing.T) {
+	t.Run("unrelated histories report the resolved base and head SHAs", func(t *testing.T) {
+		repository := trackedRepository(t, map[string]string{"src/file.ts": "clean\n"})
+		runGit(t, repository, "checkout", "-q", "--orphan", "unrelated")
+		runGit(t, repository, "rm", "-rfq", ".")
+		writeRepositoryFile(t, repository, "src/other.ts", "clean\n")
+		commitChange(t, repository, "unrelated root")
+		baseSHA := runGit(t, repository, "rev-parse", "main")
+		headSHA := runGit(t, repository, "rev-parse", "HEAD")
+		result := pullRequest(t, repository, mo.Some("main"), mo.None[string](), "HEAD", false)
+		want := "length-gate: no merge base for " + baseSHA + " and " + headSHA
+		if result.code != 2 || strings.TrimRight(result.stderr.String(), "\n") != want {
+			t.Fatalf("exit = %d, stderr %q, want exit 2 and stderr %q", result.code, result.stderr.String(), want)
+		}
+	})
+	t.Run("a failed fetch prints the first line without wrapper prefixes", func(t *testing.T) {
+		source := trackedRepository(t, map[string]string{"src/file.ts": "clean\n"})
+		makePullRequest(t, source, "// LENGTH: no\n")
+		shallow := cloneShallow(t, source, "1")
+		result := pullRequest(t, shallow, mo.None[string](), mo.Some("no-such-branch"), "HEAD", false)
+		if result.code != 2 {
+			t.Fatalf("exit = %d, stderr %q, want exit 2", result.code, result.stderr.String())
+		}
+		output := strings.TrimRight(result.stderr.String(), "\n")
+		firstLine, _, _ := strings.Cut(output, "\n")
+		if !strings.HasPrefix(firstLine, "length-gate: ") {
+			t.Fatalf("first stderr line %q lacks the length-gate prefix", firstLine)
+		}
+		if strings.Contains(output, "fetch base branch:") || strings.Contains(output, "find merge base:") {
+			t.Fatalf("stderr %q carries a wrapper prefix the TypeScript never printed", output)
+		}
+	})
+}
+
+// TestRunOncePullRequestResolutionOrder pins the npm revision failure precedence.
+func TestRunOncePullRequestResolutionOrder(t *testing.T) {
+	tests := []struct {
+		name string
+		base mo.Option[string]
+		head string
+		want string
+	}{
+		{
+			name: "missing base is reported before a bad head",
+			base: mo.None[string](),
+			head: "missing-head",
+			want: "length-gate: pull_request requires LENGTH_GATE_BASE, LENGTH_GATE_FETCH or LENGTH_GATE_MERGE=1",
+		},
+		{
+			name: "bad base is reported before a bad head",
+			base: mo.Some("missing-base"),
+			head: "missing-head",
+			want: "length-gate: base revision \"missing-base\" does not resolve",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repository := trackedRepository(t, map[string]string{"src/file.ts": "clean\n"})
+			result := pullRequest(t, repository, tt.base, mo.None[string](), tt.head, false)
+			if result.code != 2 || strings.TrimRight(result.stderr.String(), "\n") != tt.want {
+				t.Fatalf("exit = %d, stderr %q, want exit 2 and %q", result.code, result.stderr.String(), tt.want)
+			}
+		})
+	}
+}
+
+// TestRunOnceUsesLengthGateStderr keeps the usage path on the lengthgate sentinel.
+func TestRunOnceUsesLengthGateStderr(t *testing.T) {
+	repository := trackedRepository(t, map[string]string{"src/file.ts": "clean\n"})
+	env := lengthgate.GateEnv{
+		Event: "pull_request", Base: mo.None[string](), Fetch: mo.None[string](), Head: "HEAD",
+		Merge: false, All: false, SkipClasses: nil,
+	}
+	result := runGate(t, repository, env, commentConfig())
+	want := "length-gate: pull_request requires LENGTH_GATE_BASE, LENGTH_GATE_FETCH or LENGTH_GATE_MERGE=1"
+	if result.code != 2 || strings.TrimRight(result.stderr.String(), "\n") != want {
+		t.Fatalf("exit = %d, stderr %q, want %q", result.code, result.stderr.String(), want)
+	}
+}

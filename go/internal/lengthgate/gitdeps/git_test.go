@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"testing"
 )
 
@@ -45,13 +46,70 @@ func TestGitDepsMergeBaseUsesResolvedRevisions(t *testing.T) {
 	}
 }
 
-func TestRunGitReturnsContextError(t *testing.T) {
-	ctx, cancel := context.WithCancel(t.Context())
-	cancel()
-	_, err := runGit(ctx, t.TempDir(), "status")
-	if !errors.Is(err, context.Canceled) {
-		t.Fatalf("runGit error = %v, want context.Canceled", err)
+func TestRunGitCancellationWhileRunning(t *testing.T) {
+	t.Run("runGit returns context cancellation instead of an exit error", func(t *testing.T) {
+		err := cancelWhileGitIsRunning(t, func(ctx context.Context) error {
+			_, err := runGit(ctx, t.TempDir(), "status")
+			return err
+		})
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("runGit error = %v, want context.Canceled", err)
+		}
+		if _, ok := errors.AsType[*exec.ExitError](err); ok {
+			t.Fatalf("runGit error = %T, want context error rather than exit error", err)
+		}
+	})
+	t.Run("Resolve returns cancellation instead of an absent revision", func(t *testing.T) {
+		var found bool
+		err := cancelWhileGitIsRunning(t, func(ctx context.Context) error {
+			_, resolved, err := NewGitDeps(t.TempDir(), "HEAD").Resolve(ctx, "HEAD")
+			found = resolved
+			return err
+		})
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("Resolve error = %v, found = %t, want context.Canceled", err, found)
+		}
+		if found {
+			t.Fatal("Resolve found a revision after cancellation")
+		}
+	})
+}
+
+func cancelWhileGitIsRunning(t *testing.T, run func(context.Context) error) error {
+	t.Helper()
+	root := t.TempDir()
+	bin := filepath.Join(root, "bin")
+	err := os.Mkdir(bin, 0o700)
+	if err != nil {
+		t.Fatal(err)
 	}
+	blocked := filepath.Join(root, "blocked")
+	err = syscall.Mkfifo(blocked, 0o600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	git := filepath.Join(bin, "git")
+	script := "#!/bin/sh\nread _ < " + blocked + "\n"
+	err = os.WriteFile(git, []byte(script), 0o700)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", bin+string(os.PathListSeparator)+os.Getenv("PATH"))
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+	done := make(chan error, 1)
+	go func() { done <- run(ctx) }()
+	gate, err := os.OpenFile(blocked, os.O_WRONLY, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cancel()
+	runErr := <-done
+	err = gate.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return runErr
 }
 
 func gitRepository(t *testing.T) string {
