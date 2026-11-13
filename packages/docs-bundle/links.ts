@@ -48,7 +48,8 @@ function linkTargets(source: string): LinkTarget[] {
 	const masked = maskedMarkdown(source);
 	const links: LinkTarget[] = [];
 	const patterns = [
-		/!?(?:\[[^\]]*\])\(\s*(<[^>]*>|[^\s)]+)(?:\s+[^)]*)?\)/dg,
+		/(?<!!)\[[^\[\]]*(?:!\[[^\[\]]*\]\([^)]*\)[^\[\]]*)?\]\(\s*(<[^>]*>|[^\s)]+)(?:\s+[^)]*)?\)/dg,
+		/!\[[^\]]*\]\(\s*(<[^>]*>|[^\s)]+)(?:\s+[^)]*)?\)/dg,
 		/^ {0,3}\[(?!\^)[^\]\n]+\]:[ \t]*(<[^>\n]*>|(?!["'])[^\s<>]+)(?:[ \t]+[^\n]*)?$/dgm,
 	];
 	for (const match of patterns.flatMap((pattern) => [

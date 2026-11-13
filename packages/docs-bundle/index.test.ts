@@ -533,6 +533,38 @@ describe("docs bundle helpers", () => {
 			},
 		]);
 	});
+	test("rewrites image links nested in a link label", () => {
+		const current = page("docs/index.md", "/guide");
+		const routes = new Map([
+			["acme/widgets:docs/d.png", "/guide/d"],
+			["acme/widgets:docs/other.md", "/guide/other"],
+		]);
+		expect(
+			rewriteLinks(
+				"[![d](./d.png)](./d.png)",
+				current,
+				routes,
+				"/tmp/acme-widgets",
+			),
+		).toBe("[![d](/guide/d)](/guide/d)");
+		expect(
+			rewriteLinks(
+				"[![d](./d.png)](./other.md)",
+				current,
+				routes,
+				"/tmp/acme-widgets",
+			),
+		).toBe("[![d](/guide/d)](/guide/other)");
+	});
+	test("preserves nested image links in inline and fenced code", () => {
+		const current = page("docs/index.md", "/guide");
+		const routes = new Map([["acme/widgets:docs/d.png", "/guide/d"]]);
+		const input =
+			"[![d](./d.png)](./d.png) and `[![d](./d.png)](./d.png)`\n\n```md\n[![d](./d.png)](./d.png)\n```";
+		expect(rewriteLinks(input, current, routes, "/tmp/acme-widgets")).toBe(
+			"[![d](/guide/d)](/guide/d) and `[![d](./d.png)](./d.png)`\n\n```md\n[![d](./d.png)](./d.png)\n```",
+		);
+	});
 
 	test("rewrites bundled GitHub blob links to their site routes", () => {
 		const current = page("docs/index.md", "/guide");
