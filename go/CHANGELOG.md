@@ -43,3 +43,10 @@
 - Added a Renovate hash refresh command for Go source and vendor hashes, including the Go tools package vendor hash.
 - Added `code-shape-gate`, which checks file length and directory width against a per-repo allowlist with a ratchet.
 - `code-shape-gate` supports per-glob directory limits and excludes matching files from directory width counts.
+- Added `length-gate`, the Go port of `@rigelbuild/length-gate` 1.0.2, with the same flags and environment variables.
+  Invalid globs now fail config load with exit 2. The npm version accepted them at load and failed only when matching.
+  Gap: a leading `!` in `exclude` or a class glob, and a fractional `target`, are now rejected at load with exit 2. The npm version accepted both.
+
+### Removed
+
+- Removed the `@rigelbuild/length-gate` npm package. Its release-please config and manifest entries are deleted, and the binary ships in the Go tools package.

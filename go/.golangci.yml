@@ -26,6 +26,12 @@ linters:
     - gomodguard
     - nlreturn
     - exhaustruct
+  settings:
+    wrapcheck:
+      # The CLI prints model and gitdeps errors verbatim, so the gate's stderr matches its contract; wrapping would change it.
+      ignore-package-globs:
+        - github.com/RigelBuild/meissa/go/internal/lengthgate/model
+        - github.com/RigelBuild/meissa/go/internal/lengthgate/gitdeps
   enable:
     - gomodguard_v2
   exclusions:

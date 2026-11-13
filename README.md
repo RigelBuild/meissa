@@ -74,6 +74,30 @@ dirs: "src/tests": {value: 11, reason: "split test suites"}
 
 Run `code-shape-gate <repo-root>` to check. It returns 1 for findings and 2 for configuration or execution errors. Set `GATE_BASE` to a Git ref to reject new or raised allowlist entries after the initial rollout. `code-shape-gate --write <repo-root>` removes cleared entries and lowers recorded values; it refuses additions or increases. Use `code-shape-gate --write --seed <repo-root>` only to seed initial rollout entries.
 
+## Length gate
+
+`length-gate` ratchets comment block length and document prose length over a Git diff. Add `length-gate.json` with scanned `extensions`, path `exclude` globs, and `docs` classes. Each class has a `name`, `include` and `exclude` globs, a prose-word `target`, and `markerAllowed`. Globs are validated when the config loads, so a malformed pattern fails the run before any file is judged. The first class whose `include` matches a file and whose `exclude` does not owns it.
+
+```json
+{
+  "extensions": [".ts"],
+  "exclude": ["vendor/**"],
+  "docs": [
+    {
+      "name": "spec",
+      "include": ["docs/specs/**/*.md"],
+      "exclude": [],
+      "target": 1500,
+      "markerAllowed": false
+    }
+  ]
+}
+```
+
+Run `length-gate --config length-gate.json [--all] [--skip-class <name>]...`. `GATE_ROOT` selects the repository and defaults to the current Git root. Set `LENGTH_GATE_EVENT=pull_request` for a pull request check. It needs `LENGTH_GATE_BASE`, a `LENGTH_GATE_FETCH` branch to fetch from origin, or `LENGTH_GATE_MERGE=1`, and it reads the head from `LENGTH_GATE_HEAD` (default `HEAD`). `LENGTH_GATE_MERGE=1` treats the head as a pull request merge ref and uses its first parent as the base. A variable that is set counts as set even when empty. `--all` checks every configured file at the head, minus excludes, for any event. `--skip-class` is allowed only with `--all`.
+
+The gate exits 0 when it passes or skips the event, 1 for findings, and 2 for a usage, configuration or Git error. The former npm library API is not part of the Go tool.
+
 ## Renovate preset
 
 Consumers extend `github>RigelBuild/meissa//tools/renovate/preset.json5`.
@@ -92,4 +116,4 @@ Release Please opens one release pull request covering every changed package. Wh
 
 ## Local development
 
-Run `direnv allow .` once, then `direnv exec . rumdl check .` or `direnv exec . bun test`. CI runs `nix flake check` and `moon run :ci` (lint, markdown, the ref-gate self-check, and every package's typecheck and tests).
+Run `direnv allow .` once, then `direnv exec . rumdl check .`. Run the length-gate tests with `go -C go test ./internal/lengthgate/...`; `direnv exec . bun test` still runs the Bun workspace tests. CI runs `nix flake check` and `moon run :ci` (lint, markdown, the ref-gate self-check, and every package's typecheck and tests).
