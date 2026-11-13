@@ -90,7 +90,6 @@ func TestDocRatchet(t *testing.T) {
 			t.Fatalf("edited-marker findings = %#v, want none", live)
 		}
 	})
-
 }
 
 // TestDocRatchetMarkerNotes covers the unneeded-marker note on a comment block.

@@ -44,36 +44,45 @@ func markerLines(doc Doc) []int {
 func markerFromDoc(doc Doc) MarkerResult {
 	markers := markerBlocks(doc)
 	if len(markers) == 0 {
-		return MarkerResult{}
+		return MarkerResult{Found: false, Lines: nil, Error: ""}
 	}
 	starts := lineStarts(doc.source)
 	markerLine := LineOf(starts, markers[0].offset)
 	if len(markers) > 1 {
-		return MarkerResult{Found: true, Error: "only one doc LENGTH marker is allowed"}
+		return MarkerResult{Found: true, Lines: nil, Error: "only one doc LENGTH marker is allowed"}
 	}
 	marker := markers[0]
 	headings := level2Headings(doc)
 	afterFrontMatter := markerLine > doc.frontMatterEnd
 	beforeFirstHeading := len(headings) > 0 && LineOf(starts, headings[0].offset) > markerLine
 	if !afterFrontMatter || !beforeFirstHeading {
-		return MarkerResult{Found: true, Error: "doc marker must be after front matter, before the first ## heading, and name an existing section"}
+		return MarkerResult{
+			Found: true,
+			Lines: nil,
+			Error: "doc marker must be after front matter, before the first ## heading, " +
+				"and name an existing section",
+		}
 	}
 	if strings.ContainsAny(marker.value, "\r\n") {
-		return MarkerResult{Found: true, Error: "doc LENGTH marker must be one line"}
+		return MarkerResult{Found: true, Lines: nil, Error: "doc LENGTH marker must be one line"}
 	}
 	body, ok := markerBody(marker.value)
 	if !ok {
-		return MarkerResult{Found: true, Error: formatError}
+		return MarkerResult{Found: true, Lines: nil, Error: formatError}
 	}
 	names := headingNames(headings)
 	section, reason := splitSectionReason(body, names)
 	if reasonErr := comment.InvalidReason(reason); reasonErr != "" {
-		return MarkerResult{Found: true, Error: reasonErr}
+		return MarkerResult{Found: true, Lines: nil, Error: reasonErr}
 	}
 	if section == "" || !names[NormalizeHeading(section)] {
-		return MarkerResult{Found: true, Error: "doc marker section §" + section + " does not match an existing ## heading"}
+		return MarkerResult{
+			Found: true,
+			Lines: nil,
+			Error: "doc marker section §" + section + " does not match an existing ## heading",
+		}
 	}
-	return MarkerResult{Found: true}
+	return MarkerResult{Found: true, Lines: nil, Error: ""}
 }
 
 // markerBlock is one raw HTML block that begins with a LENGTH marker.

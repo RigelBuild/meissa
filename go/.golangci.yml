@@ -28,9 +28,15 @@ linters:
     - exhaustruct
   settings:
     wrapcheck:
-      # Messages the CLI prints verbatim are model.MessageError values; wrapping would change output.
+      # The CLI prints model and gitdeps errors verbatim, so the gate's stderr matches its contract; wrapping would change it.
+      # Config parse errors print verbatim; wrapping would change the printed text.
       ignore-package-globs:
         - github.com/RigelBuild/meissa/go/internal/lengthgate/model
+        - github.com/RigelBuild/meissa/go/internal/lengthgate/gitdeps
+      extra-ignore-sigs:
+        - 'func encoding/json.Unmarshal(data []byte, v any) error'
+        - 'func (*encoding/json.Decoder).Token() (encoding/json.Token, error)'
+        - 'func (*encoding/json.Decoder).Decode(v any) error'
   enable:
     - gomodguard_v2
   exclusions:

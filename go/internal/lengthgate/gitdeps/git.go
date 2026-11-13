@@ -30,7 +30,6 @@ var (
 	errNoCompleteMergeBase = errors.New("no merge base after fetching complete repository history")
 	errNoDeepenedMergeBase = errors.New("no merge base after deepening shallow history")
 	errShallowUnknown      = errors.New("cannot determine whether repository is shallow")
-	errNoMergeBase         = errors.New("no merge base")
 )
 
 type gitDeps struct {
@@ -54,7 +53,8 @@ func runGit(ctx context.Context, root string, args ...string) (gitOutput, error)
 	command.Stdout = &stdout
 	command.Stderr = &stderr
 	err := command.Run()
-	if ctxErr := ctx.Err(); ctxErr != nil {
+	ctxErr := ctx.Err()
+	if ctxErr != nil {
 		return gitOutput{}, fmt.Errorf("git canceled: %w", ctxErr)
 	}
 	if err == nil {
@@ -194,7 +194,8 @@ func (d gitDeps) FetchBase(ctx context.Context, branch string) (string, error) {
 		if shallow == "true" {
 			depth = []string{step}
 		}
-		if err := d.fetch(ctx, refspec, depth...); err != nil {
+		err := d.fetch(ctx, refspec, depth...)
+		if err != nil {
 			return "", err
 		}
 		base, found, err := d.nullable(ctx, "rev-parse", "--verify", "--quiet", "refs/remotes/origin/"+branch+"^{commit}")

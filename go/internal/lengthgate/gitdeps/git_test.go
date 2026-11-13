@@ -15,14 +15,16 @@ import (
 func TestGitDepsReadDiffAndList(t *testing.T) {
 	repository := gitRepository(t)
 	deps := NewGitDeps(repository, "HEAD")
-	if text, found, err := deps.ReadAt(t.Context(), "HEAD^", "file.ts"); err != nil || !found || text != "base\n" {
+	text, found, err := deps.ReadAt(t.Context(), "HEAD^", "file.ts")
+	if err != nil || !found || text != "base\n" {
 		t.Fatalf("ReadAt = (%q, %t, %v), want base text", text, found, err)
 	}
 	files, err := deps.ListFiles(t.Context(), "HEAD")
 	if err != nil || len(files) != 1 || files[0] != "file.ts" {
 		t.Fatalf("ListFiles = (%v, %v), want [file.ts]", files, err)
 	}
-	if diff, err := deps.Diff(t.Context(), "HEAD^", "HEAD"); err != nil || !strings.Contains(diff, "diff --git a/file.ts") {
+	diff, err := deps.Diff(t.Context(), "HEAD^", "HEAD")
+	if err != nil || !strings.Contains(diff, "diff --git a/file.ts") {
 		t.Fatalf("Diff = (%q, %v), want file.ts", diff, err)
 	}
 }
@@ -55,32 +57,41 @@ func TestRunGitReturnsContextError(t *testing.T) {
 func gitRepository(t *testing.T) string {
 	t.Helper()
 	repository := filepath.Join(t.TempDir(), "repo")
-	if err := os.Mkdir(repository, 0o755); err != nil {
+	err := os.Mkdir(repository, 0o755)
+	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := run(t.Context(), repository, "init", "-q", "-b", "main"); err != nil {
+	_, err = run(t.Context(), repository, "init", "-q", "-b", "main")
+	if err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(repository, "file.ts"), []byte("base\n"), 0o600); err != nil {
+	err = os.WriteFile(filepath.Join(repository, "file.ts"), []byte("base\n"), 0o600)
+	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := run(t.Context(), repository, "add", "file.ts"); err != nil {
+	_, err = run(t.Context(), repository, "add", "file.ts")
+	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := run(t.Context(), repository, "commit", "-q", "-m", "base"); err != nil {
+	_, err = run(t.Context(), repository, "commit", "-q", "-m", "base")
+	if err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(repository, "file.ts"), []byte("head\n"), 0o600); err != nil {
+	err = os.WriteFile(filepath.Join(repository, "file.ts"), []byte("head\n"), 0o600)
+	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := run(t.Context(), repository, "commit", "-qam", "head"); err != nil {
+	_, err = run(t.Context(), repository, "commit", "-qam", "head")
+	if err != nil {
 		t.Fatal(err)
 	}
 	return repository
 }
 
 func run(ctx context.Context, repository string, args ...string) (string, error) {
-	command := exec.CommandContext(ctx, "git", append([]string{"-C", repository, "-c", "user.name=t", "-c", "user.email=t@t"}, args...)...)
+	command := exec.CommandContext(ctx, "git", append(
+		[]string{"-C", repository, "-c", "user.name=t", "-c", "user.email=t@t"}, args...,
+	)...)
 	output, err := command.CombinedOutput()
 	return strings.TrimSpace(string(output)), err
 }

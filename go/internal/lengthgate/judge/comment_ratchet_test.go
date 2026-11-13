@@ -143,7 +143,6 @@ func TestCommentRatchetMovement(t *testing.T) {
 		findings, _ := judgeComment(before, after, nil)
 		commentPresent(t, findings, model.CommentFinding{Path: "src/file.ts", Line: 8, Lines: 11, BaseLines: 10})
 	})
-
 }
 
 // TestCommentRatchetSkips covers files and sources the comment ratchet must not judge or must report as unscannable.

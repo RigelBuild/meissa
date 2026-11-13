@@ -184,7 +184,13 @@ func runGate(t *testing.T, repository string, env lengthgate.GateEnv, config mod
 func pullRequest(t *testing.T, repository string, base, fetch mo.Option[string], head string, merge bool) runCase {
 	t.Helper()
 	env := lengthgate.GateEnv{
-		Event: "pull_request", Head: head, Merge: merge, Base: base, Fetch: fetch,
+		Event:       "pull_request",
+		Head:        head,
+		Merge:       merge,
+		Base:        base,
+		Fetch:       fetch,
+		All:         false,
+		SkipClasses: nil,
 	}
 	return runGate(t, repository, env, commentConfig())
 }

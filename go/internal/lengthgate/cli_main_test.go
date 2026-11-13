@@ -3,6 +3,7 @@
 package lengthgate_test
 
 import (
+	"maps"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,18 +13,16 @@ import (
 )
 
 // mainRun calls Main in repository with env, returning its exit code and both streams.
-func mainRun(t *testing.T, repository string, config string, env map[string]string, args ...string) runCase {
+func mainRun(t *testing.T, repository string, config string, env map[string]string) runCase {
 	t.Helper()
 	var result runCase
 	full := map[string]string{"GATE_ROOT": repository}
-	for key, value := range env {
-		full[key] = value
-	}
+	maps.Copy(full, env)
 	lookup := func(key string) (string, bool) {
 		value, ok := full[key]
 		return value, ok
 	}
-	argv := append([]string{"--config", config}, args...)
+	argv := []string{"--config", config}
 	result.code = lengthgate.Main(t.Context(), argv, lookup, &result.stdout, &result.stderr)
 	return result
 }
@@ -101,7 +100,8 @@ func TestMainUsageAndConfigErrors(t *testing.T) {
 func writeTestConfig(t *testing.T, text string) string {
 	t.Helper()
 	path := filepath.Join(t.TempDir(), "length-gate.json")
-	if err := os.WriteFile(path, []byte(text), 0o600); err != nil {
+	err := os.WriteFile(path, []byte(text), 0o600)
+	if err != nil {
 		t.Fatal(err)
 	}
 	return path

@@ -77,7 +77,9 @@ func baseCommentBlocks(file commentscan.FileDiff, before, ext string) []comments
 	return beforeScan.Blocks
 }
 
-func liveCommentMarkers(file commentscan.FileDiff, blocks []commentscan.CommentBlock) (map[int]bool, []model.Finding, []model.Note) {
+func liveCommentMarkers(
+	file commentscan.FileDiff, blocks []commentscan.CommentBlock,
+) (map[int]bool, []model.Finding, []model.Note) {
 	addedLines := changedHeadLines(file)
 	markers := map[int]bool{}
 	var findings []model.Finding
@@ -91,7 +93,9 @@ func liveCommentMarkers(file commentscan.FileDiff, blocks []commentscan.CommentB
 			continue
 		}
 		if marker.Error != "" {
-			findings = append(findings, model.BadMarkerFinding{Path: file.Path, Line: block.Start, Reason: marker.Error})
+			findings = append(findings, model.BadMarkerFinding{
+				Path: file.Path, Line: block.Start, Reason: marker.Error,
+			})
 			continue
 		}
 		markers[block.Start] = true

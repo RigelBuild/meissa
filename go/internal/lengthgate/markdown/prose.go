@@ -30,7 +30,14 @@ func ProseWords(markdown string, dropErrata bool) int {
 // proseBlocks returns the visible text of each prose block in document order. Code, tables, link
 // definitions and front matter are skipped. Errata runs are dropped when dropErrata is set.
 func proseBlocks(doc Doc, dropErrata bool) []string {
-	walk := &proseWalker{doc: doc, dropErrata: dropErrata, starts: lineStarts(doc.source)}
+	walk := &proseWalker{
+		doc:        doc,
+		dropErrata: dropErrata,
+		starts:     lineStarts(doc.source),
+		inErrata:   false,
+		errata:     nil,
+		blocks:     nil,
+	}
 	walk.errata = errataRanges(doc, walk.starts, dropErrata)
 	walk.visit(doc.root)
 	return walk.blocks

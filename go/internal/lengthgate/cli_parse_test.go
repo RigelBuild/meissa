@@ -18,7 +18,7 @@ func TestParseArgs(t *testing.T) {
 		{
 			name: "config alone",
 			args: []string{"--config", "gate.json"},
-			want: cliArgs{configPath: "gate.json"},
+			want: cliArgs{configPath: "gate.json", all: false, skipClasses: nil},
 		},
 		{
 			name: "all and repeated skip-class",
@@ -82,29 +82,41 @@ func lookupFrom(env map[string]string) func(string) (string, bool) {
 
 func TestGateEnvFrom(t *testing.T) {
 	t.Run("absent variables fall back to defaults", func(t *testing.T) {
-		got := gateEnvFrom(lookupFrom(nil), cliArgs{})
+		got := gateEnvFrom(lookupFrom(nil), cliArgs{configPath: "", all: false, skipClasses: nil})
 		if got.Head != "HEAD" || got.Merge || got.Base.IsPresent() || got.Fetch.IsPresent() {
 			t.Fatalf("gateEnvFrom = %+v, want HEAD, no merge, no base or fetch", got)
 		}
 	})
 
 	t.Run("a set but empty head is kept, not replaced by HEAD", func(t *testing.T) {
-		got := gateEnvFrom(lookupFrom(map[string]string{"LENGTH_GATE_HEAD": ""}), cliArgs{})
+		got := gateEnvFrom(
+			lookupFrom(map[string]string{"LENGTH_GATE_HEAD": ""}),
+			cliArgs{configPath: "", all: false, skipClasses: nil},
+		)
 		if got.Head != "" {
 			t.Fatalf("Head = %q, want empty", got.Head)
 		}
 	})
 
 	t.Run("a set but empty base is Some of empty, not None", func(t *testing.T) {
-		got := gateEnvFrom(lookupFrom(map[string]string{"LENGTH_GATE_BASE": ""}), cliArgs{})
+		got := gateEnvFrom(
+			lookupFrom(map[string]string{"LENGTH_GATE_BASE": ""}),
+			cliArgs{configPath: "", all: false, skipClasses: nil},
+		)
 		if got.Base != mo.Some("") {
 			t.Fatalf("Base = %v, want Some(\"\")", got.Base)
 		}
 	})
 
 	t.Run("merge is on only for exactly 1", func(t *testing.T) {
-		on := gateEnvFrom(lookupFrom(map[string]string{"LENGTH_GATE_MERGE": "1"}), cliArgs{})
-		off := gateEnvFrom(lookupFrom(map[string]string{"LENGTH_GATE_MERGE": "true"}), cliArgs{})
+		on := gateEnvFrom(
+			lookupFrom(map[string]string{"LENGTH_GATE_MERGE": "1"}),
+			cliArgs{configPath: "", all: false, skipClasses: nil},
+		)
+		off := gateEnvFrom(
+			lookupFrom(map[string]string{"LENGTH_GATE_MERGE": "true"}),
+			cliArgs{configPath: "", all: false, skipClasses: nil},
+		)
 		if !on.Merge || off.Merge {
 			t.Fatalf("Merge on=%v off=%v, want true then false", on.Merge, off.Merge)
 		}
@@ -113,7 +125,7 @@ func TestGateEnvFrom(t *testing.T) {
 	t.Run("flags flow into the env", func(t *testing.T) {
 		got := gateEnvFrom(
 			lookupFrom(map[string]string{"LENGTH_GATE_EVENT": "push"}),
-			cliArgs{all: true, skipClasses: []string{"spec"}},
+			cliArgs{configPath: "", all: true, skipClasses: []string{"spec"}},
 		)
 		if got.Event != "push" || !got.All || !slices.Equal(got.SkipClasses, []string{"spec"}) {
 			t.Fatalf("gateEnvFrom = %+v, want push, all, skip spec", got)

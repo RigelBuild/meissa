@@ -86,7 +86,8 @@ func asRecord(value any, label string) (map[string]any, error) {
 // value's raw bytes. The first key not in allowed is reported, so the error names what the user wrote first.
 func rootRawFields(data []byte, allowed []string, label string) (map[string]json.RawMessage, error) {
 	dec := json.NewDecoder(bytes.NewReader(data))
-	if _, err := dec.Token(); err != nil {
+	_, err := dec.Token()
+	if err != nil {
 		return nil, err
 	}
 	fields := map[string]json.RawMessage{}
@@ -97,7 +98,8 @@ func rootRawFields(data []byte, allowed []string, label string) (map[string]json
 		}
 		key, _ := tok.(string)
 		var value json.RawMessage
-		if err := dec.Decode(&value); err != nil {
+		err = dec.Decode(&value)
+		if err != nil {
 			return nil, err
 		}
 		if !slices.Contains(allowed, key) {
@@ -140,7 +142,6 @@ func readGlobArray(value any, label string) ([]string, error) {
 		}
 	}
 	return globs, nil
-
 }
 
 func readDocClass(value any, index int, raw json.RawMessage) (model.DocClass, error) {

@@ -245,7 +245,6 @@ func TestRunOncePullRequestOutcomes(t *testing.T) {
 			t.Fatalf("exit = %d, stderr %q", result.code, result.stderr.String())
 		}
 	})
-
 }
 
 // TestRunOncePullRequestGitFailures covers base, head and object failures that exit 2 with the cause.

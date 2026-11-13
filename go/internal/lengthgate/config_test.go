@@ -47,74 +47,76 @@ func expectRejected(t *testing.T, cases []rejectionCase) {
 }
 
 // The error strings below are the TypeScript contract. Each case isolates one rule in config.ts.
+var shapeRejections = []rejectionCase{
+	{
+		name: "unknown root key",
+		text: `{"extensions": [".ts"], "exclude": [], "docs": [], "bogus": 1}`,
+		want: `Unknown key "bogus" in config`,
+	},
+	{
+		name: "first unknown root key in input order wins",
+		text: `{"extensions": [".ts"], "exclude": [], "docs": [], "zeta": 1, "alpha": 2}`,
+		want: `Unknown key "zeta" in config`,
+	},
+	{
+		name: "first unknown class key in input order wins",
+		text: `{"extensions": [], "exclude": [], "docs": [` +
+			`{"name": "spec", "include": [], "exclude": [], "target": 1, "markerAllowed": false, "zeta": 1, "alpha": 2}]}`,
+		want: `Unknown key "zeta" in docs[0]`,
+	},
+	{
+		name: "unknown key inside a document class",
+		text: `{"extensions": [], "exclude": [], "docs": [` +
+			`{"name": "spec", "include": [], "exclude": [], "target": 1, "markerAllowed": false, "extra": true}]}`,
+		want: `Unknown key "extra" in docs[0]`,
+	},
+	{
+		name: "extensions must be an array",
+		text: `{"extensions": ".ts", "exclude": [], "docs": []}`,
+		want: "extensions must be an array of strings",
+	},
+	{
+		name: "an extension entry must be a string",
+		text: `{"extensions": [1], "exclude": [], "docs": []}`,
+		want: "extensions[0] must be a string",
+	},
+	{
+		name: "an unscanned extension is rejected",
+		text: `{"extensions": [".md"], "exclude": [], "docs": []}`,
+		want: `extensions includes ".md" but no scanner supports it`,
+	},
+	{
+		name: "a document class must be an object",
+		text: `{"extensions": [], "exclude": [], "docs": ["spec"]}`,
+		want: "docs[0] must be an object",
+	},
+	{
+		name: "docs must be an array",
+		text: `{"extensions": [], "exclude": [], "docs": {}}`,
+		want: "docs must be an array of document classes",
+	},
+	{
+		name: "a class name must be a string",
+		text: `{"extensions": [], "exclude": [], "docs": [` +
+			`{"name": 3, "include": [], "exclude": [], "target": 1, "markerAllowed": false}]}`,
+		want: "docs[0].name must be a string",
+	},
+	{
+		name: "a class target must be a number",
+		text: `{"extensions": [], "exclude": [], "docs": [` +
+			`{"name": "spec", "include": [], "exclude": [], "target": "1500", "markerAllowed": false}]}`,
+		want: "docs[0].target must be a finite number",
+	},
+	{
+		name: "a class markerAllowed must be a boolean",
+		text: `{"extensions": [], "exclude": [], "docs": [` +
+			`{"name": "spec", "include": [], "exclude": [], "target": 1, "markerAllowed": "no"}]}`,
+		want: "docs[0].markerAllowed must be a boolean",
+	},
+}
+
 func TestLoadConfigRejectsShape(t *testing.T) {
-	expectRejected(t, []rejectionCase{
-		{
-			name: "unknown root key",
-			text: `{"extensions": [".ts"], "exclude": [], "docs": [], "bogus": 1}`,
-			want: `Unknown key "bogus" in config`,
-		},
-		{
-			name: "first unknown root key in input order wins",
-			text: `{"extensions": [".ts"], "exclude": [], "docs": [], "zeta": 1, "alpha": 2}`,
-			want: `Unknown key "zeta" in config`,
-		},
-		{
-			name: "first unknown class key in input order wins",
-			text: `{"extensions": [], "exclude": [], "docs": [` +
-				`{"name": "spec", "include": [], "exclude": [], "target": 1, "markerAllowed": false, "zeta": 1, "alpha": 2}]}`,
-			want: `Unknown key "zeta" in docs[0]`,
-		},
-		{
-			name: "unknown key inside a document class",
-			text: `{"extensions": [], "exclude": [], "docs": [` +
-				`{"name": "spec", "include": [], "exclude": [], "target": 1, "markerAllowed": false, "extra": true}]}`,
-			want: `Unknown key "extra" in docs[0]`,
-		},
-		{
-			name: "extensions must be an array",
-			text: `{"extensions": ".ts", "exclude": [], "docs": []}`,
-			want: "extensions must be an array of strings",
-		},
-		{
-			name: "an extension entry must be a string",
-			text: `{"extensions": [1], "exclude": [], "docs": []}`,
-			want: "extensions[0] must be a string",
-		},
-		{
-			name: "an unscanned extension is rejected",
-			text: `{"extensions": [".md"], "exclude": [], "docs": []}`,
-			want: `extensions includes ".md" but no scanner supports it`,
-		},
-		{
-			name: "a document class must be an object",
-			text: `{"extensions": [], "exclude": [], "docs": ["spec"]}`,
-			want: "docs[0] must be an object",
-		},
-		{
-			name: "docs must be an array",
-			text: `{"extensions": [], "exclude": [], "docs": {}}`,
-			want: "docs must be an array of document classes",
-		},
-		{
-			name: "a class name must be a string",
-			text: `{"extensions": [], "exclude": [], "docs": [` +
-				`{"name": 3, "include": [], "exclude": [], "target": 1, "markerAllowed": false}]}`,
-			want: "docs[0].name must be a string",
-		},
-		{
-			name: "a class target must be a number",
-			text: `{"extensions": [], "exclude": [], "docs": [` +
-				`{"name": "spec", "include": [], "exclude": [], "target": "1500", "markerAllowed": false}]}`,
-			want: "docs[0].target must be a finite number",
-		},
-		{
-			name: "a class markerAllowed must be a boolean",
-			text: `{"extensions": [], "exclude": [], "docs": [` +
-				`{"name": "spec", "include": [], "exclude": [], "target": 1, "markerAllowed": "no"}]}`,
-			want: "docs[0].markerAllowed must be a boolean",
-		},
-	})
+	expectRejected(t, shapeRejections)
 }
 
 // TestLoadConfigRejectsGlobsAndTargets covers the rules checked at load for globs and class targets.

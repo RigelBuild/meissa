@@ -44,17 +44,17 @@ type MarkerResult struct {
 func Marker(firstLine string) MarkerResult {
 	rest, ok := commentPrefixRest(firstLine)
 	if !ok {
-		return MarkerResult{}
+		return MarkerResult{Found: false, Error: ""}
 	}
 	afterColon, ok := cutMarkerKeyword(jstext.Trim(rest))
 	if !ok {
-		return MarkerResult{}
+		return MarkerResult{Found: false, Error: ""}
 	}
 	content := TrimCommentClose(afterColon)
 	if problem := InvalidReason(content); problem != "" {
 		return MarkerResult{Found: true, Error: problem}
 	}
-	return MarkerResult{Found: true}
+	return MarkerResult{Found: true, Error: ""}
 }
 
 // WordsInReason counts reason words that hold a letter or digit.

@@ -52,7 +52,13 @@ func TestRunOncePullRequestStderr(t *testing.T) {
 func TestRunOnceUsesLengthGateStderr(t *testing.T) {
 	repository := trackedRepository(t, map[string]string{"src/file.ts": "clean\n"})
 	env := lengthgate.GateEnv{
-		Event: "pull_request", Base: mo.None[string](), Fetch: mo.None[string](), Head: "HEAD",
+		Event:       "pull_request",
+		Base:        mo.None[string](),
+		Fetch:       mo.None[string](),
+		Head:        "HEAD",
+		Merge:       false,
+		All:         false,
+		SkipClasses: nil,
 	}
 	result := runGate(t, repository, env, commentConfig())
 	want := "length-gate: pull_request requires LENGTH_GATE_BASE, LENGTH_GATE_FETCH or LENGTH_GATE_MERGE=1"
