@@ -82,27 +82,6 @@
         "typescript": "6.0.3",
       },
     },
-    "packages/length-gate": {
-      "name": "@rigelbuild/length-gate",
-      "version": "1.0.2",
-      "bin": {
-        "length-gate": "index.ts",
-      },
-      "dependencies": {
-        "@rigelbuild/comment-scan": "1.0.1",
-        "diff": "9.0.0",
-        "mdast-util-from-markdown": "2.1.0",
-        "mdast-util-frontmatter": "2.0.1",
-        "mdast-util-gfm": "3.1.0",
-        "micromark-extension-frontmatter": "2.0.0",
-        "micromark-extension-gfm": "3.0.0",
-      },
-      "devDependencies": {
-        "@types/bun": "1.4.4",
-        "@types/mdast": "4.0.4",
-        "typescript": "6.0.3",
-      },
-    },
     "packages/renovate-preflight": {
       "name": "@rigelbuild/renovate-preflight",
       "version": "1.1.1",
@@ -133,8 +112,6 @@
     "@rigelbuild/dl-reconcile": ["@rigelbuild/dl-reconcile@workspace:packages/dl-reconcile"],
 
     "@rigelbuild/docs-bundle": ["@rigelbuild/docs-bundle@workspace:packages/docs-bundle"],
-
-    "@rigelbuild/length-gate": ["@rigelbuild/length-gate@workspace:packages/length-gate"],
 
     "@rigelbuild/renovate-preflight": ["@rigelbuild/renovate-preflight@workspace:packages/renovate-preflight"],
 

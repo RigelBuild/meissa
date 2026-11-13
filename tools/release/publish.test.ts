@@ -105,8 +105,8 @@ describe("publishAll", () => {
 describe("publishReleased", () => {
 	test("publishes only package paths from a mixed release", async () => {
 		const { d, published } = deps({});
-		await publishReleased(["go", "packages/length-gate", "docs"], d);
-		expect(published).toEqual(["packages/length-gate"]);
+		await publishReleased(["go", "packages/dl-list", "docs"], d);
+		expect(published).toEqual(["packages/dl-list"]);
 	});
 
 	test("skips when no npm package was released", async () => {

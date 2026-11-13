@@ -34,10 +34,6 @@
 			"component": "renovate-preflight",
 			"package-name": "@rigelbuild/renovate-preflight"
 		},
-		"packages/length-gate": {
-			"component": "length-gate",
-			"package-name": "@rigelbuild/length-gate"
-		},
 		"packages/docs-bundle": {
 			"component": "docs-bundle",
 			"package-name": "@rigelbuild/docs-bundle"

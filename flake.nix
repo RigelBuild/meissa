@@ -108,6 +108,7 @@
           test -x "${package}/bin/ref-gate"
           test -x "${package}/bin/refresh-nix-hashes"
           test -x "${package}/bin/code-shape-gate"
+          test -x "${package}/bin/length-gate"
           touch "$out"
         '';
       } // (if system == "x86_64-linux" then {
