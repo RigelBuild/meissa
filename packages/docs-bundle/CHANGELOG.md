@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.1](https://github.com/RigelBuild/meissa/compare/docs-bundle@v1.2.0...docs-bundle@v1.2.1) (2026-11-13)
+
+
+### Bug Fixes
+
+* **docs-bundle:** rewrite the href of a link that wraps an image (RIG-9937) ([#79](https://github.com/RigelBuild/meissa/issues/79)) ([08669e2](https://github.com/RigelBuild/meissa/commit/08669e298bcb5a38cdefa5aefc45a73e046127a3))
+* **docs-bundle:** skip underscore-prefixed pages in collectPages (RIG-9938) ([#78](https://github.com/RigelBuild/meissa/issues/78)) ([efe68cf](https://github.com/RigelBuild/meissa/commit/efe68cf083cfaa42f1b9d1d4339ded5126652100))
+
 ## [1.2.0](https://github.com/RigelBuild/meissa/compare/docs-bundle@v1.1.0...docs-bundle@v1.2.0) (2026-11-10)
 
 
