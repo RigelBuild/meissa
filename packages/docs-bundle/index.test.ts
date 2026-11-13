@@ -533,6 +533,92 @@ describe("docs bundle helpers", () => {
 			},
 		]);
 	});
+	test("rewrites image links nested in a link label", () => {
+		const current = page("docs/index.md", "/guide");
+		const routes = new Map([
+			["acme/widgets:docs/d.png", "/guide/d"],
+			["acme/widgets:docs/other.md", "/guide/other"],
+		]);
+		expect(
+			rewriteLinks(
+				"[![d](./d.png)](./d.png)",
+				current,
+				routes,
+				"/tmp/acme-widgets",
+			),
+		).toBe("[![d](/guide/d)](/guide/d)");
+		expect(
+			rewriteLinks(
+				"[![d](./d.png)](./other.md)",
+				current,
+				routes,
+				"/tmp/acme-widgets",
+			),
+		).toBe("[![d](/guide/d)](/guide/other)");
+	});
+	test("rewrites every destination in badge rows and image link labels", () => {
+		const current = page("docs/index.md", "/guide");
+		const routes = new Map([
+			["acme/widgets:docs/a.png", "/guide/a.png"],
+			["acme/widgets:docs/b.png", "/guide/b.png"],
+			["acme/widgets:docs/c.md", "/guide/c"],
+			["acme/widgets:docs/d.png", "/guide/d.png"],
+			["acme/widgets:docs/x.md", "/guide/x"],
+		]);
+		expect(
+			rewriteLinks(
+				"[![a](a.png)![b](b.png)](x.md)",
+				current,
+				routes,
+				"/tmp/acme-widgets",
+			),
+		).toBe("[![a](/guide/a.png)![b](/guide/b.png)](/guide/x)");
+		expect(
+			rewriteLinks(
+				'[![d](./d.png "T")](./d.png)',
+				current,
+				routes,
+				"/tmp/acme-widgets",
+			),
+		).toBe('[![d](/guide/d.png "T")](/guide/d.png)');
+		expect(
+			rewriteLinks(
+				"[a ![i](a.png) b](c.md)",
+				current,
+				routes,
+				"/tmp/acme-widgets",
+			),
+		).toBe("[a ![i](/guide/a.png) b](/guide/c)");
+	});
+	test("rewrites an overlapping image and link target once", async () => {
+		const root = await fixture();
+		await mkdir(join(root, "docs"), { recursive: true });
+		await writeFile(join(root, "docs", "index.md"), "![a [b](x.png)");
+		const current = page("docs/index.md", "/guide");
+		const missing: string[] = [];
+		expect(
+			rewriteLinks("![a [b](x.png)", current, new Map(), root, (link) =>
+				missing.push(link.target),
+			),
+		).toBe("![a [b](https://github.com/acme/widgets/blob/main/docs/x.png)");
+		expect(missing).toEqual(["docs/x.png"]);
+		expect(await findBrokenLinks(root, source.repo, [current])).toEqual([
+			{
+				repo: source.repo,
+				sourcePath: "docs/index.md",
+				target: "docs/x.png",
+			},
+		]);
+	});
+	test("preserves nested image links in inline and fenced code", () => {
+		const current = page("docs/index.md", "/guide");
+		const routes = new Map([["acme/widgets:docs/d.png", "/guide/d"]]);
+		const input =
+			"[![d](./d.png)](./d.png) and `[![d](./d.png)](./d.png)`\n\n```md\n[![d](./d.png)](./d.png)\n```";
+		expect(rewriteLinks(input, current, routes, "/tmp/acme-widgets")).toBe(
+			"[![d](/guide/d)](/guide/d) and `[![d](./d.png)](./d.png)`\n\n```md\n[![d](./d.png)](./d.png)\n```",
+		);
+	});
 
 	test("rewrites bundled GitHub blob links to their site routes", () => {
 		const current = page("docs/index.md", "/guide");
