@@ -428,6 +428,18 @@ describe("docs bundle helpers", () => {
 			expect(isGatherable(path)).toBe(false);
 		}
 	});
+	test("collectPages skips underscore-prefixed path segments", async () => {
+		const root = await fixture();
+		await mkdir(join(root, "_drafts"), { recursive: true });
+		await writeFile(join(root, "_partial.md"), "# Partial\n");
+		await writeFile(join(root, "_drafts", "draft.md"), "# Draft\n");
+		await writeFile(join(root, "index.md"), "# Index\n");
+		const pages = await collectPages(
+			{ ...source, root },
+			{ exclude: [], sections: [] },
+		);
+		expect(pages.map(({ sourcePath }) => sourcePath)).toEqual(["index.md"]);
+	});
 
 	test("uses defaults when config is absent and requires explicit config when required", async () => {
 		const root = await fixture();

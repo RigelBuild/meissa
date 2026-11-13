@@ -7,7 +7,9 @@ export function isGatherable(path: string): boolean {
 	if (normalized.split("/").includes("dist")) return false;
 	if (normalized.split("/").includes("outputs")) return false;
 	if (
-		normalized.split("/").some((segment) => segment.startsWith(".")) &&
+		normalized
+			.split("/")
+			.some((segment) => segment.startsWith(".") || segment.startsWith("_")) &&
 		normalized !== PULL_REQUEST_TEMPLATE
 	)
 		return false;
