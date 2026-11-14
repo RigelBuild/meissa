@@ -4,6 +4,7 @@ package run
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"path"
@@ -14,11 +15,13 @@ import (
 
 	"github.com/RigelBuild/meissa/go/internal/ledgergate/claim"
 	"github.com/RigelBuild/meissa/go/internal/ledgergate/core"
+	"github.com/RigelBuild/meissa/go/ledger"
 )
 
 // Deps is the I/O the runner reads. The git and filesystem implementation
 // lives outside this package. ListDesignFiles returns the files under the
-// configured designs root, sorted.
+// configured designs root and under each archive root, sorted. The zero-files
+// guard counts only designs-root files; archive files alone do not pass it.
 type Deps interface {
 	Root() string
 	BaseRef() string
@@ -51,7 +54,7 @@ func Once(ctx context.Context, deps Deps, cfg core.Config, stdout, stderr io.Wri
 		contents:     map[string]string{},
 		fenceSeen:    map[string]bool{},
 		records:      nil,
-		corpus:       core.DecisionCorpus{Rows: nil, Malformed: nil, Strays: nil},
+		corpus:       core.DecisionCorpus{Rows: nil, Archived: nil, Malformed: nil, Strays: nil},
 		changed:      changed,
 		details:      mo.None[core.PullRequestDetails](),
 		violations:   nil,
@@ -121,14 +124,22 @@ func (g *gateRun) scanTree(ctx context.Context) bool {
 	if err != nil {
 		return g.failf("design-ledger-gate: cannot read the tree at %s\n%s", g.root, err)
 	}
-	// A wrong root or designsRoot lists nothing; never pass a gate that saw no files.
-	if len(paths) == 0 {
+	// Only files under designsRoot count: archive files alone do not prove the
+	// live tree was seen.
+	if !slices.ContainsFunc(paths, func(file string) bool {
+		return strings.HasPrefix(file, g.cfg.DesignsRoot+"/")
+	}) {
 		return g.failf("design-ledger-gate: no files under %s", g.cfg.DesignsRoot)
 	}
 	g.paths = paths
 	var decisions, recordPaths []string
 	var strays []core.StrayPath
+	var archived []string
 	for _, file := range paths {
+		if isArchivedDecision(file, g.cfg) {
+			archived = append(archived, file)
+			continue
+		}
 		kind := core.ClassifyDesignPath(file, g.cfg)
 		if kind == core.PathDecision {
 			decisions = append(decisions, file)
@@ -162,8 +173,55 @@ func (g *gateRun) scanTree(ctx context.Context) bool {
 		}
 	}
 	g.corpus = core.BuildDecisionCorpus(decisionFiles, strays)
+	rows, ok := g.parseArchived(archived)
+	if !ok {
+		return false
+	}
+	g.corpus.Archived = rows
 	g.checkSurfaces(paths)
 	return true
+}
+
+// isArchivedDecision reports whether a path is a decision file under a
+// configured archive root. Archive files are not live decisions.
+func isArchivedDecision(file string, cfg core.Config) bool {
+	if !slices.ContainsFunc(cfg.ArchiveRoots, func(root string) bool {
+		return strings.HasPrefix(file, root+"/")
+	}) {
+		return false
+	}
+	parts := strings.Split(file, "/")
+	return strings.HasPrefix(path.Base(file), "DL-") && strings.HasSuffix(path.Base(file), ".md") &&
+		slices.Contains(parts, "decisions")
+}
+
+// parseArchived reads archived decision files, reporting malformed rows and
+// failing closed on read errors. A listed but missing archive file is skipped.
+func (g *gateRun) parseArchived(files []string) ([]ledger.DecisionRow, bool) {
+	rows := []ledger.DecisionRow{}
+	for _, file := range files {
+		text, found, err := g.deps.ReadText(file)
+		if err != nil {
+			return nil, g.failf("design-ledger-gate: cannot read the tree at %s\n%s", g.root, err)
+		}
+		if !found {
+			continue
+		}
+		row, parseErr := ledger.ParseDecisionFile(file, []byte(text))
+		if parseErr != nil {
+			malformed, ok := errors.AsType[*ledger.MalformedDecision](parseErr)
+			if !ok {
+				malformed = &ledger.MalformedDecision{Path: file, Line: 0, Reason: parseErr.Error()}
+			}
+			g.violations = append(g.violations, core.Violation{
+				File: malformed.Path, Line: malformed.Line,
+				Message: "malformed archived decision file: " + malformed.Reason,
+			})
+			continue
+		}
+		rows = append(rows, row)
+	}
+	return rows, true
 }
 
 // checkSurfaces reports each depth-one surface that the configured list omits.

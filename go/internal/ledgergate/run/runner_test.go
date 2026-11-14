@@ -126,6 +126,23 @@ func runGate(t *testing.T, deps Deps, cfg core.Config) (int, string, string) {
 	return code, stdout.String(), stderr.String()
 }
 
+func TestIsArchivedDecisionRequiresConfiguredRootAndDecisionPath(t *testing.T) {
+	cfg := core.Config{ArchiveRoots: []string{"docs/archive"}}
+	cases := map[string]bool{
+		"docs/archive/ui/decisions/ui/DL-900.md":      true,
+		"docs/archive/ui/decisions/ui/notes.md":       false,
+		"docs/archive/ui/record/DL-900.md":            false,
+		"docs/archive-old/ui/decisions/ui/DL-900.md":  false,
+		"docs/designs/ui/decisions/ui/DL-900.md":      false,
+		"docs/archive/ui/decisions/ui/deep/DL-900.md": true,
+	}
+	for file, want := range cases {
+		if got := isArchivedDecision(file, cfg); got != want {
+			t.Errorf("isArchivedDecision(%q) = %v, want %v", file, got, want)
+		}
+	}
+}
+
 // TestRunOnceAppliesMatchingBotMetadataToDeclarationLegs ports
 // "runOnce applies matching same-repo bot metadata to declaration legs".
 func TestRunOnceAppliesMatchingBotMetadataToDeclarationLegs(t *testing.T) {
@@ -309,6 +326,99 @@ func TestRunOnceRecordStatusStillRunsAndListingErrorsFailClosed(t *testing.T) {
 	code, _, errs = runGate(t, failed, gateConfig(core.Legs{}))
 	if code != 2 || !strings.Contains(errs, "boom") {
 		t.Fatalf("exit = %d, want 2 with the listing error; stderr:\n%s", code, errs)
+	}
+}
+
+// TestRunOnceArchivedReadErrorFailsClosed covers the archive read path: a read
+// error on an archived decision exits 2, the same as a live read error. The
+// archived file is listed, so the failure is the read, not a missing file.
+func TestRunOnceArchivedReadErrorFailsClosed(t *testing.T) {
+	archived := "docs/archive/ui/decisions/ui/DL-900.md"
+	fake := newGateFake(map[string]string{
+		gateDecisionPath: gateDecisionFile(gateDecisionPath, gateActive),
+		gateRecordPath:   "# Record\n\nBody.\n",
+		archived:         gateDecisionFile(archived, gateActive),
+	})
+	fake.readErrs = map[string]error{archived: errors.New("disk gone")}
+	cfg := gateConfig(core.Legs{})
+	cfg.ArchiveRoots = []string{"docs/archive"}
+	code, _, errs := runGate(t, fake, cfg)
+	if code != 2 || !strings.Contains(errs, "disk gone") {
+		t.Fatalf("exit = %d, want 2 with the archived read error; stderr:\n%s", code, errs)
+	}
+}
+
+// TestRunOnceArchivedMissingFileIsSkipped covers the other half: an archived
+// path that is listed but not found is skipped, not failed.
+func TestRunOnceArchivedMissingFileIsSkipped(t *testing.T) {
+	archived := "docs/archive/ui/decisions/ui/DL-900.md"
+	fake := newGateFake(map[string]string{
+		gateDecisionPath: gateDecisionFile(gateDecisionPath, gateActive),
+		gateRecordPath:   "# Record\n\nBody.\n",
+	})
+	fake.paths = append(fake.paths, archived)
+	cfg := gateConfig(core.Legs{})
+	cfg.ArchiveRoots = []string{"docs/archive"}
+	code, _, errs := runGate(t, fake, cfg)
+	if code == 2 {
+		t.Fatalf("exit = 2 for a missing archived file, want it skipped; stderr:\n%s", errs)
+	}
+}
+
+// TestRunOnceEmptyDesignsRootFailsWhenArchiveRootsAreSet covers the zero-files
+// guard. With archiveRoots set and a wrong designsRoot, only archive files are
+// listed. Archive files alone do not prove the live tree was seen, so the gate
+// exits 2 rather than passing.
+func TestRunOnceEmptyDesignsRootFailsWhenArchiveRootsAreSet(t *testing.T) {
+	archived := "docs/archive/ui/decisions/ui/DL-900.md"
+	fake := newGateFake(map[string]string{
+		archived: gateDecisionFile(archived, gateActive),
+	})
+	cfg := gateConfig(core.Legs{})
+	cfg.ArchiveRoots = []string{"docs/archive"}
+	code, _, errs := runGate(t, fake, cfg)
+	if code != 2 || !strings.Contains(errs, "no files under docs/designs") {
+		t.Fatalf("exit = %d, want 2 for an empty designs root; stderr:\n%s", code, errs)
+	}
+}
+
+// TestN1TitleScopeChangedUsesChangedFileList covers changed title checks over
+// the file list returned by the runner dependencies.
+func TestN1TitleScopeChangedUsesChangedFileList(t *testing.T) {
+	fake := newGateFake(map[string]string{
+		gateDecisionPath: gateDecisionFile(gateDecisionPath, gateActive),
+		gateRecordPath:   "# Record\n\nBody.\n",
+	})
+	cfg := gateConfig(core.Legs{})
+	cfg.TitleScope = "changed"
+	fake.changed = core.Changed{Files: []string{gateDecisionPath}, Body: mo.None[string](), HeadBranch: ""}
+	code, _, errs := runGate(t, fake, cfg)
+	if code != 1 || !strings.Contains(errs, "DL-001: decision needs a title (titleScope changed)") {
+		t.Fatalf("changed decision: code=%d stderr=%q, want titleScope changed violation", code, errs)
+	}
+
+	fake.changed = core.Changed{Files: []string{"README.md"}, Body: mo.None[string](), HeadBranch: ""}
+	code, _, errs = runGate(t, fake, cfg)
+	if code != 0 || strings.Contains(errs, "decision needs a title") {
+		t.Fatalf("unchanged decision: code=%d stderr=%q, want no title violation", code, errs)
+	}
+}
+
+// TestN1MalformedArchivedDecisionIsReported confirms malformed archive rows are
+// reported with the archive-specific diagnostic and source location.
+func TestN1MalformedArchivedDecisionIsReported(t *testing.T) {
+	const archived = "docs/archive/ui/decisions/ui/record/DL-900.md"
+	fake := newGateFake(map[string]string{
+		gateDecisionPath: gateDecisionFile(gateDecisionPath, gateActive),
+		gateRecordPath:   "# Record\n\nBody.\n",
+		archived:         "not a front matter block\n",
+	})
+	cfg := gateConfig(core.Legs{})
+	cfg.ArchiveRoots = []string{"docs/archive"}
+	code, _, errs := runGate(t, fake, cfg)
+	want := archived + ":1: malformed archived decision file: file must start with a `---` front-matter block"
+	if code != 1 || !strings.Contains(errs, want) {
+		t.Fatalf("malformed archive: code=%d stderr=%q, want %q", code, errs, want)
 	}
 }
 

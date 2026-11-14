@@ -11,7 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"sort"
+	"slices"
 	"strings"
 	"time"
 
@@ -129,40 +129,43 @@ func (d *gitDeps) ReadText(file string) (string, bool, error) {
 	return string(data), true, nil
 }
 
-// ListDesignFiles lists the files under the designs root, sorted.
+// ListDesignFiles lists files under the designs root and configured archive roots.
 func (d *gitDeps) ListDesignFiles(_ context.Context) ([]string, error) {
+	roots := append([]string{d.cfg.DesignsRoot}, d.cfg.ArchiveRoots...)
 	var files []string
-	root := filepath.Join(d.root, filepath.FromSlash(d.cfg.DesignsRoot))
-	_, err := os.Stat(root)
-	if errors.Is(err, os.ErrNotExist) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, fmt.Errorf("list design files under %s: %w", d.cfg.DesignsRoot, err)
-	}
-	err = filepath.WalkDir(root, func(file string, entry os.DirEntry, walkErr error) error {
-		if walkErr != nil {
-			return walkErr
+	for _, configuredRoot := range roots {
+		root := filepath.Join(d.root, filepath.FromSlash(configuredRoot))
+		_, err := os.Stat(root)
+		if errors.Is(err, os.ErrNotExist) {
+			continue
 		}
-		if strings.HasPrefix(entry.Name(), ".") {
-			if entry.IsDir() && entry.Name() != "." {
-				return filepath.SkipDir
+		if err != nil {
+			return nil, fmt.Errorf("list design files under %s: %w", configuredRoot, err)
+		}
+		err = filepath.WalkDir(root, func(file string, entry os.DirEntry, walkErr error) error {
+			if walkErr != nil {
+				return walkErr
+			}
+			if strings.HasPrefix(entry.Name(), ".") {
+				if entry.IsDir() && entry.Name() != "." {
+					return filepath.SkipDir
+				}
+				return nil
+			}
+			if entry.Type().IsRegular() {
+				relative, err := filepath.Rel(d.root, file)
+				if err != nil {
+					return fmt.Errorf("relative path for %s: %w", file, err)
+				}
+				files = append(files, filepath.ToSlash(relative))
 			}
 			return nil
+		})
+		if err != nil {
+			return nil, fmt.Errorf("list design files under %s: %w", configuredRoot, err)
 		}
-		if entry.Type().IsRegular() {
-			relative, err := filepath.Rel(d.root, file)
-			if err != nil {
-				return fmt.Errorf("relative path for %s: %w", file, err)
-			}
-			files = append(files, filepath.ToSlash(relative))
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, fmt.Errorf("list design files under %s: %w", d.cfg.DesignsRoot, err)
 	}
-	sort.Strings(files)
+	slices.Sort(files)
 	return files, nil
 }
 
