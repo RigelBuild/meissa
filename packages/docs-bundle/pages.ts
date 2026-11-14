@@ -2,7 +2,7 @@ import { readdir } from "node:fs/promises";
 import { join, posix } from "node:path";
 import { matchesAny } from "./config.ts";
 import { routeSlug } from "./markdown.ts";
-import { isGatherable } from "./membership.ts";
+import { isGatherable, isSkippedDirectory } from "./membership.ts";
 import type {
 	BundlePage,
 	FetchedSource,
@@ -29,8 +29,9 @@ async function markdownFiles(root: string): Promise<string[]> {
 		})) {
 			const path =
 				directory.length === 0 ? entry.name : `${directory}/${entry.name}`;
-			if (entry.isDirectory()) await walk(path);
-			else if (entry.isFile() && isGatherable(path)) files.push(path);
+			if (entry.isDirectory()) {
+				if (!isSkippedDirectory(entry.name)) await walk(path);
+			} else if (entry.isFile() && isGatherable(path)) files.push(path);
 		}
 	}
 	await walk("");
