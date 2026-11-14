@@ -77,25 +77,68 @@ func ClassifyDesignPath(file string, cfg Config) DesignPathKind {
 // Sub is "" for a flat file.
 type Location struct{ Surface, Area, Sub string }
 
-// DecisionLocation returns where a decision file sits. It reports false when
-// the path is not a decision file under the configured layout.
+// DecisionLocation returns a decision's location under the configured live or archive layout.
+// Archive paths retain the live path relative to DesignsRoot's parent under an ArchiveRoots entry.
 func DecisionLocation(file string, cfg Config) (Location, bool) {
-	if ClassifyDesignPath(file, cfg) != PathDecision {
-		return Location{Surface: "", Area: "", Sub: ""}, false
+	if ClassifyDesignPath(file, cfg) == PathDecision {
+		root := cfg.DesignsRoot + "/"
+		parts := strings.Split(file[len(root):], "/")
+		surface := ""
+		if cfg.SurfaceDepth == 1 {
+			surface = parts[0]
+			parts = parts[1:]
+		}
+		// parts is now decisions/<area>/[<sub>/]<file>.
+		location := Location{Surface: surface, Area: parts[1], Sub: ""}
+		if len(parts) == 4 {
+			location.Sub = parts[2]
+		}
+		return location, true
 	}
-	root := cfg.DesignsRoot + "/"
-	parts := strings.Split(file[len(root):], "/")
-	surface := ""
-	if cfg.SurfaceDepth == 1 {
-		surface = parts[0]
-		parts = parts[1:]
+
+	for _, archiveRoot := range cfg.ArchiveRoots {
+		root := archiveRoot + "/"
+		if !strings.HasPrefix(file, root) {
+			continue
+		}
+
+		parts := strings.Split(file[len(root):], "/")
+		decisionStart := 0
+		if cfg.SurfaceDepth == 1 {
+			if parts[0] == "" {
+				continue
+			}
+			decisionStart = 1
+		}
+		decisionIndex := -1
+		for index := decisionStart; index < len(parts); index++ {
+			if parts[index] == "decisions" {
+				decisionIndex = index
+				break
+			}
+		}
+		if decisionIndex < 0 {
+			continue
+		}
+		if !decisionFileRE.MatchString(path.Base(file)) {
+			continue
+		}
+		decisionPath := parts[decisionIndex+1:]
+		if !isDecisionDepth(decisionPath) {
+			continue
+		}
+
+		surface := ""
+		if cfg.SurfaceDepth == 1 {
+			surface = parts[0]
+		}
+		location := Location{Surface: surface, Area: decisionPath[0], Sub: ""}
+		if len(decisionPath) == 3 {
+			location.Sub = decisionPath[1]
+		}
+		return location, true
 	}
-	// parts is now decisions/<area>/[<sub>/]<file>.
-	location := Location{Surface: surface, Area: parts[1], Sub: ""}
-	if len(parts) == 4 {
-		location.Sub = parts[2]
-	}
-	return location, true
+	return Location{Surface: "", Area: "", Sub: ""}, false
 }
 
 // isDecisionDepth reports whether the path under decisions/ is a valid
