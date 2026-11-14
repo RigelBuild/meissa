@@ -10,7 +10,8 @@ require (
 	github.com/pelletier/go-toml/v2 v2.3.1
 	github.com/samber/mo v1.12.0
 	github.com/titanous/json5 v1.0.0
-	github.com/yuin/goldmark v1.8.7
+	github.com/yuin/goldmark v1.8.2
+	github.com/yuin/goldmark/v2 v2.1.15
 	go.yaml.in/yaml/v3 v3.0.6
 )
 
