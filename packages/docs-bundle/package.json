@@ -1,6 +1,6 @@
 {
 	"name": "@rigelbuild/docs-bundle",
-	"version": "1.2.1",
+	"version": "1.2.2",
 	"type": "module",
 	"description": "Shared Markdown docs bundling helpers and publish check.",
 	"license": "MIT OR Apache-2.0",

@@ -1,7 +1,7 @@
 {
-	"packages/docs-bundle": "1.2.1",
+	"packages/docs-bundle": "1.2.2",
 	"packages/renovate-preflight": "1.1.1",
 	"packages/biome-config": "1.0.1",
 	"packages/tsconfig": "1.0.0",
-	"go": "0.3.0"
+	"go": "0.4.0"
 }

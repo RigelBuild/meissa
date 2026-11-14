@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/RigelBuild/meissa/compare/go/v0.3.0...go/v0.4.0) (2026-11-14)
+
+
+### Features
+
+* **meissa:** port the design-ledger tools to Go (RIG-8124) ([#74](https://github.com/RigelBuild/meissa/issues/74)) ([aacea5c](https://github.com/RigelBuild/meissa/commit/aacea5c2a8755fb53cfbf759e51ac6d34c34e75d))
+
 ## [0.3.0](https://github.com/RigelBuild/meissa/compare/go/v0.2.0...go/v0.3.0) (2026-11-13)
 
 

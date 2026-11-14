@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/RigelBuild/meissa/compare/docs-bundle@v1.2.1...docs-bundle@v1.2.2) (2026-11-14)
+
+
+### Bug Fixes
+
+* **docs-bundle:** skip excluded directories while walking (RIG-9695) ([#83](https://github.com/RigelBuild/meissa/issues/83)) ([b4ad479](https://github.com/RigelBuild/meissa/commit/b4ad479a7e1474bbe2c90b936e03cd02f539ae28))
+
 ## [1.2.1](https://github.com/RigelBuild/meissa/compare/docs-bundle@v1.2.0...docs-bundle@v1.2.1) (2026-11-13)
 
 
