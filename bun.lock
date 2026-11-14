@@ -29,17 +29,6 @@
         "typescript": "6.0.3",
       },
     },
-    "packages/renovate-preflight": {
-      "name": "@rigelbuild/renovate-preflight",
-      "version": "1.1.1",
-      "bin": {
-        "renovate-preflight": "index.ts",
-      },
-      "devDependencies": {
-        "@types/bun": "1.4.4",
-        "typescript": "6.0.3",
-      },
-    },
     "packages/tsconfig": {
       "name": "@rigelbuild/tsconfig",
       "version": "1.0.0",
@@ -51,7 +40,6 @@
 
     "@rigelbuild/docs-bundle": ["@rigelbuild/docs-bundle@workspace:packages/docs-bundle"],
 
-    "@rigelbuild/renovate-preflight": ["@rigelbuild/renovate-preflight@workspace:packages/renovate-preflight"],
 
     "@rigelbuild/tsconfig": ["@rigelbuild/tsconfig@workspace:packages/tsconfig"],
 
