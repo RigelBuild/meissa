@@ -64,7 +64,7 @@
   Invalid globs now fail config load with exit 2. The npm version accepted them at load and failed only when matching.
   Gap: a leading `!` in `exclude` or a class glob, and a fractional `target`, are now rejected at load with exit 2. The npm version accepted both.
 - Added the `dl-claim`, `dl-list`, `dl-reconcile`, and `design-ledger-gate` Go binaries.
-- `design-ledger-gate` supports one-level decision sub-areas, an optional `title:` front-matter key, and the `requireSubArea`, `titleScope` and `archiveRoots` config keys. A Record outside the designs root and every archive root reports `Record path must be under <root> or an archive root`. A live decision cannot supersede or amend an archived one.
+- `design-ledger-gate` supports one-level decision sub-areas, an optional `title:` front-matter key, and the `requireSubArea`, `titleScope` and `archiveRoots` config keys. A Record outside the designs root and every archive root reports `Record path must be under <root> or an archive root`. A live decision cannot be marked `Superseded by` an archived decision.
 
 ### Removed
 

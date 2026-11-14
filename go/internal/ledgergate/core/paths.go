@@ -77,8 +77,8 @@ func ClassifyDesignPath(file string, cfg Config) DesignPathKind {
 // Sub is "" for a flat file.
 type Location struct{ Surface, Area, Sub string }
 
-// DecisionLocation returns a decision's location under the configured live or archive layout.
-// Archive paths retain the live path relative to DesignsRoot's parent under an ArchiveRoots entry.
+// DecisionLocation returns a decision's location; archive paths are relative to DesignsRoot.
+// Archive layout under ArchiveRoots: `<archiveRoot>/[<surface>/]…/decisions/<area>/[<sub>/]DL-*.md`.
 func DecisionLocation(file string, cfg Config) (Location, bool) {
 	if ClassifyDesignPath(file, cfg) == PathDecision {
 		root := cfg.DesignsRoot + "/"
@@ -110,20 +110,22 @@ func DecisionLocation(file string, cfg Config) (Location, bool) {
 			}
 			decisionStart = 1
 		}
-		decisionIndex := -1
-		for index := decisionStart; index < len(parts); index++ {
-			if parts[index] == "decisions" {
-				decisionIndex = index
-				break
-			}
-		}
-		if decisionIndex < 0 {
+		if slices.Contains(parts, "") {
 			continue
 		}
-		if !decisionFileRE.MatchString(path.Base(file)) {
+		decisionIndex := -1
+		if len(parts) >= 3 && parts[len(parts)-3] == "decisions" {
+			decisionIndex = len(parts) - 3
+		} else if len(parts) >= 4 && parts[len(parts)-4] == "decisions" {
+			decisionIndex = len(parts) - 4
+		}
+		if decisionIndex < decisionStart {
 			continue
 		}
 		decisionPath := parts[decisionIndex+1:]
+		if len(decisionPath) == 0 || !decisionFileRE.MatchString(decisionPath[len(decisionPath)-1]) {
+			continue
+		}
 		if !isDecisionDepth(decisionPath) {
 			continue
 		}
