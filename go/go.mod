@@ -11,7 +11,8 @@ require (
 	github.com/samber/mo v1.12.0
 	github.com/titanous/json5 v1.0.0
 	github.com/yuin/goldmark v1.8.7
-	go.yaml.in/yaml/v3 v3.0.6
+	go.yaml.in/yaml/v3 v3.0.4
+	go.yaml.in/yaml/v4 v4.0.0
 )
 
 require (
