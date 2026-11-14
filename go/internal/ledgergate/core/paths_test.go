@@ -33,17 +33,17 @@ func TestResolveRecordRelative(t *testing.T) {
 
 func TestClassifyDesignPath(t *testing.T) {
 	cases := map[string]DesignPathKind{
-		decisionDir + "/README.md":           PathDecisionsReadme,
-		decisionDir + "/ui/DL-001.md":        PathDecision,
-		decisionDir + "/ui/nested/DL-001.md": PathDecision,
-		decisionDir + "/ui/notes.txt":        PathMisplaced,
-		decisionDir + "/DL-001.md":           PathMisplaced,
-		decisionDir + "/foo.md":              PathMisplaced,
-		decisionDir + "/ui/DECISIONS.md":     PathLegacyLedger,
-		"docs/designs/DECISIONS.md":          PathLegacyLedger,
-		"docs/designs/server/DECISIONS.md":   PathLegacyLedger,
-		"docs/designs/ui/DL-009.md":          PathMisplaced,
-		"docs/designs/ui/record/design.md":   PathOther,
+		decisionDir + "/README.md":                     PathDecisionsReadme,
+		decisionDir + "/ui/DL-001.md":                  PathDecision,
+		decisionDir + "/ui/nested/DL-001.md":           PathDecision,
+		decisionDir + "/ui/notes.txt":                  PathMisplaced,
+		decisionDir + "/DL-001.md":                     PathMisplaced,
+		decisionDir + "/foo.md":                        PathMisplaced,
+		decisionDir + "/ui/DECISIONS.md":               PathLegacyLedger,
+		"docs/designs/DECISIONS.md":                    PathLegacyLedger,
+		"docs/designs/server/DECISIONS.md":             PathLegacyLedger,
+		"docs/designs/ui/DL-009.md":                    PathMisplaced,
+		"docs/designs/ui/record/design.md":             PathOther,
 		"docs/archive/platform/decisions/ui/DL-900.md": PathOther,
 	}
 	for file, want := range cases {
