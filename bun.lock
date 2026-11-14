@@ -15,59 +15,6 @@
       "name": "@rigelbuild/biome-config",
       "version": "1.0.1",
     },
-    "packages/design-ledger-gate": {
-      "name": "@rigelbuild/design-ledger-gate",
-      "version": "2.0.1",
-      "bin": {
-        "design-ledger-gate": "index.ts",
-      },
-      "devDependencies": {
-        "@types/bun": "1.4.4",
-        "typescript": "6.0.3",
-      },
-    },
-    "packages/dl-claim": {
-      "name": "@rigelbuild/dl-claim",
-      "version": "1.1.2",
-      "bin": {
-        "dl-claim": "index.ts",
-      },
-      "dependencies": {
-        "@rigelbuild/design-ledger-gate": "2.0.1",
-      },
-      "devDependencies": {
-        "@types/bun": "1.4.4",
-        "typescript": "6.0.3",
-      },
-    },
-    "packages/dl-list": {
-      "name": "@rigelbuild/dl-list",
-      "version": "1.0.1",
-      "bin": {
-        "dl-list": "index.ts",
-      },
-      "dependencies": {
-        "@rigelbuild/design-ledger-gate": "2.0.1",
-      },
-      "devDependencies": {
-        "@types/bun": "1.4.4",
-        "typescript": "6.0.3",
-      },
-    },
-    "packages/dl-reconcile": {
-      "name": "@rigelbuild/dl-reconcile",
-      "version": "1.0.3",
-      "bin": {
-        "dl-reconcile": "index.ts",
-      },
-      "dependencies": {
-        "@rigelbuild/design-ledger-gate": "2.0.1",
-      },
-      "devDependencies": {
-        "@types/bun": "1.4.4",
-        "typescript": "6.0.3",
-      },
-    },
     "packages/docs-bundle": {
       "name": "@rigelbuild/docs-bundle",
       "version": "1.2.0",
@@ -101,13 +48,6 @@
   "packages": {
     "@rigelbuild/biome-config": ["@rigelbuild/biome-config@workspace:packages/biome-config"],
 
-    "@rigelbuild/design-ledger-gate": ["@rigelbuild/design-ledger-gate@workspace:packages/design-ledger-gate"],
-
-    "@rigelbuild/dl-claim": ["@rigelbuild/dl-claim@workspace:packages/dl-claim"],
-
-    "@rigelbuild/dl-list": ["@rigelbuild/dl-list@workspace:packages/dl-list"],
-
-    "@rigelbuild/dl-reconcile": ["@rigelbuild/dl-reconcile@workspace:packages/dl-reconcile"],
 
     "@rigelbuild/docs-bundle": ["@rigelbuild/docs-bundle@workspace:packages/docs-bundle"],
 

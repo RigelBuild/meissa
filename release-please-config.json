@@ -6,22 +6,6 @@
 	"tag-separator": "@",
 	"bump-minor-pre-major": true,
 	"packages": {
-		"packages/design-ledger-gate": {
-			"component": "design-ledger-gate",
-			"package-name": "@rigelbuild/design-ledger-gate"
-		},
-		"packages/dl-claim": {
-			"component": "dl-claim",
-			"package-name": "@rigelbuild/dl-claim"
-		},
-		"packages/dl-list": {
-			"component": "dl-list",
-			"package-name": "@rigelbuild/dl-list"
-		},
-		"packages/dl-reconcile": {
-			"component": "dl-reconcile",
-			"package-name": "@rigelbuild/dl-reconcile"
-		},
 		"packages/biome-config": {
 			"component": "biome-config",
 			"package-name": "@rigelbuild/biome-config"

@@ -110,6 +110,15 @@ Meissa is public: never name or cite a private repository. `ref-gate` enforces t
 
 The Go `ref-gate` rejects the JavaScript-supported `v` regular-expression flag.
 
+## Design-ledger tools
+
+The Go binaries `design-ledger-gate`, `dl-claim`, `dl-list`, and `dl-reconcile` replace the removed npm packages. Each prints usage with `--help`.
+
+- `design-ledger-gate --config <path>` reads the JSON gate config. `GATE_ROOT` overrides the Git root. GitHub PR metadata or Woodpecker pull-request variables provide changed files, body, and branch; without PR context, PR-only checks are skipped. Exit 0 means no violations, 1 means violations, and 2 means usage, config, or read error.
+- `dl-claim --config <path> --ref <RIG-n|none> --lane <branch> [--count 1..10] [--surface <s>]` claims decision IDs. Count defaults to 1; `--surface` is required for multiple configured surfaces. Use the PR head branch as the lane; a fork uses `<owner>:<branch>`. `--rebind --from <lane> --lane <lane> --ids DL-a,DL-b` moves claims; `--release --lane <lane> --ids DL-a,DL-b` frees them. Credentials use `DL_CLAIM_TOKEN` or a non-empty `DL_CLAIM_TOKEN_FILE`, which takes precedence. The counter URL comes from config. A failed claim may have consumed IDs, so do not rerun it blindly. Exit 0 means success, 1 means request or service failure, and 2 means usage, config, or read error.
+- `dl-list [--config PATH] [--surface S] [--area A] [--status active|superseded|retired] [--grep TEXT] [--glob GLOB]` lists decisions. Config defaults to `design-ledger.config.json`; the default glob is `designsRoot/*/decisions/*/DL-*.md` at depth 1, or `designsRoot/decisions/*/DL-*.md` at depth 0. `--glob` overrides it, filters combine, and `--grep` searches the output case-insensitively. Exit 1 means malformed files or no matches; exit 2 means usage, config, or read error.
+- `dl-reconcile --config <path> [--check] [--stale-exit]` reports landed decisions to the counter. `--check` validates files without contacting the counter; `--stale-exit` exits 1 when stale claims remain. Credentials use `DL_CLAIM_TOKEN` or a non-empty `DL_CLAIM_TOKEN_FILE`, which takes precedence. `GATE_ROOT` overrides the Git root and the counter URL comes from config. Exit 1 means request or service failure, or stale claims with `--stale-exit`; exit 2 means usage, config, or read error.
+
 ## Releases
 
 Release Please opens one release pull request covering every changed package. When it merges, the release workflow publishes each released package to npm with provenance through trusted publishing. A new package needs one manual first publish before its trusted publisher can be attached.
