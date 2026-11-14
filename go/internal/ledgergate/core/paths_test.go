@@ -44,6 +44,7 @@ func TestClassifyDesignPath(t *testing.T) {
 		"docs/designs/server/DECISIONS.md":   PathLegacyLedger,
 		"docs/designs/ui/DL-009.md":          PathMisplaced,
 		"docs/designs/ui/record/design.md":   PathOther,
+		"docs/archive/platform/decisions/ui/DL-900.md": PathOther,
 	}
 	for file, want := range cases {
 		if got := ClassifyDesignPath(file, testConfig); got != want {
@@ -175,14 +176,105 @@ func TestN1DecisionLocation(t *testing.T) {
 			Location{Surface: "", Area: "", Sub: ""},
 		},
 		{"non-decision file", "docs/designs/ui/record/design.md", false, Location{Surface: "", Area: "", Sub: ""}},
-		{
-			"archive root path", "docs/archive/ui/decisions/ui/record/DL-900.md", false,
-			Location{Surface: "", Area: "", Sub: ""},
-		},
+		{"archive root path", "docs/archive/ui/decisions/ui/record/DL-900.md", true, Location{Surface: "", Area: "ui", Sub: "record"}},
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
 			got, ok := DecisionLocation(test.file, cfg)
+			if ok != test.wantOK {
+				t.Fatalf("DecisionLocation(%q) ok = %v, want %v", test.file, ok, test.wantOK)
+			}
+			if ok && got != test.wantLoc {
+				t.Fatalf("DecisionLocation(%q) = %+v, want %+v", test.file, got, test.wantLoc)
+			}
+		})
+	}
+}
+
+func TestDecisionLocationArchiveLayouts(t *testing.T) {
+	depthZeroArchive := testConfig
+	depthZeroArchive.ArchiveRoots = []string{"docs/archive"}
+	depthOneArchive := depthOneConfig
+	depthOneArchive.ArchiveRoots = []string{"docs/archive"}
+	noArchiveRoots := testConfig
+	noArchiveRoots.ArchiveRoots = []string{}
+
+	cases := []struct {
+		name    string
+		file    string
+		cfg     Config
+		wantLoc Location
+		wantOK  bool
+	}{
+		{
+			name:    "depth zero flat archive decision",
+			file:    "docs/archive/platform/records/decisions/ui/DL-900.md",
+			cfg:     depthZeroArchive,
+			wantLoc: Location{Surface: "", Area: "ui", Sub: ""},
+			wantOK:  true,
+		},
+		{
+			name:    "depth zero archived sub-area",
+			file:    "docs/archive/platform/records/decisions/ui/record/DL-901.md",
+			cfg:     depthZeroArchive,
+			wantLoc: Location{Surface: "", Area: "ui", Sub: "record"},
+			wantOK:  true,
+		},
+		{
+			name:    "depth one flat archive decision",
+			file:    "docs/archive/platform/decisions/ui/DL-902.md",
+			cfg:     depthOneArchive,
+			wantLoc: Location{Surface: "platform", Area: "ui", Sub: ""},
+			wantOK:  true,
+		},
+		{
+			name:    "depth one archived sub-area after preserved prefix",
+			file:    "docs/archive/platform/records/decisions/ui/record/DL-903.md",
+			cfg:     depthOneArchive,
+			wantLoc: Location{Surface: "platform", Area: "ui", Sub: "record"},
+			wantOK:  true,
+		},
+		{
+			name:   "path outside archive root boundary",
+			file:   "docs/archive-old/decisions/ui/DL-904.md",
+			cfg:    depthZeroArchive,
+			wantOK: false,
+		},
+		{
+			name:   "archive roots empty",
+			file:   "docs/archive/decisions/ui/DL-905.md",
+			cfg:    noArchiveRoots,
+			wantOK: false,
+		},
+		{
+			name:   "too deep under archive decisions",
+			file:   "docs/archive/decisions/ui/record/deep/DL-906.md",
+			cfg:    depthZeroArchive,
+			wantOK: false,
+		},
+		{
+			name:   "non-decision archive basename",
+			file:   "docs/archive/decisions/ui/record/notes.md",
+			cfg:    depthZeroArchive,
+			wantOK: false,
+		},
+		{
+			name:   "bad archived sub-area slug",
+			file:   "docs/archive/decisions/ui/BadSlug/DL-907.md",
+			cfg:    depthZeroArchive,
+			wantOK: false,
+		},
+		{
+			name:    "live decision remains located",
+			file:    "docs/designs/decisions/ui/DL-908.md",
+			cfg:     depthZeroArchive,
+			wantLoc: Location{Surface: "", Area: "ui", Sub: ""},
+			wantOK:  true,
+		},
+	}
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			got, ok := DecisionLocation(test.file, test.cfg)
 			if ok != test.wantOK {
 				t.Fatalf("DecisionLocation(%q) ok = %v, want %v", test.file, ok, test.wantOK)
 			}
@@ -353,7 +445,7 @@ func TestArchivedSupersessionFailsWhenArchiveRootsSet(t *testing.T) {
 	corpus := corpusOf(decisionOptions{id: "DL-001", status: "Superseded by DL-900 (Matt, 2026-07-22)"})
 	corpus.Archived = []ledger.DecisionRow{row}
 	got := evaluateCorpus(corpus, nil, noChange, nil, cfg, mo.None[PullRequestDetails]())
-	want := "DL-001: live decision cannot be superseded by or amend an archived decision (docs/archive/ui/decisions/ui/record/DL-900.md)"
+	want := "DL-001: live decision cannot be superseded by an archived decision (docs/archive/ui/decisions/ui/record/DL-900.md)"
 	if !hasMessage(got, want) {
 		t.Fatalf("violations = %+v, want %q", got, want)
 	}
@@ -362,7 +454,7 @@ func TestArchivedSupersessionFailsWhenArchiveRootsSet(t *testing.T) {
 func TestArchivedSupersessionPassesWithoutArchiveRoots(t *testing.T) {
 	corpus := corpusOf(decisionOptions{id: "DL-001", status: "Superseded by DL-900 (Matt, 2026-07-22)"})
 	got := evalDefault(corpus, nil)
-	if hasMessage(got, "cannot be superseded by or amend an archived decision") {
+	if hasMessage(got, "cannot be superseded by an archived decision") {
 		t.Fatalf("archived message fired with archiveRoots empty: %+v", got)
 	}
 	if !hasMessage(got, "DL-001: Superseded by DL-900, which is not a decision file") {

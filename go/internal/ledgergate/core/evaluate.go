@@ -213,7 +213,7 @@ func (e *evaluator) checkRowSupersession(row ledger.DecisionRow, byID map[string
 	}
 	if archived, found := e.archivedRow(targetID); found {
 		e.add(row.Path, keyLineStatus,
-			fmt.Sprintf("%s: live decision cannot be superseded by or amend an archived decision (%s)", row.ID, archived.Path))
+			fmt.Sprintf("%s: live decision cannot be superseded by an archived decision (%s)", row.ID, archived.Path))
 		return
 	}
 	if _, known := byID[targetID]; !known {
