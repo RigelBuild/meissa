@@ -30,7 +30,8 @@ func Main(ctx context.Context, _ []string, env func(string) string, stdout, stde
 		return reportFailure(stderr, err)
 	}
 	deps := osDeps{root: root, stdout: stdout, stderr: stderr}
-	if err := publishReleased(ctx, paths, deps); err != nil {
+	err = publishReleased(ctx, paths, deps)
+	if err != nil {
 		return reportFailure(stderr, err)
 	}
 	return 0
@@ -53,7 +54,8 @@ type osDeps struct {
 
 func (d osDeps) Read(path string) (packageManifest, error) {
 	var manifest packageManifest
-	if err := readPackageJSON(d.root, path, &manifest); err != nil {
+	err := readPackageJSON(d.root, path, &manifest)
+	if err != nil {
 		return packageManifest{}, err
 	}
 	return manifest, nil
@@ -76,24 +78,34 @@ func (osDeps) Status(ctx context.Context, url string) (_ int, err error) {
 
 // Publish runs npm publish with provenance in the package directory.
 func (d osDeps) Publish(ctx context.Context, path string) error {
-	cmd := exec.CommandContext(ctx, "npm", "publish", "--provenance", "--access", "public") //nolint:gosec // G204: fixed npm argv; only the directory varies.
+	cmd := exec.CommandContext(
+		ctx,
+		"npm",
+		"publish",
+		"--provenance",
+		"--access",
+		"public",
+	) //nolint:gosec // G204: fixed npm argv; only the directory varies.
 	cmd.Dir = filepath.Join(d.root, path)
 	cmd.Stdout = d.stdout
 	cmd.Stderr = d.stderr
-	if err := cmd.Run(); err != nil {
+	err := cmd.Run()
+	if err != nil {
 		return fmt.Errorf("npm publish: %w", err)
 	}
 	return nil
 }
 
 func (d osDeps) Log(line string) {
-	if _, err := fmt.Fprintln(d.stdout, line); err != nil {
+_, err := fmt.Fprintln(d.stdout, line)
+	if err != nil {
 		slog.Default().Error("write publish log", "err", err)
 	}
 }
 
 func reportFailure(stderr io.Writer, err error) int {
-	if _, writeErr := fmt.Fprintf(stderr, "npm-publish: %v\n", err); writeErr != nil {
+_, writeErr := fmt.Fprintf(stderr, "npm-publish: %v\n", err)
+	if writeErr != nil {
 		slog.Default().Error("write failure report", "err", writeErr)
 	}
 	return 1
