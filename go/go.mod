@@ -6,7 +6,7 @@ require (
 	cuelang.org/go v0.17.1
 	github.com/bmatcuk/doublestar/v4 v4.10.4
 	github.com/dlclark/regexp2/v2 v2.12.0
-	github.com/odvcencio/gotreesitter v0.56.0
+	github.com/odvcencio/gotreesitter v0.57.0
 	github.com/pelletier/go-toml/v2 v2.3.1
 	github.com/samber/mo v1.12.0
 	github.com/titanous/json5 v1.0.0
