@@ -97,14 +97,14 @@ func (d osDeps) Publish(ctx context.Context, path string) error {
 }
 
 func (d osDeps) Log(line string) {
-_, err := fmt.Fprintln(d.stdout, line)
+	_, err := fmt.Fprintln(d.stdout, line)
 	if err != nil {
 		slog.Default().Error("write publish log", "err", err)
 	}
 }
 
 func reportFailure(stderr io.Writer, err error) int {
-_, writeErr := fmt.Fprintf(stderr, "npm-publish: %v\n", err)
+	_, writeErr := fmt.Fprintf(stderr, "npm-publish: %v\n", err)
 	if writeErr != nil {
 		slog.Default().Error("write failure report", "err", writeErr)
 	}

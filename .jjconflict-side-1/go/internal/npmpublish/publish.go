@@ -20,7 +20,7 @@ const registryBase = "https://registry.npmjs.org"
 // registryTimeout bounds each registry status check, so a stalled registry cannot hold the release job.
 const registryTimeout = 30 * time.Second
 
-var errBadPaths = errors.New("bad paths_released")
+var errUnexpectedRegistryStatus = errors.New("unexpected registry status")
 
 // packageManifest holds the package.json fields the publish flow reads.
 type packageManifest struct {
@@ -40,7 +40,8 @@ type publishDeps interface {
 // An empty list or a non-string item is an error.
 func parsePaths(raw string) ([]string, error) {
 	var parsed []any
-	if err := json.Unmarshal([]byte(raw), &parsed); err != nil {
+	err := json.Unmarshal([]byte(raw), &parsed)
+	if err != nil {
 		return nil, fmt.Errorf("%w: %w", errBadPaths, err)
 	}
 	if len(parsed) == 0 {
@@ -70,7 +71,7 @@ func isPublished(ctx context.Context, m packageManifest, d publishDeps) (bool, e
 	case http.StatusNotFound:
 		return false, nil
 	default:
-		return false, fmt.Errorf("%s: registry returned %d", url, status)
+		return false, fmt.Errorf("%s: registry returned %d: %w", url, status, errUnexpectedRegistryStatus)
 	}
 }
 
@@ -91,7 +92,8 @@ func publishAll(ctx context.Context, paths []string, d publishDeps) error {
 			d.Log("skip " + id + ": already on npm")
 			continue
 		}
-		if err := d.Publish(ctx, path); err != nil {
+		err = d.Publish(ctx, path)
+		if err != nil {
 			return fmt.Errorf("publish %s: %w", path, err)
 		}
 		d.Log("published " + id)
@@ -129,7 +131,8 @@ func allPackages(root string) ([]string, error) {
 		var manifest struct {
 			Private bool `json:"private"`
 		}
-		if err := readPackageJSON(root, path, &manifest); err != nil {
+		err := readPackageJSON(root, path, &manifest)
+		if err != nil {
 			return nil, err
 		}
 		if !manifest.Private {
@@ -146,7 +149,8 @@ func readPackageJSON(root, path string, v any) error {
 	if err != nil {
 		return fmt.Errorf("read %s: %w", file, err)
 	}
-	if err := json.Unmarshal(data, v); err != nil {
+	err = json.Unmarshal(data, v)
+	if err != nil {
 		return fmt.Errorf("parse %s: %w", file, err)
 	}
 	return nil

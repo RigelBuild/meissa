@@ -10,7 +10,11 @@ import (
 
 func TestMainRun(t *testing.T) {
 	privateOnly := t.TempDir()
-	write(t, filepath.Join(privateOnly, "packages", "internal", "package.json"), `{"name":"@rigelbuild/internal","private":true}`)
+	write(
+		t,
+		filepath.Join(privateOnly, "packages", "internal", "package.json"),
+		`{"name":"@rigelbuild/internal","private":true}`,
+	)
 	cwdPrivateOnly := t.TempDir()
 	write(t, filepath.Join(cwdPrivateOnly, "packages", "x", "package.json"), `{"name":"@rigelbuild/x","private":true}`)
 
@@ -24,26 +28,34 @@ func TestMainRun(t *testing.T) {
 	}{
 		{
 			name:       "publish all skips when every package is private",
+			cwd:        "",
 			env:        map[string]string{"GITHUB_WORKSPACE": privateOnly, "PUBLISH_ALL": "true"},
 			wantCode:   0,
 			wantStdout: "skip: no npm package released\n",
+			wantStderr: "",
 		},
 		{
 			name:       "publish all fails without a packages directory",
+			cwd:        "",
 			env:        map[string]string{"GITHUB_WORKSPACE": t.TempDir(), "PUBLISH_ALL": "true"},
 			wantCode:   1,
+			wantStdout: "",
 			wantStderr: "npm-publish: list packages: ",
 		},
 		{
 			name:       "release without a package skips without touching the registry",
+			cwd:        "",
 			env:        map[string]string{"GITHUB_WORKSPACE": t.TempDir(), "PATHS_RELEASED": `["go","docs"]`},
 			wantCode:   0,
 			wantStdout: "skip: no npm package released\n",
+			wantStderr: "",
 		},
 		{
 			name:       "malformed paths_released fails",
+			cwd:        "",
 			env:        map[string]string{"GITHUB_WORKSPACE": t.TempDir(), "PATHS_RELEASED": "[]"},
 			wantCode:   1,
+			wantStdout: "",
 			wantStderr: "npm-publish: bad paths_released\n",
 		},
 		{
@@ -52,6 +64,7 @@ func TestMainRun(t *testing.T) {
 			env:        map[string]string{"PUBLISH_ALL": "true"},
 			wantCode:   0,
 			wantStdout: "skip: no npm package released\n",
+			wantStderr: "",
 		},
 	}
 	for _, tt := range tests {
