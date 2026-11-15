@@ -1,0 +1,16 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/jsx.ts",
+  "corpus": "go/commentscan/testdata/corpus/tsx/type-arguments.tsx",
+  "scan": {
+    "residues": [
+      "",
+      "",
+      "const element = <Element<T>>hi</Element>;",
+      "const selfClosing = <Element<T> />;",
+      "const fragment = <>fragment</>;",
+      ""
+    ],
+    "ambiguous": false
+  }
+}

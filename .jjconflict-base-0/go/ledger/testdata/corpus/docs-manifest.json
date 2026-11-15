@@ -1,0 +1,1974 @@
+{
+  "revision": "b3549997fcaab879d39b9dd98d633747183fe00c",
+  "docsRevision": "fc2d4ac1004e132b9458682af29becdca452f7a7",
+  "files": [
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-015.md",
+      "corpus": "docs/000/DL-015.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-016.md",
+      "corpus": "docs/001/DL-016.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-017.md",
+      "corpus": "docs/002/DL-017.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-018.md",
+      "corpus": "docs/003/DL-018.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-025.md",
+      "corpus": "docs/004/DL-025.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-026.md",
+      "corpus": "docs/005/DL-026.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-027.md",
+      "corpus": "docs/006/DL-027.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-028.md",
+      "corpus": "docs/007/DL-028.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-029.md",
+      "corpus": "docs/008/DL-029.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-037.md",
+      "corpus": "docs/009/DL-037.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-043.md",
+      "corpus": "docs/010/DL-043.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-063.md",
+      "corpus": "docs/011/DL-063.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-064.md",
+      "corpus": "docs/012/DL-064.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-065.md",
+      "corpus": "docs/013/DL-065.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-066.md",
+      "corpus": "docs/014/DL-066.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-075.md",
+      "corpus": "docs/015/DL-075.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-076.md",
+      "corpus": "docs/016/DL-076.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-077.md",
+      "corpus": "docs/017/DL-077.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-078.md",
+      "corpus": "docs/018/DL-078.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-079.md",
+      "corpus": "docs/019/DL-079.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-080.md",
+      "corpus": "docs/020/DL-080.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-081.md",
+      "corpus": "docs/021/DL-081.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-082.md",
+      "corpus": "docs/022/DL-082.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-083.md",
+      "corpus": "docs/023/DL-083.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-084.md",
+      "corpus": "docs/024/DL-084.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-085.md",
+      "corpus": "docs/025/DL-085.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-086.md",
+      "corpus": "docs/026/DL-086.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-087.md",
+      "corpus": "docs/027/DL-087.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-088.md",
+      "corpus": "docs/028/DL-088.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-089.md",
+      "corpus": "docs/029/DL-089.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-090.md",
+      "corpus": "docs/030/DL-090.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-093.md",
+      "corpus": "docs/031/DL-093.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-095.md",
+      "corpus": "docs/032/DL-095.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-123.md",
+      "corpus": "docs/033/DL-123.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-124.md",
+      "corpus": "docs/034/DL-124.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-125.md",
+      "corpus": "docs/035/DL-125.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-126.md",
+      "corpus": "docs/036/DL-126.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-129.md",
+      "corpus": "docs/037/DL-129.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-130.md",
+      "corpus": "docs/038/DL-130.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-131.md",
+      "corpus": "docs/039/DL-131.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-132.md",
+      "corpus": "docs/040/DL-132.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-133.md",
+      "corpus": "docs/041/DL-133.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-134.md",
+      "corpus": "docs/042/DL-134.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-135.md",
+      "corpus": "docs/043/DL-135.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-136.md",
+      "corpus": "docs/044/DL-136.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-137.md",
+      "corpus": "docs/045/DL-137.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-138.md",
+      "corpus": "docs/046/DL-138.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-139.md",
+      "corpus": "docs/047/DL-139.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-140.md",
+      "corpus": "docs/048/DL-140.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-141.md",
+      "corpus": "docs/049/DL-141.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-142.md",
+      "corpus": "docs/050/DL-142.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-143.md",
+      "corpus": "docs/051/DL-143.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-144.md",
+      "corpus": "docs/052/DL-144.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-145.md",
+      "corpus": "docs/053/DL-145.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-146.md",
+      "corpus": "docs/054/DL-146.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-147.md",
+      "corpus": "docs/055/DL-147.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-164.md",
+      "corpus": "docs/056/DL-164.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-165.md",
+      "corpus": "docs/057/DL-165.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-166.md",
+      "corpus": "docs/058/DL-166.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-167.md",
+      "corpus": "docs/059/DL-167.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-168.md",
+      "corpus": "docs/060/DL-168.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-169.md",
+      "corpus": "docs/061/DL-169.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-170.md",
+      "corpus": "docs/062/DL-170.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-171.md",
+      "corpus": "docs/063/DL-171.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-185.md",
+      "corpus": "docs/064/DL-185.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-187.md",
+      "corpus": "docs/065/DL-187.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-188.md",
+      "corpus": "docs/066/DL-188.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-189.md",
+      "corpus": "docs/067/DL-189.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-190.md",
+      "corpus": "docs/068/DL-190.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-191.md",
+      "corpus": "docs/069/DL-191.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-192.md",
+      "corpus": "docs/070/DL-192.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-211.md",
+      "corpus": "docs/071/DL-211.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-212.md",
+      "corpus": "docs/072/DL-212.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-213.md",
+      "corpus": "docs/073/DL-213.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-241.md",
+      "corpus": "docs/074/DL-241.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-253.md",
+      "corpus": "docs/075/DL-253.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-283.md",
+      "corpus": "docs/076/DL-283.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-284.md",
+      "corpus": "docs/077/DL-284.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-285.md",
+      "corpus": "docs/078/DL-285.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-286.md",
+      "corpus": "docs/079/DL-286.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-287.md",
+      "corpus": "docs/080/DL-287.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-288.md",
+      "corpus": "docs/081/DL-288.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-289.md",
+      "corpus": "docs/082/DL-289.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-290.md",
+      "corpus": "docs/083/DL-290.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-291.md",
+      "corpus": "docs/084/DL-291.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-292.md",
+      "corpus": "docs/085/DL-292.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-293.md",
+      "corpus": "docs/086/DL-293.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-294.md",
+      "corpus": "docs/087/DL-294.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-295.md",
+      "corpus": "docs/088/DL-295.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-296.md",
+      "corpus": "docs/089/DL-296.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-297.md",
+      "corpus": "docs/090/DL-297.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-310.md",
+      "corpus": "docs/091/DL-310.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-318.md",
+      "corpus": "docs/092/DL-318.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-322.md",
+      "corpus": "docs/093/DL-322.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-323.md",
+      "corpus": "docs/094/DL-323.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-357.md",
+      "corpus": "docs/095/DL-357.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-372.md",
+      "corpus": "docs/096/DL-372.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-383.md",
+      "corpus": "docs/097/DL-383.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-384.md",
+      "corpus": "docs/098/DL-384.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-398.md",
+      "corpus": "docs/099/DL-398.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-400.md",
+      "corpus": "docs/100/DL-400.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-401.md",
+      "corpus": "docs/101/DL-401.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-402.md",
+      "corpus": "docs/102/DL-402.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-403.md",
+      "corpus": "docs/103/DL-403.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-404.md",
+      "corpus": "docs/104/DL-404.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-405.md",
+      "corpus": "docs/105/DL-405.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-417.md",
+      "corpus": "docs/106/DL-417.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-426.md",
+      "corpus": "docs/107/DL-426.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-427.md",
+      "corpus": "docs/108/DL-427.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-428.md",
+      "corpus": "docs/109/DL-428.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-429.md",
+      "corpus": "docs/110/DL-429.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-448.md",
+      "corpus": "docs/111/DL-448.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-449.md",
+      "corpus": "docs/112/DL-449.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-450.md",
+      "corpus": "docs/113/DL-450.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-451.md",
+      "corpus": "docs/114/DL-451.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-452.md",
+      "corpus": "docs/115/DL-452.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-453.md",
+      "corpus": "docs/116/DL-453.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-454.md",
+      "corpus": "docs/117/DL-454.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-455.md",
+      "corpus": "docs/118/DL-455.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-456.md",
+      "corpus": "docs/119/DL-456.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-457.md",
+      "corpus": "docs/120/DL-457.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-467.md",
+      "corpus": "docs/121/DL-467.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-468.md",
+      "corpus": "docs/122/DL-468.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-469.md",
+      "corpus": "docs/123/DL-469.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-491.md",
+      "corpus": "docs/124/DL-491.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-495.md",
+      "corpus": "docs/125/DL-495.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-496.md",
+      "corpus": "docs/126/DL-496.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-497.md",
+      "corpus": "docs/127/DL-497.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-498.md",
+      "corpus": "docs/128/DL-498.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-499.md",
+      "corpus": "docs/129/DL-499.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-500.md",
+      "corpus": "docs/130/DL-500.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-501.md",
+      "corpus": "docs/131/DL-501.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-502.md",
+      "corpus": "docs/132/DL-502.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-503.md",
+      "corpus": "docs/133/DL-503.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-504.md",
+      "corpus": "docs/134/DL-504.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-505.md",
+      "corpus": "docs/135/DL-505.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-506.md",
+      "corpus": "docs/136/DL-506.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-511.md",
+      "corpus": "docs/137/DL-511.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-512.md",
+      "corpus": "docs/138/DL-512.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-524.md",
+      "corpus": "docs/139/DL-524.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-529.md",
+      "corpus": "docs/140/DL-529.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-535.md",
+      "corpus": "docs/141/DL-535.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-536.md",
+      "corpus": "docs/142/DL-536.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-537.md",
+      "corpus": "docs/143/DL-537.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-538.md",
+      "corpus": "docs/144/DL-538.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-558.md",
+      "corpus": "docs/145/DL-558.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-559.md",
+      "corpus": "docs/146/DL-559.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/agent/DL-561.md",
+      "corpus": "docs/147/DL-561.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-257.md",
+      "corpus": "docs/148/DL-257.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-258.md",
+      "corpus": "docs/149/DL-258.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-259.md",
+      "corpus": "docs/150/DL-259.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-260.md",
+      "corpus": "docs/151/DL-260.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-261.md",
+      "corpus": "docs/152/DL-261.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-262.md",
+      "corpus": "docs/153/DL-262.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-263.md",
+      "corpus": "docs/154/DL-263.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-277.md",
+      "corpus": "docs/155/DL-277.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-278.md",
+      "corpus": "docs/156/DL-278.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-279.md",
+      "corpus": "docs/157/DL-279.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-280.md",
+      "corpus": "docs/158/DL-280.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-298.md",
+      "corpus": "docs/159/DL-298.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-299.md",
+      "corpus": "docs/160/DL-299.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-300.md",
+      "corpus": "docs/161/DL-300.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-301.md",
+      "corpus": "docs/162/DL-301.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-311.md",
+      "corpus": "docs/163/DL-311.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-312.md",
+      "corpus": "docs/164/DL-312.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-313.md",
+      "corpus": "docs/165/DL-313.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-314.md",
+      "corpus": "docs/166/DL-314.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-315.md",
+      "corpus": "docs/167/DL-315.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-316.md",
+      "corpus": "docs/168/DL-316.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-317.md",
+      "corpus": "docs/169/DL-317.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-325.md",
+      "corpus": "docs/170/DL-325.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-326.md",
+      "corpus": "docs/171/DL-326.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-331.md",
+      "corpus": "docs/172/DL-331.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-332.md",
+      "corpus": "docs/173/DL-332.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-333.md",
+      "corpus": "docs/174/DL-333.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-334.md",
+      "corpus": "docs/175/DL-334.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-335.md",
+      "corpus": "docs/176/DL-335.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-336.md",
+      "corpus": "docs/177/DL-336.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-337.md",
+      "corpus": "docs/178/DL-337.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-366.md",
+      "corpus": "docs/179/DL-366.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-368.md",
+      "corpus": "docs/180/DL-368.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-369.md",
+      "corpus": "docs/181/DL-369.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-378.md",
+      "corpus": "docs/182/DL-378.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-379.md",
+      "corpus": "docs/183/DL-379.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-380.md",
+      "corpus": "docs/184/DL-380.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-381.md",
+      "corpus": "docs/185/DL-381.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-382.md",
+      "corpus": "docs/186/DL-382.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-385.md",
+      "corpus": "docs/187/DL-385.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-386.md",
+      "corpus": "docs/188/DL-386.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-387.md",
+      "corpus": "docs/189/DL-387.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-445.md",
+      "corpus": "docs/190/DL-445.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/infra/DL-492.md",
+      "corpus": "docs/191/DL-492.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-001.md",
+      "corpus": "docs/192/DL-001.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-002.md",
+      "corpus": "docs/193/DL-002.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-003.md",
+      "corpus": "docs/194/DL-003.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-004.md",
+      "corpus": "docs/195/DL-004.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-005.md",
+      "corpus": "docs/196/DL-005.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-006.md",
+      "corpus": "docs/197/DL-006.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-007.md",
+      "corpus": "docs/198/DL-007.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-008.md",
+      "corpus": "docs/199/DL-008.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-009.md",
+      "corpus": "docs/200/DL-009.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-010.md",
+      "corpus": "docs/201/DL-010.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-011.md",
+      "corpus": "docs/202/DL-011.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-012.md",
+      "corpus": "docs/203/DL-012.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-013.md",
+      "corpus": "docs/204/DL-013.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-014.md",
+      "corpus": "docs/205/DL-014.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-019.md",
+      "corpus": "docs/206/DL-019.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-020.md",
+      "corpus": "docs/207/DL-020.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-021.md",
+      "corpus": "docs/208/DL-021.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-022.md",
+      "corpus": "docs/209/DL-022.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-023.md",
+      "corpus": "docs/210/DL-023.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-024.md",
+      "corpus": "docs/211/DL-024.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-030.md",
+      "corpus": "docs/212/DL-030.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-031.md",
+      "corpus": "docs/213/DL-031.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-038.md",
+      "corpus": "docs/214/DL-038.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-039.md",
+      "corpus": "docs/215/DL-039.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-040.md",
+      "corpus": "docs/216/DL-040.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-042.md",
+      "corpus": "docs/217/DL-042.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-047.md",
+      "corpus": "docs/218/DL-047.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-174.md",
+      "corpus": "docs/219/DL-174.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-175.md",
+      "corpus": "docs/220/DL-175.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-176.md",
+      "corpus": "docs/221/DL-176.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-177.md",
+      "corpus": "docs/222/DL-177.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-178.md",
+      "corpus": "docs/223/DL-178.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-179.md",
+      "corpus": "docs/224/DL-179.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-180.md",
+      "corpus": "docs/225/DL-180.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-181.md",
+      "corpus": "docs/226/DL-181.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-227.md",
+      "corpus": "docs/227/DL-227.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-228.md",
+      "corpus": "docs/228/DL-228.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-229.md",
+      "corpus": "docs/229/DL-229.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/meta/DL-239.md",
+      "corpus": "docs/230/DL-239.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/observability/DL-303.md",
+      "corpus": "docs/231/DL-303.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/observability/DL-515.md",
+      "corpus": "docs/232/DL-515.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/platform/DL-329.md",
+      "corpus": "docs/233/DL-329.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/platform/DL-330.md",
+      "corpus": "docs/234/DL-330.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/platform/DL-338.md",
+      "corpus": "docs/235/DL-338.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/platform/DL-358.md",
+      "corpus": "docs/236/DL-358.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/platform/DL-440.md",
+      "corpus": "docs/237/DL-440.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/repo/DL-413.md",
+      "corpus": "docs/238/DL-413.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/repo/DL-414.md",
+      "corpus": "docs/239/DL-414.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/repo/DL-415.md",
+      "corpus": "docs/240/DL-415.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/repo/DL-439.md",
+      "corpus": "docs/241/DL-439.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/repo/DL-446.md",
+      "corpus": "docs/242/DL-446.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/repo/DL-447.md",
+      "corpus": "docs/243/DL-447.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-048.md",
+      "corpus": "docs/244/DL-048.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-049.md",
+      "corpus": "docs/245/DL-049.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-050.md",
+      "corpus": "docs/246/DL-050.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-051.md",
+      "corpus": "docs/247/DL-051.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-052.md",
+      "corpus": "docs/248/DL-052.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-053.md",
+      "corpus": "docs/249/DL-053.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-054.md",
+      "corpus": "docs/250/DL-054.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-055.md",
+      "corpus": "docs/251/DL-055.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-067.md",
+      "corpus": "docs/252/DL-067.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-068.md",
+      "corpus": "docs/253/DL-068.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-069.md",
+      "corpus": "docs/254/DL-069.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-070.md",
+      "corpus": "docs/255/DL-070.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-071.md",
+      "corpus": "docs/256/DL-071.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-072.md",
+      "corpus": "docs/257/DL-072.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-073.md",
+      "corpus": "docs/258/DL-073.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-074.md",
+      "corpus": "docs/259/DL-074.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-091.md",
+      "corpus": "docs/260/DL-091.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-092.md",
+      "corpus": "docs/261/DL-092.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-094.md",
+      "corpus": "docs/262/DL-094.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-098.md",
+      "corpus": "docs/263/DL-098.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-099.md",
+      "corpus": "docs/264/DL-099.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-161.md",
+      "corpus": "docs/265/DL-161.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-162.md",
+      "corpus": "docs/266/DL-162.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-163.md",
+      "corpus": "docs/267/DL-163.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-182.md",
+      "corpus": "docs/268/DL-182.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-186.md",
+      "corpus": "docs/269/DL-186.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-200.md",
+      "corpus": "docs/270/DL-200.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-201.md",
+      "corpus": "docs/271/DL-201.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-202.md",
+      "corpus": "docs/272/DL-202.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-203.md",
+      "corpus": "docs/273/DL-203.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-204.md",
+      "corpus": "docs/274/DL-204.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-205.md",
+      "corpus": "docs/275/DL-205.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-206.md",
+      "corpus": "docs/276/DL-206.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-210.md",
+      "corpus": "docs/277/DL-210.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-226.md",
+      "corpus": "docs/278/DL-226.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-240.md",
+      "corpus": "docs/279/DL-240.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-254.md",
+      "corpus": "docs/280/DL-254.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-255.md",
+      "corpus": "docs/281/DL-255.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-256.md",
+      "corpus": "docs/282/DL-256.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-264.md",
+      "corpus": "docs/283/DL-264.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-265.md",
+      "corpus": "docs/284/DL-265.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-266.md",
+      "corpus": "docs/285/DL-266.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-267.md",
+      "corpus": "docs/286/DL-267.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-268.md",
+      "corpus": "docs/287/DL-268.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-269.md",
+      "corpus": "docs/288/DL-269.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-270.md",
+      "corpus": "docs/289/DL-270.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-271.md",
+      "corpus": "docs/290/DL-271.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-276.md",
+      "corpus": "docs/291/DL-276.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-281.md",
+      "corpus": "docs/292/DL-281.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-302.md",
+      "corpus": "docs/293/DL-302.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-304.md",
+      "corpus": "docs/294/DL-304.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-305.md",
+      "corpus": "docs/295/DL-305.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-306.md",
+      "corpus": "docs/296/DL-306.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-307.md",
+      "corpus": "docs/297/DL-307.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-308.md",
+      "corpus": "docs/298/DL-308.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-309.md",
+      "corpus": "docs/299/DL-309.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-324.md",
+      "corpus": "docs/300/DL-324.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-327.md",
+      "corpus": "docs/301/DL-327.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-328.md",
+      "corpus": "docs/302/DL-328.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-340.md",
+      "corpus": "docs/303/DL-340.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-342.md",
+      "corpus": "docs/304/DL-342.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-343.md",
+      "corpus": "docs/305/DL-343.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-347.md",
+      "corpus": "docs/306/DL-347.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-350.md",
+      "corpus": "docs/307/DL-350.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-351.md",
+      "corpus": "docs/308/DL-351.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-352.md",
+      "corpus": "docs/309/DL-352.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-353.md",
+      "corpus": "docs/310/DL-353.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-354.md",
+      "corpus": "docs/311/DL-354.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-355.md",
+      "corpus": "docs/312/DL-355.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-356.md",
+      "corpus": "docs/313/DL-356.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-360.md",
+      "corpus": "docs/314/DL-360.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-361.md",
+      "corpus": "docs/315/DL-361.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-362.md",
+      "corpus": "docs/316/DL-362.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-363.md",
+      "corpus": "docs/317/DL-363.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-364.md",
+      "corpus": "docs/318/DL-364.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-365.md",
+      "corpus": "docs/319/DL-365.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-370.md",
+      "corpus": "docs/320/DL-370.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-371.md",
+      "corpus": "docs/321/DL-371.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-375.md",
+      "corpus": "docs/322/DL-375.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-376.md",
+      "corpus": "docs/323/DL-376.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-377.md",
+      "corpus": "docs/324/DL-377.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-392.md",
+      "corpus": "docs/325/DL-392.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-393.md",
+      "corpus": "docs/326/DL-393.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-394.md",
+      "corpus": "docs/327/DL-394.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-395.md",
+      "corpus": "docs/328/DL-395.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-396.md",
+      "corpus": "docs/329/DL-396.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-408.md",
+      "corpus": "docs/330/DL-408.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-410.md",
+      "corpus": "docs/331/DL-410.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-411.md",
+      "corpus": "docs/332/DL-411.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-412.md",
+      "corpus": "docs/333/DL-412.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-441.md",
+      "corpus": "docs/334/DL-441.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-442.md",
+      "corpus": "docs/335/DL-442.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-443.md",
+      "corpus": "docs/336/DL-443.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-444.md",
+      "corpus": "docs/337/DL-444.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-458.md",
+      "corpus": "docs/338/DL-458.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-466.md",
+      "corpus": "docs/339/DL-466.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-477.md",
+      "corpus": "docs/340/DL-477.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-513.md",
+      "corpus": "docs/341/DL-513.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-516.md",
+      "corpus": "docs/342/DL-516.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-517.md",
+      "corpus": "docs/343/DL-517.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-518.md",
+      "corpus": "docs/344/DL-518.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-526.md",
+      "corpus": "docs/345/DL-526.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-527.md",
+      "corpus": "docs/346/DL-527.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-528.md",
+      "corpus": "docs/347/DL-528.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-539.md",
+      "corpus": "docs/348/DL-539.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-540.md",
+      "corpus": "docs/349/DL-540.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-541.md",
+      "corpus": "docs/350/DL-541.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-542.md",
+      "corpus": "docs/351/DL-542.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-543.md",
+      "corpus": "docs/352/DL-543.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-544.md",
+      "corpus": "docs/353/DL-544.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-545.md",
+      "corpus": "docs/354/DL-545.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-546.md",
+      "corpus": "docs/355/DL-546.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-547.md",
+      "corpus": "docs/356/DL-547.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-560.md",
+      "corpus": "docs/357/DL-560.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-562.md",
+      "corpus": "docs/358/DL-562.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-563.md",
+      "corpus": "docs/359/DL-563.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-564.md",
+      "corpus": "docs/360/DL-564.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-577.md",
+      "corpus": "docs/361/DL-577.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/server/DL-582.md",
+      "corpus": "docs/362/DL-582.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-032.md",
+      "corpus": "docs/363/DL-032.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-033.md",
+      "corpus": "docs/364/DL-033.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-034.md",
+      "corpus": "docs/365/DL-034.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-035.md",
+      "corpus": "docs/366/DL-035.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-036.md",
+      "corpus": "docs/367/DL-036.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-041.md",
+      "corpus": "docs/368/DL-041.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-044.md",
+      "corpus": "docs/369/DL-044.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-096.md",
+      "corpus": "docs/370/DL-096.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-097.md",
+      "corpus": "docs/371/DL-097.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-106.md",
+      "corpus": "docs/372/DL-106.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-107.md",
+      "corpus": "docs/373/DL-107.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-108.md",
+      "corpus": "docs/374/DL-108.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-109.md",
+      "corpus": "docs/375/DL-109.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-110.md",
+      "corpus": "docs/376/DL-110.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-111.md",
+      "corpus": "docs/377/DL-111.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-112.md",
+      "corpus": "docs/378/DL-112.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-113.md",
+      "corpus": "docs/379/DL-113.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-127.md",
+      "corpus": "docs/380/DL-127.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-128.md",
+      "corpus": "docs/381/DL-128.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-148.md",
+      "corpus": "docs/382/DL-148.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-149.md",
+      "corpus": "docs/383/DL-149.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-150.md",
+      "corpus": "docs/384/DL-150.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-151.md",
+      "corpus": "docs/385/DL-151.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-152.md",
+      "corpus": "docs/386/DL-152.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-153.md",
+      "corpus": "docs/387/DL-153.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-154.md",
+      "corpus": "docs/388/DL-154.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-155.md",
+      "corpus": "docs/389/DL-155.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-156.md",
+      "corpus": "docs/390/DL-156.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-157.md",
+      "corpus": "docs/391/DL-157.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-158.md",
+      "corpus": "docs/392/DL-158.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-159.md",
+      "corpus": "docs/393/DL-159.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-160.md",
+      "corpus": "docs/394/DL-160.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-183.md",
+      "corpus": "docs/395/DL-183.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-184.md",
+      "corpus": "docs/396/DL-184.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-193.md",
+      "corpus": "docs/397/DL-193.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-194.md",
+      "corpus": "docs/398/DL-194.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-195.md",
+      "corpus": "docs/399/DL-195.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-196.md",
+      "corpus": "docs/400/DL-196.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-197.md",
+      "corpus": "docs/401/DL-197.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-198.md",
+      "corpus": "docs/402/DL-198.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-199.md",
+      "corpus": "docs/403/DL-199.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-207.md",
+      "corpus": "docs/404/DL-207.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-208.md",
+      "corpus": "docs/405/DL-208.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-209.md",
+      "corpus": "docs/406/DL-209.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-214.md",
+      "corpus": "docs/407/DL-214.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-215.md",
+      "corpus": "docs/408/DL-215.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-216.md",
+      "corpus": "docs/409/DL-216.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-217.md",
+      "corpus": "docs/410/DL-217.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-218.md",
+      "corpus": "docs/411/DL-218.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-219.md",
+      "corpus": "docs/412/DL-219.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-220.md",
+      "corpus": "docs/413/DL-220.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-221.md",
+      "corpus": "docs/414/DL-221.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-222.md",
+      "corpus": "docs/415/DL-222.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-223.md",
+      "corpus": "docs/416/DL-223.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-224.md",
+      "corpus": "docs/417/DL-224.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-225.md",
+      "corpus": "docs/418/DL-225.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-230.md",
+      "corpus": "docs/419/DL-230.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-231.md",
+      "corpus": "docs/420/DL-231.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-232.md",
+      "corpus": "docs/421/DL-232.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-233.md",
+      "corpus": "docs/422/DL-233.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-234.md",
+      "corpus": "docs/423/DL-234.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-235.md",
+      "corpus": "docs/424/DL-235.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-236.md",
+      "corpus": "docs/425/DL-236.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-237.md",
+      "corpus": "docs/426/DL-237.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-238.md",
+      "corpus": "docs/427/DL-238.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-245.md",
+      "corpus": "docs/428/DL-245.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-246.md",
+      "corpus": "docs/429/DL-246.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-247.md",
+      "corpus": "docs/430/DL-247.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-248.md",
+      "corpus": "docs/431/DL-248.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-249.md",
+      "corpus": "docs/432/DL-249.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-250.md",
+      "corpus": "docs/433/DL-250.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-251.md",
+      "corpus": "docs/434/DL-251.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-252.md",
+      "corpus": "docs/435/DL-252.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-272.md",
+      "corpus": "docs/436/DL-272.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-273.md",
+      "corpus": "docs/437/DL-273.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-274.md",
+      "corpus": "docs/438/DL-274.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-275.md",
+      "corpus": "docs/439/DL-275.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-282.md",
+      "corpus": "docs/440/DL-282.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-319.md",
+      "corpus": "docs/441/DL-319.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-320.md",
+      "corpus": "docs/442/DL-320.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-321.md",
+      "corpus": "docs/443/DL-321.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-341.md",
+      "corpus": "docs/444/DL-341.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-344.md",
+      "corpus": "docs/445/DL-344.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-345.md",
+      "corpus": "docs/446/DL-345.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-346.md",
+      "corpus": "docs/447/DL-346.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-348.md",
+      "corpus": "docs/448/DL-348.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-349.md",
+      "corpus": "docs/449/DL-349.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-367.md",
+      "corpus": "docs/450/DL-367.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-388.md",
+      "corpus": "docs/451/DL-388.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-389.md",
+      "corpus": "docs/452/DL-389.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-390.md",
+      "corpus": "docs/453/DL-390.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-391.md",
+      "corpus": "docs/454/DL-391.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-397.md",
+      "corpus": "docs/455/DL-397.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-399.md",
+      "corpus": "docs/456/DL-399.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-406.md",
+      "corpus": "docs/457/DL-406.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-409.md",
+      "corpus": "docs/458/DL-409.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-416.md",
+      "corpus": "docs/459/DL-416.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-418.md",
+      "corpus": "docs/460/DL-418.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-419.md",
+      "corpus": "docs/461/DL-419.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-420.md",
+      "corpus": "docs/462/DL-420.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-421.md",
+      "corpus": "docs/463/DL-421.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-422.md",
+      "corpus": "docs/464/DL-422.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-423.md",
+      "corpus": "docs/465/DL-423.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-424.md",
+      "corpus": "docs/466/DL-424.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-425.md",
+      "corpus": "docs/467/DL-425.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-430.md",
+      "corpus": "docs/468/DL-430.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-431.md",
+      "corpus": "docs/469/DL-431.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-432.md",
+      "corpus": "docs/470/DL-432.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-433.md",
+      "corpus": "docs/471/DL-433.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-434.md",
+      "corpus": "docs/472/DL-434.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-435.md",
+      "corpus": "docs/473/DL-435.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-436.md",
+      "corpus": "docs/474/DL-436.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-437.md",
+      "corpus": "docs/475/DL-437.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-438.md",
+      "corpus": "docs/476/DL-438.md"
+    },
+    {
+      "path": "docs/designs/compass/decisions/ui/DL-521.md",
+      "corpus": "docs/477/DL-521.md"
+    },
+    {
+      "path": "docs/designs/cotal/decisions/pi/DL-494.md",
+      "corpus": "docs/478/DL-494.md"
+    },
+    {
+      "path": "docs/designs/cotal/decisions/seat/DL-493.md",
+      "corpus": "docs/479/DL-493.md"
+    },
+    {
+      "path": "docs/designs/hermes-agent/decisions/session/DL-648.md",
+      "corpus": "docs/480/DL-648.md"
+    },
+    {
+      "path": "docs/designs/hermes-agent/decisions/session/DL-649.md",
+      "corpus": "docs/481/DL-649.md"
+    },
+    {
+      "path": "docs/designs/meissa/decisions/go/DL-647.md",
+      "corpus": "docs/482/DL-647.md"
+    },
+    {
+      "path": "docs/designs/oh-my-pi/decisions/config/DL-519.md",
+      "corpus": "docs/483/DL-519.md"
+    },
+    {
+      "path": "docs/designs/oh-my-pi/decisions/config/DL-520.md",
+      "corpus": "docs/484/DL-520.md"
+    },
+    {
+      "path": "docs/designs/oh-my-pi/decisions/gateway/DL-522.md",
+      "corpus": "docs/485/DL-522.md"
+    },
+    {
+      "path": "docs/designs/oh-my-pi/decisions/gateway/DL-523.md",
+      "corpus": "docs/486/DL-523.md"
+    },
+    {
+      "path": "docs/designs/woodpecker/decisions/queue/DL-530.md",
+      "corpus": "docs/487/DL-530.md"
+    },
+    {
+      "path": "docs/designs/woodpecker/decisions/queue/DL-531.md",
+      "corpus": "docs/488/DL-531.md"
+    },
+    {
+      "path": "docs/designs/woodpecker/decisions/queue/DL-532.md",
+      "corpus": "docs/489/DL-532.md"
+    },
+    {
+      "path": "docs/designs/woodpecker/decisions/queue/DL-533.md",
+      "corpus": "docs/490/DL-533.md"
+    },
+    {
+      "path": "docs/designs/woodpecker/decisions/queue/DL-534.md",
+      "corpus": "docs/491/DL-534.md"
+    }
+  ]
+}

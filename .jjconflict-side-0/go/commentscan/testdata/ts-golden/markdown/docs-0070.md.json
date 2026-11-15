@@ -1,0 +1,946 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0070.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 Hosted environment provider contract"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Current contract"
+    },
+    {
+      "kind": "code-span",
+      "value": "EnvironmentDriver.describeImage"
+    },
+    {
+      "kind": "code-span",
+      "value": "preflight"
+    },
+    {
+      "kind": "code-span",
+      "value": "reserve"
+    },
+    {
+      "kind": "code-span",
+      "value": "provision"
+    },
+    {
+      "kind": "code-span",
+      "value": "start"
+    },
+    {
+      "kind": "code-span",
+      "value": "adopt"
+    },
+    {
+      "kind": "code-span",
+      "value": "inspect"
+    },
+    {
+      "kind": "code-span",
+      "value": "reconcile"
+    },
+    {
+      "kind": "code-span",
+      "value": "reap"
+    },
+    {
+      "kind": "code-span",
+      "value": "destroy"
+    },
+    {
+      "kind": "code-span",
+      "value": "recoveryEvidence"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/core/src/environment.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "EnvironmentDriver"
+    },
+    {
+      "kind": "code-span",
+      "value": "describeImage(manifest)"
+    },
+    {
+      "kind": "code-span",
+      "value": "implementations/manager/src/environment-operations.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "ManagerEnvironments.plan"
+    },
+    {
+      "kind": "code-span",
+      "value": "ManagerEnvironments.prepareSeat"
+    },
+    {
+      "kind": "code-span",
+      "value": "exportCheckpoint"
+    },
+    {
+      "kind": "code-span",
+      "value": "ManagerEnvironments.operate"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/core/src/connector.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "LaunchSpec"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/core/src/connector.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "LaunchOpts"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/core/src/launch-material.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "validate"
+    },
+    {
+      "kind": "code-span",
+      "value": "implementations/manager/src/manager.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "execBearerPreflight"
+    },
+    {
+      "kind": "code-span",
+      "value": "implementations/manager/src/manager-service-contract.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "ManagerStatus"
+    },
+    {
+      "kind": "code-span",
+      "value": "implementations/manager/src/manager.ts"
+    },
+    {
+      "kind": "code-span",
+      "value": "Manager.managerStatusData"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Contract types"
+    },
+    {
+      "kind": "code-span",
+      "value": "Hosted*"
+    },
+    {
+      "kind": "code-span",
+      "value": "ProviderEnvironmentLaunchRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "ManagedEnvironmentRecord"
+    },
+    {
+      "kind": "code-span",
+      "value": "EnvironmentPlan"
+    },
+    {
+      "kind": "code-span",
+      "value": "EnvironmentLaunchRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "CheckpointOutput"
+    },
+    {
+      "kind": "code-span",
+      "value": "EnvironmentDriver"
+    },
+    {
+      "kind": "code-span",
+      "value": "EnvironmentHandle"
+    },
+    {
+      "kind": "code-span",
+      "value": "packages/core/src/index.ts"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 1. Probe capabilities"
+    },
+    {
+      "kind": "code-span",
+      "value": "HostedEnvironmentPreflight"
+    },
+    {
+      "kind": "code-span",
+      "value": "HostedEnvironmentCapabilities"
+    },
+    {
+      "kind": "code-span",
+      "value": "probedAt"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\ninterface HostedEnvironmentCapabilities {\n  guestBuild: boolean;\n  custody: boolean;\n  sessionHistory: boolean;\n  materialRenewal: boolean;\n  coldCheckpoint: boolean;\n  memoryCheckpoint: boolean;\n  nested: boolean;\n  pauseKeepsMemory: boolean;\n  snapshot: boolean;\n  export: boolean;\n  gpu: boolean;\n  durableSeatHome: boolean;\n  screen: boolean;\n  exec: boolean;\n  extend: false | { stepMs: HostedPositiveStepMs };\n}\n\ninterface HostedEnvironmentPreflight {\n  checks: HostedEnvironmentPreflightCheck[];\n  capabilities: HostedEnvironmentCapabilities;\n  probedAt: number;\n}"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "preflightHosted(plan)"
+    },
+    {
+      "kind": "code-span",
+      "value": "probedAt"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "false"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "pauseKeepsMemory: false"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "durableSeatHome: false"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "screen"
+    },
+    {
+      "kind": "code-span",
+      "value": "exec"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "probedAt"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 2. Image and template references"
+    },
+    {
+      "kind": "code-span",
+      "value": "HostedEnvironmentPlan"
+    },
+    {
+      "kind": "code-span",
+      "value": "HostedEnvironmentImageReference"
+    },
+    {
+      "kind": "code-span",
+      "value": "HostedEnvironmentDriverExtension.describeHostedImage"
+    },
+    {
+      "kind": "code-span",
+      "value": "HostedEnvironmentImageDescription"
+    },
+    {
+      "kind": "code-span",
+      "value": "describeImage(manifest)"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\ntype HostedEnvironmentImageReference =\n  | { kind: \"oci\"; manifest: HostedEnvironmentFileReference }\n  | { kind: \"template\"; ref: HostedEnvironmentRecordText };"
+    },
+    {
+      "kind": "code-span",
+      "value": "providerOptions"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "ref"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "describeHostedImage"
+    },
+    {
+      "kind": "code-span",
+      "value": "{ kind, ref, digest? }"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "bundleSha256"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "{ kind, ref, digest? }"
+    },
+    {
+      "kind": "code-span",
+      "value": "digest"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 3. Network mode and lifetime"
+    },
+    {
+      "kind": "code-span",
+      "value": "HostedEnvironmentPlan"
+    },
+    {
+      "kind": "code-span",
+      "value": "extendHosted"
+    },
+    {
+      "kind": "code-span",
+      "value": "extend: false"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\ninterface HostedEnvironmentPlan {\n  // existing fields\n  network: string | null;\n}\n\ninterface HostedEnvironmentDriverExtension {\n  extendHosted(\n    ref: HostedEnvironmentReference,\n    op: HostedOperationContext,\n  ): Promise<HostedEnvironmentLifetime>;\n}\n\ninterface HostedEnvironmentLifetime {\n  expiresAt: number | null;\n  observedAt: number;\n}"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "network"
+    },
+    {
+      "kind": "code-span",
+      "value": "null"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "extendHosted"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "extend"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "extend: { stepMs }"
+    },
+    {
+      "kind": "code-span",
+      "value": "HostedPositiveStepMs"
+    },
+    {
+      "kind": "code-span",
+      "value": "validateHostedPositiveStepMs"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "extendHosted"
+    },
+    {
+      "kind": "code-span",
+      "value": "expiresAt: null"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 4. Checkpoint export without a host volume"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\ntype HostedCheckpointOutput =\n  | { kind: \"host-path\"; path: string; maxBytes: number }\n  | { kind: \"provider-file\"; maxBytes: number };\n\ntype HostedCheckpointExport =\n  | { kind: \"host-path\"; file: HostedEnvironmentFileReference }\n  | { kind: \"provider-file\"; file: HostedEnvironmentProviderFileReference };\n\ninterface HostedEnvironmentProviderFileReference {\n  environment: HostedEnvironmentReference;\n  id: string;\n  byteLength: number;\n  sha256: string;\n}"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "exportHostedCheckpoint"
+    },
+    {
+      "kind": "code-span",
+      "value": "HostedCheckpointExport"
+    },
+    {
+      "kind": "code-span",
+      "value": "exportCheckpoint"
+    },
+    {
+      "kind": "code-span",
+      "value": "{ path, maxBytes }"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "host-path"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "provider-file"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "readHostedProviderFile"
+    },
+    {
+      "kind": "code-span",
+      "value": "HostedEnvironmentHandleExtension"
+    },
+    {
+      "kind": "code-span",
+      "value": "HostedOperationContext"
+    },
+    {
+      "kind": "code-span",
+      "value": "maxBytes"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 5. Bearer source"
+    },
+    {
+      "kind": "code-span",
+      "value": "HostedEnvironmentBearerSource"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\ntype HostedEnvironmentBearerSource =\n  | { kind: \"socket\"; path: string }\n  | { kind: \"https\"; url: HostedAuthorityHttpsUrl };\n\ninterface HostedEnvironmentLaunchAuthentication {\n  bearerSource: HostedEnvironmentBearerSource;\n}\n\ninterface HostedEnvironmentLaunchRequest<Intent>\n  extends ProviderEnvironmentLaunchRequest<Intent> {\n  // every closed base field comes from ProviderEnvironmentLaunchRequest\n  authentication: HostedEnvironmentLaunchAuthentication;\n}"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "socket"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "validateHostedAuthorityHttpsUrl"
+    },
+    {
+      "kind": "code-span",
+      "value": "HostedAuthorityHttpsUrl"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "authentication.bearerSource"
+    },
+    {
+      "kind": "code-span",
+      "value": "credential"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 6. Credentials"
+    },
+    {
+      "kind": "code-span",
+      "value": "ProviderEnvironmentLaunchRequest"
+    },
+    {
+      "kind": "code-span",
+      "value": "credential"
+    },
+    {
+      "kind": "code-span",
+      "value": "prepareLaunch"
+    },
+    {
+      "kind": "code-span",
+      "value": "authentication.bearerSource"
+    },
+    {
+      "kind": "code-span",
+      "value": "ManagerEnvironments.prepareSeat"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "purpose: \"agent-credential\""
+    },
+    {
+      "kind": "code-span",
+      "value": "lifetime: \"launch\""
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "replaceMaterial"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 7. Environment record"
+    },
+    {
+      "kind": "code-span",
+      "value": "environment"
+    },
+    {
+      "kind": "code-span",
+      "value": "ManagedEnvironmentRecord.id"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\ninterface ManagedEnvironmentRecord {\n  version: \"cotal-manager-environment-record/v1\";\n  id: HostedEnvironmentRecordText;\n  provider: HostedEnvironmentRecordText;\n  providerRef: HostedEnvironmentRecordText;\n  space: HostedEnvironmentRecordText;\n  host?: HostedEnvironmentRecordText;\n  arch?: HostedEnvironmentRecordText;\n  engine?: HostedEnvironmentRecordText;\n  volumeId?: HostedEnvironmentRecordText;\n  image: HostedEnvironmentRecordImage;\n  owner: HostedEnvironmentRecordText;\n  createdAt: number;\n  state: \"creating\" | \"running\" | \"stopped\" | \"failed\";\n  stoppedAt?: number;\n  expiresAt?: number;\n  network?: HostedEnvironmentRecordText;\n  capabilities: HostedEnvironmentCapabilities;\n  probedAt?: number;\n}"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "id"
+    },
+    {
+      "kind": "code-span",
+      "value": "reserveHosted(id)"
+    },
+    {
+      "kind": "code-span",
+      "value": "HostedEnvironmentReference"
+    },
+    {
+      "kind": "code-span",
+      "value": "id"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "presence.environment === record.id"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "hostedFacts(ref, op)"
+    },
+    {
+      "kind": "code-span",
+      "value": "providerRef"
+    },
+    {
+      "kind": "code-span",
+      "value": "volumeId"
+    },
+    {
+      "kind": "code-span",
+      "value": "network"
+    },
+    {
+      "kind": "code-span",
+      "value": "engine"
+    },
+    {
+      "kind": "code-span",
+      "value": "volumeId"
+    },
+    {
+      "kind": "code-span",
+      "value": "describeHostedImage"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "id"
+    },
+    {
+      "kind": "code-span",
+      "value": "provider"
+    },
+    {
+      "kind": "code-span",
+      "value": "space"
+    },
+    {
+      "kind": "code-span",
+      "value": "host"
+    },
+    {
+      "kind": "code-span",
+      "value": "owner"
+    },
+    {
+      "kind": "code-span",
+      "value": "createdAt"
+    },
+    {
+      "kind": "code-span",
+      "value": "probedAt"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "stoppedAt"
+    },
+    {
+      "kind": "code-span",
+      "value": "expiresAt"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "host"
+    },
+    {
+      "kind": "code-span",
+      "value": "arch"
+    },
+    {
+      "kind": "code-span",
+      "value": "engine"
+    },
+    {
+      "kind": "code-span",
+      "value": "volumeId"
+    },
+    {
+      "kind": "code-span",
+      "value": "arch"
+    },
+    {
+      "kind": "code-span",
+      "value": "engine"
+    },
+    {
+      "kind": "code-span",
+      "value": "host"
+    },
+    {
+      "kind": "code-span",
+      "value": "hostedFacts"
+    },
+    {
+      "kind": "code-span",
+      "value": "volumeId"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "createdAt"
+    },
+    {
+      "kind": "code-span",
+      "value": "stoppedAt"
+    },
+    {
+      "kind": "code-span",
+      "value": "expiresAt"
+    },
+    {
+      "kind": "code-span",
+      "value": "probedAt"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "providerRef"
+    },
+    {
+      "kind": "code-span",
+      "value": "id"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "HostedEnvironmentRecordText"
+    },
+    {
+      "kind": "code-span",
+      "value": "validateHostedEnvironmentRecordText"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 8. Host enrollment facts"
+    },
+    {
+      "kind": "code-span",
+      "value": "environment-host-facts"
+    },
+    {
+      "kind": "code-span",
+      "value": "MANAGER_READ_COMMANDS"
+    },
+    {
+      "kind": "code-span",
+      "value": "manager.read"
+    },
+    {
+      "kind": "code-span",
+      "value": "EnvironmentHostFacts"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[ts]\ninterface EnvironmentHostFacts {\n  version: \"cotal-environment-host-facts/v1\";\n  instanceId: string;\n  host: string;\n  arch: string;\n  os: { platform: string; release: string };\n  engines: { name: string; version?: string }[];\n  kvm: { present: boolean; usable: boolean };\n  headroom: {\n    cpus: number;\n    memoryMiB: number;\n    diskGiB: number;\n    environmentSlots: number;\n  };\n  observedAt: number;\n}"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "host"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "arch"
+    },
+    {
+      "kind": "code-span",
+      "value": "os"
+    },
+    {
+      "kind": "code-span",
+      "value": "engines"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "kvm.present"
+    },
+    {
+      "kind": "code-span",
+      "value": "kvm.usable"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "headroom"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "observedAt"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "supervise"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Lifecycle and security rules"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "HostedOperationContext"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

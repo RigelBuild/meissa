@@ -1,0 +1,13 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/jsx.ts",
+  "corpus": "go/commentscan/testdata/corpus/jsx/broken-tree-error-ts-clean.tsx",
+  "scan": {
+    "residues": [
+      "type recovered = import('./m', { with: { 'resolution-mode': 'import' } }).X;",
+      "const diagnosed = <T>(x: T) => x;",
+      ""
+    ],
+    "ambiguous": true
+  }
+}

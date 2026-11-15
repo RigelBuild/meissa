@@ -1,0 +1,94 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/meissa-0018.md",
+  "fingerprint": [
+    {
+      "kind": "heading",
+      "value": "H1 @rigelbuild/ref-gate"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Configuration"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[json]\n{\n  \"prefilter\": { \"ere\": \"acme\", \"ignoreCase\": true },\n  \"patterns\": [{ \"source\": \"\\\\bacme\\\\b\", \"flags\": \"i\" }],\n  \"ignore\": [\"acme-gate\"],\n  \"carveOutPaths\": [\"generated/manifest.json\"],\n  \"carveOutPrefixes\": [\"generated/docs/\"],\n  \"allowlist\": { \"fixtures/example.txt\": \"Synthetic fixture\" },\n  \"remediationDoc\": \"docs/reference-policy.md\"\n}"
+    },
+    {
+      "kind": "code-span",
+      "value": "prefilter.ere"
+    },
+    {
+      "kind": "code-span",
+      "value": "git grep"
+    },
+    {
+      "kind": "code-span",
+      "value": "patterns"
+    },
+    {
+      "kind": "code-span",
+      "value": "remediationDoc"
+    },
+    {
+      "kind": "code-span",
+      "value": ".gitattributes"
+    },
+    {
+      "kind": "code-span",
+      "value": "carveOutPaths"
+    },
+    {
+      "kind": "code-span",
+      "value": "carveOutPrefixes"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 CLI"
+    },
+    {
+      "kind": "fenced-code",
+      "value": "`3[sh]\nref-gate --config ./ref-gate.json"
+    },
+    {
+      "kind": "code-span",
+      "value": "GATE_ROOT"
+    },
+    {
+      "kind": "heading",
+      "value": "H2 Exit codes"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "0"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "1"
+    },
+    {
+      "kind": "code-span",
+      "value": "<file>:<line>: <text>"
+    },
+    {
+      "kind": "block-marker",
+      "value": "list:-"
+    },
+    {
+      "kind": "code-span",
+      "value": "2"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

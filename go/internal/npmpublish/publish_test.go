@@ -5,15 +5,12 @@ package npmpublish
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
 )
-
-var errFakePublish = errors.New("npm publish failed")
 
 // fakeDeps records publishes and log lines. Statuses maps a registry URL to an HTTP status.
 type fakeDeps struct {
@@ -23,8 +20,8 @@ type fakeDeps struct {
 	publishFn func(path string) error
 }
 
-func (f *fakeDeps) Read(path string) (packageManifest, error) {
-	return packageManifest{Name: "@rigelbuild/" + strings.Split(path, "/")[1], Version: "1.0.0"}, nil
+func (f *fakeDeps) Read(path string) (Manifest, error) {
+	return Manifest{Name: "@rigelbuild/" + strings.Split(path, "/")[1], Version: "1.0.0"}, nil
 }
 
 func (f *fakeDeps) Status(_ context.Context, url string) (int, error) {
@@ -50,20 +47,19 @@ func url(pkg string) string {
 
 func TestParsePaths(t *testing.T) {
 	t.Run("accepts a non-empty string array", func(t *testing.T) {
-		got, err := parsePaths(`["packages/a","packages/b"]`)
+		got, err := ParsePaths(`["packages/a","packages/b"]`)
 		if err != nil {
-			t.Fatalf("parsePaths error = %v", err)
+			t.Fatalf("ParsePaths error = %v", err)
 		}
 		if !reflect.DeepEqual(got, []string{"packages/a", "packages/b"}) {
-			t.Fatalf("parsePaths = %v", got)
+			t.Fatalf("ParsePaths = %v", got)
 		}
 	})
 
 	for _, raw := range []string{"", "[]", `"packages/a"`, "[1]"} {
 		t.Run("rejects "+raw, func(t *testing.T) {
-			_, err := parsePaths(raw)
-			if err == nil {
-				t.Fatalf("parsePaths(%q) returned no error", raw)
+			if _, err := ParsePaths(raw); err == nil {
+				t.Fatalf("ParsePaths(%q) returned no error", raw)
 			}
 		})
 	}
@@ -93,20 +89,19 @@ func TestAllPackages(t *testing.T) {
 
 func TestIsPublished(t *testing.T) {
 	t.Run("fails on a registry error instead of publishing", func(t *testing.T) {
-		d := &fakeDeps{statuses: map[string]int{url("a"): 503}, published: []string{}, lines: []string{}, publishFn: nil}
-		_, err := isPublished(t.Context(), packageManifest{Name: "@rigelbuild/a", Version: "1.0.0"}, d)
+		d := &fakeDeps{statuses: map[string]int{url("a"): 503}}
+		_, err := IsPublished(t.Context(), Manifest{Name: "@rigelbuild/a", Version: "1.0.0"}, d)
 		if err == nil || !strings.Contains(err.Error(), "registry returned 503") {
-			t.Fatalf("isPublished error = %v, want registry returned 503", err)
+			t.Fatalf("IsPublished error = %v, want registry returned 503", err)
 		}
 	})
 }
 
 func TestPublishAll(t *testing.T) {
 	t.Run("re-run skips versions already on npm and publishes the rest", func(t *testing.T) {
-		d := &fakeDeps{statuses: map[string]int{url("gate"): 200}, published: []string{}, lines: []string{}, publishFn: nil}
-		err := publishAll(t.Context(), []string{"packages/gate", "packages/list"}, d)
-		if err != nil {
-			t.Fatalf("publishAll error = %v", err)
+		d := &fakeDeps{statuses: map[string]int{url("gate"): 200}}
+		if err := PublishAll(t.Context(), []string{"packages/gate", "packages/list"}, d); err != nil {
+			t.Fatalf("PublishAll error = %v", err)
 		}
 		if !reflect.DeepEqual(d.published, []string{"packages/list"}) {
 			t.Fatalf("published = %v", d.published)
@@ -119,22 +114,22 @@ func TestPublishAll(t *testing.T) {
 			t.Fatalf("lines = %v, want %v", d.lines, want)
 		}
 	})
+
 	t.Run("stops at the first failed publish", func(t *testing.T) {
-		d := &fakeDeps{statuses: map[string]int{}, published: []string{}, lines: []string{}, publishFn: func(path string) error {
-			return fmt.Errorf("%w: %s", errFakePublish, path)
+		d := &fakeDeps{publishFn: func(path string) error {
+			return errors.New("npm publish failed in " + path)
 		}}
-		err := publishAll(t.Context(), []string{"packages/a", "packages/b"}, d)
-		if !errors.Is(err, errFakePublish) || !strings.Contains(err.Error(), "packages/a") {
-			t.Fatalf("publishAll error = %v, want fake publish error for packages/a", err)
+		err := PublishAll(t.Context(), []string{"packages/a", "packages/b"}, d)
+		if err == nil || !strings.Contains(err.Error(), "packages/a") {
+			t.Fatalf("PublishAll error = %v, want packages/a", err)
 		}
 	})
 }
 
 func TestPublishReleased(t *testing.T) {
 	t.Run("publishes only package paths from a mixed release", func(t *testing.T) {
-		d := &fakeDeps{statuses: map[string]int{}, published: []string{}, lines: []string{}, publishFn: nil}
-		err := publishReleased(t.Context(), []string{"go", "packages/length-gate", "docs"}, d)
-		if err != nil {
+		d := &fakeDeps{}
+		if err := publishReleased(t.Context(), []string{"go", "packages/length-gate", "docs"}, d); err != nil {
 			t.Fatalf("publishReleased error = %v", err)
 		}
 		if !reflect.DeepEqual(d.published, []string{"packages/length-gate"}) {
@@ -143,9 +138,8 @@ func TestPublishReleased(t *testing.T) {
 	})
 
 	t.Run("skips when no npm package was released", func(t *testing.T) {
-		d := &fakeDeps{statuses: map[string]int{}, published: []string{}, lines: []string{}, publishFn: nil}
-		err := publishReleased(t.Context(), []string{"go"}, d)
-		if err != nil {
+		d := &fakeDeps{}
+		if err := publishReleased(t.Context(), []string{"go"}, d); err != nil {
 			t.Fatalf("publishReleased error = %v", err)
 		}
 		if len(d.published) != 0 {
@@ -159,12 +153,10 @@ func TestPublishReleased(t *testing.T) {
 
 func write(t *testing.T, path, text string) {
 	t.Helper()
-	err := os.MkdirAll(filepath.Dir(path), 0o755)
-	if err != nil {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		t.Fatalf("mkdir %s: %v", path, err)
 	}
-	err = os.WriteFile(path, []byte(text), 0o600)
-	if err != nil {
+	if err := os.WriteFile(path, []byte(text), 0o600); err != nil {
 		t.Fatalf("write %s: %v", path, err)
 	}
 }

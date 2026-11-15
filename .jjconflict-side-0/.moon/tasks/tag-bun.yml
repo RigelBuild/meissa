@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/tasks.json
+inheritedBy:
+  tag: 'bun'
+
+tasks:
+  install:
+    command: 'noop'
+    deps: ['root:install']
+    options:
+      internal: true
+
+  typecheck:
+    command: 'bun run tsc --noEmit -p .'
+    deps: ['install']
+
+  test:
+    command: 'bun test'
+    deps: ['install']
+
+  ci:
+    deps: ['typecheck', 'test']
+    options:
+      cache: false

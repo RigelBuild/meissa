@@ -1,0 +1,14 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/markdown.ts",
+  "corpus": "go/commentscan/testdata/corpus/markdown/docs-0018.md",
+  "fingerprint": [
+    {
+      "kind": "front-matter",
+      "value": "id: DL-499\ndecision: \"Settings are whole-file: the winning `settings/config.yml` is the agent's only settings file, loaded by the unchanged `buildFleetSettings`.\"\nstatus: \"Active (Matt, 2026-10-13)\"\nrecord: ../../agent-config-overlays.md#decisions"
+    }
+  ],
+  "comparison": {
+    "kind": "same"
+  }
+}

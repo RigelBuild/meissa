@@ -1,0 +1,17 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/astro.ts",
+  "corpus": "go/commentscan/testdata/corpus/astro/markup-comments.astro",
+  "scan": {
+    "residues": [
+      "<ul>",
+      "  {items.map((item) => (",
+      "",
+      "    <a href={item.url}>x//y</a>",
+      "  ))}",
+      "</ul>",
+      ""
+    ],
+    "ambiguous": false
+  }
+}

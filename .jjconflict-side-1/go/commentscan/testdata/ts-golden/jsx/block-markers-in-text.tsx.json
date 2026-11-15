@@ -1,0 +1,12 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/jsx.ts",
+  "corpus": "go/commentscan/testdata/corpus/jsx/block-markers-in-text.tsx",
+  "scan": {
+    "residues": [
+      "const E = (y) => <a>{y}/* not */ text</a>;",
+      ""
+    ],
+    "ambiguous": false
+  }
+}

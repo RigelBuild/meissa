@@ -1,0 +1,11 @@
+{
+  "revision": "8abcad28deacbf200d5ff420222e0db23590cf86",
+  "path": "packages/comment-scan/jsx.ts",
+  "corpus": "go/commentscan/testdata/corpus/jsx/finding4-escape-9.tsx",
+  "scan": {
+    "residues": [
+      "'\\9'"
+    ],
+    "ambiguous": true
+  }
+}
