@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-//nolint:exhaustruct_v5,lll // Keep TS-derived cases direct and readable.
+//nolint:exhaustruct_v5,lll // Keep TS-derived fixture cases direct and readable.
 package main
 
 import (
@@ -108,6 +108,33 @@ func TestListDesignFilesWalksFilesystem(t *testing.T) {
 	}
 }
 
+func TestListDesignFilesIncludesConfiguredArchiveRoots(t *testing.T) {
+	root := t.TempDir()
+	for _, file := range []string{
+		"docs/designs/ui/record/design.md",
+		"docs/archive/ui/decisions/ui/DL-900.md",
+	} {
+		full := filepath.Join(root, filepath.FromSlash(file))
+		err := os.MkdirAll(filepath.Dir(full), 0o750)
+		if err != nil {
+			t.Fatal(err)
+		}
+		err = os.WriteFile(full, []byte("# Record\n"), 0o600)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	deps := &gitDeps{root: root, cfg: core.Config{DesignsRoot: "docs/designs", ArchiveRoots: []string{"docs/archive"}}}
+	got, err := deps.ListDesignFiles(context.Background())
+	if err != nil {
+		t.Fatalf("ListDesignFiles: %v", err)
+	}
+	want := []string{"docs/archive/ui/decisions/ui/DL-900.md", "docs/designs/ui/record/design.md"}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("ListDesignFiles = %v, want %v", got, want)
+	}
+}
+
 func TestReadTextTreatsNonRegularPathsAsMissing(t *testing.T) {
 	root := t.TempDir()
 	directory := filepath.Join(root, "docs", "designs", "record-dir")
@@ -166,6 +193,106 @@ Choose the stable option.
 	}, &stdout, &stderr)
 	if code != 1 || !strings.Contains(stderr.String(), "Status supersession does not resolve to a record: archive/") {
 		t.Fatalf("exit = %d, want supersession violation; stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+	}
+}
+
+func TestMainTitleScopeUsesWoodpeckerChangedFiles(t *testing.T) {
+	root := t.TempDir()
+	decisionPath := "docs/designs/decisions/ui/record/DL-001.md"
+	recordPath := "docs/designs/ui/record/design.md"
+	decision := "---\nid: DL-001\ndecision: \"Choose the stable option.\"\n" +
+		"status: \"Active (Reviewer, 2026-01-01)\"\nrecord: ../../../ui/record/design.md\n---\n# Decision\n"
+	for file, contents := range map[string]string{
+		decisionPath: decision,
+		recordPath:   "# Record\n",
+		"README.md":  "# Readme\n",
+	} {
+		full := filepath.Join(root, filepath.FromSlash(file))
+		err := os.MkdirAll(filepath.Dir(full), 0o755)
+		if err != nil {
+			t.Fatal(err)
+		}
+		err = os.WriteFile(full, []byte(contents), 0o600)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	configPath := filepath.Join(root, "ledger.json")
+	config := `{"designsRoot":"docs/designs","surfaceDepth":0,"governedRoots":["ui"],"titleScope":"changed","counter":{"url":"https://counter.example.test","partition":"public-docs"}}`
+	err := os.WriteFile(configPath, []byte(config), 0o600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, test := range []struct {
+		name           string
+		changedFiles   string
+		wantTitleError bool
+	}{
+		{name: "decision listed", changedFiles: `["docs/designs/decisions/ui/record/DL-001.md"]`, wantTitleError: true},
+		{name: "only nondecision file listed", changedFiles: `["README.md"]`, wantTitleError: false},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			var stdout, stderr strings.Builder
+			code := Main(context.Background(), []string{"--config", configPath}, func(key string) string {
+				switch key {
+				case "GATE_ROOT":
+					return root
+				case "CI_PIPELINE_EVENT":
+					return "pull_request"
+				case "CI_PIPELINE_FILES":
+					return test.changedFiles
+				default:
+					return ""
+				}
+			}, &stdout, &stderr)
+			hasTitleError := strings.Contains(stderr.String(), "decision needs a title (titleScope changed)")
+			if hasTitleError != test.wantTitleError {
+				t.Fatalf("title violation = %v, want %v; exit=%d stdout=%q stderr=%q", hasTitleError, test.wantTitleError, code, stdout.String(), stderr.String())
+			}
+			if test.wantTitleError && code != 1 {
+				t.Fatalf("exit = %d, want 1; stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+			}
+			if !test.wantTitleError && code != 0 {
+				t.Fatalf("exit = %d, want 0; stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+			}
+		})
+	}
+}
+
+func TestMainReportsMalformedArchivedDecision(t *testing.T) {
+	root := t.TempDir()
+	files := map[string]string{
+		"docs/designs/ui/record/design.md": "# Record\n",
+		"docs/designs/decisions/ui/DL-001.md": "---\nid: DL-001\ndecision: \"Choose the stable option.\"\n" +
+			"status: \"Active (Reviewer, 2026-01-01)\"\nrecord: ../../ui/record/design.md\n---\n# Decision\n",
+		"docs/archive/decisions/ui/DL-900.md": "---\nid: DL-900\ninvalid: malformed\n---\n# Archived\n",
+	}
+	for file, contents := range files {
+		full := filepath.Join(root, filepath.FromSlash(file))
+		err := os.MkdirAll(filepath.Dir(full), 0o755)
+		if err != nil {
+			t.Fatal(err)
+		}
+		err = os.WriteFile(full, []byte(contents), 0o600)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	configPath := filepath.Join(root, "ledger.json")
+	config := `{"designsRoot":"docs/designs","surfaceDepth":0,"governedRoots":["ui"],"archiveRoots":["docs/archive"],"counter":{"url":"https://counter.example.test","partition":"public-docs"}}`
+	err := os.WriteFile(configPath, []byte(config), 0o600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var stdout, stderr strings.Builder
+	code := Main(context.Background(), []string{"--config", configPath}, func(key string) string {
+		if key == "GATE_ROOT" {
+			return root
+		}
+		return ""
+	}, &stdout, &stderr)
+	if code != 1 || !strings.Contains(stderr.String(), "docs/archive/decisions/ui/DL-900.md:2: malformed archived decision file:") {
+		t.Fatalf("exit = %d, want archived malformed-decision violation; stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 	}
 }
 

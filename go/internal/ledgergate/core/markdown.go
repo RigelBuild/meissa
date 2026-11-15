@@ -23,8 +23,11 @@ type File struct {
 }
 
 // DecisionCorpus holds the parsed decision files and the stray design files.
+// Archived holds decisions under archiveRoots. Live checks never see them;
+// they are only the targets a live decision's supersession may not name.
 type DecisionCorpus struct {
 	Rows      []ledger.DecisionRow
+	Archived  []ledger.DecisionRow
 	Malformed []ledger.MalformedDecision
 	Strays    []StrayPath
 }
@@ -83,6 +86,7 @@ type Violation struct {
 func BuildDecisionCorpus(files []File, strays []StrayPath) DecisionCorpus {
 	corpus := DecisionCorpus{
 		Rows:      []ledger.DecisionRow{},
+		Archived:  []ledger.DecisionRow{},
 		Malformed: []ledger.MalformedDecision{},
 		Strays:    append([]StrayPath{}, strays...),
 	}

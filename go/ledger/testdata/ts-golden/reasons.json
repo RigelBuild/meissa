@@ -66,19 +66,19 @@
       "name": "a duplicate key",
       "path": "docs/designs/decisions/meta/DL-297.md",
       "line": 2,
-      "reason": "front matter must hold exactly id, decision, status, record"
+      "reason": "front matter must hold id, decision, status, record and optional title"
     },
     {
       "name": "an extra key",
       "path": "docs/designs/decisions/meta/DL-297.md",
       "line": 2,
-      "reason": "front matter must hold exactly id, decision, status, record"
+      "reason": "front matter must hold id, decision, status, record and optional title"
     },
     {
       "name": "a missing key",
       "path": "docs/designs/decisions/meta/DL-297.md",
       "line": 2,
-      "reason": "front matter must hold exactly id, decision, status, record"
+      "reason": "front matter must hold id, decision, status, record and optional title"
     },
     {
       "name": "keys out of order",

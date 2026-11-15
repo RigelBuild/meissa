@@ -27,6 +27,9 @@ var (
 		Legs:                   Legs{Citations: false, Errata: false, RecordLinks: false, MainIDs: false, ClaimCheck: false},
 		Counter:                testCounter,
 		RemediationDoc:         mo.None[string](),
+		RequireSubArea:         false,
+		TitleScope:             "off",
+		ArchiveRoots:           []string{},
 	}
 	depthOneConfig = Config{
 		DesignsRoot:            "docs/designs",
@@ -40,6 +43,9 @@ var (
 		Legs:                   Legs{Citations: false, Errata: false, RecordLinks: false, MainIDs: false, ClaimCheck: false},
 		Counter:                testCounter,
 		RemediationDoc:         mo.None[string](),
+		RequireSubArea:         false,
+		TitleScope:             "off",
+		ArchiveRoots:           []string{},
 	}
 	noChange = Changed{Files: nil, Body: mo.None[string](), HeadBranch: ""}
 )
@@ -397,7 +403,7 @@ func TestDecisionAreaMustMatchRecordPath(t *testing.T) {
 		t.Fatalf("mismatch violations = %+v, want %+v", mismatch, want)
 	}
 	outside := evalDefault(corpusOf(decisionOptionsForRecord("../../../elsewhere/design.md")), nil)
-	if !hasMessage(outside, "decision area must match") {
+	if !hasMessage(outside, "Record path must be under docs/designs or an archive root (docs/elsewhere/design.md)") {
 		t.Fatalf("outside violations = %+v", outside)
 	}
 }
@@ -411,7 +417,7 @@ func TestDecisionCompletenessRequiresAreaDecision(t *testing.T) {
 
 func TestNoDecisionFilesForGovernedRecords(t *testing.T) {
 	records := []RecordHeader{recordOf("docs/designs/ui/record/design.md", "# Title\n")}
-	got := evalDefault(DecisionCorpus{Rows: nil, Malformed: nil, Strays: nil}, records)
+	got := evalDefault(DecisionCorpus{Rows: nil, Archived: nil, Malformed: nil, Strays: nil}, records)
 	if !hasMessage(got, "no valid decision files were found") {
 		t.Fatalf("violations = %+v, want missing decision files", got)
 	}

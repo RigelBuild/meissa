@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -120,4 +121,77 @@ func writeTemp(t *testing.T, body string) string {
 		t.Fatal(err)
 	}
 	return path
+}
+
+func TestLoadConfigDefaultsN1Keys(t *testing.T) {
+	config := `{"designsRoot":"docs/designs","surfaceDepth":1,"counter":{"url":"x","partition":"p"}}`
+	cfg, err := LoadConfig(writeTemp(t, config))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.RequireSubArea || cfg.TitleScope != "off" || len(cfg.ArchiveRoots) != 0 {
+		t.Fatalf("N1 defaults = sub-area %t, title scope %q, archive roots %v", cfg.RequireSubArea, cfg.TitleScope, cfg.ArchiveRoots)
+	}
+}
+
+func TestLoadConfigRoundTripsN1Keys(t *testing.T) {
+	config := `{"designsRoot":"docs/designs","surfaceDepth":1,"requireSubArea":true,"titleScope":"changed","archiveRoots":["docs/archive","docs/old"],"counter":{"url":"x","partition":"p"}}`
+	cfg, err := LoadConfig(writeTemp(t, config))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !cfg.RequireSubArea || cfg.TitleScope != "changed" || !slices.Equal(cfg.ArchiveRoots, []string{"docs/archive", "docs/old"}) {
+		t.Fatalf("N1 config did not round trip: %+v", cfg)
+	}
+}
+
+func TestLoadConfigRejectsInvalidN1Keys(t *testing.T) {
+	cases := map[string]string{
+		"requireSubArea as string":    `"requireSubArea":"yes"`,
+		"titleScope unknown":          `"titleScope":"some"`,
+		"titleScope not a string":     `"titleScope":true`,
+		"archiveRoots dotdot":         `"archiveRoots":["../x"]`,
+		"archiveRoots non-string":     `"archiveRoots":["docs/archive",3]`,
+		"archiveRoots trailing slash": `"archiveRoots":["docs/archive/"]`,
+		"archiveRoots dot prefix":     `"archiveRoots":["./docs/archive"]`,
+	}
+	for name, field := range cases {
+		t.Run(name, func(t *testing.T) {
+			body := `{"designsRoot":"docs/designs","surfaceDepth":1,` + field + `,"counter":{"url":"x","partition":"p"}}`
+			_, err := LoadConfig(writeTemp(t, body))
+			if err == nil {
+				t.Fatalf("LoadConfig accepted %s", name)
+			}
+		})
+	}
+}
+
+func TestLoadConfigRejectsOverlappingArchiveRoots(t *testing.T) {
+	cases := map[string]string{
+		"equals designsRoot":   `"archiveRoots":["docs/designs"]`,
+		"under designsRoot":    `"archiveRoots":["docs/designs/archive"]`,
+		"contains designsRoot": `"archiveRoots":["docs"]`,
+		"nested in another":    `"archiveRoots":["docs/archive","docs/archive/old"]`,
+		"same root twice":      `"archiveRoots":["docs/archive","docs/archive"]`,
+	}
+	for name, field := range cases {
+		t.Run(name, func(t *testing.T) {
+			body := `{"designsRoot":"docs/designs","surfaceDepth":1,` + field + `,"counter":{"url":"x","partition":"p"}}`
+			_, err := LoadConfig(writeTemp(t, body))
+			if err == nil {
+				t.Fatalf("LoadConfig accepted %s", name)
+			}
+		})
+	}
+}
+
+func TestLoadConfigAcceptsArchiveRootsOnPathBoundary(t *testing.T) {
+	config := `{"designsRoot":"docs/designs","surfaceDepth":1,"archiveRoots":["docs/designs-old","docs/archive"],"counter":{"url":"x","partition":"p"}}`
+	cfg, err := LoadConfig(writeTemp(t, config))
+	if err != nil {
+		t.Fatalf("LoadConfig rejected a sibling directory: %v", err)
+	}
+	if !slices.Equal(cfg.ArchiveRoots, []string{"docs/designs-old", "docs/archive"}) {
+		t.Fatalf("ArchiveRoots = %v", cfg.ArchiveRoots)
+	}
 }
