@@ -1,6 +1,0 @@
-{
-	"extends": "@rigelbuild/tsconfig/base.json",
-	"compilerOptions": {
-		"noUncheckedIndexedAccess": true
-	}
-}

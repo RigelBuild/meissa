@@ -1,1 +1,0 @@
-const x = <a href='a&b /* c */' />;
