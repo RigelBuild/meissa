@@ -35,7 +35,8 @@ func newConsumerFixture(t *testing.T) consumerFixture {
 	writeFixtureFile(t, filepath.Join(directory, ".gitignore"), "node_modules/\ngenerated/\n")
 
 	packageDirectory := filepath.Join(directory, "node_modules", "@rigelbuild", "biome-config")
-	if err := os.MkdirAll(packageDirectory, 0o755); err != nil {
+	err := os.MkdirAll(packageDirectory, 0o755)
+	if err != nil {
 		t.Fatal(err)
 	}
 	source := filepath.Join(filepath.Dir(moduleRoot(t)), "packages", "biome-config")
@@ -93,7 +94,8 @@ func isBiomePreset(value map[string]any) bool {
 func parseBiomePreset(t *testing.T, source string) map[string]any {
 	t.Helper()
 	var value map[string]any
-	if err := json.Unmarshal([]byte(source), &value); err != nil {
+	err := json.Unmarshal([]byte(source), &value)
+	if err != nil {
 		t.Fatalf("parse Biome preset: %v", err)
 	}
 	if !isBiomePreset(value) {
@@ -218,7 +220,8 @@ func TestSharedConfigurationPackages(t *testing.T) {
 			"{\n\t\"root\": true,\n\t\"extends\": [\"@rigelbuild/biome-config/biome\"]\n}\n")
 		writeFixtureFile(t, f.fixturePath, "export const ok = true;\n")
 		generated := filepath.Join(f.directory, "generated")
-		if err := os.Mkdir(generated, 0o755); err != nil {
+		err := os.Mkdir(generated, 0o755)
+		if err != nil {
 			t.Fatal(err)
 		}
 		writeFixtureFile(t, filepath.Join(generated, "bad.ts"), "export   const bad   =  1\n")

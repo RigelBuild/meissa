@@ -27,8 +27,9 @@ func runProcess(t *testing.T, dir string, env []string, name string, args ...str
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
-	result := processResult{}
-	if err := cmd.Run(); err != nil {
+	var result processResult
+	err := cmd.Run()
+	if err != nil {
 		var exitErr *exec.ExitError
 		if !errors.As(err, &exitErr) {
 			t.Fatalf("run %s: %v", name, err)
@@ -46,7 +47,8 @@ func runProcess(t *testing.T, dir string, env []string, name string, args ...str
 
 func writeFixtureFile(t *testing.T, path, content string) {
 	t.Helper()
-	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+	err := os.WriteFile(path, []byte(content), 0o600)
+	if err != nil {
 		t.Fatal(err)
 	}
 }
