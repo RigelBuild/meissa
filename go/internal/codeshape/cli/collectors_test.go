@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/RigelBuild/meissa/go/internal/codeshape"
 )
 
 func goTestRepo(t *testing.T, source string) string {
@@ -224,7 +226,7 @@ func TestTSMissingBinary(t *testing.T) {
 func TestTSTruncatedJSON(t *testing.T) {
 	root := tsRepo(t, "function f() {}\n")
 	dir := t.TempDir()
-	script := "#!/bin/sh\nif [ \"$1\" = --version ]; then echo 'Version: 2.5.15'; exit 0; fi\n" +
+	script := "#!/bin/sh\nif [ \"$1\" = --version ]; then echo 'Version: " + codeshape.BiomeVersion + "'; exit 0; fi\n" +
 		"printf '{\"summary\":'\n"
 	err := os.WriteFile(filepath.Join(dir, "biome"), []byte(script), 0755)
 	if err != nil {
