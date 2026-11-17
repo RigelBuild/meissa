@@ -1,2 +1,0 @@
-# Publish policy for the public documentation site.
-exclude = ["**/testdata/**"]
