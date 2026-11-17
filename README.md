@@ -80,17 +80,17 @@ Run `code-shape-gate <repo-root>` to check. It returns 1 for findings and 2 for 
 
 ```json
 {
-  "extensions": [".ts"],
-  "exclude": ["vendor/**"],
-  "docs": [
-    {
-      "name": "spec",
-      "include": ["docs/specs/**/*.md"],
-      "exclude": [],
-      "target": 1500,
-      "markerAllowed": false
-    }
-  ]
+	"extensions": [".ts"],
+	"exclude": ["vendor/**"],
+	"docs": [
+		{
+			"name": "spec",
+			"include": ["docs/specs/**/*.md"],
+			"exclude": [],
+			"target": 1500,
+			"markerAllowed": false
+		}
+	]
 }
 ```
 

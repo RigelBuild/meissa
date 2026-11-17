@@ -2,12 +2,12 @@
 
 projects:
   globs:
-    - 'packages/*/moon.yml'
-    - 'go/moon.yml'
+    - "packages/*/moon.yml"
+    - "go/moon.yml"
   sources:
-    root: '.'
+    root: "."
 
 vcs:
-  client: 'git'
-  provider: 'github'
-  defaultBranch: 'main'
+  client: "git"
+  provider: "github"
+  defaultBranch: "main"
