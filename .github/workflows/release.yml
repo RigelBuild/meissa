@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: main
     permissions: {}
+    env:
+      RELEASE_BRANCH: release-please--branches--main
     outputs:
       releases_created: ${{ steps.release.outputs.releases_created }}
       paths_released: ${{ steps.release.outputs.paths_released }}
@@ -35,6 +37,57 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
           target-branch: main
+
+      - name: Look for an open release PR
+        id: release-pr-branch
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          count="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$RELEASE_BRANCH" --state open --json number --jq 'length')"
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+
+      # release-please rewrites the release branch from main on each run that updates the PR,
+      # so this formatting commit is made again on every run, not kept from an earlier one.
+      - name: Check out the release PR branch
+        if: steps.release-pr-branch.outputs.count != '0'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.RELEASE_BRANCH }}
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+
+      - name: Install Nix
+        if: steps.release-pr-branch.outputs.count != '0'
+        uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      # Only CHANGELOG.md files this release touched. Biome's exit code cannot be the gate:
+      # --no-errors-on-unmatched exits 0 on a real I/O error, so the step reads the JSON reporter and
+      # fails on any error-severity diagnostic. Ignored paths are not errors.
+      - name: Format release CHANGELOGs with the CI biome
+        if: steps.release-pr-branch.outputs.count != '0'
+        run: |
+          set -euo pipefail
+          biome="$(nix build --no-link --print-out-paths .#biome)"
+          git diff --name-only --diff-filter=AMR origin/main...HEAD -- '*CHANGELOG.md' > changelogs.txt
+          if [ -s changelogs.txt ]; then
+            xargs -r -a changelogs.txt "$biome/bin/biome" format --write --no-errors-on-unmatched --reporter=json > biome.json.out || true
+            if grep -q '"severity":"error"' biome.json.out; then
+              grep -o '"message":"[^"]*"' biome.json.out >&2
+              exit 1
+            fi
+          fi
+          rm -f changelogs.txt biome.json.out
+          if git diff --quiet; then
+            echo "release CHANGELOGs already match the CI biome format"
+            exit 0
+          fi
+          git config user.name "$(git log -1 --format=%an)"
+          git config user.email "$(git log -1 --format=%ae)"
+          git commit -a -m "chore(release): format changelogs with biome"
+          git push origin "HEAD:refs/heads/$RELEASE_BRANCH"
 
   publish:
     # A manual dispatch publishes every package; the script skips versions already on npm.
