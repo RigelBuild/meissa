@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/RigelBuild/meissa/go/internal/codeshape"
 )
 
 func fakeCollector(t *testing.T, name, version, output string, status int) {
@@ -34,7 +36,7 @@ func TestBiomeFailClosed(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			root := tsRepo(t, "function f() {}\n")
-			fakeCollector(t, "biome", "Version: 2.5.15", tc.output, tc.status)
+			fakeCollector(t, "biome", "Version: "+codeshape.BiomeVersion, tc.output, tc.status)
 			code, _, stderr := runGoGate(t, root)
 			if code != 2 {
 				t.Fatalf("code=%d stderr=%q", code, stderr)

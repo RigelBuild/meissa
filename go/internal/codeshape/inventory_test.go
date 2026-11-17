@@ -4,6 +4,7 @@ package codeshape
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -230,5 +231,23 @@ func TestToolVersionMismatch(t *testing.T) {
 	err = CheckToolVersion(t.Context(), path, BiomeVersion)
 	if err == nil || !strings.Contains(err.Error(), "unsupported tool version") {
 		t.Fatalf("error = %v", err)
+	}
+}
+
+func TestBiomeVersionMatchesRepoSchema(t *testing.T) {
+	data, err := os.ReadFile(filepath.Join("..", "..", "..", "biome.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var config struct {
+		Schema string `json:"$schema"`
+	}
+	err = json.Unmarshal(data, &config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "https://biomejs.dev/schemas/" + BiomeVersion + "/schema.json"
+	if config.Schema != want {
+		t.Fatalf("BiomeVersion = %s but biome.json $schema = %q", BiomeVersion, config.Schema)
 	}
 }

@@ -15,7 +15,7 @@ const (
 	// GolangciVersion is the supported golangci-lint release.
 	GolangciVersion = "2.15.0"
 	// BiomeVersion is the supported Biome release.
-	BiomeVersion = "2.5.15"
+	BiomeVersion = "2.6.5"
 )
 
 var errToolVersion = errors.New("unsupported tool version")
