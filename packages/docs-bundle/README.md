@@ -24,16 +24,21 @@ The TOML file requires an `exclude` array. `[[sections]]` entries assign page pr
 
 The check runs on Markdown files and does not need a site generator. Exit codes:
 
-| Code | Meaning |
-| --- | --- |
-| 0 | No errors. |
-| 1 | Page collection failed (route collisions, stray or unassigned pages, an unreadable root), or broken relative links. |
-| 2 | Invalid arguments, a missing or invalid `docs-bundle.toml`, or a page that cannot be read while checking links. |
+| Code | Meaning                                                                                                             |
+| ---- | ------------------------------------------------------------------------------------------------------------------- |
+| 0    | No errors.                                                                                                          |
+| 1    | Page collection failed (route collisions, stray or unassigned pages, an unreadable root), or broken relative links. |
+| 2    | Invalid arguments, a missing or invalid `docs-bundle.toml`, or a page that cannot be read while checking links.     |
 
 ## Library
 
 ```ts
-import { collectPages, extractTitle, readPublishConfig, rewriteLinks } from "@rigelbuild/docs-bundle";
+import {
+	collectPages,
+	extractTitle,
+	readPublishConfig,
+	rewriteLinks,
+} from "@rigelbuild/docs-bundle";
 
 const config = await readPublishConfig(repositoryRoot, "required");
 const pages = await collectPages(source, config);

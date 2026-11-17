@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.6.5/schema.json",
 	"root": true,
 	"extends": ["@rigelbuild/biome-config/biome"],
 	"files": {
@@ -7,7 +7,8 @@
 			"**",
 			"!rumdl-extends.test.ts",
 			"!go/commentscan/testdata",
-			"!go/ledger/testdata"
+			"!go/ledger/testdata",
+			"!**/CHANGELOG.md"
 		]
 	},
 	"overrides": [
