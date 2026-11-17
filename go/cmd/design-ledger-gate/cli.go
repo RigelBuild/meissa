@@ -271,6 +271,9 @@ func (d *gitDeps) prMetadata(ctx context.Context) (run.PRMetadata, error) {
 }
 
 func (d *gitDeps) readPRMetadata(ctx context.Context) (run.PRMetadata, error) {
+	if d.env("CI_PIPELINE_EVENT") == "pull_request" && d.env("CI_PIPELINE_FILES") == "" {
+		return d.unsetFilesMetadata(ctx)
+	}
 	switch prCtx := run.PRContextFrom(d.env).(type) {
 	case run.PRContextPR:
 		metadata, err := run.ReadPullRequest(ctx, prCtx.Repo, prCtx.PRNumber)
@@ -288,6 +291,25 @@ func (d *gitDeps) readPRMetadata(ctx context.Context) (run.PRMetadata, error) {
 			PullRequestDetails: noPullRequestDetails(),
 		}, nil
 	}
+}
+
+// unsetFilesMetadata serves a Woodpecker pull request whose CI_PIPELINE_FILES is
+// unset. Woodpecker omits the list past its 500-file cap, so the changed files
+// come from git diff against origin/<base>, the same base the merge-base checks
+// use. The body and head branch still come from the CI env.
+func (d *gitDeps) unsetFilesMetadata(ctx context.Context) (run.PRMetadata, error) {
+	output, err := gitOutput(ctx, d.root, "diff", "--name-only", "origin/"+d.baseRef+"...HEAD")
+	if err != nil {
+		return run.PRMetadata{}, err
+	}
+	return run.PRMetadata{
+		Changed: core.Changed{
+			Files:      splitLines(output),
+			Body:       mo.Some(d.env("CI_COMMIT_PULL_REQUEST_BODY")),
+			HeadBranch: d.env("CI_COMMIT_SOURCE_BRANCH"),
+		},
+		PullRequestDetails: noPullRequestDetails(),
+	}, nil
 }
 
 // noPullRequestDetails is the empty details value for runs without a PR.
