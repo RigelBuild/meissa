@@ -63,23 +63,15 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
 
-      # Only CHANGELOG.md files this release touched. Biome's exit code cannot be the gate:
-      # --no-errors-on-unmatched exits 0 on a real I/O error, so the step reads the JSON reporter and
-      # fails on any error-severity diagnostic. Ignored paths are not errors.
+      # Only CHANGELOG.md files this release touched. Biome's own exit code fails the step; the
+      # --no-errors-on-unmatched flag only lets paths the biome config ignores pass.
       - name: Format release CHANGELOGs with the CI biome
         if: steps.release-pr-branch.outputs.count != '0'
         run: |
           set -euo pipefail
           biome="$(nix build --no-link --print-out-paths .#biome)"
-          git diff --name-only --diff-filter=AMR origin/main...HEAD -- '*CHANGELOG.md' > changelogs.txt
-          if [ -s changelogs.txt ]; then
-            xargs -r -a changelogs.txt "$biome/bin/biome" format --write --no-errors-on-unmatched --reporter=json > biome.json.out || true
-            if grep -q '"severity":"error"' biome.json.out; then
-              grep -o '"message":"[^"]*"' biome.json.out >&2
-              exit 1
-            fi
-          fi
-          rm -f changelogs.txt biome.json.out
+          git diff --name-only --diff-filter=AMR origin/main...HEAD -- '*CHANGELOG.md' \
+            | xargs -r "$biome/bin/biome" format --write --no-errors-on-unmatched
           if git diff --quiet; then
             echo "release CHANGELOGs already match the CI biome format"
             exit 0
