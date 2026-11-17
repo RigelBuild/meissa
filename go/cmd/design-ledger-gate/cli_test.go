@@ -7,6 +7,7 @@ import (
 	"context"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -338,5 +339,63 @@ func TestMainBadArgumentsPrintUsageAndExitTwo(t *testing.T) {
 				t.Fatalf("code = %d, stdout = %q, stderr = %q; want 2, empty and usage", code, stdout.String(), stderr.String())
 			}
 		})
+	}
+}
+
+// TestMainUnsetPipelineFilesFallsBackToGitDiff covers a PR over Woodpecker's
+// 500-file cap: CI_PIPELINE_FILES is unset, so the changed files come from
+// git diff against origin/<base> instead of failing closed with exit 2.
+func TestMainUnsetPipelineFilesFallsBackToGitDiff(t *testing.T) {
+	root := t.TempDir()
+	git := func(args ...string) string {
+		t.Helper()
+		cmd := exec.Command("git", append([]string{"-C", root}, args...)...)
+		cmd.Env = append(os.Environ(),
+			"GIT_AUTHOR_NAME=test", "GIT_AUTHOR_EMAIL=test@example.test",
+			"GIT_COMMITTER_NAME=test", "GIT_COMMITTER_EMAIL=test@example.test")
+		out, err := cmd.Output()
+		if err != nil {
+			t.Fatalf("git %v: %v", args, err)
+		}
+		return string(out)
+	}
+	git("init", "-q", "-b", "main")
+	write := func(file, contents string) {
+		t.Helper()
+		full := filepath.Join(root, filepath.FromSlash(file))
+		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(full, []byte(contents), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	write("README.md", "# Readme\n")
+	git("add", "-A")
+	git("commit", "-q", "-m", "base")
+	git("update-ref", "refs/remotes/origin/main", "HEAD")
+	write("docs/designs/ui/record/design.md", "# Record\n")
+	write("docs/designs/decisions/ui/record/DL-001.md", "---\nid: DL-001\ndecision: \"Choose the stable option.\"\nstatus: \"Active (Reviewer, 2026-01-01)\"\nrecord: ../../../ui/record/design.md\n---\n# Decision\n")
+	git("add", "-A")
+	git("commit", "-q", "-m", "head")
+
+	configPath := filepath.Join(root, "ledger.json")
+	config := `{"designsRoot":"docs/designs","surfaceDepth":0,"governedRoots":["ui"],"counter":{"url":"https://counter.example.test","partition":"public-docs"}}`
+	if err := os.WriteFile(configPath, []byte(config), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	var stdout, stderr strings.Builder
+	code := Main(t.Context(), []string{"--config", configPath}, func(key string) string {
+		switch key {
+		case "GATE_ROOT":
+			return root
+		case "CI_PIPELINE_EVENT":
+			return "pull_request"
+		default:
+			return ""
+		}
+	}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("exit = %d, want 0 via git diff fallback; stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 	}
 }
