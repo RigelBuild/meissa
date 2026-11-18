@@ -347,26 +347,27 @@ func TestMainBadArgumentsPrintUsageAndExitTwo(t *testing.T) {
 // git diff against origin/<base> instead of failing closed with exit 2.
 func TestMainUnsetPipelineFilesFallsBackToGitDiff(t *testing.T) {
 	root := t.TempDir()
-	git := func(args ...string) string {
+	git := func(args ...string) {
 		t.Helper()
-		cmd := exec.Command("git", append([]string{"-C", root}, args...)...)
+		cmd := exec.CommandContext(t.Context(), "git", append([]string{"-C", root}, args...)...)
 		cmd.Env = append(os.Environ(),
 			"GIT_AUTHOR_NAME=test", "GIT_AUTHOR_EMAIL=test@example.test",
 			"GIT_COMMITTER_NAME=test", "GIT_COMMITTER_EMAIL=test@example.test")
-		out, err := cmd.Output()
+		_, err := cmd.Output()
 		if err != nil {
 			t.Fatalf("git %v: %v", args, err)
 		}
-		return string(out)
 	}
 	git("init", "-q", "-b", "main")
 	write := func(file, contents string) {
 		t.Helper()
 		full := filepath.Join(root, filepath.FromSlash(file))
-		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+		err := os.MkdirAll(filepath.Dir(full), 0o755)
+		if err != nil {
 			t.Fatal(err)
 		}
-		if err := os.WriteFile(full, []byte(contents), 0o600); err != nil {
+		err = os.WriteFile(full, []byte(contents), 0o600)
+		if err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -381,7 +382,8 @@ func TestMainUnsetPipelineFilesFallsBackToGitDiff(t *testing.T) {
 
 	configPath := filepath.Join(root, "ledger.json")
 	config := `{"designsRoot":"docs/designs","surfaceDepth":0,"governedRoots":["ui"],"counter":{"url":"https://counter.example.test","partition":"public-docs"}}`
-	if err := os.WriteFile(configPath, []byte(config), 0o600); err != nil {
+	err := os.WriteFile(configPath, []byte(config), 0o600)
+	if err != nil {
 		t.Fatal(err)
 	}
 	var stdout, stderr strings.Builder
