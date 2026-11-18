@@ -1,5 +1,12 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import {
+	chmod,
+	mkdir,
+	mkdtemp,
+	readdir,
+	rm,
+	writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { isExcluded, parseExclusions } from "./exclusions.ts";
@@ -418,6 +425,7 @@ describe("docs bundle helpers", () => {
 		]) {
 			expect(isGatherable(path)).toBe(true);
 		}
+		expect(isGatherable(".github/other.md")).toBe(false);
 		for (const path of [
 			"CHANGELOG.md",
 			"docs/designs/record.md",
@@ -448,6 +456,37 @@ describe("docs bundle helpers", () => {
 			"index.md",
 			"snake_case.md",
 		]);
+	});
+	test("prunes excluded directories but collects the GitHub pull request template", async () => {
+		const root = await fixture();
+		await mkdir(join(root, "node_modules", "x"), { recursive: true });
+		await mkdir(join(root, ".git"), { recursive: true });
+		await mkdir(join(root, ".github"), { recursive: true });
+		await writeFile(
+			join(root, "node_modules", "x", "page.md"),
+			"# Dependency\n",
+		);
+		await writeFile(join(root, ".git", "ignored.md"), "# Git metadata\n");
+		await writeFile(
+			join(root, ".github", "PULL_REQUEST_TEMPLATE.md"),
+			"# PR template\n",
+		);
+		await chmod(join(root, "node_modules"), 0o000);
+		await chmod(join(root, ".git"), 0o000);
+		try {
+			// Root ignores mode bits; fail loudly rather than pass without proving pruning.
+			await expect(readdir(join(root, "node_modules"))).rejects.toThrow();
+			const pages = await collectPages(
+				{ ...source, root },
+				{ exclude: [], sections: [] },
+			);
+			expect(pages.map(({ sourcePath }) => sourcePath)).toEqual([
+				".github/PULL_REQUEST_TEMPLATE.md",
+			]);
+		} finally {
+			await chmod(join(root, "node_modules"), 0o700);
+			await chmod(join(root, ".git"), 0o700);
+		}
 	});
 
 	test("uses defaults when config is absent and requires explicit config when required", async () => {
