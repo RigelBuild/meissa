@@ -20,12 +20,31 @@ func TestUnmeasuredSkipFinding(t *testing.T) {
 	}
 	var output strings.Builder
 	findings, paths, err := handleTSSkips(&output, skips, testConfig())
-	if err != nil || len(findings) != 1 || findings[0].Path != "bad.ts" || findings[0].Value != 70 ||
-		len(paths) != 1 || paths[0] != "bad.ts" {
+	if err != nil || len(findings) != 2 || findings[0].Metric != codeshape.MetricUnmeasured ||
+		findings[1].Path != "bad.ts" || findings[1].Value != 70 || len(paths) != 1 || paths[0] != "bad.ts" {
 		t.Fatalf("findings=%v paths=%v err=%v", findings, paths, err)
 	}
 	if !strings.Contains(output.String(), "skip plain.ts: no functions") {
 		t.Fatal(output.String())
+	}
+}
+
+func TestSyntaxSkipTypeScriptIsUnmeasured(t *testing.T) {
+	skips := []codeshape.Skip{{Path: "bad.ts", Reason: "parse TypeScript \"bad.ts\": syntax errors", Remedy: "",
+		Unmeasured: &codeshape.UnmeasuredFunctions{Values: map[codeshape.Metric]int{}, BiomeParseFailed: false}}}
+	var output strings.Builder
+	findings, paths, err := handleTSSkips(&output, skips, testConfig())
+	if err != nil || len(paths) != 1 || paths[0] != "bad.ts" || len(findings) != 1 ||
+		findings[0].Metric != codeshape.MetricUnmeasured || findings[0].Path != "bad.ts" {
+		t.Fatalf("findings=%v paths=%v err=%v", findings, paths, err)
+	}
+}
+
+func TestTypeOnlyReexportIsUnmeasuredFinding(t *testing.T) {
+	root := tsRepo(t, "export type * from \"./t\";\n")
+	code, out, stderr := runGoGate(t, root)
+	if code != 1 || !strings.Contains(out, "unmeasured value=0 limit=0") {
+		t.Fatalf("code=%d out=%q stderr=%q", code, out, stderr)
 	}
 }
 
