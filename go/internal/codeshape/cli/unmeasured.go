@@ -20,13 +20,11 @@ func handleTSSkips(output io.Writer, skips []codeshape.Skip, cfg codeshape.Confi
 	for _, skip := range skips {
 		if skip.Unmeasured != nil {
 			paths = append(paths, skip.Path)
-			if skip.Unmeasured.BiomeParseFailed {
-				findings = append(findings, codeshape.Finding{Path: skip.Path, Metric: codeshape.MetricUnmeasured,
-					Value: 0, Limit: 0, Fix: skip.Reason + "; exclude it or fix the parse"})
-			}
+			findings = append(findings, codeshape.Finding{Path: skip.Path, Metric: codeshape.MetricUnmeasured,
+				Value: 0, Limit: 0, Fix: skip.Reason + "; " + tsUnmeasuredHint})
 			for metric, value := range skip.Unmeasured.Values {
 				findings = append(findings, codeshape.Finding{Path: skip.Path, Metric: metric, Value: value,
-					Limit: cfg.Functions.LimitFor(metric), Fix: "unparseable by the function collector; exclude it or fix the parse"})
+					Limit: cfg.Functions.LimitFor(metric), Fix: "unparseable by the function collector; " + tsUnmeasuredHint})
 			}
 		}
 		_, err := fmt.Fprintf(output, "code-shape-gate: skip %s: %s\n", skip.Path, skip.Reason)
@@ -36,6 +34,10 @@ func handleTSSkips(output io.Writer, skips []codeshape.Skip, cfg codeshape.Confi
 	}
 	return findings, paths, nil
 }
+
+// tsUnmeasuredHint is the fix clause for a TypeScript file that could not be measured.
+const tsUnmeasuredHint = "if the file is valid syntax that the grammar rejects, add it to exclude; " +
+	"otherwise fix the parse error"
 
 func separateUnmeasured(allow *codeshape.Allowlist, paths []string) codeshape.FunctionMeasurements {
 	preserved := make(codeshape.FunctionMeasurements)

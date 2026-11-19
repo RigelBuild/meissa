@@ -71,7 +71,7 @@ func biomeParseSkips(report biomeReport, sources map[string][]byte) ([]codeshape
 		}
 		delete(sources, path)
 		skips = append(skips, codeshape.Skip{Path: path, Reason: "Biome parse error: " + diagnostic.Message, Remedy: "",
-			Unmeasured: &codeshape.UnmeasuredFunctions{Values: map[codeshape.Metric]int{}, BiomeParseFailed: true}})
+			Unmeasured: &codeshape.UnmeasuredFunctions{Values: map[codeshape.Metric]int{}}})
 	}
 	return skips, nil
 }

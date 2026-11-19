@@ -55,7 +55,7 @@ Function allowlist entries are keyed by metric, path and function ID. Go IDs use
 
 The gate runs Biome with its own generated configuration and the gate's limits. It copies the root Biome configuration's `javascript.parser` options. The repository's Biome rule settings are checked for consistency, but do not control measurement. The two measured rules may use `warn` or `error` levels in the repository configuration.
 
-Skips are printed on stderr. A Go file outside the default build that contains functions, or a file Biome cannot parse, is an unmeasured finding. If the TypeScript function collector cannot parse a file and Biome reports an over-limit function, the gate reports a file-level finding. Existing function allowlist entries for unmeasured files are preserved on `--write`. Skips that leave no functions unmeasured are notices only. Use the gate's `exclude` to opt out.
+Skips are printed on stderr. A Go file outside the default build that contains functions, or a file Biome cannot parse, is an unmeasured finding. A TypeScript file the tree-sitter grammar rejects is an unmeasured finding whatever Biome reports. Existing function allowlist entries for unmeasured files are preserved on `--write`. Skips that leave no functions unmeasured are notices only. Use the gate's `exclude` to opt out.
 
 Biome does not process files under `node_modules`. Exclude tracked paths in those directories from the gate.
 
