@@ -35,6 +35,20 @@ var (
 type goSourceFile struct {
 	set       *token.FileSet
 	functions []goFunction
+	goos      string
+}
+
+// MeasuredGOOS returns the host GOOS first, then the other measured platforms.
+// A file is measured under the first GOOS whose build includes it, so
+// default-build files keep their host measurements and each path counts once.
+func MeasuredGOOS() []string {
+	sets := []string{build.Default.GOOS}
+	for _, goos := range []string{"linux", "darwin", "windows"} {
+		if goos != build.Default.GOOS {
+			sets = append(sets, goos)
+		}
+	}
+	return sets
 }
 
 type goFunction struct {
@@ -105,20 +119,34 @@ func measureGoModule(ctx context.Context, binary, root, module string, cfg codes
 			}
 		}
 	}
-	for _, limit := range limits {
-		report, err := runGolangci(ctx, binary, root, module, limit.linter, limit.lines, limit.statements, cfg)
-		if err != nil {
-			return err
+	for _, goos := range MeasuredGOOS() {
+		if !hasGOOSFile(files, goos) {
+			continue
 		}
-		err = applyGoIssues(root, module, files, cfg, limit.metric, limit.linter, report, measurements)
-		if err != nil {
-			return err
+		for _, limit := range limits {
+			report, err := runGolangci(ctx, binary, root, module, goos, limit.linter, limit.lines, limit.statements, cfg)
+			if err != nil {
+				return err
+			}
+			err = applyGoIssues(root, module, goos, files, cfg, limit.metric, limit.linter, report, measurements)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
 }
 
-func applyGoIssues(root, module string, files map[string]goSourceFile, cfg codeshape.Config,
+func hasGOOSFile(files map[string]goSourceFile, goos string) bool {
+	for _, file := range files {
+		if file.goos == goos {
+			return true
+		}
+	}
+	return false
+}
+
+func applyGoIssues(root, module, goos string, files map[string]goSourceFile, cfg codeshape.Config,
 	metric codeshape.Metric, linter string, report golangciReport,
 	measurements map[codeshape.Metric]map[string][]codeshape.Entry,
 ) error {
@@ -139,6 +167,9 @@ func applyGoIssues(root, module string, files map[string]goSourceFile, cfg codes
 		}
 		path = filepath.ToSlash(path)
 		if excludedFunctionPath(path, cfg) || !codeshape.CountedPath(path, cfg) {
+			continue
+		}
+		if source, exists := files[path]; exists && source.goos != goos {
 			continue
 		}
 		value, err := metricValue(issue.Text, metric)
@@ -180,8 +211,13 @@ func parseGoSources(root, module string, paths []string, cfg codeshape.Config) (
 ) {
 	files := make(map[string]goSourceFile)
 	skips := []codeshape.Skip{}
-	buildContext := build.Default
-	buildContext.CgoEnabled = false
+	contexts := make([]build.Context, 0, len(MeasuredGOOS()))
+	for _, goos := range MeasuredGOOS() {
+		buildContext := build.Default
+		buildContext.GOOS = goos
+		buildContext.CgoEnabled = false
+		contexts = append(contexts, buildContext)
+	}
 	modules := make([]string, 0)
 	for _, path := range paths {
 		if filepath.Base(path) == "go.mod" {
@@ -194,9 +230,16 @@ func parseGoSources(root, module string, paths []string, cfg codeshape.Config) (
 			continue
 		}
 		fullPath := filepath.Join(root, filepath.FromSlash(path))
-		matches, err := buildContext.MatchFile(filepath.Dir(fullPath), filepath.Base(fullPath))
-		if err != nil {
-			return nil, nil, fmt.Errorf("check Go build constraints %q: %w", path, err)
+		goos := ""
+		for _, buildContext := range contexts {
+			matches, err := buildContext.MatchFile(filepath.Dir(fullPath), filepath.Base(fullPath))
+			if err != nil {
+				return nil, nil, fmt.Errorf("check Go build constraints %q: %w", path, err)
+			}
+			if matches {
+				goos = buildContext.GOOS
+				break
+			}
 		}
 		source, err := codeshape.ReadRepositoryFile(root, filepath.FromSlash(path))
 		if err != nil {
@@ -207,21 +250,46 @@ func parseGoSources(root, module string, paths []string, cfg codeshape.Config) (
 		if err != nil {
 			return nil, nil, fmt.Errorf("parse Go source %q: %w", path, err)
 		}
-		if !matches {
+		functions := goFunctions(file, set)
+		reason := unmeasuredReason(goos, file)
+		if reason != "" {
 			var unmeasured *codeshape.UnmeasuredFunctions
-			if len(goFunctions(file, set)) > 0 {
+			if len(functions) > 0 {
 				unmeasured = &codeshape.UnmeasuredFunctions{Values: nil, BiomeParseFailed: false}
 			}
-			skips = append(skips, codeshape.Skip{Path: path, Reason: "not in default Go build", Unmeasured: unmeasured})
+			skips = append(skips, codeshape.Skip{Path: path, Reason: reason, Unmeasured: unmeasured})
 			continue
 		}
-		functions := goFunctions(file, set)
 		for index := range functions {
 			functions[index].path = path
 		}
-		files[path] = goSourceFile{set: set, functions: functions}
+		files[path] = goSourceFile{set: set, functions: functions, goos: goos}
 	}
 	return files, skips, nil
+}
+
+// unmeasuredReason returns why a parsed file cannot be measured, or "" if it can.
+// Other-GOOS passes run with CGO_ENABLED=0, which drops files that import "C",
+// so their functions would be recorded as 0. Such files are reported instead.
+// Host-GOOS cgo files keep their base behavior.
+func unmeasuredReason(goos string, file *ast.File) string {
+	if goos == "" {
+		return "not in any measured Go build"
+	}
+	if goos != build.Default.GOOS && importsC(file) {
+		return "uses cgo (import \"C\"), which the CGO_ENABLED=0 measurement excludes"
+	}
+	return ""
+}
+
+func importsC(file *ast.File) bool {
+	for _, spec := range file.Imports {
+		path, err := strconv.Unquote(spec.Path.Value)
+		if err == nil && path == "C" {
+			return true
+		}
+	}
+	return false
 }
 
 func eligibleGoSource(path, module string, modules []string, cfg codeshape.Config) bool {

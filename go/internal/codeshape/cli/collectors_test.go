@@ -30,7 +30,7 @@ func runGoGate(t *testing.T, root string) (int, string, string) {
 func TestSkipOnlyModuleIsValid(t *testing.T) {
 	root := goTestRepo(t, "//go:build integration\n\npackage p\nconst X = 1\n")
 	code, out, stderr := runGoGate(t, root)
-	if code != 0 || out != "" || !strings.Contains(stderr, "code-shape-gate: skip x.go: not in default Go build\n") {
+	if code != 0 || out != "" || !strings.Contains(stderr, "code-shape-gate: skip x.go: not in any measured Go build\n") {
 		t.Fatalf("code=%d out=%q stderr=%q", code, out, stderr)
 	}
 }
@@ -38,7 +38,7 @@ func TestSkipOnlyModuleIsValid(t *testing.T) {
 func TestSkippedGoFunctionsAreFindings(t *testing.T) {
 	root := goTestRepo(t, "//go:build integration\n\npackage p\nfunc F() {}\n")
 	code, out, stderr := runGoGate(t, root)
-	if code != 1 || !strings.Contains(out, "x.go") || !strings.Contains(stderr, "not in default Go build") {
+	if code != 1 || !strings.Contains(out, "x.go") || !strings.Contains(stderr, "not in any measured Go build") {
 		t.Fatalf("code=%d out=%q stderr=%q", code, out, stderr)
 	}
 }
