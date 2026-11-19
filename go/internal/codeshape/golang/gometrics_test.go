@@ -4,9 +4,12 @@ package golang
 
 import (
 	"fmt"
+	"go/build"
 	"go/parser"
 	"go/token"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
@@ -221,5 +224,139 @@ func TestGoBareAndAllSuppressions(t *testing.T) {
 				t.Fatalf("missing %s line %d: %#v", metric, line, findings)
 			}
 		}
+	}
+}
+
+func TestGoLoneOtherGOOSFileMeasured(t *testing.T) {
+	root := goTestRepo(t, "package p\nfunc Parent() {}\n")
+	trackedFile(t, root, "x_darwin.go", "package p\nfunc Darwin() {\n"+strings.Repeat("println(1)\n", 41)+"}\n")
+	commitFiles(t, root)
+	cfg := testConfig()
+	cfg.Functions = codeshape.FunctionLimits{Go: codeshape.GoFunctionLimits{Cognitive: 20, Lines: 60, Statements: 40},
+		TS: codeshape.TSFunctionLimits{Cognitive: 0, Lines: 0}}
+	values, skips, err := GoMetrics(t.Context(), root, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(skips) != 0 {
+		t.Fatalf("skips=%v", skips)
+	}
+	entries := values[codeshape.MetricGoStatements]["x_darwin.go"]
+	if len(entries) != 1 || entries[0].Value != 41 {
+		t.Fatalf("x_darwin.go: %#v", entries)
+	}
+}
+
+func TestGoOtherGOOSCgoFileUnmeasured(t *testing.T) {
+	other := "darwin"
+	if build.Default.GOOS == other {
+		other = "windows"
+	}
+	path := "c_" + other + ".go"
+	root := goTestRepo(t, "package p\nfunc Parent() {}\n")
+	trackedFile(t, root, path, "package p\nimport \"C\"\nfunc Cgo() {\n"+strings.Repeat("println(1)\n", 41)+"}\n")
+	commitFiles(t, root)
+	values, skips, err := GoMetrics(t.Context(), root, testConfig())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(skips) != 1 || skips[0].Path != path || skips[0].Unmeasured == nil ||
+		!strings.Contains(skips[0].Reason, "cgo") {
+		t.Fatalf("skips=%#v", skips)
+	}
+	if entries := values[codeshape.MetricGoStatements][path]; len(entries) != 0 {
+		t.Fatalf("cgo file measured: %#v", entries)
+	}
+}
+
+func TestGoFilesAssignedToHostThenFirstMatch(t *testing.T) {
+	root := goTestRepo(t, "package p\nfunc Parent() {}\n")
+	trackedFile(t, root, "both.go", "//go:build darwin || windows\n\npackage p\nfunc Both() {}\n")
+	commitFiles(t, root)
+	files, skips, err := parseGoSources(root, ".", []string{"both.go", "x.go"}, testConfig())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(skips) != 0 {
+		t.Fatalf("skips=%v", skips)
+	}
+	if got := files["x.go"].goos; got != build.Default.GOOS {
+		t.Fatalf("x.go measured under %q, want host %q", got, build.Default.GOOS)
+	}
+	// MeasuredGOOS order is host, then linux, darwin, windows: first match wins.
+	want := "darwin"
+	if build.Default.GOOS == "windows" {
+		want = "windows"
+	}
+	if got := files["both.go"].goos; got != want {
+		t.Fatalf("both.go measured under %q, want %q", got, want)
+	}
+}
+
+func TestGoOnlyHostPassWithoutOtherGOOSFiles(t *testing.T) {
+	root := goTestRepo(t, "package p\nfunc Parent() {}\n")
+	log := filepath.Join(t.TempDir(), "goos.log")
+	dir := t.TempDir()
+	script := "#!/bin/sh\nif [ \"$1\" = --version ]; then echo 'golangci-lint has version 2.15.0'; exit 0; fi\n" +
+		"echo \"$GOOS\" >> '" + log + "'\n" +
+		"printf '%s' '{\"Issues\":[],\"Report\":{\"Linters\":[" +
+		"{\"Name\":\"gocognit\",\"Enabled\":true},{\"Name\":\"funlen\",\"Enabled\":true}]}}'\n"
+	err := os.WriteFile(filepath.Join(dir, "golangci-lint"), []byte(script), 0o755)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	_, _, err = GoMetrics(t.Context(), root, testConfig())
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, err := os.ReadFile(log)
+	if err != nil {
+		t.Fatal(err)
+	}
+	seen := map[string]bool{}
+	for goos := range strings.FieldsSeq(string(data)) {
+		seen[goos] = true
+	}
+	if len(seen) != 1 || !seen[build.Default.GOOS] {
+		t.Fatalf("golangci-lint ran for GOOS %v, want only host %q", seen, build.Default.GOOS)
+	}
+}
+
+// TestGoSharedFileCountedOnceUnderItsAssignedGOOS pins the count-once invariant:
+// a file built for two GOOS sets is assigned to one of them, and a pass for the
+// other GOOS must not record a value for it. The fake linter reports a larger
+// value under GOOS=windows; only the assignment filter keeps it out.
+func TestGoSharedFileCountedOnceUnderItsAssignedGOOS(t *testing.T) {
+	root := goTestRepo(t, "package p\nfunc Parent() {}\n")
+	trackedFile(t, root, "both.go", "//go:build darwin || windows\n\npackage p\nfunc Both() {\n"+
+		strings.Repeat("println(1)\n", 41)+"}\n")
+	// A windows-only file makes the windows pass run, so it can offer both.go a value.
+	trackedFile(t, root, "w_windows.go", "package p\nfunc W() {}\n")
+	commitFiles(t, root)
+	dir := t.TempDir()
+	script := "#!/bin/sh\nif [ \"$1\" = --version ]; then echo 'golangci-lint has version 2.15.0'; exit 0; fi\n" +
+		"linter=\"\"\nwhile [ $# -gt 0 ]; do if [ \"$1\" = --enable-only ]; then linter=$2; fi; shift; done\n" +
+		"if [ \"$linter\" != funlen ]; then " +
+		"printf '%s' '{\"Issues\":[],\"Report\":{\"Linters\":[{\"Name\":\"'\"$linter\"'\",\"Enabled\":true}]}}'; " +
+		"exit 0; fi\n" +
+		"value=41\nif [ \"$GOOS\" = windows ]; then value=99; fi\n" +
+		"printf '%s' \"{\\\"Issues\\\":[{\\\"FromLinter\\\":\\\"funlen\\\",\\\"Text\\\":" +
+		"\\\"Func Both is too long ($value > 40)\\\"," +
+		"\\\"Pos\\\":{\\\"Filename\\\":\\\"both.go\\\",\\\"Line\\\":4,\\\"Column\\\":1}}],\\\"Report\\\":{\\\"Linters\\\":" +
+		"[{\\\"Name\\\":\\\"funlen\\\",\\\"Enabled\\\":true}]}}\"\n" +
+		"exit 1\n"
+	err := os.WriteFile(filepath.Join(dir, "golangci-lint"), []byte(script), 0o755)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	values, _, err := GoMetrics(t.Context(), root, testConfig())
+	if err != nil {
+		t.Fatal(err)
+	}
+	entries := values[codeshape.MetricGoStatements]["both.go"]
+	if len(entries) != 1 || entries[0].Value == 99 {
+		t.Fatalf("other GOOS pass leaked into both.go: %#v", entries)
 	}
 }

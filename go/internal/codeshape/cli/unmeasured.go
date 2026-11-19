@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"io"
 	"maps"
+	"strings"
 
 	"github.com/RigelBuild/meissa/go/internal/codeshape"
+	"github.com/RigelBuild/meissa/go/internal/codeshape/golang"
 )
 
 func handleTSSkips(output io.Writer, skips []codeshape.Skip, cfg codeshape.Config) (
@@ -74,8 +76,17 @@ func handleGoSkips(output io.Writer, skips []codeshape.Skip) ([]codeshape.Findin
 		if skip.Unmeasured != nil {
 			paths = append(paths, skip.Path)
 			findings = append(findings, codeshape.Finding{Path: skip.Path, Metric: codeshape.MetricUnmeasured,
-				Value: 0, Limit: 0, Fix: skip.Reason + "; exclude it or include it in a linux, darwin or windows Go build"})
+				Value: 0, Limit: 0, Fix: skip.Reason + "; exclude it or include it in a default-GOARCH " +
+					goosPhrase(golang.MeasuredGOOS()) + " Go build"})
 		}
 	}
 	return findings, paths, nil
+}
+
+// goosPhrase joins GOOS names as "a, b or c".
+func goosPhrase(goos []string) string {
+	if len(goos) < 2 {
+		return strings.Join(goos, "")
+	}
+	return strings.Join(goos[:len(goos)-1], ", ") + " or " + goos[len(goos)-1]
 }
