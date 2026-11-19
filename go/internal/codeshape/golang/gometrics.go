@@ -251,13 +251,14 @@ func parseGoSources(root, module string, paths []string, cfg codeshape.Config) (
 			return nil, nil, fmt.Errorf("parse Go source %q: %w", path, err)
 		}
 		functions := goFunctions(file, set)
-		reason := unmeasuredReason(goos, file)
+		reason, remedy := unmeasuredReason(goos, file)
 		if reason != "" {
 			var unmeasured *codeshape.UnmeasuredFunctions
 			if len(functions) > 0 {
 				unmeasured = &codeshape.UnmeasuredFunctions{Values: nil, BiomeParseFailed: false}
 			}
-			skips = append(skips, codeshape.Skip{Path: path, Reason: reason, Unmeasured: unmeasured})
+			skips = append(skips, codeshape.Skip{Path: path, Reason: reason, Remedy: remedy,
+				Unmeasured: unmeasured})
 			continue
 		}
 		for index := range functions {
@@ -268,18 +269,20 @@ func parseGoSources(root, module string, paths []string, cfg codeshape.Config) (
 	return files, skips, nil
 }
 
-// unmeasuredReason returns why a parsed file cannot be measured, or "" if it can.
-// Other-GOOS passes run with CGO_ENABLED=0, which drops files that import "C",
-// so their functions would be recorded as 0. Such files are reported instead.
-// Host-GOOS cgo files keep their base behavior.
-func unmeasuredReason(goos string, file *ast.File) string {
+// unmeasuredReason returns why a parsed file cannot be measured and the remedy
+// for that reason, or "" for both if it can. Other-GOOS passes run with
+// CGO_ENABLED=0, which drops files that import "C", so their functions would be
+// recorded as 0. Such files are reported instead. Host-GOOS cgo files keep their
+// base behavior: they are measured, and their CGO_ENABLED=0 result is a silent 0.
+func unmeasuredReason(goos string, file *ast.File) (string, string) {
 	if goos == "" {
-		return "not in any measured Go build"
+		return "not in any measured Go build", ""
 	}
 	if goos != build.Default.GOOS && importsC(file) {
-		return "uses cgo (import \"C\"), which the CGO_ENABLED=0 measurement excludes"
+		return "uses cgo (import \"C\"), which the CGO_ENABLED=0 measurement excludes",
+			"exclude it or move its functions out of the cgo file"
 	}
-	return ""
+	return "", ""
 }
 
 func importsC(file *ast.File) bool {

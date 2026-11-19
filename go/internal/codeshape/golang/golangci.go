@@ -138,12 +138,24 @@ func runGolangciWithConfig(
 // golangciCacheDir returns a cache directory for one GOOS pass. The package
 // cache key omits GOOS, so passes that share a cache reuse each other's issues:
 // a file built only for another GOOS would take the host pass's empty result.
+// A caller-set GOLANGCI_LINT_CACHE is the root, so a persisted cache stays
+// persisted; otherwise the root is the user cache directory. The root is made
+// absolute because golangci-lint resolves the value in the module directory.
 func golangciCacheDir(goos string) (string, error) {
-	base, err := os.UserCacheDir()
-	if err != nil {
-		return "", fmt.Errorf("locate user cache for golangci-lint: %w", err)
+	root := os.Getenv("GOLANGCI_LINT_CACHE")
+	if root == "" {
+		base, err := os.UserCacheDir()
+		if err != nil {
+			return "", fmt.Errorf("locate user cache for golangci-lint: %w", err)
+		}
+		root = filepath.Join(base, "golangci-lint-code-shape")
 	}
-	dir := filepath.Join(base, "golangci-lint-code-shape", goos)
+	absRoot, err := filepath.Abs(root)
+	if err != nil {
+		return "", fmt.Errorf("resolve golangci-lint cache root %q: %w", root, err)
+	}
+	dir := filepath.Join(absRoot, goos)
+	//nolint:gosec // G703: the cache root comes from the caller's own environment, not repository input
 	err = os.MkdirAll(dir, 0o750)
 	if err != nil {
 		return "", fmt.Errorf("create golangci-lint cache %q: %w", dir, err)

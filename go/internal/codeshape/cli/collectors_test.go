@@ -3,6 +3,7 @@
 package cli
 
 import (
+	"go/build"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -39,6 +40,25 @@ func TestSkippedGoFunctionsAreFindings(t *testing.T) {
 	root := goTestRepo(t, "//go:build integration\n\npackage p\nfunc F() {}\n")
 	code, out, stderr := runGoGate(t, root)
 	if code != 1 || !strings.Contains(out, "x.go") || !strings.Contains(stderr, "not in any measured Go build") {
+		t.Fatalf("code=%d out=%q stderr=%q", code, out, stderr)
+	}
+}
+
+func TestOtherGOOSCgoFileFixNamesCgo(t *testing.T) {
+	other := "darwin"
+	if build.Default.GOOS == other {
+		other = "windows"
+	}
+	root := newFixtureRepo(t)
+	writeConfigFiles(t, root, validConfig, "files: {}\n")
+	trackedFile(t, root, "go.mod", "module example.com/fixture\n\ngo 1.25\n")
+	trackedFile(t, root, "c_"+other+".go", "package p\nimport \"C\"\nfunc Cgo() {\n"+
+		strings.Repeat("println(1)\n", 41)+"}\n")
+	commitFiles(t, root)
+	code, out, stderr := runGoGate(t, root)
+	want := "fix=uses cgo (import \"C\"), which the CGO_ENABLED=0 measurement excludes; " +
+		"exclude it or move its functions out of the cgo file"
+	if code != 1 || !strings.Contains(out, want) || strings.Contains(out, "include it in") {
 		t.Fatalf("code=%d out=%q stderr=%q", code, out, stderr)
 	}
 }
