@@ -74,7 +74,7 @@ func handleGoSkips(output io.Writer, skips []codeshape.Skip) ([]codeshape.Findin
 		if skip.Unmeasured != nil {
 			paths = append(paths, skip.Path)
 			findings = append(findings, codeshape.Finding{Path: skip.Path, Metric: codeshape.MetricUnmeasured,
-				Value: 0, Limit: 0, Fix: skip.Reason + "; exclude it or include it in the default Go build"})
+				Value: 0, Limit: 0, Fix: skip.Reason + "; exclude it or include it in a linux, darwin or windows Go build"})
 		}
 	}
 	return findings, paths, nil

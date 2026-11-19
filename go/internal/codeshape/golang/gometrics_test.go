@@ -7,6 +7,7 @@ import (
 	"go/parser"
 	"go/token"
 	"os/exec"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -47,7 +48,7 @@ func TestGoCollectorFixture(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	report, err := runGolangci(t.Context(), binary, root, ".", "funlen", 10, 10, cfg)
+	report, err := runGolangci(t.Context(), binary, root, ".", runtime.GOOS, "funlen", 10, 10, cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,7 +142,7 @@ func TestGoExcludedAndUnbuiltFiles(t *testing.T) {
 	trackedFile(t, root, "fixtures/x.go", offender)
 	trackedFile(t, root, "excluded/x.go", offender)
 	trackedFile(t, root, "tagged.go", "//go:build integration\n\n"+offender)
-	trackedFile(t, root, "platform_windows.go", offender)
+	trackedFile(t, root, "platform_windows.go", strings.Replace(offender, "package fixture", "package p", 1))
 	commitFiles(t, root)
 	cfg := testConfig()
 	cfg.Exclude = []string{"excluded/**"}
@@ -149,8 +150,41 @@ func TestGoExcludedAndUnbuiltFiles(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(skips) != 2 || len(values[codeshape.MetricGoStatements]) != 1 {
+	if len(skips) != 1 || skips[0].Path != "tagged.go" || len(values[codeshape.MetricGoStatements]) != 2 {
 		t.Fatalf("skips=%v measurements=%v", skips, values[codeshape.MetricGoStatements])
+	}
+}
+
+func TestGoOtherGOOSFilesMeasured(t *testing.T) {
+	root := goTestRepo(t, "package p\nfunc Parent() {\n"+strings.Repeat("println(1)\n", 41)+"}\n")
+	body := "() {\n" + strings.Repeat("println(1)\n", 42) + "}\n"
+	trackedFile(t, root, "x_darwin.go", "package p\nfunc Darwin"+body)
+	trackedFile(t, root, "x_windows.go", "package p\nfunc Windows"+body)
+	trackedFile(t, root, "both.go", "//go:build darwin || windows\n\npackage p\nfunc Both"+body)
+	commitFiles(t, root)
+	values, skips, err := GoMetrics(t.Context(), root, testConfig())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(skips) != 0 {
+		t.Fatalf("skips=%v", skips)
+	}
+	want := map[string]int{"x.go": 41, "x_darwin.go": 42, "x_windows.go": 42, "both.go": 42}
+	statements := values[codeshape.MetricGoStatements]
+	if len(statements) != len(want) {
+		t.Fatalf("unexpected paths: %#v", statements)
+	}
+	for path, value := range want {
+		for _, metric := range []codeshape.Metric{
+			codeshape.MetricGoStatements, codeshape.MetricGoLines, codeshape.MetricGoCognitive,
+		} {
+			if len(values[metric][path]) != 1 {
+				t.Fatalf("%s %s: %#v", metric, path, values[metric][path])
+			}
+		}
+		if entries := statements[path]; entries[0].Value != value {
+			t.Fatalf("%s: %#v", path, entries)
+		}
 	}
 }
 func TestGoExcludedModule(t *testing.T) {

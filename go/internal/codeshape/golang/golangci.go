@@ -48,7 +48,7 @@ type golangciReport struct {
 
 func runGolangci(
 	ctx context.Context,
-	binary, root, module, linter string,
+	binary, root, module, goos, linter string,
 	lines, statements int,
 	cfg codeshape.Config,
 ) (golangciReport, error) {
@@ -66,7 +66,7 @@ func runGolangci(
 	if err != nil {
 		return golangciReport{}, fmt.Errorf("create golangci-lint config: %w", err)
 	}
-	report, runErr := runGolangciWithConfig(ctx, binary, root, module, linter, configuration, temporary)
+	report, runErr := runGolangciWithConfig(ctx, binary, root, module, goos, linter, configuration, temporary)
 	removeErr := os.Remove(temporary.Name())
 	if removeErr != nil {
 		removeErr = fmt.Errorf("remove golangci-lint config: %w", removeErr)
@@ -75,7 +75,7 @@ func runGolangci(
 }
 
 func runGolangciWithConfig(
-	ctx context.Context, binary, root, module, linter, configuration string, temporary *os.File,
+	ctx context.Context, binary, root, module, goos, linter, configuration string, temporary *os.File,
 ) (golangciReport, error) {
 	var err error
 	_, err = temporary.WriteString(configuration)
@@ -95,7 +95,7 @@ func runGolangciWithConfig(
 		"--output.json.path", "stdout", "--path-mode", "abs", "--show-stats=false", "--uniq-by-line=false",
 		"--max-issues-per-linter", "0", "--max-same-issues", "0", "./...")
 	command.Dir = filepath.Join(root, filepath.FromSlash(module))
-	command.Env = append(os.Environ(), "CGO_ENABLED=0")
+	command.Env = append(os.Environ(), "CGO_ENABLED=0", "GOOS="+goos)
 	var stdout, stderr bytes.Buffer
 	command.Stdout = &stdout
 	command.Stderr = &stderr
