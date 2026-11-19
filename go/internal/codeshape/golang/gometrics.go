@@ -255,7 +255,7 @@ func parseGoSources(root, module string, paths []string, cfg codeshape.Config) (
 		if reason != "" {
 			var unmeasured *codeshape.UnmeasuredFunctions
 			if len(functions) > 0 {
-				unmeasured = &codeshape.UnmeasuredFunctions{Values: nil, BiomeParseFailed: false}
+				unmeasured = &codeshape.UnmeasuredFunctions{Values: nil}
 			}
 			skips = append(skips, codeshape.Skip{Path: path, Reason: reason, Remedy: remedy,
 				Unmeasured: unmeasured})
