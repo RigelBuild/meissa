@@ -360,3 +360,56 @@ func TestGoSharedFileCountedOnceUnderItsAssignedGOOS(t *testing.T) {
 		t.Fatalf("other GOOS pass leaked into both.go: %#v", entries)
 	}
 }
+
+// TestGoHostCgoFileStaysMeasured pins the host-GOOS cgo behavior: a file built
+// for the host GOOS is measured as before, not reported as unmeasured. Its
+// CGO_ENABLED=0 measurement stays a silent 0, as it was on base.
+func TestGoHostCgoFileStaysMeasured(t *testing.T) {
+	path := "c_" + build.Default.GOOS + ".go"
+	root := goTestRepo(t, "package p\nfunc Parent() {}\n")
+	trackedFile(t, root, path, "package p\nimport \"C\"\nfunc Cgo() {}\n")
+	commitFiles(t, root)
+	files, skips, err := parseGoSources(root, ".", []string{path, "x.go"}, testConfig())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(skips) != 0 {
+		t.Fatalf("host cgo file skipped: %#v", skips)
+	}
+	if got := files[path]; got.goos != build.Default.GOOS || len(got.functions) != 1 {
+		t.Fatalf("%s: goos=%q functions=%d", path, got.goos, len(got.functions))
+	}
+}
+
+func TestGolangciCacheDirUsesCallerRoot(t *testing.T) {
+	root := t.TempDir()
+	t.Setenv("GOLANGCI_LINT_CACHE", root)
+	dir, err := golangciCacheDir("darwin")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := filepath.Join(root, "darwin"); dir != want {
+		t.Fatalf("cache dir %q, want %q", dir, want)
+	}
+	_, err = os.Stat(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestGolangciCacheDirDefaultsToUserCache(t *testing.T) {
+	t.Setenv("GOLANGCI_LINT_CACHE", "")
+	t.Setenv("HOME", t.TempDir())
+	t.Setenv("XDG_CACHE_HOME", t.TempDir())
+	base, err := os.UserCacheDir()
+	if err != nil {
+		t.Fatal(err)
+	}
+	dir, err := golangciCacheDir("darwin")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := filepath.Join(base, "golangci-lint-code-shape", "darwin"); dir != want {
+		t.Fatalf("cache dir %q, want %q", dir, want)
+	}
+}

@@ -14,8 +14,8 @@ import (
 
 func TestUnmeasuredSkipFinding(t *testing.T) {
 	skips := []codeshape.Skip{
-		{Path: "plain.ts", Reason: "no functions", Unmeasured: nil},
-		{Path: "bad.ts", Reason: "parse error", Unmeasured: &codeshape.UnmeasuredFunctions{
+		{Path: "plain.ts", Reason: "no functions", Remedy: "", Unmeasured: nil},
+		{Path: "bad.ts", Reason: "parse error", Remedy: "", Unmeasured: &codeshape.UnmeasuredFunctions{
 			Values: map[codeshape.Metric]int{codeshape.MetricTSLines: 70}, BiomeParseFailed: false}},
 	}
 	var output strings.Builder
@@ -58,7 +58,7 @@ func TestUnparseableFileCannotRaiseBaseEntry(t *testing.T) {
 }
 
 func TestGoSkipFixNamesDefaultGOARCH(t *testing.T) {
-	skips := []codeshape.Skip{{Path: "a_riscv64.go", Reason: "not in any measured Go build",
+	skips := []codeshape.Skip{{Path: "a_riscv64.go", Reason: "not in any measured Go build", Remedy: "",
 		Unmeasured: &codeshape.UnmeasuredFunctions{Values: nil, BiomeParseFailed: false}}}
 	var output strings.Builder
 	findings, _, err := handleGoSkips(&output, skips)

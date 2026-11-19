@@ -9,10 +9,12 @@ import (
 	"sort"
 )
 
-// Skip records a source file that could not be measured.
+// Skip records a source file that could not be measured. Remedy, when set,
+// replaces the default fix clause the gate prints for the skip.
 type Skip struct {
 	Path       string
 	Reason     string
+	Remedy     string
 	Unmeasured *UnmeasuredFunctions
 }
 

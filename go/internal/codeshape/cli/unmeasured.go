@@ -76,11 +76,19 @@ func handleGoSkips(output io.Writer, skips []codeshape.Skip) ([]codeshape.Findin
 		if skip.Unmeasured != nil {
 			paths = append(paths, skip.Path)
 			findings = append(findings, codeshape.Finding{Path: skip.Path, Metric: codeshape.MetricUnmeasured,
-				Value: 0, Limit: 0, Fix: skip.Reason + "; exclude it or include it in a default-GOARCH " +
-					goosPhrase(golang.MeasuredGOOS()) + " Go build"})
+				Value: 0, Limit: 0, Fix: skip.Reason + "; " + goRemedy(skip)})
 		}
 	}
 	return findings, paths, nil
+}
+
+// goRemedy returns the fix clause for a skipped Go file. A skip with no remedy of
+// its own names the default-GOARCH builds that would include the file.
+func goRemedy(skip codeshape.Skip) string {
+	if skip.Remedy != "" {
+		return skip.Remedy
+	}
+	return "exclude it or include it in a default-GOARCH " + goosPhrase(golang.MeasuredGOOS()) + " Go build"
 }
 
 // goosPhrase joins GOOS names as "a, b or c".
