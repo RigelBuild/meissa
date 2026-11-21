@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.4.1](https://github.com/RigelBuild/meissa/compare/go/v0.4.0...go/v0.4.1) (2026-11-21)
+
+
+### Bug Fixes
+
+* **codeshape:** cgo-skip wording, host-cgo test, caller lint cache root (RIG-11035) ([#95](https://github.com/RigelBuild/meissa/issues/95)) ([eb29357](https://github.com/RigelBuild/meissa/commit/eb29357f4b24031786b92a66738405e4bfe7bb55))
+* **codeshape:** match BiomeVersion to the CI biome (RIG-10601) ([#91](https://github.com/RigelBuild/meissa/issues/91)) ([99c878c](https://github.com/RigelBuild/meissa/commit/99c878c5bc2b72a6f1583a5104a16f5e8489c99a))
+* **codeshape:** measure Go files built only for other GOOS (RIG-10887) ([#94](https://github.com/RigelBuild/meissa/issues/94)) ([703fceb](https://github.com/RigelBuild/meissa/commit/703fceb900f8440eb57e165f7f40e824978c8511))
+* **codeshape:** report unparseable TypeScript as unmeasured (RIG-11131) ([#96](https://github.com/RigelBuild/meissa/issues/96)) ([05a41fb](https://github.com/RigelBuild/meissa/commit/05a41fbb7d1ef9d38dcbb436737a9a5fbc44f5c9))
+* **deps:** update module github.com/pelletier/go-toml/v2 to v2.4.3 ([#67](https://github.com/RigelBuild/meissa/issues/67)) ([75d1b61](https://github.com/RigelBuild/meissa/commit/75d1b617aad8cec46731eddcd2dd65308d44123e))
+* **design-ledger-gate:** fall back to git diff when CI_PIPELINE_FILES is unset (RIG-10581) ([#89](https://github.com/RigelBuild/meissa/issues/89)) ([53ca444](https://github.com/RigelBuild/meissa/commit/53ca444fe52e4c8ebfd3ddf5791906e6cfbc2551))
+* **design-ledger-gate:** satisfy noinlineerr and noctx in cli tests (RIG-10673) ([#93](https://github.com/RigelBuild/meissa/issues/93)) ([da284ce](https://github.com/RigelBuild/meissa/commit/da284ce84a7b5a1b87b75d166fe79b70b545080c))
+
 ## [0.4.0](https://github.com/RigelBuild/meissa/compare/go/v0.3.0...go/v0.4.0) (2026-11-15)
 
 
