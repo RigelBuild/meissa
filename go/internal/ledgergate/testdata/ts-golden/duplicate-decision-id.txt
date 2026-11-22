@@ -1,0 +1,4 @@
+
+design-ledger-gate: 1 violation(s):
+  docs/designs/decisions/ui/DL-001.md:2: DL-001: duplicate decision id (also defined in docs/designs/decisions/server/DL-001.md)
+

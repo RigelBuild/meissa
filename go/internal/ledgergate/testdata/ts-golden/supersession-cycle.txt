@@ -1,0 +1,4 @@
+
+design-ledger-gate: 1 violation(s):
+  docs/designs/decisions/ui/DL-003.md:4: supersession cycle: DL-003 → DL-004 → DL-003
+

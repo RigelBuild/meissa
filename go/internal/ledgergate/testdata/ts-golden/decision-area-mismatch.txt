@@ -1,0 +1,4 @@
+
+design-ledger-gate: 1 violation(s):
+  docs/designs/decisions/ui/DL-001.md:5: DL-001: decision area must match its Record path (docs/designs/server/record/design.md)
+

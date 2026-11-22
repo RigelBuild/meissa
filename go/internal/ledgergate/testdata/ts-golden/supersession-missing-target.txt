@@ -1,0 +1,4 @@
+
+design-ledger-gate: 1 violation(s):
+  docs/designs/decisions/ui/DL-001.md:4: DL-001: Superseded by DL-999, which is not a decision file
+

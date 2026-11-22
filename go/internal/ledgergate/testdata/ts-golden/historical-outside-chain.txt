@@ -1,0 +1,4 @@
+
+design-ledger-gate: 1 violation(s):
+  docs/designs/ui/record/design.md:3: `Status: Historical` but the record is not in the configured historical chain
+

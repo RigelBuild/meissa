@@ -1,0 +1,4 @@
+
+design-ledger-gate: 1 violation(s):
+  (pull request): PR touches a governed design record without a changed decision file or Ledger-impact declaration
+

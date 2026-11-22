@@ -1,0 +1,6 @@
+
+design-ledger-gate: 3 violation(s):
+  docs/designs/decisions/ui/DL-001.md:11: unresolved merge conflict marker: <<<<<<<
+  docs/designs/decisions/ui/DL-001.md:12: unresolved merge conflict marker: =======
+  docs/designs/decisions/ui/DL-001.md:13: unresolved merge conflict marker: >>>>>>>
+
