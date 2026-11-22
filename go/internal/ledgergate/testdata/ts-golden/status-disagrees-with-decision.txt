@@ -1,0 +1,4 @@
+
+design-ledger-gate: 1 violation(s):
+  docs/designs/ui/record/design.md:3: record Status supersession disagrees with its decision status
+

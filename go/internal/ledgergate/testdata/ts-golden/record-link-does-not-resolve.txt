@@ -1,0 +1,4 @@
+
+design-ledger-gate: 1 violation(s):
+  docs/designs/decisions/ui/DL-001.md:5: DL-001: Record link path does not resolve: ../../ui/record/design.md
+

@@ -1,0 +1,24 @@
+{
+	"revision": "9bc47354cc2cafc2ecab2f4e61aa8070deb45b99",
+	"provenance": "Captured from the TypeScript ledger gate at revision 9bc47354. These goldens are frozen and are not regenerated. The capture tool retires with the TypeScript gate; its sources exist only in git history.",
+	"goldens": {
+		"duplicate-decision-id.txt": "exit=1 revision=9bc47354cc2cafc2ecab2f4e61aa8070deb45b99",
+		"supersession-missing-target.txt": "exit=1 revision=9bc47354cc2cafc2ecab2f4e61aa8070deb45b99",
+		"superseded-by-itself.txt": "exit=1 revision=9bc47354cc2cafc2ecab2f4e61aa8070deb45b99",
+		"supersession-cycle.txt": "exit=1 revision=9bc47354cc2cafc2ecab2f4e61aa8070deb45b99",
+		"supersession-cycle-independent.txt": "exit=1 revision=9bc47354cc2cafc2ecab2f4e61aa8070deb45b99",
+		"anchor-not-found.txt": "exit=1 revision=9bc47354cc2cafc2ecab2f4e61aa8070deb45b99",
+		"record-link-does-not-resolve.txt": "exit=1 revision=9bc47354cc2cafc2ecab2f4e61aa8070deb45b99",
+		"large-record-without-anchor.txt": "exit=1 revision=9bc47354cc2cafc2ecab2f4e61aa8070deb45b99",
+		"decision-area-mismatch.txt": "exit=1 revision=9bc47354cc2cafc2ecab2f4e61aa8070deb45b99",
+		"malformed-or-prohibited-status.txt": "exit=1 revision=9bc47354cc2cafc2ecab2f4e61aa8070deb45b99",
+		"historical-outside-chain.txt": "exit=1 revision=9bc47354cc2cafc2ecab2f4e61aa8070deb45b99",
+		"status-disagrees-with-decision.txt": "exit=1 revision=9bc47354cc2cafc2ecab2f4e61aa8070deb45b99",
+		"status-supersession-unresolved.txt": "exit=1 revision=9bc47354cc2cafc2ecab2f4e61aa8070deb45b99",
+		"no-valid-decision-file.txt": "exit=1 revision=9bc47354cc2cafc2ecab2f4e61aa8070deb45b99",
+		"touch-coupling-declaration.txt": "exit=1 revision=9bc47354cc2cafc2ecab2f4e61aa8070deb45b99",
+		"touch-coupling-branch-prefix.txt": "exit=1 revision=9bc47354cc2cafc2ecab2f4e61aa8070deb45b99",
+		"merge-conflict-marker.txt": "exit=1 revision=9bc47354cc2cafc2ecab2f4e61aa8070deb45b99",
+		"config-legacy-exempt-key.txt": "exit=2 revision=9bc47354cc2cafc2ecab2f4e61aa8070deb45b99"
+	}
+}

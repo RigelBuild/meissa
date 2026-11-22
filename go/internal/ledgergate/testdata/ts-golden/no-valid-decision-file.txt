@@ -1,0 +1,4 @@
+
+design-ledger-gate: 1 violation(s):
+  docs/designs/decisions/server: docs/designs/server/ has records but no valid decision file in decisions/server/
+
