@@ -11,6 +11,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 // errorWriter reports a closed output destination.
@@ -78,6 +79,57 @@ func TestClaimCLI(t *testing.T) {
 		)
 		if code != 1 {
 			t.Fatalf("code=%d, want 1 for output failure", code)
+		}
+	})
+	t.Run("request rejection exits 1 and prints endpoint and error name only", func(t *testing.T) {
+		base := http.DefaultTransport
+		http.DefaultTransport = roundTrip(func(*http.Request) (*http.Response, error) {
+			return nil, errTransportSecret
+		})
+		t.Cleanup(func() { http.DefaultTransport = base })
+		var stdout, stderr bytes.Buffer
+		argv := []string{"--config", writeConfig(t, testCounter), "--ref", "none", "--lane", "feature/b"}
+		code := Main(
+			context.Background(), argv,
+			env(map[string]string{"DL_CLAIM_TOKEN": testToken}),
+			&stdout, &stderr,
+		)
+		msg := stderr.String()
+		if code != 1 || stdout.Len() != 0 {
+			t.Fatalf("code=%d stdout=%q, want exit 1 and no stdout", code, stdout.String())
+		}
+		if !strings.Contains(msg, "request to "+testCounter+"/claim failed (Error)") ||
+			!strings.Contains(msg, "do not rerun") {
+			t.Fatalf("stderr = %q, want endpoint, error name and do-not-rerun warning", msg)
+		}
+		if strings.Contains(msg, "Bearer secret") {
+			t.Fatalf("stderr = %q leaks the transport error text", msg)
+		}
+	})
+
+	t.Run("the CLI client keeps the 30-second default deadline", func(t *testing.T) {
+		var deadline time.Time
+		var hasDeadline bool
+		base := http.DefaultTransport
+		http.DefaultTransport = roundTrip(func(r *http.Request) (*http.Response, error) {
+			deadline, hasDeadline = r.Context().Deadline()
+			return jsonResponse(200, `{"ids":[{"id":"DL-377","date":"2026-09-29"}]}`), nil
+		})
+		t.Cleanup(func() { http.DefaultTransport = base })
+		var stdout, stderr bytes.Buffer
+		argv := []string{"--config", writeConfig(t, testCounter), "--ref", "none", "--lane", "feature/b"}
+		start := time.Now()
+		code := Main(
+			context.Background(), argv,
+			env(map[string]string{"DL_CLAIM_TOKEN": testToken}),
+			&stdout, &stderr,
+		)
+		if code != 0 || !hasDeadline {
+			t.Fatalf("code=%d hasDeadline=%v stderr=%q", code, hasDeadline, stderr.String())
+		}
+		got := deadline.Sub(start)
+		if got < 30*time.Second || got > 31*time.Second {
+			t.Fatalf("deadline %v after start; want the 30s default plus send time", got)
 		}
 	})
 }

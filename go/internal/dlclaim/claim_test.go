@@ -302,9 +302,6 @@ func TestClaimService(t *testing.T) {
 		if got := errorName(io.EOF); got != "Error" {
 			t.Fatalf("plain error name = %q, want Error", got)
 		}
-		if client := newClient(requestTimeout); client.Timeout != requestTimeout {
-			t.Fatalf("client timeout = %v, want %v", client.Timeout, requestTimeout)
-		}
 	})
 
 	t.Run("uses the requested timeout deadline for its fetch", func(t *testing.T) {

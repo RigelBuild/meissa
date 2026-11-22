@@ -189,15 +189,18 @@ func TestParseArgs(t *testing.T) {
 	})
 
 	t.Run("rejects a missing or flag-shaped value", func(t *testing.T) {
-		for _, argv := range [][]string{
-			{"--grep"},
-			{"--grep", "--surface", "x"},
-			{"--area="},
-			{"--config"},
+		for _, tc := range []struct {
+			argv []string
+			want string
+		}{
+			{argv: []string{"--grep"}, want: "--grep needs a value"},
+			{argv: []string{"--grep", "--surface", "x"}, want: "--grep needs a value"},
+			{argv: []string{"--area="}, want: "--area needs a value"},
+			{argv: []string{"--config"}, want: "--config needs a value"},
 		} {
-			_, err := ParseArgs(argv)
-			if err == nil || !strings.HasSuffix(err.Error(), "needs a value") {
-				t.Fatalf("ParseArgs(%q) err = %v, want a needs-a-value error", argv, err)
+			_, err := ParseArgs(tc.argv)
+			if err == nil || err.Error() != tc.want {
+				t.Fatalf("ParseArgs(%q) err = %v, want %q", tc.argv, err, tc.want)
 			}
 		}
 		got, err := ParseArgs([]string{"--grep=--no-hooks"})
