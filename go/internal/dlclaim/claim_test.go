@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -17,6 +18,7 @@ import (
 	"strings"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/RigelBuild/meissa/go/internal/ledgergate/claim"
 	"github.com/RigelBuild/meissa/go/internal/ledgergate/core"
@@ -27,6 +29,11 @@ const (
 	testCounter   = "https://counter.example.test"
 	testPartition = "public-docs"
 )
+
+// errTransportSecret is a transport failure whose text must never reach the CLI output.
+//
+//nolint:staticcheck // Keeps the header-shaped leak the test guards against.
+var errTransportSecret = errors.New("Authorization: Bearer secret")
 
 // oneSurface is the single-surface config the TS tests call oneSurface.
 func oneSurface() core.Config {
@@ -206,6 +213,26 @@ func TestClaimService(t *testing.T) {
 		}
 	})
 
+	t.Run("request rejection prints endpoint and error name only", func(t *testing.T) {
+		client := fakeClient(func(*http.Request) (*http.Response, error) {
+			return nil, errTransportSecret
+		})
+		_, err := Claim(context.Background(), client, claimBody(), testToken, oneSurface())
+		if err == nil {
+			t.Fatal("transport failure returned no error")
+		}
+		msg := err.Error()
+		if !strings.Contains(msg, "request to "+testCounter+"/claim failed (Error)") {
+			t.Fatalf("err = %q, want endpoint and error name", msg)
+		}
+		if strings.Contains(msg, "Bearer secret") {
+			t.Fatalf("err = %q leaks the transport error text", msg)
+		}
+		if !strings.Contains(msg, "do not rerun") {
+			t.Fatalf("err = %q, want the do-not-rerun warning", msg)
+		}
+	})
+
 	t.Run("keeps status hints when service error bodies are unreadable", func(t *testing.T) {
 		for _, tc := range []struct {
 			name   string
@@ -275,8 +302,31 @@ func TestClaimService(t *testing.T) {
 		if got := errorName(io.EOF); got != "Error" {
 			t.Fatalf("plain error name = %q, want Error", got)
 		}
-		if client := newClient(); client.Timeout != requestTimeout {
+		if client := newClient(requestTimeout); client.Timeout != requestTimeout {
 			t.Fatalf("client timeout = %v, want %v", client.Timeout, requestTimeout)
+		}
+	})
+
+	t.Run("uses the requested timeout deadline for its fetch", func(t *testing.T) {
+		const timeout = 12345 * time.Millisecond
+		var deadline time.Time
+		var hasDeadline bool
+		client := newClient(timeout)
+		client.Transport = roundTrip(func(r *http.Request) (*http.Response, error) {
+			deadline, hasDeadline = r.Context().Deadline()
+			return jsonResponse(200, `{"ids":[{"id":"DL-377","date":"2026-09-29"},{"id":"DL-378","date":"2026-09-29"}]}`), nil
+		})
+		start := time.Now()
+		_, err := Claim(context.Background(), client, claimBody(), testToken, oneSurface())
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !hasDeadline {
+			t.Fatal("outbound claim request has no deadline; the requested timeout did not reach the fetch")
+		}
+		got := deadline.Sub(start)
+		if got < timeout || got > timeout+time.Second {
+			t.Fatalf("deadline %v after start; want the requested %v plus send time", got, timeout)
 		}
 	})
 

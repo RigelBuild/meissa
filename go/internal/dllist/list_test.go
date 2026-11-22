@@ -100,6 +100,15 @@ func TestListDecisions(t *testing.T) {
 		}
 	})
 
+	t.Run("a grep that matches no printed text returns no lines", func(t *testing.T) {
+		for _, grep := range []string{"Matt", "../"} {
+			lines, _ := ListDecisions(corpus(), Filters{Grep: grep}, depth1())
+			if len(lines) != 0 {
+				t.Fatalf("grep %q lines = %v, want none", grep, lines)
+			}
+		}
+	})
+
 	t.Run("a line carries status, location, decision and record", func(t *testing.T) {
 		lines, _ := ListDecisions(corpus(), Filters{Grep: "moon"}, depth1())
 		if len(lines) != 1 {
@@ -176,6 +185,24 @@ func TestParseArgs(t *testing.T) {
 		_, err = ParseArgs([]string{"--config", "a", "--config", "b"})
 		if err == nil {
 			t.Fatal("duplicate --config accepted")
+		}
+	})
+
+	t.Run("rejects a missing or flag-shaped value", func(t *testing.T) {
+		for _, argv := range [][]string{
+			{"--grep"},
+			{"--grep", "--surface", "x"},
+			{"--area="},
+			{"--config"},
+		} {
+			_, err := ParseArgs(argv)
+			if err == nil || !strings.HasSuffix(err.Error(), "needs a value") {
+				t.Fatalf("ParseArgs(%q) err = %v, want a needs-a-value error", argv, err)
+			}
+		}
+		got, err := ParseArgs([]string{"--grep=--no-hooks"})
+		if err != nil || got.Filters.Grep != "--no-hooks" {
+			t.Fatalf("inline value starting with -- = %q, %v; want --no-hooks", got.Filters.Grep, err)
 		}
 	})
 }

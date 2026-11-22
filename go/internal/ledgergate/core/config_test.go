@@ -195,3 +195,26 @@ func TestLoadConfigAcceptsArchiveRootsOnPathBoundary(t *testing.T) {
 		t.Fatalf("ArchiveRoots = %v", cfg.ArchiveRoots)
 	}
 }
+
+func TestLoadConfigValidatesClaimCheckAndAuthorBindings(t *testing.T) {
+	base := `"designsRoot":"docs/designs","surfaceDepth":1,"counter":{"url":"https://counter.example.test","partition":"public-docs"}`
+	cfg, err := LoadConfig(writeTemp(t, "{"+base+"}"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Legs.ClaimCheck {
+		t.Fatal("legs.claimCheck defaults on, want off when absent")
+	}
+	_, err = LoadConfig(writeTemp(t, `{`+base+`,"legs":{"claimCheck":"yes"}}`))
+	if err == nil || !strings.Contains(err.Error(), "legs.claimCheck must be a boolean") {
+		t.Fatalf("err = %v, want legs.claimCheck must be a boolean", err)
+	}
+	cfg, err = LoadConfig(writeTemp(t, `{`+base+`,"exemptBranches":[{"prefix":"automation/","author":"trusted[bot]"}]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []ExemptBranchRule{{Prefix: "automation/", Author: "trusted[bot]"}}
+	if !slices.Equal(cfg.ExemptBranches, want) {
+		t.Fatalf("ExemptBranches = %v, want %v", cfg.ExemptBranches, want)
+	}
+}
