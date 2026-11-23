@@ -473,3 +473,107 @@ func TestRunOnceReturnsRecordReadError(t *testing.T) {
 		t.Fatalf("exit = %d, want 2 with the record read error; stderr:\n%s", code, stderr)
 	}
 }
+
+// TestRunOnceReportsUnknownDepthOneSurface ports "reports discovered depth-one surfaces outside the counter allowlist".
+func TestRunOnceReportsUnknownDepthOneSurface(t *testing.T) {
+	const gammaRecord = "docs/designs/gamma/record.md"
+	fake := newGateFake(map[string]string{
+		gammaRecord: "# Unknown surface\n",
+	})
+	cfg := core.Config{
+		DesignsRoot:  gateDesignsRoot,
+		SurfaceDepth: 1,
+		Surfaces:     []string{"alpha"},
+		Counter:      core.Counter{URL: "https://example.invalid", Partition: "test"},
+	}
+	code, _, stderr := runGate(t, fake, cfg)
+	if code != 1 || !strings.Contains(stderr, "unknown design surface: gamma") {
+		t.Fatalf("exit = %d, want 1 with unknown design surface: gamma; stderr:\n%s", code, stderr)
+	}
+}
+
+// authorFake is gateFake with the PR details a test sets and a claim service that can fail.
+type authorFake struct {
+	*gateFake
+
+	details  core.PullRequestDetails
+	fetchErr error
+	fetches  int
+}
+
+func (f *authorFake) PullRequestDetails(context.Context) (mo.Option[core.PullRequestDetails], error) {
+	return mo.Some(f.details), nil
+}
+
+func (f *authorFake) FetchClaims(ctx context.Context, lane string, ids []string) (map[string]claim.Verdict, error) {
+	f.fetches++
+	if f.fetchErr != nil {
+		return nil, f.fetchErr
+	}
+	return f.gateFake.FetchClaims(ctx, lane, ids)
+}
+
+// TestRunOnceClaimExemptionRequiresMatchingAuthorAndServiceFailureExitsTwo ports
+// "exemption requires matching PR author; service failures exit 2".
+func TestRunOnceClaimExemptionRequiresMatchingAuthorAndServiceFailureExitsTwo(t *testing.T) {
+	const exemptRecord = "docs/designs/ui/record/design.md"
+	const exemptDecision = "docs/designs/decisions/ui/DL-004.md"
+	build := func(details core.PullRequestDetails, fetchErr error) (*authorFake, core.Config) {
+		inner := newGateFake(map[string]string{
+			exemptDecision: gateDecisionFile(exemptDecision, gateActive),
+			exemptRecord:   "# Record\n",
+		})
+		inner.changed = core.Changed{Files: []string{exemptDecision}, Body: mo.Some(""), HeadBranch: "automation/update"}
+		inner.claims = map[string]claim.Verdict{"DL-004": claim.VerdictLane}
+		cfg := gateConfig(core.Legs{ClaimCheck: true})
+		cfg.ExemptBranches = []core.ExemptBranchRule{{Prefix: "automation/", Author: "trusted[bot]"}}
+		return &authorFake{gateFake: inner, details: details, fetchErr: fetchErr}, cfg
+	}
+	sameRepo := func(author string) core.PullRequestDetails {
+		return core.PullRequestDetails{
+			IsCrossRepository:   mo.Some(false),
+			HeadRepositoryOwner: mo.None[string](),
+			Author:              mo.Some(author),
+		}
+	}
+
+	untrusted, cfg := build(sameRepo("untrusted"), nil)
+	if code, _, stderr := runGate(t, untrusted, cfg); code != 0 || untrusted.fetches != 1 {
+		t.Fatalf("untrusted author: exit = %d, fetches = %d, want 0 and 1 claim fetch; stderr:\n%s",
+			code, untrusted.fetches, stderr)
+	}
+
+	trusted, cfg := build(sameRepo("trusted[bot]"), nil)
+	if code, _, stderr := runGate(t, trusted, cfg); code != 0 || trusted.fetches != 0 {
+		t.Fatalf("trusted author: exit = %d, fetches = %d, want 0 and no claim fetch; stderr:\n%s",
+			code, trusted.fetches, stderr)
+	}
+
+	// A cross-repository PR is not exempt, even from the trusted author.
+	crossRepo, cfg := build(core.PullRequestDetails{
+		IsCrossRepository:   mo.Some(true),
+		HeadRepositoryOwner: mo.Some("contributor"),
+		Author:              mo.Some("trusted[bot]"),
+	}, nil)
+	if code, _, stderr := runGate(t, crossRepo, cfg); code != 0 || crossRepo.fetches != 1 {
+		t.Fatalf("cross-repository PR, trusted author: exit = %d, fetches = %d, want 0 and 1 claim fetch; stderr:\n%s",
+			code, crossRepo.fetches, stderr)
+	}
+
+	// An unknown repository status is not exempt either.
+	unknownRepo, cfg := build(core.PullRequestDetails{
+		IsCrossRepository:   mo.None[bool](),
+		HeadRepositoryOwner: mo.None[string](),
+		Author:              mo.Some("trusted[bot]"),
+	}, nil)
+	if code, _, stderr := runGate(t, unknownRepo, cfg); code != 0 || unknownRepo.fetches != 1 {
+		t.Fatalf("unknown repository status, trusted author: exit = %d, fetches = %d, want 0 and 1 claim fetch; stderr:\n%s",
+			code, unknownRepo.fetches, stderr)
+	}
+
+	down, cfg := build(sameRepo("untrusted"), errors.New("service down"))
+	code, _, stderr := runGate(t, down, cfg)
+	if code != 2 || !strings.Contains(stderr, "cannot reach the DL claim service") {
+		t.Fatalf("service down: exit = %d, want 2 with unreachable-service message; stderr:\n%s", code, stderr)
+	}
+}

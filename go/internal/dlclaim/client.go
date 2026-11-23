@@ -70,11 +70,11 @@ func BuildClaimBody(cfg core.Config, a ClaimArgs) ClaimRequest {
 }
 
 // newClient refuses redirects, so the bearer token never follows one.
-func newClient() *http.Client {
+func newClient(timeout time.Duration) *http.Client {
 	return &http.Client{
 		Transport: nil,
 		Jar:       nil,
-		Timeout:   requestTimeout,
+		Timeout:   timeout,
 		CheckRedirect: func(*http.Request, []*http.Request) error {
 			return errors.New("redirects are refused")
 		},

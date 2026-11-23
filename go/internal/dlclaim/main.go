@@ -48,7 +48,7 @@ func Main(ctx context.Context, args []string, env func(string) string, stdout, s
 
 // run performs the parsed action. Its token is already read; it validates the token itself.
 func run(ctx context.Context, parsed Args, token string, cfg core.Config, stdout, stderr io.Writer) int {
-	client := newClient()
+	client := newClient(requestTimeout)
 	switch a := parsed.(type) {
 	case ClaimArgs:
 		ids, err := Claim(ctx, client, BuildClaimBody(cfg, a), token, cfg)
