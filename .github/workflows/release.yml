@@ -102,9 +102,9 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
 
-      - name: Put Bun and Node.js on PATH
+      - name: Put Go, Bun and Node.js on PATH
         run: |
-          mapfile -t outputs < <(nix build --no-link --print-out-paths --inputs-from . nixpkgs#bun nixpkgs#nodejs)
+          mapfile -t outputs < <(nix build --no-link --print-out-paths --inputs-from . .#go-dev nixpkgs#bun nixpkgs#nodejs)
           for output in "${outputs[@]}"; do
             echo "$output/bin" >> "$GITHUB_PATH"
           done
@@ -116,6 +116,9 @@ jobs:
       # Each package is published once by hand first, then gets its trusted publisher.
       # A re-run skips versions already on npm, so it can finish a partial release.
       - name: Publish released packages
-        run: bun tools/release/publish.ts
+        run: go -C go run ./cmd/npm-publish
         env:
           PUBLISH_ALL: ${{ github.event_name == 'workflow_dispatch' }}
+          GOTOOLCHAIN: local
+          GOWORK: off
+          GOFLAGS: -mod=readonly
