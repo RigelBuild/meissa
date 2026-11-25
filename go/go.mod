@@ -7,7 +7,6 @@ require (
 	github.com/bmatcuk/doublestar/v4 v4.10.4
 	github.com/dlclark/regexp2/v2 v2.12.0
 	github.com/odvcencio/gotreesitter v0.56.0
-	github.com/pelletier/go-toml/v2 v2.4.3
 	github.com/samber/mo v1.12.0
 	github.com/titanous/json5 v1.0.0
 	github.com/yuin/goldmark v1.8.7
@@ -19,6 +18,7 @@ require (
 	github.com/emicklei/proto v1.14.3 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
+	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
 	github.com/protocolbuffers/txtpbfmt v0.0.0-20260420112717-c39628bde8b5 // indirect
 	golang.org/x/net v0.57.0 // indirect
 	golang.org/x/text v0.40.0 // indirect

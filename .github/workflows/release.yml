@@ -102,15 +102,12 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
 
-      - name: Put Go, Bun and Node.js on PATH
+      - name: Put Go and Node.js on PATH
         run: |
-          mapfile -t outputs < <(nix build --no-link --print-out-paths --inputs-from . .#go-dev nixpkgs#bun nixpkgs#nodejs)
+          mapfile -t outputs < <(nix build --no-link --print-out-paths --inputs-from . .#go-dev nixpkgs#nodejs)
           for output in "${outputs[@]}"; do
             echo "$output/bin" >> "$GITHUB_PATH"
           done
-
-      - name: Install workspace dependencies
-        run: bun install --frozen-lockfile
 
       # npm trusted publishing (OIDC) needs npm >= 11.5.1; the pinned Node 24 ships 11.x.
       # Each package is published once by hand first, then gets its trusted publisher.

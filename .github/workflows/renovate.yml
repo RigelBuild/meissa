@@ -26,8 +26,6 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
 
-      - uses: oven-sh/setup-bun@3d267786b128fe76c2f16a390aa2448b815359f3 # v2.1.2
-
       - name: Mint Renovate App token
         id: app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
@@ -57,4 +55,4 @@ jobs:
         env:
           RENOVATE_CONFIG_FILE: tools/renovate/bot-config.json5
           RENOVATE_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: bunx renovate@44.46.2
+        run: npx --yes renovate@44.46.2

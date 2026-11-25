@@ -1,16 +1,7 @@
 # yaml-language-server: $schema=https://moonrepo.dev/schemas/project.json
 layer: "library"
-language: "typescript"
 
 tasks:
-  install:
-    command: "bun install --frozen-lockfile"
-    inputs: ["/package.json", "/bun.lock", "/bunfig.toml"]
-    options:
-      internal: true
-      cache: false
-      runFromWorkspaceRoot: true
-
   lint:
     command: "biome check ."
     options:
@@ -19,14 +10,12 @@ tasks:
 
   markdownlint:
     command: "rumdl check ."
-    deps: ["install"]
     options:
       cache: false
       runFromWorkspaceRoot: true
 
   refgate:
     command: "ref-gate --config ref-gate.config.json"
-    deps: ["install"]
     options:
       cache: false
       runFromWorkspaceRoot: true
