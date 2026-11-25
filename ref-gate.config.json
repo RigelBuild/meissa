@@ -19,7 +19,7 @@
 		{ "source": "\\bSEA-\\d+\\b", "flags": "" }
 	],
 	"ignore": [],
-	"carveOutPaths": ["ref-gate.config.json", "bun.lock"],
+	"carveOutPaths": ["ref-gate.config.json"],
 	"carveOutPrefixes": [],
 	"allowlist": {},
 	"remediationDoc": "README.md"

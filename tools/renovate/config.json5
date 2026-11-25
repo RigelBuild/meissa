@@ -3,7 +3,7 @@
   // No Renovate schedule: the workflow's daily cron is the cadence, so a late
   // GitHub cron start still opens PRs.
   extends: ["github>RigelBuild/meissa//tools/renovate/preset.json5"],
-  enabledManagers: ["custom.regex", "bun", "npm", "gomod"],
+  enabledManagers: ["custom.regex", "npm", "gomod"],
   postUpdateOptions: ["gomodTidy"],
   customManagers: [
     {
@@ -39,14 +39,9 @@
   ],
   packageRules: [
     {
-      // Mirrors bunfig.toml minimumReleaseAgeExcludes; the Go policy test keeps the lists equal.
-      matchPackageNames: ["@types/bun", "bun-types"],
-      minimumReleaseAge: null,
-    },
-    {
       // TypeScript 7.0 ships without the programmatic API (it lands in 7.1), so
       // tools that import `typescript` break. Remove this cap once 7.1 ships.
-      matchManagers: ["bun", "npm"],
+      matchManagers: ["npm"],
       matchPackageNames: ["typescript"],
       allowedVersions: "<7",
     },

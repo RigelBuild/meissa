@@ -41,7 +41,7 @@ Consumer `.rumdl.toml` files inherit the shared rules and can add local exclusio
 extends = "$RUMDL_BASE_CONFIG"
 ```
 
-The policy is the shared `[MD0nn]` rule set from `rumdl/base.toml` in this repo. Meissa's own development shell also provides Bun, Node.js, and moon from its pinned nixpkgs.
+The policy is the shared `[MD0nn]` rule set from `rumdl/base.toml` in this repo. Meissa's own development shell provides its pinned Go toolchain, Node.js, and moon.
 
 ## Code shape gate
 
@@ -104,7 +104,7 @@ Consumers extend `github>RigelBuild/meissa//tools/renovate/preset.json5`.
 
 ## Packages
 
-Packages under `packages/` are published to npm as `@rigelbuild/<tool>` and versioned independently. This includes `@rigelbuild/tsconfig` and `@rigelbuild/biome-config` for shared TypeScript and Biome configuration.
+The two JSON config packages under `packages/`, `@rigelbuild/biome-config` and `@rigelbuild/tsconfig`, are published to npm and versioned independently.
 
 Meissa is public: never name or cite a private repository. `ref-gate` enforces this with `ref-gate.config.json`.
 
@@ -125,4 +125,4 @@ Release Please opens one release pull request covering every changed package. Wh
 
 ## Local development
 
-Run `direnv allow .` once, then `direnv exec . rumdl check .`. Run the length-gate tests with `go -C go test ./internal/lengthgate/...`; `direnv exec . bun test` still runs the Bun workspace tests. CI runs `nix flake check` and `moon run :ci` (lint, markdown, the ref-gate self-check, and every package's typecheck and tests).
+Run `direnv allow .` once, then `direnv exec . rumdl check .`. Run the length-gate tests with `go -C go test ./internal/lengthgate/...`. CI runs `nix flake check` and `moon run :ci` (Biome, Markdown, the ref-gate self-check, and Go tests).

@@ -14,10 +14,6 @@
 			"component": "tsconfig",
 			"package-name": "@rigelbuild/tsconfig"
 		},
-		"packages/docs-bundle": {
-			"component": "docs-bundle",
-			"package-name": "@rigelbuild/docs-bundle"
-		},
 		"go": {
 			"release-type": "go",
 			"component": "go",

@@ -23,7 +23,7 @@ func TestRenovatePolicyScheduledWorkflow(t *testing.T) {
 			`cron: "0 6 * * *"`, "workflow_dispatch:", "environment: main",
 			"actions/create-github-app-token@", "client-id: ${{ vars.RENOVATE_APP_CLIENT_ID }}",
 			"private-key: ${{ secrets.RENOVATE_APP_PRIVATE_KEY }}", "RENOVATE_TOKEN: ${{ steps.app-token.outputs.token }}",
-			"bunx renovate@44.46.2",
+			"npx --yes renovate@44.46.2",
 		} {
 			if !strings.Contains(text, fragment) {
 				t.Errorf("workflow missing %q", fragment)

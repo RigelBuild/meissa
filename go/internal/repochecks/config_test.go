@@ -10,7 +10,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/pelletier/go-toml/v2"
 	"go.yaml.in/yaml/v3"
 )
 
@@ -31,9 +30,6 @@ func TestRenovatePolicy(t *testing.T) {
 	})
 	t.Run("the resolved preset preserves the original shared policy", func(t *testing.T) {
 		testResolvedPresetPolicy(t, paths.root, paths.config)
-	})
-	t.Run("the cooldown exemptions match bunfig minimumReleaseAgeExcludes", func(t *testing.T) {
-		testCooldownExemptions(t, paths.root, paths.config)
 	})
 	t.Run("typescript stays on 6.x until 7.1 ships its API", func(t *testing.T) {
 		testTypescriptVersionCap(t, paths.config)
@@ -90,7 +86,7 @@ func testSharedPresetPolicy(t *testing.T, configPath, presetPath string) {
 			t.Errorf("package rule has a schedule: %#v", entry)
 		}
 	}
-	equalJSON(t, config["enabledManagers"], []any{"custom.regex", "bun", "npm", "gomod"})
+	equalJSON(t, config["enabledManagers"], []any{"custom.regex", "npm", "gomod"})
 	equalJSON(t, config["postUpdateOptions"], []any{"gomodTidy"})
 	if !containsString(asStrings(t, preset["extends"], "preset extends"), "config:recommended") {
 		t.Fatal("shared preset lost config:recommended")
@@ -132,31 +128,6 @@ func testResolvedPresetPolicy(t *testing.T, root, configPath string) {
 	if !containsString(asStrings(t, effective["enabledManagers"], "enabledManagers"), "gomod") {
 		t.Error("resolved managers lost gomod")
 	}
-}
-
-func testCooldownExemptions(t *testing.T, root, configPath string) {
-	t.Helper()
-	config := readJSON5Record(t, configPath)
-	bunfigData, err := os.ReadFile(filepath.Join(root, "bunfig.toml"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	var bunfig map[string]any
-	decodeErr := toml.Unmarshal(bunfigData, &bunfig)
-	if decodeErr != nil {
-		t.Fatal(decodeErr)
-	}
-	install := asRecord(t, bunfig["install"], "bunfig install")
-	rules := asArray(t, config["packageRules"], "packageRules")
-	exempt := make([]string, 0)
-	for _, item := range rules {
-		rule := asRecord(t, item, "package rule")
-		minimumReleaseAge, hasCooldown := rule["minimumReleaseAge"]
-		if hasCooldown && minimumReleaseAge == nil && hasStringField(rule, "matchPackageNames", "@types/bun") {
-			exempt = append(exempt, "@types/bun", "bun-types")
-		}
-	}
-	equalJSON(t, exempt, install["minimumReleaseAgeExcludes"])
 }
 
 func testTypescriptVersionCap(t *testing.T, configPath string) {
@@ -259,7 +230,7 @@ func testGoAnalyzerRefreshPolicy(t *testing.T, config json5Record) {
 	if refresh["executionMode"] != "branch" {
 		t.Errorf("refresh executionMode = %v, want branch", refresh["executionMode"])
 	}
-	equalJSON(t, config["enabledManagers"], []any{"custom.regex", "bun", "npm", "gomod"})
+	equalJSON(t, config["enabledManagers"], []any{"custom.regex", "npm", "gomod"})
 	equalJSON(t, config["postUpdateOptions"], []any{"gomodTidy"})
 	gotreesitter := findRule(t, config, func(rule json5Record) bool {
 		return hasStringField(rule, "matchPackageNames", "github.com/odvcencio/gotreesitter")

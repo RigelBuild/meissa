@@ -109,8 +109,7 @@ func decisionGlob(cfg core.Config) string {
 	return cfg.DesignsRoot + "/decisions/*/DL-*.md"
 }
 
-// readDecisionFiles walks root with glob, skipping hidden paths as Bun's scan does,
-// and reads each matching file.
+// readDecisionFiles walks root with glob, skipping hidden paths, and reads each matching file.
 func readDecisionFiles(ctx context.Context, root, glob string) ([]DecisionFile, error) {
 	fsys := os.DirFS(root)
 	var files []DecisionFile
