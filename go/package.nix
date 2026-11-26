@@ -3,7 +3,7 @@ buildGoModule {
   pname = "meissa-tools";
   version = (lib.importJSON ../.release-please-manifest.json).go or "0.0.0";
   src = lib.fileset.toSource { root = ./.; fileset = ./.; };
-  vendorHash = "sha256-czXDnf+YTOGKlW2qUP9idRdIaHg2I53Xnu1xRVdcbPU=";
+  vendorHash = "sha256-90NhwJJCw08RV703rAXXjGEj1zKLQaLfMH8mlwszvO0=";
   subPackages = [ "cmd/code-shape-gate" "cmd/design-ledger-gate" "cmd/dl-claim" "cmd/dl-list" "cmd/dl-reconcile" "cmd/length-gate" "cmd/ref-gate" "cmd/refresh-nix-hashes" ];
   env.CGO_ENABLED = "0";
   ldflags = [ "-s" "-w" ];
