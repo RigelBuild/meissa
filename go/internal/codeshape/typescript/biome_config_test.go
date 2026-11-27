@@ -4,6 +4,7 @@ package typescript
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -70,5 +71,38 @@ func TestGateBiomeMeasuresLargeFile(t *testing.T) {
 	values, _, err := TSMetrics(t.Context(), root, cfg)
 	if err != nil || len(values[codeshape.MetricTSLines]["x.ts"]) != 1 {
 		t.Fatalf("values=%v err=%v", values, err)
+	}
+}
+
+func TestValidateBiomeErrorsIncludesRejectedDiagnostic(t *testing.T) {
+	const diagnosticPath = "src/example.ts"
+	const diagnosticMessage = "unable to parse suppression directive"
+	const reportJSON = `{
+		"summary": {"errors": 1},
+		"diagnostics": [{
+			"category": "suppressions/parse",
+			"severity": "error",
+			"message": "unable to parse suppression directive",
+			"location": {"path": "src/example.ts"}
+		}]
+	}`
+
+	var report biomeReport
+	err := json.Unmarshal([]byte(reportJSON), &report)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = validateBiomeErrors(report)
+	if !errors.Is(err, errBiomeReported) {
+		t.Fatalf("validateBiomeErrors() error = %v, want wrapped %v", err, errBiomeReported)
+	}
+	if !strings.Contains(err.Error(), diagnosticPath) || !strings.Contains(err.Error(), diagnosticMessage) {
+		t.Fatalf(
+			"validateBiomeErrors() error = %q, want path %q and message %q",
+			err,
+			diagnosticPath,
+			diagnosticMessage,
+		)
 	}
 }
