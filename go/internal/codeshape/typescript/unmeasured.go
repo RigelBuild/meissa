@@ -44,7 +44,13 @@ func validateBiomeErrors(report biomeReport) error {
 		}
 		if _, ok := metrics[diagnostic.Category]; !ok && diagnostic.Category != "parse" &&
 			!strings.HasPrefix(diagnostic.Category, "parse/") {
-			return fmt.Errorf("biome reported %s: %w", diagnostic.Category, errBiomeReported)
+			return fmt.Errorf(
+				"biome reported %s at %q: %q: %w",
+				diagnostic.Category,
+				diagnostic.Location.Path,
+				diagnostic.Message,
+				errBiomeReported,
+			)
 		}
 		count++
 	}
